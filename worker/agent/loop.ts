@@ -10,11 +10,14 @@ export interface AgentLoopArgs {
   onFolio: (lastTool: string, input: Record<string, unknown>) => Promise<void>;
   emit: (ev: ServerEvent) => void;
   maxTurns?: number;
+  maxToolCalls?: number;
 }
 
 export async function runAgentLoop(args: AgentLoopArgs): Promise<void> {
   const { provider, tools, messages, callTool, onFolio, emit } = args;
   const maxTurns = args.maxTurns ?? 12;
+  const maxToolCalls = args.maxToolCalls ?? 24;
+  let totalToolCalls = 0;
 
   for (let turn = 0; turn < maxTurns; turn++) {
     const pendingTools: Array<{ id: string; name: string; input: Record<string, unknown> }> = [];
@@ -41,9 +44,14 @@ export async function runAgentLoop(args: AgentLoopArgs): Promise<void> {
       catch (e) { content = `ERROR: ${(e as Error).message}`; }
       emit({ type: "tool", tool: t.name, phase: "done", summary: content.slice(0, 120) });
       results.content.push({ type: "tool_result", tool_use_id: t.id, content });
-      if (isTripMutating(t.name, t.input)) await onFolio(t.name, t.input);
+      if (isTripMutating(t.name, t.input)) {
+        try { await onFolio(t.name, t.input); }
+        catch { /* folio refresh is best-effort; a failed refresh must never abort the turn */ }
+      }
     }
     messages.push(results);
+    totalToolCalls += pendingTools.length;
+    if (totalToolCalls >= maxToolCalls) { emit({ type: "turn-complete" }); return; }
   }
   emit({ type: "turn-complete" });
 }

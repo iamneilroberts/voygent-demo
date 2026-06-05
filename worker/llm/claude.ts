@@ -4,6 +4,7 @@ export async function* parseAnthropicStream(body: ReadableStream<Uint8Array>): A
   const reader = body.getReader();
   const dec = new TextDecoder();
   let buf = "";
+  let completed = false;
   const blocks: Record<number, { type: string; id?: string; name?: string; text: string; json: string }> = {};
 
   for (;;) {
@@ -23,19 +24,37 @@ export async function* parseAnthropicStream(body: ReadableStream<Uint8Array>): A
         if (ev.delta.type === "text_delta") { b.text += ev.delta.text; yield { type: "text-delta", delta: ev.delta.text }; }
         else if (ev.delta.type === "input_json_delta") { b.json += ev.delta.partial_json; }
       } else if (ev.type === "message_stop") {
-        const content: AssistantMessage["content"] = [];
-        for (const idx of Object.keys(blocks).map(Number).sort((a, b) => a - b)) {
-          const b = blocks[idx];
-          if (b.type === "text") content.push({ type: "text", text: b.text });
-          else if (b.type === "tool_use") {
-            const input = b.json ? JSON.parse(b.json) : {};
-            content.push({ type: "tool_use", id: b.id!, name: b.name!, input });
-            yield { type: "tool-call", id: b.id!, name: b.name!, input };
+        if (!completed) {
+          completed = true;
+          const content: AssistantMessage["content"] = [];
+          for (const idx of Object.keys(blocks).map(Number).sort((a, b) => a - b)) {
+            const b = blocks[idx];
+            if (b.type === "text") content.push({ type: "text", text: b.text });
+            else if (b.type === "tool_use") {
+              const input = b.json ? JSON.parse(b.json) : {};
+              content.push({ type: "tool_use", id: b.id!, name: b.name!, input });
+              yield { type: "tool-call", id: b.id!, name: b.name!, input };
+            }
           }
+          yield { type: "turn-complete", assistant: { role: "assistant", content } };
         }
-        yield { type: "turn-complete", assistant: { role: "assistant", content } };
       }
     }
+  }
+  // EOF fallback: if the stream ended without a message_stop frame, finalize what we have
+  if (!completed && Object.keys(blocks).length > 0) {
+    completed = true;
+    const content: AssistantMessage["content"] = [];
+    for (const idx of Object.keys(blocks).map(Number).sort((a, b) => a - b)) {
+      const b = blocks[idx];
+      if (b.type === "text") content.push({ type: "text", text: b.text });
+      else if (b.type === "tool_use") {
+        const input = b.json ? JSON.parse(b.json) : {};
+        content.push({ type: "tool_use", id: b.id!, name: b.name!, input });
+        yield { type: "tool-call", id: b.id!, name: b.name!, input };
+      }
+    }
+    yield { type: "turn-complete", assistant: { role: "assistant", content } };
   }
 }
 

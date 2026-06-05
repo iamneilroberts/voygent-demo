@@ -19,4 +19,13 @@ describe("McpClient", () => {
     const out = await c.callTool("flight_search", { trip_id: "t1" });
     expect(out).toBe("5 flights");
   });
+
+  it("listTools parses tools/list result from an SSE response", async () => {
+    const payload = { jsonrpc: "2.0", id: 1, result: { tools: [{ name: "x", input_schema: {} }] } };
+    const sseBody = `event: message\ndata: ${JSON.stringify(payload)}\n\n`;
+    const f = vi.fn().mockResolvedValue(new Response(sseBody, { headers: { "content-type": "text/event-stream" } }));
+    const c = new McpClient("https://mcp.test/mcp", "bearer", f as any);
+    const tools = await c.listTools();
+    expect(tools[0].name).toBe("x");
+  });
 });

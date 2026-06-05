@@ -18,4 +18,16 @@ describe("SseMultiplexer", () => {
     const out = await drain(mux.readable);
     expect(out).toBe(`data: ${JSON.stringify(events[0])}\n\ndata: ${JSON.stringify(events[1])}\n\n`);
   });
+
+  it("close() is idempotent (double close does not throw)", () => {
+    const mux = new SseMultiplexer();
+    mux.close();
+    expect(() => mux.close()).not.toThrow();
+  });
+
+  it("send() after close returns false and does not throw", () => {
+    const mux = new SseMultiplexer();
+    mux.close();
+    expect(mux.send({ type: "turn-complete" })).toBe(false);
+  });
 });

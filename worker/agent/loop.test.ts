@@ -49,4 +49,27 @@ describe("runAgentLoop", () => {
     expect(types[types.length - 1]).toBe("turn-complete");
     expect(folioCalls).toBe(1);                // flight_search w/ trip_id triggered a folio refresh
   });
+
+  it("completes the turn even when onFolio throws, still feeding tool results", async () => {
+    const asstWithTool: AssistantMessage = {
+      role: "assistant",
+      content: [{ type: "tool_use", id: "tu2", name: "flight_search", input: { trip_id: "t2" } }],
+    };
+    const asstFinal: AssistantMessage = { role: "assistant", content: [{ type: "text", text: "Done despite error." }] };
+    const provider = fakeProvider([
+      [{ type: "tool-call", id: "tu2", name: "flight_search", input: { trip_id: "t2" } }, { type: "turn-complete", assistant: asstWithTool }],
+      [{ type: "text-delta", delta: "Done despite error." }, { type: "turn-complete", assistant: asstFinal }],
+    ]);
+    const out: ServerEvent[] = [];
+    await runAgentLoop({
+      provider, tools: [],
+      messages: [{ role: "user", content: "find flights" }] as ConversationMessage[],
+      callTool: async (name) => `result of ${name}`,
+      onFolio: async () => { throw new Error("read_trip 503"); },
+      emit: (e) => out.push(e),
+    });
+    const types = out.map((e) => e.type);
+    expect(types[types.length - 1]).toBe("turn-complete");
+    expect(types).toContain("tool");   // tool event was emitted — throw did NOT abort the turn
+  });
 });

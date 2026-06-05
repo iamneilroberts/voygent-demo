@@ -25,12 +25,22 @@ export class McpClient {
   private async parseBody(res: Response): Promise<any> {
     const ct = res.headers.get("content-type") ?? "";
     const text = await res.text();
-    if (ct.includes("text/event-stream")) {
-      const lines = text.split("\n").filter((l) => l.startsWith("data:"));
-      const last = lines[lines.length - 1]?.slice(5).trim();
-      return last ? JSON.parse(last) : {};
+    if (!ct.includes("text/event-stream")) return JSON.parse(text);
+    // SSE: split into frames on blank lines; within a frame, concatenate `data:` lines
+    // (stripping one optional leading space per the SSE spec). Return the last frame whose
+    // joined data parses as JSON — that is the JSON-RPC response (ping/comment frames are skipped).
+    let last: any = {};
+    for (const frame of text.split(/\n\n+/)) {
+      const data = frame
+        .split("\n")
+        .filter((l) => l.startsWith("data:"))
+        .map((l) => l.slice(5).replace(/^ /, ""))
+        .join("\n")
+        .trim();
+      if (!data) continue;
+      try { last = JSON.parse(data); } catch { /* skip non-JSON data frame */ }
     }
-    return JSON.parse(text);
+    return last;
   }
 
   async listTools(): Promise<ToolSchema[]> {
