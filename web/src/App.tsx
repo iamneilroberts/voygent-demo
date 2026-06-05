@@ -46,7 +46,7 @@ export function App() {
 
   return (
     <div className="app">
-      <header><strong>Voygent</strong> — a live demo of the MCP connector, built by Neil Roberts</header>
+      <header><strong>Voygent</strong> <span className="sub">AI travel-planning agent</span> <span className="by">built by Neil Roberts</span></header>
       <div className="cols">
         <ChatView messages={messages} tools={tools} onSend={send} busy={busy} />
         <FolioPanel folio={folio} />

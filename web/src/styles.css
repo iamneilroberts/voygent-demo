@@ -16,10 +16,13 @@ body {
 }
 .app { display: flex; flex-direction: column; height: 100vh; }
 .app > header {
+  display: flex; align-items: baseline; gap: 10px;
   padding: 14px 20px; border-bottom: 1px solid var(--line);
   background: var(--panel); font-size: 14px; color: var(--muted);
 }
-.app > header strong { color: var(--ink); font-size: 15px; }
+.app > header strong { color: var(--ink); font-size: 16px; letter-spacing: -.01em; }
+.app > header .sub { color: var(--muted); }
+.app > header .by { margin-left: auto; color: var(--muted); font-size: 13px; }
 .cols { flex: 1; display: grid; grid-template-columns: 1fr 380px; min-height: 0; }
 
 .chat { display: flex; flex-direction: column; min-height: 0; border-right: 1px solid var(--line); }
