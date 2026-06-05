@@ -18,9 +18,17 @@ export type ConversationMessage =
   | AssistantMessage
   | UserToolResult;
 
+export interface TokenUsage {
+  inputTokens: number;        // uncached input
+  outputTokens: number;
+  cacheCreationTokens: number; // written to cache this turn (billed ~1.25x)
+  cacheReadTokens: number;     // read from cache this turn (billed ~0.1x)
+}
+
 export type ProviderEvent =
   | { type: "text-delta"; delta: string }
   | { type: "tool-call"; id: string; name: string; input: Record<string, unknown> }
+  | { type: "usage"; usage: TokenUsage }
   | { type: "turn-complete"; assistant: AssistantMessage };
 
 export interface LLMProvider {

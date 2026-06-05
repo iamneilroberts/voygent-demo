@@ -1,4 +1,4 @@
-import type { LLMProvider, ToolSchema, ConversationMessage } from "../llm/provider";
+import type { LLMProvider, ToolSchema, ConversationMessage, TokenUsage } from "../llm/provider";
 import type { ServerEvent } from "../../shared/events";
 import { isTripMutating } from "./folio-sync";
 
@@ -9,6 +9,7 @@ export interface AgentLoopArgs {
   callTool: (name: string, input: Record<string, unknown>) => Promise<string>;
   onFolio: (lastTool: string, input: Record<string, unknown>) => Promise<void>;
   emit: (ev: ServerEvent) => void;
+  onUsage?: (usage: TokenUsage) => void;     // server-side cost telemetry (NOT sent to the client)
   maxTurns?: number;
   maxToolCalls?: number;
 }
@@ -27,6 +28,8 @@ export async function runAgentLoop(args: AgentLoopArgs): Promise<void> {
         emit({ type: "text", delta: ev.delta });
       } else if (ev.type === "tool-call") {
         pendingTools.push({ id: ev.id, name: ev.name, input: ev.input });
+      } else if (ev.type === "usage") {
+        args.onUsage?.(ev.usage);
       } else if (ev.type === "turn-complete") {
         messages.push(ev.assistant);
       }

@@ -5,9 +5,28 @@ import { McpClient } from "./mcp/client";
 import { FixtureReplay, type ReplayHelpers } from "./mcp/replay";
 import { presetRoutes } from "./fixtures/index";
 import { ClaudeProvider } from "./llm/claude";
-import type { ConversationMessage } from "./llm/provider";
+import { estimateCostUsd } from "./llm/cost";
+import type { ConversationMessage, TokenUsage } from "./llm/provider";
 
-interface Env { ANTHROPIC_API_KEY: string; VOYGENT_MCP_URL: string; VOYGENT_MCP_BEARER: string; }
+interface Env {
+  ANTHROPIC_API_KEY: string;
+  VOYGENT_MCP_URL: string;
+  VOYGENT_MCP_BEARER: string;
+  SESSION: DurableObjectNamespace;        // self-namespace; a reserved instance is the budget ledger
+  LLM_MODEL?: string;                     // cheap default while developing; override to sonnet for quality
+  BUDGET_DAILY_USD?: string;              // global daily spend cap (default 5)
+}
+
+// Cost guardrail: the demo only needs these ~9 tools. Sending the full ~79-tool
+// Voygent catalog every turn was the dominant cost; restrict to what's used.
+const DEMO_TOOLS = new Set([
+  "save_trip", "read_trip", "patch_trip",
+  "flight_search", "flight_list", "promote_flights",
+  "hotel_search", "hotel_list", "promote_hotels_to_lodging",
+]);
+
+const DEFAULT_MODEL = "claude-haiku-4-5";  // cheap while we work; flip via LLM_MODEL secret
+const DEFAULT_DAILY_CAP_USD = 5;
 
 const FEATURED = presetRoutes()
   .map((r) => `• ${r.label}: ${r.origin}→${r.destination} (${r.city}), ${r.depart} to ${r.ret}, 2 travelers`)
@@ -43,21 +62,50 @@ const SYSTEM_HINT =
   "4. Always stage with patch_trip using the FULL array value, never indexed paths like flights.0.x.\n" +
   "5. Briefly narrate what you're doing in chat; let the folio carry the details.";
 
+function utcDate(): string { return new Date().toISOString().slice(0, 10); }
+interface BudgetRec { date: string; spent: number; }
+
 export class SessionDO {
   private messages: ConversationMessage[] = [];
   private tripId = `demo-${crypto.randomUUID().slice(0, 8)}`;
   private replay = new FixtureReplay(this.tripId);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  constructor(_state: DurableObjectState, private env: Env) {}
+  constructor(private state: DurableObjectState, private env: Env) {}
+
+  // --- daily budget ledger (a single reserved DO instance, "__budget__") ---
+  private capUsd(): number { return Number(this.env.BUDGET_DAILY_USD ?? DEFAULT_DAILY_CAP_USD); }
+  private async readBudget(): Promise<BudgetRec> {
+    const today = utcDate();
+    const rec = (await this.state.storage.get<BudgetRec>("budget")) ?? { date: today, spent: 0 };
+    return rec.date === today ? rec : { date: today, spent: 0 };
+  }
+  private budgetStub(): DurableObjectStub {
+    return this.env.SESSION.get(this.env.SESSION.idFromName("__budget__"));
+  }
 
   async fetch(req: Request): Promise<Response> {
+    const url = new URL(req.url);
+    if (url.pathname === "/__budget/status") {
+      const rec = await this.readBudget();
+      const cap = this.capUsd();
+      return Response.json({ date: rec.date, spentUsd: rec.spent, capUsd: cap, over: rec.spent >= cap });
+    }
+    if (url.pathname === "/__budget/add") {
+      const { usd } = await req.json<{ usd: number }>();
+      const rec = await this.readBudget();
+      rec.spent += Number(usd) || 0;
+      await this.state.storage.put("budget", rec);
+      return Response.json(rec);
+    }
+    return this.handleChat(req);
+  }
+
+  private async handleChat(req: Request): Promise<Response> {
     const { message } = await req.json<{ message: string }>();
+    const model = this.env.LLM_MODEL || DEFAULT_MODEL;
     const mcp = new McpClient(this.env.VOYGENT_MCP_URL, this.env.VOYGENT_MCP_BEARER);
-    const provider = new ClaudeProvider(this.env.ANTHROPIC_API_KEY);
+    const provider = new ClaudeProvider(this.env.ANTHROPIC_API_KEY, model);
     const mux = new SseMultiplexer();
 
-    // The replay layer needs live access to the staging trip for the promote steps
-    // (read which candidate ids the model staged; write back the real promoted object).
     const helpers: ReplayHelpers = {
       readTrip: async () => {
         const raw = await mcp.callTool("read_trip", { tripId: this.tripId, raw: true });
@@ -65,44 +113,53 @@ export class SessionDO {
       },
       patchTrip: async (updates) => { await mcp.callTool("patch_trip", { tripId: this.tripId, updates }); },
     };
-
-    // Supplier-search / candidate-list / promote tools are replayed from real captured
-    // fixtures (staging has no supplier creds); everything else runs live against staging.
     const callTool = (name: string, input: Record<string, unknown>): Promise<string> =>
       this.replay.isIntercepted(name)
         ? this.replay.handle(name, input as Record<string, any>, helpers)
         : mcp.callTool(name, input);
 
-    // seed the conversation with the system hint as the first user message if empty
     if (this.messages.length === 0) this.messages.push({ role: "user", content: `${SYSTEM_HINT}\n\nMy trip_id is ${this.tripId}.` });
     this.messages.push({ role: "user", content: message });
 
-    // Run the loop fire-and-forget; the open SSE response body keeps the
-    // request (and isolate) alive until mux.close(). No waitUntil needed.
+    // Per-session cost telemetry (server-side only — never sent to the client).
+    let sessionCost = 0;
+    const u: TokenUsage = { inputTokens: 0, outputTokens: 0, cacheCreationTokens: 0, cacheReadTokens: 0 };
+
     void (async () => {
       try {
-        const tools = await mcp.listTools();
+        // Restrict the catalog to the tools the demo actually uses (cost guardrail).
+        const tools = (await mcp.listTools()).filter((t) => DEMO_TOOLS.has(t.name));
         await runAgentLoop({
           provider, tools, messages: this.messages,
           callTool,
           onFolio: async () => {
             const raw = await mcp.callTool("read_trip", { tripId: this.tripId });
             let parsed: any = {};
-            try { parsed = JSON.parse(raw); } catch { /* read_trip may wrap text; tolerate */ }
-            // Overlay what promote_* actually committed. read_trip can momentarily
-            // miss a just-written flights/lodging array due to KV eventual
-            // consistency; the replay's retained result is authoritative and immediate.
+            try { parsed = JSON.parse(raw); } catch { /* tolerate */ }
             const data = (parsed && typeof parsed === "object" && parsed.data) ? parsed.data : (parsed ?? {});
             const promoted = this.replay.lastPromoted();
             if (promoted.flights != null) data.flights = promoted.flights;
             if (promoted.lodging != null) data.lodging = promoted.lodging;
             mux.send({ type: "folio", folio: tripToFolio(this.tripId, { data }) });
           },
+          onUsage: (turn) => {
+            u.inputTokens += turn.inputTokens; u.outputTokens += turn.outputTokens;
+            u.cacheCreationTokens += turn.cacheCreationTokens; u.cacheReadTokens += turn.cacheReadTokens;
+            sessionCost += estimateCostUsd(model, turn);
+          },
           emit: (e) => mux.send(e),
         });
       } catch (e) {
         mux.send({ type: "error", message: (e as Error).message });
-      } finally { mux.close(); }
+      } finally {
+        mux.close();
+        // Record cost: log (visible via `wrangler tail`) + add to the daily ledger.
+        console.log(`[cost] model=${model} trip=${this.tripId} in=${u.inputTokens} out=${u.outputTokens} cacheR=${u.cacheReadTokens} cacheW=${u.cacheCreationTokens} usd=${sessionCost.toFixed(4)}`);
+        if (sessionCost > 0) {
+          try { await this.budgetStub().fetch("https://do/__budget/add", { method: "POST", body: JSON.stringify({ usd: sessionCost }) }); }
+          catch { /* ledger update is best-effort */ }
+        }
+      }
     })();
 
     return new Response(mux.readable, {

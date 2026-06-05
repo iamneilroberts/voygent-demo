@@ -1,4 +1,4 @@
-import type { LLMProvider, ProviderEvent, ConversationMessage, ToolSchema, AssistantMessage } from "./provider";
+import type { LLMProvider, ProviderEvent, ConversationMessage, ToolSchema, AssistantMessage, TokenUsage } from "./provider";
 
 export async function* parseAnthropicStream(body: ReadableStream<Uint8Array>): AsyncIterable<ProviderEvent> {
   const reader = body.getReader();
@@ -6,6 +6,8 @@ export async function* parseAnthropicStream(body: ReadableStream<Uint8Array>): A
   let buf = "";
   let completed = false;
   const blocks: Record<number, { type: string; id?: string; name?: string; text: string; json: string }> = {};
+  const usage: TokenUsage = { inputTokens: 0, outputTokens: 0, cacheCreationTokens: 0, cacheReadTokens: 0 };
+  let sawUsage = false;
 
   for (;;) {
     const { value, done } = await reader.read();
@@ -17,7 +19,17 @@ export async function* parseAnthropicStream(body: ReadableStream<Uint8Array>): A
       const dataLine = frame.split("\n").find((l) => l.startsWith("data:"));
       if (!dataLine) continue;
       const ev = JSON.parse(dataLine.slice(5).trim());
-      if (ev.type === "content_block_start") {
+      if (ev.type === "message_start" && ev.message?.usage) {
+        const u = ev.message.usage;
+        usage.inputTokens = u.input_tokens ?? 0;
+        usage.cacheCreationTokens = u.cache_creation_input_tokens ?? 0;
+        usage.cacheReadTokens = u.cache_read_input_tokens ?? 0;
+        usage.outputTokens = u.output_tokens ?? 0;
+        sawUsage = true;
+      } else if (ev.type === "message_delta" && ev.usage) {
+        usage.outputTokens = ev.usage.output_tokens ?? usage.outputTokens;
+        sawUsage = true;
+      } else if (ev.type === "content_block_start") {
         blocks[ev.index] = { type: ev.content_block.type, id: ev.content_block.id, name: ev.content_block.name, text: "", json: "" };
       } else if (ev.type === "content_block_delta") {
         const b = blocks[ev.index];
@@ -36,6 +48,7 @@ export async function* parseAnthropicStream(body: ReadableStream<Uint8Array>): A
               yield { type: "tool-call", id: b.id!, name: b.name!, input };
             }
           }
+          if (sawUsage) yield { type: "usage", usage };
           yield { type: "turn-complete", assistant: { role: "assistant", content } };
         }
       }
@@ -54,8 +67,30 @@ export async function* parseAnthropicStream(body: ReadableStream<Uint8Array>): A
         yield { type: "tool-call", id: b.id!, name: b.name!, input };
       }
     }
+    if (sawUsage) yield { type: "usage", usage };
     yield { type: "turn-complete", assistant: { role: "assistant", content } };
   }
+}
+
+const EPHEMERAL = { type: "ephemeral" as const };
+
+// Cache the two stable, expensive prefixes so the agent loop's later turns read
+// them at ~0.1x instead of re-billing full price every turn:
+//  1. the tools block (cache_control on the last tool caches the whole array)
+//  2. the first user message (our long, static SYSTEM_HINT)
+function withToolCache(tools: ToolSchema[]): unknown[] {
+  return tools.map((t, i) => ({
+    name: t.name, description: t.description, input_schema: t.input_schema,
+    ...(i === tools.length - 1 ? { cache_control: EPHEMERAL } : {}),
+  }));
+}
+function withMessageCache(messages: ConversationMessage[]): unknown[] {
+  return messages.map((m, i) => {
+    if (i === 0 && m.role === "user" && typeof m.content === "string") {
+      return { role: "user", content: [{ type: "text", text: m.content, cache_control: EPHEMERAL }] };
+    }
+    return m;
+  });
 }
 
 export class ClaudeProvider implements LLMProvider {
@@ -70,8 +105,8 @@ export class ClaudeProvider implements LLMProvider {
       },
       body: JSON.stringify({
         model: this.model, max_tokens: 4096, stream: true,
-        tools: tools.map((t) => ({ name: t.name, description: t.description, input_schema: t.input_schema })),
-        messages,
+        tools: withToolCache(tools),
+        messages: withMessageCache(messages),
       }),
     });
     if (!res.ok || !res.body) throw new Error(`Anthropic HTTP ${res.status}: ${await res.text()}`);
