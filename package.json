@@ -7,8 +7,8 @@
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit",
     "dev:worker": "wrangler dev",
-    "dev:web": "vite",
-    "build:web": "vite build"
+    "dev:web": "vite --config web/vite.config.ts",
+    "build:web": "vite build --config web/vite.config.ts"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240512.0",
