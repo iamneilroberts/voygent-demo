@@ -52,15 +52,29 @@ The public `/chat` spends **Anthropic tokens per visit, uncapped** (per-conversa
 **Before sharing the URL widely**, do Phase 4: global daily $ + tool-call ceiling, per-IP rate limit,
 input caps. Kill switch is live: `wrangler secret put DEMO_DISABLED` (enter `1`) to pause instantly.
 
+## Phase 2 — DONE (2026-06-05, commit `bdb317a`, deployed)
+
+Polished honest agent UX:
+- Chat renders light prose markdown (bold/italic/bullets) via `web/src/prose.tsx` (safe, no
+  `dangerouslySetInnerHTML`) + a typing indicator; `**bold**` no longer shows literal asterisks.
+- Folio cards enriched: flights show route · carrier · date · stops · cabin + emphasized price;
+  hotels show area · stars · nights + per-night/total. `folio-sync` filters bare staging stubs
+  (`{_candidateId}`) so the folio shows only promoted items (no "Hotel"/"Flight" placeholder flash).
+- Mechanism leaks closed: neutral no-result notes + hardened SYSTEM_HINT (no "captured/demo/fixture").
+- Verified live via Playwright screenshot (real Delta flight + 3 real hotels, full detail).
+
 ## Next (from the full-path plan)
 
-1. **Phase 4 budget caps** — recommended next given the cost concern (global daily cap + abuse guard).
-2. **Phase 2 polish** — chat is prose but a touch emoji-heavy; the "demo environment / captured data"
-   line on no-results is a mild mechanism reveal (softer than before — tune wording if undesired).
-   Folio cards could show route/dates/nights, not just price.
-3. **Phase 2b onboarding** — preset chips (the 5 routes above) + CF IP-geo origin prefill + interview-first.
-4. **Phase 3 Engineering Inspector** — the résumé payload; all real tool telemetry already flows through
+1. **Phase 2b onboarding** — preset chips (the 5 routes above) + CF IP-geo origin prefill +
+   interview-first. The natural next step in plan order.
+2. **Phase 3 Engineering Inspector** — the résumé payload; all real tool telemetry already flows through
    the hand-rolled host.
+3. **Phase 4 budget caps + housekeeping** — global daily $/tool ceiling, per-IP rate limit, input caps.
+   **Note:** every public visit writes a `demo-*` trip to **staging KV** (by design — the demo uses the
+   real trip engine). These accumulate; add a TTL/cleanup sweep here.
+
+(Cost posture per Neil 2026-06-05: not gating on cost while he monitors — Phase 4 caps are no longer
+the forced next step; proceed in plan order 2b → 3 → 4.)
 
 ## Don't
 - Don't point the PUBLIC demo at live prod creds (decision B keeps it on staging + fixtures = $0/visit).
