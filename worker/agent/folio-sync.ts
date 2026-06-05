@@ -30,17 +30,26 @@ export function tripToFolio(tripId: string, raw: any): FolioData {
   // After promote_flights, trip.flights is an object { outbound, return } whose
   // legs carry { route, airline, totalPrice, segments }. Before promotion (or in
   // legacy trips) it can be a flat array. Handle both.
-  const flightLegs: any[] = Array.isArray(t.flights)
+  const rawLegs: any[] = Array.isArray(t.flights)
     ? t.flights
     : t.flights && typeof t.flights === "object"
       ? [t.flights.outbound, t.flights.return].filter(Boolean)
       : [];
-  const flights: FolioFlight[] = flightLegs.map((f: any) => ({
-    label: String(f.label ?? f.route ?? "Flight"),
-    price: asPrice(f.price ?? f.totalPrice ?? f.total),
-    carrier: f.airline ?? f.carrier ?? undefined,
-    route: f.route ?? undefined,
-  }));
+  // Skip bare staging stubs ({ _candidateId } the model writes before promote_flights);
+  // the folio shows only promoted flights, never transient placeholders.
+  const flightLegs = rawLegs.filter((f: any) => f && (f.route || f.airline || f.segments || f.totalPrice || f.price));
+  const flights: FolioFlight[] = flightLegs.map((f: any) => {
+    const segs = Array.isArray(f.segments) ? f.segments : [];
+    return {
+      label: String(f.label ?? f.route ?? "Flight"),
+      price: asPrice(f.price ?? f.totalPrice ?? f.total),
+      carrier: f.airline ?? f.carrier ?? undefined,
+      route: f.route ?? undefined,
+      date: f.date ?? undefined,
+      cabin: f.cabin ?? undefined,
+      stops: segs.length > 0 ? Math.max(0, segs.length - 1) : undefined,
+    };
+  });
 
   // `lodging[]` is the canonical promoted array; `hotels[]` is the staging array
   // (cleared to [] by promote_hotels_to_lodging). Prefer lodging, fall back to a
@@ -51,10 +60,15 @@ export function tripToFolio(tripId: string, raw: any): FolioData {
     : Array.isArray(t.hotels) && t.hotels.length
       ? t.hotels
       : Array.isArray(t.lodging) ? t.lodging : [];
-  const hotels: FolioHotel[] = lodgingSrc.map((h: any) => ({
+  // Skip bare staging stubs ({ _candidateId } with no display data) so the folio
+  // never flashes nameless "Hotel" placeholders between stage and promote.
+  const hotels: FolioHotel[] = lodgingSrc.filter((h: any) => h && (h.name || h.priceTotal || h.total)).map((h: any) => ({
     name: String(h.name ?? "Hotel"),
-    price: asPrice(h.price ?? h.total ?? h.rate),
-    stars: typeof h.stars === "number" ? h.stars : undefined,
+    price: asPrice(h.price ?? h.total ?? h.rate ?? h.priceTotal),
+    stars: typeof h.stars === "number" ? h.stars : (typeof h.starRating === "number" ? h.starRating : undefined),
+    area: h.location ?? h.area ?? undefined,
+    nights: typeof h.nights === "number" ? h.nights : undefined,
+    perNight: asPrice(h.pricePerNight),
   }));
 
   return { tripId, title, flights, hotels };

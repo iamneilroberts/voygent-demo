@@ -1,5 +1,11 @@
-export interface FolioFlight { label: string; price?: string; carrier?: string; route?: string; }
-export interface FolioHotel { name: string; price?: string; stars?: number; }
+export interface FolioFlight {
+  label: string; price?: string; carrier?: string; route?: string;
+  date?: string; cabin?: string; stops?: number;
+}
+export interface FolioHotel {
+  name: string; price?: string; stars?: number;
+  area?: string; nights?: number; perNight?: string;
+}
 export interface FolioData {
   tripId: string;
   title: string;

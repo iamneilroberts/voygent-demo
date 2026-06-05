@@ -45,7 +45,9 @@ describe("flight search + list replay", () => {
     const out = JSON.parse(r["flightSearch"]({ origin: "BOS", destination: "PAR" }));
     expect(out.count).toBe(0);
     expect(out.candidates).toEqual([]);
-    expect(out.note).toContain("No live demo results");
+    expect(out.note).toContain("No results for");
+    // must NOT leak the internal mechanism to the model
+    expect(out.note).not.toMatch(/captured|demo|fixture|replay/i);
   });
 
   it("flight_list requires a prior search", () => {

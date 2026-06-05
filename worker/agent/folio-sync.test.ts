@@ -61,6 +61,14 @@ describe("tripToFolio", () => {
     expect(folio.hotels[0].price).toBe("$1308");
   });
 
+  it("hides bare staging stubs ({_candidateId}) until promote fills real data", () => {
+    // mid-pipeline: model has staged picks but promote hasn't run yet
+    const raw = { data: { meta: { title: "X" }, flights: [{ _candidateId: "serp:a" }], hotels: [{ _candidateId: "serp:b" }], lodging: [] } };
+    const folio = tripToFolio("t1", raw);
+    expect(folio.flights).toEqual([]);
+    expect(folio.hotels).toEqual([]);
+  });
+
   it("falls back to clientName/destination when meta.title is absent", () => {
     const raw = { data: { meta: { clientName: "Jake & Sarah", destination: "Cancun, Mexico" } } };
     expect(tripToFolio("t1", raw).title).toBe("Jake & Sarah");

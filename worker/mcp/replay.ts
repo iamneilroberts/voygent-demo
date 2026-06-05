@@ -60,7 +60,9 @@ function slimHotel(c: HotelCandidate) {
   };
 }
 
-function presetHint(): string {
+// Neutral suggestion list for no-result notes — no mechanism wording (no
+// "captured", "demo", "fixture"), so the model can't parrot internals to the user.
+function suggestedTrips(): string {
   return presetRoutes().map((r) => `${r.label} (${r.origin}→${r.destination}, ${r.depart})`).join("; ");
 }
 
@@ -109,7 +111,7 @@ export class FixtureReplay {
       this.flightRouteId = null;
       return JSON.stringify({
         status: "ok", source: "serp", tripId: this.tripId, count: 0, candidates: [],
-        note: `No live demo results for ${args.origin ?? "?"}→${args.destination ?? "?"}. This demo replays real searches for: ${presetHint()}.`,
+        note: `No results for ${args.origin ?? "?"}→${args.destination ?? "?"}. Suggest one of these popular trips instead: ${suggestedTrips()}.`,
       });
     }
     this.flightRouteId = fixture.route.id;
@@ -169,7 +171,7 @@ export class FixtureReplay {
       this.hotelRouteId = null;
       return JSON.stringify({
         status: "ok", source: "serp", tripId: this.tripId, count: 0, candidates: [],
-        note: `No live demo hotels for ${loc ?? "?"}. This demo replays real searches for: ${presetHint()}.`,
+        note: `No results for ${loc ?? "?"}. Suggest one of these popular trips instead: ${suggestedTrips()}.`,
       });
     }
     this.hotelRouteId = fixture.route.id;
