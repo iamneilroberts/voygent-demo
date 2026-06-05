@@ -1,0 +1,1051 @@
+{
+  "route": {
+    "id": "dublin-oct",
+    "label": "Dublin in October",
+    "origin": "MOB",
+    "destination": "DUB",
+    "city": "Dublin",
+    "depart": "2026-10-12",
+    "ret": "2026-10-19",
+    "adults": 2
+  },
+  "flights": [
+    {
+      "id": "serp:70wngy",
+      "source": "serp",
+      "offerId": null,
+      "price": 3426,
+      "currency": "USD",
+      "priceWithCcFee": null,
+      "fareType": null,
+      "validatingCarrier": "United",
+      "commissionProtected": false,
+      "cabin": "Economy",
+      "stops": 1,
+      "durationMinutes": 747,
+      "airlines": [
+        "United"
+      ],
+      "route": "MOB→DUB",
+      "flightNumbers": [
+        "UA4314",
+        "UA310"
+      ],
+      "segments": [
+        {
+          "origin": "MOB",
+          "destination": "IAD",
+          "depart": "2026-10-12 12:53",
+          "arrive": "2026-10-12 16:15",
+          "carrier": "United",
+          "flightNumber": "UA 4314",
+          "cabin": "Economy",
+          "durationMinutes": 142,
+          "layover": null,
+          "equipment": "Embraer ERJ-135/145"
+        },
+        {
+          "origin": "IAD",
+          "destination": "DUB",
+          "depart": "2026-10-12 19:05",
+          "arrive": "2026-10-13 07:20",
+          "carrier": "United",
+          "flightNumber": "UA 310",
+          "cabin": "Economy",
+          "durationMinutes": 435,
+          "layover": "2h 50m",
+          "equipment": "Boeing 757",
+          "overnight": true
+        }
+      ],
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:05:29.906Z",
+      "query": {
+        "origin": "MOB",
+        "destination": "DUB",
+        "departure_date": "2026-10-12",
+        "return_date": "2026-10-19",
+        "adults": 2
+      },
+      "pricePerPerson": 1713,
+      "priceBasis": "per_person",
+      "pax": 2
+    },
+    {
+      "id": "serp:3lqsh0",
+      "source": "serp",
+      "offerId": null,
+      "price": 3426,
+      "currency": "USD",
+      "priceWithCcFee": null,
+      "fareType": null,
+      "validatingCarrier": "Delta",
+      "commissionProtected": false,
+      "cabin": "Economy",
+      "stops": 1,
+      "durationMinutes": 630,
+      "airlines": [
+        "Delta"
+      ],
+      "route": "MOB→DUB",
+      "flightNumbers": [
+        "DL1110",
+        "DL176"
+      ],
+      "segments": [
+        {
+          "origin": "MOB",
+          "destination": "ATL",
+          "depart": "2026-10-12 16:15",
+          "arrive": "2026-10-12 18:38",
+          "carrier": "Delta",
+          "flightNumber": "DL 1110",
+          "cabin": "Economy",
+          "durationMinutes": 83,
+          "layover": null,
+          "equipment": "Boeing 717"
+        },
+        {
+          "origin": "ATL",
+          "destination": "DUB",
+          "depart": "2026-10-12 20:00",
+          "arrive": "2026-10-13 08:45",
+          "carrier": "Delta",
+          "flightNumber": "DL 176",
+          "cabin": "Economy",
+          "durationMinutes": 465,
+          "layover": "1h 22m",
+          "equipment": "Airbus A330",
+          "overnight": true
+        }
+      ],
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:05:29.906Z",
+      "query": {
+        "origin": "MOB",
+        "destination": "DUB",
+        "departure_date": "2026-10-12",
+        "return_date": "2026-10-19",
+        "adults": 2
+      },
+      "pricePerPerson": 1713,
+      "priceBasis": "per_person",
+      "pax": 2
+    },
+    {
+      "id": "serp:thxolp",
+      "source": "serp",
+      "offerId": null,
+      "price": 3426,
+      "currency": "USD",
+      "priceWithCcFee": null,
+      "fareType": null,
+      "validatingCarrier": "American",
+      "commissionProtected": false,
+      "cabin": "Economy",
+      "stops": 1,
+      "durationMinutes": 653,
+      "airlines": [
+        "American"
+      ],
+      "route": "MOB→DUB",
+      "flightNumbers": [
+        "AA6035",
+        "AA724"
+      ],
+      "segments": [
+        {
+          "origin": "MOB",
+          "destination": "CLT",
+          "depart": "2026-10-12 16:42",
+          "arrive": "2026-10-12 19:40",
+          "carrier": "American",
+          "flightNumber": "AA 6035",
+          "cabin": "Economy",
+          "durationMinutes": 118,
+          "layover": null,
+          "equipment": "Embraer ERJ-145"
+        },
+        {
+          "origin": "CLT",
+          "destination": "DUB",
+          "depart": "2026-10-12 21:15",
+          "arrive": "2026-10-13 09:35",
+          "carrier": "American",
+          "flightNumber": "AA 724",
+          "cabin": "Economy",
+          "durationMinutes": 440,
+          "layover": "1h 35m",
+          "equipment": "Boeing 777",
+          "overnight": true,
+          "oftenDelayed": true
+        }
+      ],
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:05:29.906Z",
+      "query": {
+        "origin": "MOB",
+        "destination": "DUB",
+        "departure_date": "2026-10-12",
+        "return_date": "2026-10-19",
+        "adults": 2
+      },
+      "pricePerPerson": 1713,
+      "priceBasis": "per_person",
+      "pax": 2
+    },
+    {
+      "id": "serp:1w4jijl",
+      "source": "serp",
+      "offerId": null,
+      "price": 3518,
+      "currency": "USD",
+      "priceWithCcFee": null,
+      "fareType": null,
+      "validatingCarrier": "American",
+      "commissionProtected": false,
+      "cabin": "Economy",
+      "stops": 2,
+      "durationMinutes": 967,
+      "airlines": [
+        "American",
+        "British Airways"
+      ],
+      "route": "MOB→DUB",
+      "flightNumbers": [
+        "AA5162",
+        "AA50",
+        "BA826"
+      ],
+      "segments": [
+        {
+          "origin": "MOB",
+          "destination": "DFW",
+          "depart": "2026-10-12 11:33",
+          "arrive": "2026-10-12 13:34",
+          "carrier": "American",
+          "flightNumber": "AA 5162",
+          "cabin": "Economy",
+          "durationMinutes": 121,
+          "layover": null,
+          "equipment": "Canadair RJ 900"
+        },
+        {
+          "origin": "DFW",
+          "destination": "LHR",
+          "depart": "2026-10-12 15:25",
+          "arrive": "2026-10-13 06:20",
+          "carrier": "American",
+          "flightNumber": "AA 50",
+          "cabin": "Economy",
+          "durationMinutes": 535,
+          "layover": "1h 51m",
+          "equipment": "Boeing 787",
+          "overnight": true
+        },
+        {
+          "origin": "LHR",
+          "destination": "DUB",
+          "depart": "2026-10-13 08:15",
+          "arrive": "2026-10-13 09:40",
+          "carrier": "British Airways",
+          "flightNumber": "BA 826",
+          "cabin": "Economy",
+          "durationMinutes": 85,
+          "layover": "1h 55m",
+          "equipment": "Airbus A321neo"
+        }
+      ],
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:05:29.906Z",
+      "query": {
+        "origin": "MOB",
+        "destination": "DUB",
+        "departure_date": "2026-10-12",
+        "return_date": "2026-10-19",
+        "adults": 2
+      },
+      "pricePerPerson": 1759,
+      "priceBasis": "per_person",
+      "pax": 2
+    },
+    {
+      "id": "serp:tacag3",
+      "source": "serp",
+      "offerId": null,
+      "price": 4398,
+      "currency": "USD",
+      "priceWithCcFee": null,
+      "fareType": null,
+      "validatingCarrier": "American",
+      "commissionProtected": false,
+      "cabin": "Economy",
+      "stops": 2,
+      "durationMinutes": 927,
+      "airlines": [
+        "American",
+        "Aer Lingus"
+      ],
+      "route": "MOB→DUB",
+      "flightNumbers": [
+        "AA5162",
+        "AA50",
+        "EI151"
+      ],
+      "segments": [
+        {
+          "origin": "MOB",
+          "destination": "DFW",
+          "depart": "2026-10-12 11:33",
+          "arrive": "2026-10-12 13:34",
+          "carrier": "American",
+          "flightNumber": "AA 5162",
+          "cabin": "Economy",
+          "durationMinutes": 121,
+          "layover": null,
+          "equipment": "Canadair RJ 900"
+        },
+        {
+          "origin": "DFW",
+          "destination": "LHR",
+          "depart": "2026-10-12 15:25",
+          "arrive": "2026-10-13 06:20",
+          "carrier": "American",
+          "flightNumber": "AA 50",
+          "cabin": "Economy",
+          "durationMinutes": 535,
+          "layover": "1h 51m",
+          "equipment": "Boeing 787",
+          "overnight": true
+        },
+        {
+          "origin": "LHR",
+          "destination": "DUB",
+          "depart": "2026-10-13 07:40",
+          "arrive": "2026-10-13 09:00",
+          "carrier": "Aer Lingus",
+          "flightNumber": "EI 151",
+          "cabin": "Economy",
+          "durationMinutes": 80,
+          "layover": "1h 20m",
+          "equipment": "Airbus A321"
+        }
+      ],
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:05:29.906Z",
+      "query": {
+        "origin": "MOB",
+        "destination": "DUB",
+        "departure_date": "2026-10-12",
+        "return_date": "2026-10-19",
+        "adults": 2
+      },
+      "pricePerPerson": 2199,
+      "priceBasis": "per_person",
+      "pax": 2
+    }
+  ],
+  "hotels": [
+    {
+      "id": "serp:1n8v5x1",
+      "source": "serp",
+      "offerId": null,
+      "name": "Baggotrath House Apartments, Newbridge Ave, Dublin 4 - One-Bedroom Luxury Apartment",
+      "starRating": null,
+      "reviewScore": 5,
+      "reviewScoreScale": 5,
+      "reviewCount": 16,
+      "pricePerNight": 192,
+      "priceTotal": 1343,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Dublin",
+      "otaPrices": [
+        {
+          "name": "Bluepillow.com",
+          "pricePerNight": 192,
+          "isOfficial": false
+        }
+      ],
+      "stayRef": "dublin-2026-10-12-2026-10-19",
+      "stay": {
+        "location": "Dublin",
+        "checkIn": "2026-10-12",
+        "checkOut": "2026-10-19"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:05:34.552Z",
+      "query": {
+        "destination": "Dublin",
+        "check_in": "2026-10-12",
+        "check_out": "2026-10-19",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:q9rbc5",
+      "source": "serp",
+      "offerId": null,
+      "name": "House Dublin",
+      "starRating": 3,
+      "reviewScore": 4.4,
+      "reviewScoreScale": 5,
+      "reviewCount": 3100,
+      "pricePerNight": 128,
+      "priceTotal": 893,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Dublin",
+      "stayRef": "dublin-2026-10-12-2026-10-19",
+      "stay": {
+        "location": "Dublin",
+        "checkIn": "2026-10-12",
+        "checkOut": "2026-10-19"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:05:34.552Z",
+      "query": {
+        "destination": "Dublin",
+        "check_in": "2026-10-12",
+        "check_out": "2026-10-19",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:d1030t",
+      "source": "serp",
+      "offerId": null,
+      "name": "Beckett Locke, North Docks",
+      "starRating": 4,
+      "reviewScore": 4.5,
+      "reviewScoreScale": 5,
+      "reviewCount": 1007,
+      "pricePerNight": 137,
+      "priceTotal": 959,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Dublin",
+      "stayRef": "dublin-2026-10-12-2026-10-19",
+      "stay": {
+        "location": "Dublin",
+        "checkIn": "2026-10-12",
+        "checkOut": "2026-10-19"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:05:34.552Z",
+      "query": {
+        "destination": "Dublin",
+        "check_in": "2026-10-12",
+        "check_out": "2026-10-19",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:17lbl11",
+      "source": "serp",
+      "offerId": null,
+      "name": "The Dean Docklands - Formerly The Mayson",
+      "starRating": 4,
+      "reviewScore": 4.3,
+      "reviewScoreScale": 5,
+      "reviewCount": 1007,
+      "pricePerNight": 159,
+      "priceTotal": 1115,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Dublin",
+      "stayRef": "dublin-2026-10-12-2026-10-19",
+      "stay": {
+        "location": "Dublin",
+        "checkIn": "2026-10-12",
+        "checkOut": "2026-10-19"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:05:34.552Z",
+      "query": {
+        "destination": "Dublin",
+        "check_in": "2026-10-12",
+        "check_out": "2026-10-19",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:j7sfg",
+      "source": "serp",
+      "offerId": null,
+      "name": "Zanzibar Locke, Ha'penny Bridge",
+      "starRating": 4,
+      "reviewScore": 4.6,
+      "reviewScoreScale": 5,
+      "reviewCount": 866,
+      "pricePerNight": 187,
+      "priceTotal": 1308,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Dublin",
+      "stayRef": "dublin-2026-10-12-2026-10-19",
+      "stay": {
+        "location": "Dublin",
+        "checkIn": "2026-10-12",
+        "checkOut": "2026-10-19"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:05:34.552Z",
+      "query": {
+        "destination": "Dublin",
+        "check_in": "2026-10-12",
+        "check_out": "2026-10-19",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:1n3zcwm",
+      "source": "serp",
+      "offerId": null,
+      "name": "The Plaza Hotel",
+      "starRating": 4,
+      "reviewScore": 3.8,
+      "reviewScoreScale": 5,
+      "reviewCount": 1324,
+      "pricePerNight": 138,
+      "priceTotal": 963,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Dublin",
+      "stayRef": "dublin-2026-10-12-2026-10-19",
+      "stay": {
+        "location": "Dublin",
+        "checkIn": "2026-10-12",
+        "checkOut": "2026-10-19"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:05:34.552Z",
+      "query": {
+        "destination": "Dublin",
+        "check_in": "2026-10-12",
+        "check_out": "2026-10-19",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:19rdp1s",
+      "source": "serp",
+      "offerId": null,
+      "name": "Donnybrook Hall",
+      "starRating": 4,
+      "reviewScore": 4.7,
+      "reviewScoreScale": 5,
+      "reviewCount": 176,
+      "pricePerNight": 146,
+      "priceTotal": 1020,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Dublin",
+      "stayRef": "dublin-2026-10-12-2026-10-19",
+      "stay": {
+        "location": "Dublin",
+        "checkIn": "2026-10-12",
+        "checkOut": "2026-10-19"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:05:34.552Z",
+      "query": {
+        "destination": "Dublin",
+        "check_in": "2026-10-12",
+        "check_out": "2026-10-19",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:il1l58",
+      "source": "serp",
+      "offerId": null,
+      "name": "Beckett Locke - City Studio",
+      "starRating": null,
+      "reviewScore": 4.95,
+      "reviewScoreScale": 5,
+      "reviewCount": 8,
+      "pricePerNight": 158,
+      "priceTotal": 1107,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Dublin",
+      "otaPrices": [
+        {
+          "name": "Bluepillow.com",
+          "pricePerNight": 158,
+          "isOfficial": false
+        }
+      ],
+      "stayRef": "dublin-2026-10-12-2026-10-19",
+      "stay": {
+        "location": "Dublin",
+        "checkIn": "2026-10-12",
+        "checkOut": "2026-10-19"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:05:34.552Z",
+      "query": {
+        "destination": "Dublin",
+        "check_in": "2026-10-12",
+        "check_out": "2026-10-19",
+        "adults": 2
+      }
+    }
+  ],
+  "promotedFlightsById": {
+    "serp:70wngy": {
+      "outbound": {
+        "date": "2026-10-12",
+        "route": "MOB→DUB",
+        "airline": "United",
+        "cabin": "Economy",
+        "totalPrice": 3426,
+        "confirmation": null,
+        "multiDay": false,
+        "segments": [
+          {
+            "flight": "UnitedUA 4314",
+            "airline": "United",
+            "route": "MOB→IAD",
+            "date": "2026-10-12",
+            "depart": "2026-10-12 12:53",
+            "arrive": "2026-10-12 16:15",
+            "layover": null
+          },
+          {
+            "flight": "UnitedUA 310",
+            "airline": "United",
+            "route": "IAD→DUB",
+            "date": "2026-10-12",
+            "depart": "2026-10-12 19:05",
+            "arrive": "2026-10-13 07:20",
+            "layover": "2h 50m"
+          }
+        ],
+        "description": null,
+        "notes": null,
+        "_candidateId": "serp:70wngy"
+      },
+      "return": null
+    },
+    "serp:3lqsh0": {
+      "outbound": {
+        "date": "2026-10-12",
+        "route": "MOB→DUB",
+        "airline": "Delta",
+        "cabin": "Economy",
+        "totalPrice": 3426,
+        "confirmation": null,
+        "multiDay": false,
+        "segments": [
+          {
+            "flight": "DeltaDL 1110",
+            "airline": "Delta",
+            "route": "MOB→ATL",
+            "date": "2026-10-12",
+            "depart": "2026-10-12 16:15",
+            "arrive": "2026-10-12 18:38",
+            "layover": null
+          },
+          {
+            "flight": "DeltaDL 176",
+            "airline": "Delta",
+            "route": "ATL→DUB",
+            "date": "2026-10-12",
+            "depart": "2026-10-12 20:00",
+            "arrive": "2026-10-13 08:45",
+            "layover": "1h 22m"
+          }
+        ],
+        "description": null,
+        "notes": null,
+        "_candidateId": "serp:3lqsh0"
+      },
+      "return": null
+    },
+    "serp:thxolp": {
+      "outbound": {
+        "date": "2026-10-12",
+        "route": "MOB→DUB",
+        "airline": "American",
+        "cabin": "Economy",
+        "totalPrice": 3426,
+        "confirmation": null,
+        "multiDay": false,
+        "segments": [
+          {
+            "flight": "AmericanAA 6035",
+            "airline": "American",
+            "route": "MOB→CLT",
+            "date": "2026-10-12",
+            "depart": "2026-10-12 16:42",
+            "arrive": "2026-10-12 19:40",
+            "layover": null
+          },
+          {
+            "flight": "AmericanAA 724",
+            "airline": "American",
+            "route": "CLT→DUB",
+            "date": "2026-10-12",
+            "depart": "2026-10-12 21:15",
+            "arrive": "2026-10-13 09:35",
+            "layover": "1h 35m"
+          }
+        ],
+        "description": null,
+        "notes": null,
+        "_candidateId": "serp:thxolp"
+      },
+      "return": null
+    },
+    "serp:1w4jijl": {
+      "outbound": {
+        "date": "2026-10-12",
+        "route": "MOB→DUB",
+        "airline": "American",
+        "cabin": "Economy",
+        "totalPrice": 3518,
+        "confirmation": null,
+        "multiDay": false,
+        "segments": [
+          {
+            "flight": "AmericanAA 5162",
+            "airline": "American",
+            "route": "MOB→DFW",
+            "date": "2026-10-12",
+            "depart": "2026-10-12 11:33",
+            "arrive": "2026-10-12 13:34",
+            "layover": null
+          },
+          {
+            "flight": "AmericanAA 50",
+            "airline": "American",
+            "route": "DFW→LHR",
+            "date": "2026-10-12",
+            "depart": "2026-10-12 15:25",
+            "arrive": "2026-10-13 06:20",
+            "layover": "1h 51m"
+          },
+          {
+            "flight": "British AirwaysBA 826",
+            "airline": "British Airways",
+            "route": "LHR→DUB",
+            "date": "2026-10-13",
+            "depart": "2026-10-13 08:15",
+            "arrive": "2026-10-13 09:40",
+            "layover": "1h 55m"
+          }
+        ],
+        "description": null,
+        "notes": null,
+        "_candidateId": "serp:1w4jijl"
+      },
+      "return": null
+    },
+    "serp:tacag3": {
+      "outbound": {
+        "date": "2026-10-12",
+        "route": "MOB→DUB",
+        "airline": "American",
+        "cabin": "Economy",
+        "totalPrice": 4398,
+        "confirmation": null,
+        "multiDay": false,
+        "segments": [
+          {
+            "flight": "AmericanAA 5162",
+            "airline": "American",
+            "route": "MOB→DFW",
+            "date": "2026-10-12",
+            "depart": "2026-10-12 11:33",
+            "arrive": "2026-10-12 13:34",
+            "layover": null
+          },
+          {
+            "flight": "AmericanAA 50",
+            "airline": "American",
+            "route": "DFW→LHR",
+            "date": "2026-10-12",
+            "depart": "2026-10-12 15:25",
+            "arrive": "2026-10-13 06:20",
+            "layover": "1h 51m"
+          },
+          {
+            "flight": "Aer LingusEI 151",
+            "airline": "Aer Lingus",
+            "route": "LHR→DUB",
+            "date": "2026-10-13",
+            "depart": "2026-10-13 07:40",
+            "arrive": "2026-10-13 09:00",
+            "layover": "1h 20m"
+          }
+        ],
+        "description": null,
+        "notes": null,
+        "_candidateId": "serp:tacag3"
+      },
+      "return": null
+    }
+  },
+  "promotedLodgingById": {
+    "serp:1n8v5x1": {
+      "name": "Baggotrath House Apartments, Newbridge Ave, Dublin 4 - One-Bedroom Luxury Apartment",
+      "location": "Dublin",
+      "checkIn": "2026-10-12",
+      "checkOut": "2026-10-19",
+      "dates": null,
+      "nights": 7,
+      "stars": null,
+      "total": 1343,
+      "pricePerNight": 192,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-1",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:1n8v5x1"
+    },
+    "serp:q9rbc5": {
+      "name": "House Dublin",
+      "location": "Dublin",
+      "checkIn": "2026-10-12",
+      "checkOut": "2026-10-19",
+      "dates": null,
+      "nights": 7,
+      "stars": 3,
+      "total": 893,
+      "pricePerNight": 128,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-2",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:q9rbc5"
+    },
+    "serp:d1030t": {
+      "name": "Beckett Locke, North Docks",
+      "location": "Dublin",
+      "checkIn": "2026-10-12",
+      "checkOut": "2026-10-19",
+      "dates": null,
+      "nights": 7,
+      "stars": 4,
+      "total": 959,
+      "pricePerNight": 137,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-3",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:d1030t"
+    },
+    "serp:17lbl11": {
+      "name": "The Dean Docklands - Formerly The Mayson",
+      "location": "Dublin",
+      "checkIn": "2026-10-12",
+      "checkOut": "2026-10-19",
+      "dates": null,
+      "nights": 7,
+      "stars": 4,
+      "total": 1115,
+      "pricePerNight": 159,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-4",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:17lbl11"
+    },
+    "serp:j7sfg": {
+      "name": "Zanzibar Locke, Ha'penny Bridge",
+      "location": "Dublin",
+      "checkIn": "2026-10-12",
+      "checkOut": "2026-10-19",
+      "dates": null,
+      "nights": 7,
+      "stars": 4,
+      "total": 1308,
+      "pricePerNight": 187,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-5",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:j7sfg"
+    },
+    "serp:1n3zcwm": {
+      "name": "The Plaza Hotel",
+      "location": "Dublin",
+      "checkIn": "2026-10-12",
+      "checkOut": "2026-10-19",
+      "dates": null,
+      "nights": 7,
+      "stars": 4,
+      "total": 963,
+      "pricePerNight": 138,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-6",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:1n3zcwm"
+    },
+    "serp:19rdp1s": {
+      "name": "Donnybrook Hall",
+      "location": "Dublin",
+      "checkIn": "2026-10-12",
+      "checkOut": "2026-10-19",
+      "dates": null,
+      "nights": 7,
+      "stars": 4,
+      "total": 1020,
+      "pricePerNight": 146,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-7",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:19rdp1s"
+    },
+    "serp:il1l58": {
+      "name": "Beckett Locke - City Studio",
+      "location": "Dublin",
+      "checkIn": "2026-10-12",
+      "checkOut": "2026-10-19",
+      "dates": null,
+      "nights": 7,
+      "stars": null,
+      "total": 1107,
+      "pricePerNight": 158,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-8",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:il1l58"
+    }
+  }
+}

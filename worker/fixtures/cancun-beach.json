@@ -1,0 +1,896 @@
+{
+  "route": {
+    "id": "cancun-beach",
+    "label": "Cancún beach week",
+    "origin": "ATL",
+    "destination": "CUN",
+    "city": "Cancun",
+    "depart": "2027-03-13",
+    "ret": "2027-03-20",
+    "adults": 2
+  },
+  "flights": [
+    {
+      "id": "serp:1wmlods",
+      "source": "serp",
+      "offerId": null,
+      "price": 2696,
+      "currency": "USD",
+      "priceWithCcFee": null,
+      "fareType": null,
+      "validatingCarrier": "American",
+      "commissionProtected": false,
+      "cabin": "Economy",
+      "stops": 1,
+      "durationMinutes": 346,
+      "airlines": [
+        "American"
+      ],
+      "route": "ATL→CUN",
+      "flightNumbers": [
+        "AA2438",
+        "AA895"
+      ],
+      "segments": [
+        {
+          "origin": "ATL",
+          "destination": "CLT",
+          "depart": "2027-03-13 06:30",
+          "arrive": "2027-03-13 07:49",
+          "carrier": "American",
+          "flightNumber": "AA 2438",
+          "cabin": "Economy",
+          "durationMinutes": 79,
+          "layover": null,
+          "equipment": "Airbus A320"
+        },
+        {
+          "origin": "CLT",
+          "destination": "CUN",
+          "depart": "2027-03-13 09:01",
+          "arrive": "2027-03-13 12:16",
+          "carrier": "American",
+          "flightNumber": "AA 895",
+          "cabin": "Economy",
+          "durationMinutes": 195,
+          "layover": "1h 12m",
+          "equipment": "Airbus A321"
+        }
+      ],
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:09:43.988Z",
+      "query": {
+        "origin": "ATL",
+        "destination": "CUN",
+        "departure_date": "2027-03-13",
+        "return_date": "2027-03-20",
+        "adults": 2
+      },
+      "pricePerPerson": 1348,
+      "priceBasis": "per_person",
+      "pax": 2
+    },
+    {
+      "id": "serp:3ttlqt",
+      "source": "serp",
+      "offerId": null,
+      "price": 3144,
+      "currency": "USD",
+      "priceWithCcFee": null,
+      "fareType": null,
+      "validatingCarrier": "Delta",
+      "commissionProtected": false,
+      "cabin": "Economy",
+      "stops": 0,
+      "durationMinutes": 170,
+      "airlines": [
+        "Delta"
+      ],
+      "route": "ATL→CUN",
+      "flightNumbers": [
+        "DL1964"
+      ],
+      "segments": [
+        {
+          "origin": "ATL",
+          "destination": "CUN",
+          "depart": "2027-03-13 08:15",
+          "arrive": "2027-03-13 11:05",
+          "carrier": "Delta",
+          "flightNumber": "DL 1964",
+          "cabin": "Economy",
+          "durationMinutes": 170,
+          "layover": null,
+          "equipment": "Airbus A321"
+        }
+      ],
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:09:43.988Z",
+      "query": {
+        "origin": "ATL",
+        "destination": "CUN",
+        "departure_date": "2027-03-13",
+        "return_date": "2027-03-20",
+        "adults": 2
+      },
+      "pricePerPerson": 1572,
+      "priceBasis": "per_person",
+      "pax": 2
+    },
+    {
+      "id": "serp:174tezc",
+      "source": "serp",
+      "offerId": null,
+      "price": 2596,
+      "currency": "USD",
+      "priceWithCcFee": null,
+      "fareType": null,
+      "validatingCarrier": "American",
+      "commissionProtected": false,
+      "cabin": "Economy",
+      "stops": 1,
+      "durationMinutes": 803,
+      "airlines": [
+        "American"
+      ],
+      "route": "ATL→CUN",
+      "flightNumbers": [
+        "AA4085",
+        "AA881"
+      ],
+      "segments": [
+        {
+          "origin": "ATL",
+          "destination": "CLT",
+          "depart": "2027-03-13 20:08",
+          "arrive": "2027-03-13 21:39",
+          "carrier": "American",
+          "flightNumber": "AA 4085",
+          "cabin": "Economy",
+          "durationMinutes": 91,
+          "layover": null,
+          "equipment": "Embraer 175"
+        },
+        {
+          "origin": "CLT",
+          "destination": "CUN",
+          "depart": "2027-03-14 07:24",
+          "arrive": "2027-03-14 09:31",
+          "carrier": "American",
+          "flightNumber": "AA 881",
+          "cabin": "Economy",
+          "durationMinutes": 187,
+          "layover": "8h 45m",
+          "equipment": "Airbus A321"
+        }
+      ],
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:09:43.988Z",
+      "query": {
+        "origin": "ATL",
+        "destination": "CUN",
+        "departure_date": "2027-03-13",
+        "return_date": "2027-03-20",
+        "adults": 2
+      },
+      "pricePerPerson": 1298,
+      "priceBasis": "per_person",
+      "pax": 2
+    },
+    {
+      "id": "serp:191afx3",
+      "source": "serp",
+      "offerId": null,
+      "price": 2954,
+      "currency": "USD",
+      "priceWithCcFee": null,
+      "fareType": null,
+      "validatingCarrier": "Delta",
+      "commissionProtected": false,
+      "cabin": "Economy",
+      "stops": 1,
+      "durationMinutes": 728,
+      "airlines": [
+        "Delta",
+        "Aeromexico"
+      ],
+      "route": "ATL→CUN",
+      "flightNumbers": [
+        "DL1589",
+        "AM427"
+      ],
+      "segments": [
+        {
+          "origin": "ATL",
+          "destination": "MIA",
+          "depart": "2027-03-13 22:57",
+          "arrive": "2027-03-14 00:52",
+          "carrier": "Delta",
+          "flightNumber": "DL 1589",
+          "cabin": "Economy",
+          "durationMinutes": 115,
+          "layover": null,
+          "equipment": "Boeing 757",
+          "oftenDelayed": true
+        },
+        {
+          "origin": "MIA",
+          "destination": "CUN",
+          "depart": "2027-03-14 10:02",
+          "arrive": "2027-03-14 11:05",
+          "carrier": "Aeromexico",
+          "flightNumber": "AM 427",
+          "cabin": "Economy",
+          "durationMinutes": 123,
+          "layover": "8h 10m",
+          "equipment": "Boeing 737MAX 8 Passenger"
+        }
+      ],
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:09:43.988Z",
+      "query": {
+        "origin": "ATL",
+        "destination": "CUN",
+        "departure_date": "2027-03-13",
+        "return_date": "2027-03-20",
+        "adults": 2
+      },
+      "pricePerPerson": 1477,
+      "priceBasis": "per_person",
+      "pax": 2
+    }
+  ],
+  "hotels": [
+    {
+      "id": "serp:5jkojt",
+      "source": "serp",
+      "offerId": null,
+      "name": "Charming loft apartment with breathtaking penthouse ocean view",
+      "starRating": null,
+      "reviewScore": 4.8238807,
+      "reviewScoreScale": 5,
+      "reviewCount": 134,
+      "pricePerNight": 176,
+      "priceTotal": 1230,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Cancun",
+      "otaPrices": [
+        {
+          "name": "Vrbo.com",
+          "pricePerNight": 176,
+          "isOfficial": false
+        }
+      ],
+      "stayRef": "cancun-2027-03-13-2027-03-20",
+      "stay": {
+        "location": "Cancun",
+        "checkIn": "2027-03-13",
+        "checkOut": "2027-03-20"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:09:53.011Z",
+      "query": {
+        "destination": "Cancun",
+        "check_in": "2027-03-13",
+        "check_out": "2027-03-20",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:1xahl7h",
+      "source": "serp",
+      "offerId": null,
+      "name": "Marriott Cancun, An All-Inclusive Resort",
+      "starRating": 4,
+      "reviewScore": 4.6,
+      "reviewScoreScale": 5,
+      "reviewCount": 6383,
+      "pricePerNight": 532,
+      "priceTotal": 3723,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Cancun",
+      "stayRef": "cancun-2027-03-13-2027-03-20",
+      "stay": {
+        "location": "Cancun",
+        "checkIn": "2027-03-13",
+        "checkOut": "2027-03-20"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:09:53.011Z",
+      "query": {
+        "destination": "Cancun",
+        "check_in": "2027-03-13",
+        "check_out": "2027-03-20",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:1oq9dwf",
+      "source": "serp",
+      "offerId": null,
+      "name": "JW Marriott Cancun Resort & Spa",
+      "starRating": 5,
+      "reviewScore": 4.6,
+      "reviewScoreScale": 5,
+      "reviewCount": 3931,
+      "pricePerNight": 437,
+      "priceTotal": 3061,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Cancun",
+      "stayRef": "cancun-2027-03-13-2027-03-20",
+      "stay": {
+        "location": "Cancun",
+        "checkIn": "2027-03-13",
+        "checkOut": "2027-03-20"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:09:53.011Z",
+      "query": {
+        "destination": "Cancun",
+        "check_in": "2027-03-13",
+        "check_out": "2027-03-20",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:1hhem0z",
+      "source": "serp",
+      "offerId": null,
+      "name": "Iberostar Selection Cancún",
+      "starRating": 5,
+      "reviewScore": 4.7,
+      "reviewScoreScale": 5,
+      "reviewCount": 30170,
+      "pricePerNight": 438,
+      "priceTotal": 3069,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Cancun",
+      "stayRef": "cancun-2027-03-13-2027-03-20",
+      "stay": {
+        "location": "Cancun",
+        "checkIn": "2027-03-13",
+        "checkOut": "2027-03-20"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:09:53.011Z",
+      "query": {
+        "destination": "Cancun",
+        "check_in": "2027-03-13",
+        "check_out": "2027-03-20",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:66h5ik",
+      "source": "serp",
+      "offerId": null,
+      "name": "TOP/2BR/Million Dollar Ocean Views/Balcony/Gym/HZ",
+      "starRating": null,
+      "reviewScore": 4.85,
+      "reviewScoreScale": 5,
+      "reviewCount": 128,
+      "pricePerNight": 296,
+      "priceTotal": 2071,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Cancun",
+      "otaPrices": [
+        {
+          "name": "Hospitable.com",
+          "pricePerNight": 296,
+          "isOfficial": true
+        }
+      ],
+      "stayRef": "cancun-2027-03-13-2027-03-20",
+      "stay": {
+        "location": "Cancun",
+        "checkIn": "2027-03-13",
+        "checkOut": "2027-03-20"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:09:53.011Z",
+      "query": {
+        "destination": "Cancun",
+        "check_in": "2027-03-13",
+        "check_out": "2027-03-20",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:1ed8m7y",
+      "source": "serp",
+      "offerId": null,
+      "name": "Mayan Monkey Cancún",
+      "starRating": 3,
+      "reviewScore": 4.6,
+      "reviewScoreScale": 5,
+      "reviewCount": 8277,
+      "pricePerNight": 74,
+      "priceTotal": 516,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Cancun",
+      "stayRef": "cancun-2027-03-13-2027-03-20",
+      "stay": {
+        "location": "Cancun",
+        "checkIn": "2027-03-13",
+        "checkOut": "2027-03-20"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:09:53.011Z",
+      "query": {
+        "destination": "Cancun",
+        "check_in": "2027-03-13",
+        "check_out": "2027-03-20",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:7zy3dd",
+      "source": "serp",
+      "offerId": null,
+      "name": "Oceanside Beach house Pool & Short walk to Beach",
+      "starRating": null,
+      "reviewScore": 4.0976744,
+      "reviewScoreScale": 5,
+      "reviewCount": 43,
+      "pricePerNight": 420,
+      "priceTotal": 2942,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Cancun",
+      "otaPrices": [
+        {
+          "name": "Booking.com",
+          "pricePerNight": 420,
+          "isOfficial": false
+        }
+      ],
+      "stayRef": "cancun-2027-03-13-2027-03-20",
+      "stay": {
+        "location": "Cancun",
+        "checkIn": "2027-03-13",
+        "checkOut": "2027-03-20"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:09:53.011Z",
+      "query": {
+        "destination": "Cancun",
+        "check_in": "2027-03-13",
+        "check_out": "2027-03-20",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:vut90f",
+      "source": "serp",
+      "offerId": null,
+      "name": "Ocean front Villa Marlin, best location in hotel zone 109",
+      "starRating": null,
+      "reviewScore": 4.65,
+      "reviewScoreScale": 5,
+      "reviewCount": 41,
+      "pricePerNight": 261,
+      "priceTotal": 1827,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Cancun",
+      "otaPrices": [
+        {
+          "name": "Booking.com",
+          "pricePerNight": 261,
+          "isOfficial": false
+        }
+      ],
+      "stayRef": "cancun-2027-03-13-2027-03-20",
+      "stay": {
+        "location": "Cancun",
+        "checkIn": "2027-03-13",
+        "checkOut": "2027-03-20"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:09:53.011Z",
+      "query": {
+        "destination": "Cancun",
+        "check_in": "2027-03-13",
+        "check_out": "2027-03-20",
+        "adults": 2
+      }
+    }
+  ],
+  "promotedFlightsById": {
+    "serp:1wmlods": {
+      "outbound": {
+        "date": "2027-03-13",
+        "route": "ATL→CUN",
+        "airline": "American",
+        "cabin": "Economy",
+        "totalPrice": 2696,
+        "confirmation": null,
+        "multiDay": false,
+        "segments": [
+          {
+            "flight": "AmericanAA 2438",
+            "airline": "American",
+            "route": "ATL→CLT",
+            "date": "2027-03-13",
+            "depart": "2027-03-13 06:30",
+            "arrive": "2027-03-13 07:49",
+            "layover": null
+          },
+          {
+            "flight": "AmericanAA 895",
+            "airline": "American",
+            "route": "CLT→CUN",
+            "date": "2027-03-13",
+            "depart": "2027-03-13 09:01",
+            "arrive": "2027-03-13 12:16",
+            "layover": "1h 12m"
+          }
+        ],
+        "description": null,
+        "notes": null,
+        "_candidateId": "serp:1wmlods"
+      },
+      "return": null
+    },
+    "serp:3ttlqt": {
+      "outbound": {
+        "date": "2027-03-13",
+        "route": "ATL→CUN",
+        "airline": "Delta",
+        "cabin": "Economy",
+        "totalPrice": 3144,
+        "confirmation": null,
+        "multiDay": false,
+        "segments": [
+          {
+            "flight": "DeltaDL 1964",
+            "airline": "Delta",
+            "route": "ATL→CUN",
+            "date": "2027-03-13",
+            "depart": "2027-03-13 08:15",
+            "arrive": "2027-03-13 11:05",
+            "layover": null
+          }
+        ],
+        "description": null,
+        "notes": null,
+        "_candidateId": "serp:3ttlqt"
+      },
+      "return": null
+    },
+    "serp:174tezc": {
+      "outbound": {
+        "date": "2027-03-13",
+        "route": "ATL→CUN",
+        "airline": "American",
+        "cabin": "Economy",
+        "totalPrice": 2596,
+        "confirmation": null,
+        "multiDay": false,
+        "segments": [
+          {
+            "flight": "AmericanAA 4085",
+            "airline": "American",
+            "route": "ATL→CLT",
+            "date": "2027-03-13",
+            "depart": "2027-03-13 20:08",
+            "arrive": "2027-03-13 21:39",
+            "layover": null
+          },
+          {
+            "flight": "AmericanAA 881",
+            "airline": "American",
+            "route": "CLT→CUN",
+            "date": "2027-03-14",
+            "depart": "2027-03-14 07:24",
+            "arrive": "2027-03-14 09:31",
+            "layover": "8h 45m"
+          }
+        ],
+        "description": null,
+        "notes": null,
+        "_candidateId": "serp:174tezc"
+      },
+      "return": null
+    },
+    "serp:191afx3": {
+      "outbound": {
+        "date": "2027-03-13",
+        "route": "ATL→CUN",
+        "airline": "Delta",
+        "cabin": "Economy",
+        "totalPrice": 2954,
+        "confirmation": null,
+        "multiDay": false,
+        "segments": [
+          {
+            "flight": "DeltaDL 1589",
+            "airline": "Delta",
+            "route": "ATL→MIA",
+            "date": "2027-03-13",
+            "depart": "2027-03-13 22:57",
+            "arrive": "2027-03-14 00:52",
+            "layover": null
+          },
+          {
+            "flight": "AeromexicoAM 427",
+            "airline": "Aeromexico",
+            "route": "MIA→CUN",
+            "date": "2027-03-14",
+            "depart": "2027-03-14 10:02",
+            "arrive": "2027-03-14 11:05",
+            "layover": "8h 10m"
+          }
+        ],
+        "description": null,
+        "notes": null,
+        "_candidateId": "serp:191afx3"
+      },
+      "return": null
+    }
+  },
+  "promotedLodgingById": {
+    "serp:5jkojt": {
+      "name": "Charming loft apartment with breathtaking penthouse ocean view",
+      "location": "Cancun",
+      "checkIn": "2027-03-13",
+      "checkOut": "2027-03-20",
+      "dates": null,
+      "nights": 7,
+      "stars": null,
+      "total": 1230,
+      "pricePerNight": 176,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-1",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:5jkojt"
+    },
+    "serp:1xahl7h": {
+      "name": "Marriott Cancun, An All-Inclusive Resort",
+      "location": "Cancun",
+      "checkIn": "2027-03-13",
+      "checkOut": "2027-03-20",
+      "dates": null,
+      "nights": 7,
+      "stars": 4,
+      "total": 3723,
+      "pricePerNight": 532,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-2",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:1xahl7h"
+    },
+    "serp:1oq9dwf": {
+      "name": "JW Marriott Cancun Resort & Spa",
+      "location": "Cancun",
+      "checkIn": "2027-03-13",
+      "checkOut": "2027-03-20",
+      "dates": null,
+      "nights": 7,
+      "stars": 5,
+      "total": 3061,
+      "pricePerNight": 437,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-3",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:1oq9dwf"
+    },
+    "serp:1hhem0z": {
+      "name": "Iberostar Selection Cancún",
+      "location": "Cancun",
+      "checkIn": "2027-03-13",
+      "checkOut": "2027-03-20",
+      "dates": null,
+      "nights": 7,
+      "stars": 5,
+      "total": 3069,
+      "pricePerNight": 438,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-4",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:1hhem0z"
+    },
+    "serp:66h5ik": {
+      "name": "TOP/2BR/Million Dollar Ocean Views/Balcony/Gym/HZ",
+      "location": "Cancun",
+      "checkIn": "2027-03-13",
+      "checkOut": "2027-03-20",
+      "dates": null,
+      "nights": 7,
+      "stars": null,
+      "total": 2071,
+      "pricePerNight": 296,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-5",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:66h5ik"
+    },
+    "serp:1ed8m7y": {
+      "name": "Mayan Monkey Cancún",
+      "location": "Cancun",
+      "checkIn": "2027-03-13",
+      "checkOut": "2027-03-20",
+      "dates": null,
+      "nights": 7,
+      "stars": 3,
+      "total": 516,
+      "pricePerNight": 74,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-6",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:1ed8m7y"
+    },
+    "serp:7zy3dd": {
+      "name": "Oceanside Beach house Pool & Short walk to Beach",
+      "location": "Cancun",
+      "checkIn": "2027-03-13",
+      "checkOut": "2027-03-20",
+      "dates": null,
+      "nights": 7,
+      "stars": null,
+      "total": 2942,
+      "pricePerNight": 420,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-7",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:7zy3dd"
+    },
+    "serp:vut90f": {
+      "name": "Ocean front Villa Marlin, best location in hotel zone 109",
+      "location": "Cancun",
+      "checkIn": "2027-03-13",
+      "checkOut": "2027-03-20",
+      "dates": null,
+      "nights": 7,
+      "stars": null,
+      "total": 1827,
+      "pricePerNight": 261,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-8",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:vut90f"
+    }
+  }
+}

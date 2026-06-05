@@ -33,6 +33,34 @@ describe("tripToFolio", () => {
     expect(folio.hotels[0].price).toBe("$3430");
   });
 
+  it("maps the promoted { outbound, return } flights object (post promote_flights)", () => {
+    const raw = {
+      data: {
+        meta: { title: "Dublin" },
+        flights: {
+          outbound: { route: "MOB→DUB", airline: "United", totalPrice: 3426, segments: [] },
+          return: null,
+        },
+        lodging: [{ name: "Baggotrath House", total: 1343, stars: null }],
+      },
+    };
+    const folio = tripToFolio("t1", raw);
+    expect(folio.flights).toHaveLength(1);
+    expect(folio.flights[0].carrier).toBe("United");
+    expect(folio.flights[0].route).toBe("MOB→DUB");
+    expect(folio.flights[0].price).toBe("$3426");
+    expect(folio.hotels[0].price).toBe("$1343");
+  });
+
+  it("uses lodging[] even when an emptied staging hotels[] is also present", () => {
+    // post promote_hotels_to_lodging: hotels[] cleared to [], lodging[] holds the cards
+    const raw = { data: { meta: { title: "Dublin" }, hotels: [], lodging: [{ name: "Zanzibar Locke", total: 1308 }] } };
+    const folio = tripToFolio("t1", raw);
+    expect(folio.hotels).toHaveLength(1);
+    expect(folio.hotels[0].name).toBe("Zanzibar Locke");
+    expect(folio.hotels[0].price).toBe("$1308");
+  });
+
   it("falls back to clientName/destination when meta.title is absent", () => {
     const raw = { data: { meta: { clientName: "Jake & Sarah", destination: "Cancun, Mexico" } } };
     expect(tripToFolio("t1", raw).title).toBe("Jake & Sarah");

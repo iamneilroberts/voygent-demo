@@ -1,0 +1,957 @@
+{
+  "route": {
+    "id": "tokyo-blossom",
+    "label": "Tokyo cherry-blossom",
+    "origin": "SFO",
+    "destination": "HND",
+    "city": "Tokyo",
+    "depart": "2027-04-04",
+    "ret": "2027-04-14",
+    "adults": 2
+  },
+  "flights": [
+    {
+      "id": "serp:1evafjj",
+      "source": "serp",
+      "offerId": null,
+      "price": 7778,
+      "currency": "USD",
+      "priceWithCcFee": null,
+      "fareType": null,
+      "validatingCarrier": "ANA",
+      "commissionProtected": false,
+      "cabin": "Economy",
+      "stops": 0,
+      "durationMinutes": 675,
+      "airlines": [
+        "ANA"
+      ],
+      "route": "SFO→HND",
+      "flightNumbers": [
+        "NH107"
+      ],
+      "segments": [
+        {
+          "origin": "SFO",
+          "destination": "HND",
+          "depart": "2027-04-04 01:45",
+          "arrive": "2027-04-05 05:00",
+          "carrier": "ANA",
+          "flightNumber": "NH 107",
+          "cabin": "Economy",
+          "durationMinutes": 675,
+          "layover": null,
+          "equipment": "Boeing 777",
+          "overnight": true
+        }
+      ],
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:09:58.323Z",
+      "query": {
+        "origin": "SFO",
+        "destination": "HND",
+        "departure_date": "2027-04-04",
+        "return_date": "2027-04-14",
+        "adults": 2
+      },
+      "pricePerPerson": 3889,
+      "priceBasis": "per_person",
+      "pax": 2
+    },
+    {
+      "id": "serp:7oqojt",
+      "source": "serp",
+      "offerId": null,
+      "price": 7778,
+      "currency": "USD",
+      "priceWithCcFee": null,
+      "fareType": null,
+      "validatingCarrier": "United",
+      "commissionProtected": false,
+      "cabin": "Economy",
+      "stops": 0,
+      "durationMinutes": 690,
+      "airlines": [
+        "United"
+      ],
+      "route": "SFO→HND",
+      "flightNumbers": [
+        "UA875"
+      ],
+      "segments": [
+        {
+          "origin": "SFO",
+          "destination": "HND",
+          "depart": "2027-04-04 10:25",
+          "arrive": "2027-04-05 13:55",
+          "carrier": "United",
+          "flightNumber": "UA 875",
+          "cabin": "Economy",
+          "durationMinutes": 690,
+          "layover": null,
+          "equipment": "Boeing 777"
+        }
+      ],
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:09:58.323Z",
+      "query": {
+        "origin": "SFO",
+        "destination": "HND",
+        "departure_date": "2027-04-04",
+        "return_date": "2027-04-14",
+        "adults": 2
+      },
+      "pricePerPerson": 3889,
+      "priceBasis": "per_person",
+      "pax": 2
+    },
+    {
+      "id": "serp:18g42u7",
+      "source": "serp",
+      "offerId": null,
+      "price": 7812,
+      "currency": "USD",
+      "priceWithCcFee": null,
+      "fareType": null,
+      "validatingCarrier": "JAL",
+      "commissionProtected": false,
+      "cabin": "Economy",
+      "stops": 0,
+      "durationMinutes": 670,
+      "airlines": [
+        "JAL"
+      ],
+      "route": "SFO→HND",
+      "flightNumbers": [
+        "JL1"
+      ],
+      "segments": [
+        {
+          "origin": "SFO",
+          "destination": "HND",
+          "depart": "2027-04-04 11:55",
+          "arrive": "2027-04-05 15:05",
+          "carrier": "JAL",
+          "flightNumber": "JL 1",
+          "cabin": "Economy",
+          "durationMinutes": 670,
+          "layover": null,
+          "equipment": "Boeing 777"
+        }
+      ],
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:09:58.323Z",
+      "query": {
+        "origin": "SFO",
+        "destination": "HND",
+        "departure_date": "2027-04-04",
+        "return_date": "2027-04-14",
+        "adults": 2
+      },
+      "pricePerPerson": 3906,
+      "priceBasis": "per_person",
+      "pax": 2
+    },
+    {
+      "id": "serp:12f3nq4",
+      "source": "serp",
+      "offerId": null,
+      "price": 4964,
+      "currency": "USD",
+      "priceWithCcFee": null,
+      "fareType": null,
+      "validatingCarrier": "EVA Air",
+      "commissionProtected": false,
+      "cabin": "Economy",
+      "stops": 1,
+      "durationMinutes": 1650,
+      "airlines": [
+        "EVA Air"
+      ],
+      "route": "SFO→HND",
+      "flightNumbers": [
+        "BR17",
+        "BR190"
+      ],
+      "segments": [
+        {
+          "origin": "SFO",
+          "destination": "TPE",
+          "depart": "2027-04-04 00:50",
+          "arrive": "2027-04-05 05:40",
+          "carrier": "EVA Air",
+          "flightNumber": "BR 17",
+          "cabin": "Economy",
+          "durationMinutes": 830,
+          "layover": null,
+          "equipment": "Boeing 777",
+          "overnight": true
+        },
+        {
+          "origin": "TSA",
+          "destination": "HND",
+          "depart": "2027-04-05 16:20",
+          "arrive": "2027-04-05 20:20",
+          "carrier": "EVA Air",
+          "flightNumber": "BR 190",
+          "cabin": "Economy",
+          "durationMinutes": 180,
+          "layover": "10h 40m",
+          "equipment": "Boeing 787-10"
+        }
+      ],
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:09:58.323Z",
+      "query": {
+        "origin": "SFO",
+        "destination": "HND",
+        "departure_date": "2027-04-04",
+        "return_date": "2027-04-14",
+        "adults": 2
+      },
+      "pricePerPerson": 2482,
+      "priceBasis": "per_person",
+      "pax": 2
+    },
+    {
+      "id": "serp:zas5vv",
+      "source": "serp",
+      "offerId": null,
+      "price": 5454,
+      "currency": "USD",
+      "priceWithCcFee": null,
+      "fareType": null,
+      "validatingCarrier": "China Airlines",
+      "commissionProtected": false,
+      "cabin": "Economy",
+      "stops": 1,
+      "durationMinutes": 1750,
+      "airlines": [
+        "China Airlines"
+      ],
+      "route": "SFO→HND",
+      "flightNumbers": [
+        "CI3",
+        "CI222"
+      ],
+      "segments": [
+        {
+          "origin": "SFO",
+          "destination": "TPE",
+          "depart": "2027-04-04 01:05",
+          "arrive": "2027-04-05 05:35",
+          "carrier": "China Airlines",
+          "flightNumber": "CI 3",
+          "cabin": "Economy",
+          "durationMinutes": 810,
+          "layover": null,
+          "equipment": "Boeing 777",
+          "overnight": true
+        },
+        {
+          "origin": "TSA",
+          "destination": "HND",
+          "depart": "2027-04-05 18:05",
+          "arrive": "2027-04-05 22:15",
+          "carrier": "China Airlines",
+          "flightNumber": "CI 222",
+          "cabin": "Economy",
+          "durationMinutes": 190,
+          "layover": "12h 30m",
+          "equipment": "Airbus A330"
+        }
+      ],
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:09:58.323Z",
+      "query": {
+        "origin": "SFO",
+        "destination": "HND",
+        "departure_date": "2027-04-04",
+        "return_date": "2027-04-14",
+        "adults": 2
+      },
+      "pricePerPerson": 2727,
+      "priceBasis": "per_person",
+      "pax": 2
+    }
+  ],
+  "hotels": [
+    {
+      "id": "serp:j0yxup",
+      "source": "serp",
+      "offerId": null,
+      "name": "Tokyo Bay Shiomi Prince Hotel",
+      "starRating": 4,
+      "reviewScore": 4.4,
+      "reviewScoreScale": 5,
+      "reviewCount": 1568,
+      "pricePerNight": 229,
+      "priceTotal": 2287,
+      "priceBasis": "both",
+      "nights": 10,
+      "currency": "USD",
+      "area": "Tokyo",
+      "stayRef": "tokyo-2027-04-04-2027-04-14",
+      "stay": {
+        "location": "Tokyo",
+        "checkIn": "2027-04-04",
+        "checkOut": "2027-04-14"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:10:10.746Z",
+      "query": {
+        "destination": "Tokyo",
+        "check_in": "2027-04-04",
+        "check_out": "2027-04-14",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:6zq6sq",
+      "source": "serp",
+      "offerId": null,
+      "name": "Cliff Court102 Conveniently located just a 15-minute walk from Ikebukuro, the anime town",
+      "starRating": null,
+      "reviewScore": 4,
+      "reviewScoreScale": 5,
+      "reviewCount": 1,
+      "pricePerNight": 49,
+      "priceTotal": 491,
+      "priceBasis": "both",
+      "nights": 10,
+      "currency": "USD",
+      "area": "Tokyo",
+      "otaPrices": [
+        {
+          "name": "Booking.com",
+          "pricePerNight": 49,
+          "isOfficial": false
+        }
+      ],
+      "stayRef": "tokyo-2027-04-04-2027-04-14",
+      "stay": {
+        "location": "Tokyo",
+        "checkIn": "2027-04-04",
+        "checkOut": "2027-04-14"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:10:10.746Z",
+      "query": {
+        "destination": "Tokyo",
+        "check_in": "2027-04-04",
+        "check_out": "2027-04-14",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:bgnvkb",
+      "source": "serp",
+      "offerId": null,
+      "name": "Edo Sakura",
+      "starRating": 3,
+      "reviewScore": 4.7,
+      "reviewScoreScale": 5,
+      "reviewCount": 457,
+      "pricePerNight": 153,
+      "priceTotal": 1528,
+      "priceBasis": "both",
+      "nights": 10,
+      "currency": "USD",
+      "area": "Tokyo",
+      "stayRef": "tokyo-2027-04-04-2027-04-14",
+      "stay": {
+        "location": "Tokyo",
+        "checkIn": "2027-04-04",
+        "checkOut": "2027-04-14"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:10:10.746Z",
+      "query": {
+        "destination": "Tokyo",
+        "check_in": "2027-04-04",
+        "check_out": "2027-04-14",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:jfchx6",
+      "source": "serp",
+      "offerId": null,
+      "name": "Pierre-Auguste Renoir Tokyo Shibuya Shinjyuku 7min Free Wifi New Open",
+      "starRating": null,
+      "reviewScore": 4.25,
+      "reviewScoreScale": 5,
+      "reviewCount": 2,
+      "pricePerNight": 100,
+      "priceTotal": 1004,
+      "priceBasis": "both",
+      "nights": 10,
+      "currency": "USD",
+      "area": "Tokyo",
+      "otaPrices": [
+        {
+          "name": "Booking.com",
+          "pricePerNight": 100,
+          "isOfficial": false
+        }
+      ],
+      "stayRef": "tokyo-2027-04-04-2027-04-14",
+      "stay": {
+        "location": "Tokyo",
+        "checkIn": "2027-04-04",
+        "checkOut": "2027-04-14"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:10:10.746Z",
+      "query": {
+        "destination": "Tokyo",
+        "check_in": "2027-04-04",
+        "check_out": "2027-04-14",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:18dm8pr",
+      "source": "serp",
+      "offerId": null,
+      "name": "美山小屋-临近东京夏日乐园，高尾山，相模湖游乐园",
+      "starRating": null,
+      "reviewScore": 4.4,
+      "reviewScoreScale": 5,
+      "reviewCount": 25,
+      "pricePerNight": 103,
+      "priceTotal": 1031,
+      "priceBasis": "both",
+      "nights": 10,
+      "currency": "USD",
+      "area": "Tokyo",
+      "otaPrices": [
+        {
+          "name": "Booking.com",
+          "pricePerNight": 103,
+          "isOfficial": false
+        }
+      ],
+      "stayRef": "tokyo-2027-04-04-2027-04-14",
+      "stay": {
+        "location": "Tokyo",
+        "checkIn": "2027-04-04",
+        "checkOut": "2027-04-14"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:10:10.746Z",
+      "query": {
+        "destination": "Tokyo",
+        "check_in": "2027-04-04",
+        "check_out": "2027-04-14",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:1paicp3",
+      "source": "serp",
+      "offerId": null,
+      "name": "The Tokyo Station Hotel",
+      "starRating": 5,
+      "reviewScore": 4.5,
+      "reviewScoreScale": 5,
+      "reviewCount": 3739,
+      "pricePerNight": 412,
+      "priceTotal": 4123,
+      "priceBasis": "both",
+      "nights": 10,
+      "currency": "USD",
+      "area": "Tokyo",
+      "stayRef": "tokyo-2027-04-04-2027-04-14",
+      "stay": {
+        "location": "Tokyo",
+        "checkIn": "2027-04-04",
+        "checkOut": "2027-04-14"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:10:10.746Z",
+      "query": {
+        "destination": "Tokyo",
+        "check_in": "2027-04-04",
+        "check_out": "2027-04-14",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:10zai8c",
+      "source": "serp",
+      "offerId": null,
+      "name": "Photogenic villa｜Disney 30 min｜Free parking (compact only)",
+      "starRating": null,
+      "reviewScore": null,
+      "reviewScoreScale": null,
+      "reviewCount": null,
+      "pricePerNight": 160,
+      "priceTotal": 1604,
+      "priceBasis": "both",
+      "nights": 10,
+      "currency": "USD",
+      "area": "Tokyo",
+      "otaPrices": [
+        {
+          "name": "Booking.com",
+          "pricePerNight": 160,
+          "isOfficial": false
+        }
+      ],
+      "stayRef": "tokyo-2027-04-04-2027-04-14",
+      "stay": {
+        "location": "Tokyo",
+        "checkIn": "2027-04-04",
+        "checkOut": "2027-04-14"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:10:10.746Z",
+      "query": {
+        "destination": "Tokyo",
+        "check_in": "2027-04-04",
+        "check_out": "2027-04-14",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:1hkm43l",
+      "source": "serp",
+      "offerId": null,
+      "name": "Newly built 301 4 minutes walk from JR and subway Asakusabashi station High speed WiFi Near Akihab / Chiyoda-ku Tokyo",
+      "starRating": null,
+      "reviewScore": 4.75,
+      "reviewScoreScale": 5,
+      "reviewCount": 2,
+      "pricePerNight": 104,
+      "priceTotal": 1037,
+      "priceBasis": "both",
+      "nights": 10,
+      "currency": "USD",
+      "area": "Tokyo",
+      "otaPrices": [
+        {
+          "name": "Booking.com",
+          "pricePerNight": 104,
+          "isOfficial": false
+        }
+      ],
+      "stayRef": "tokyo-2027-04-04-2027-04-14",
+      "stay": {
+        "location": "Tokyo",
+        "checkIn": "2027-04-04",
+        "checkOut": "2027-04-14"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:10:10.746Z",
+      "query": {
+        "destination": "Tokyo",
+        "check_in": "2027-04-04",
+        "check_out": "2027-04-14",
+        "adults": 2
+      }
+    }
+  ],
+  "promotedFlightsById": {
+    "serp:1evafjj": {
+      "outbound": {
+        "date": "2027-04-04",
+        "route": "SFO→HND",
+        "airline": "ANA",
+        "cabin": "Economy",
+        "totalPrice": 7778,
+        "confirmation": null,
+        "multiDay": false,
+        "segments": [
+          {
+            "flight": "ANANH 107",
+            "airline": "ANA",
+            "route": "SFO→HND",
+            "date": "2027-04-04",
+            "depart": "2027-04-04 01:45",
+            "arrive": "2027-04-05 05:00",
+            "layover": null
+          }
+        ],
+        "description": null,
+        "notes": null,
+        "_candidateId": "serp:1evafjj"
+      },
+      "return": null
+    },
+    "serp:7oqojt": {
+      "outbound": {
+        "date": "2027-04-04",
+        "route": "SFO→HND",
+        "airline": "United",
+        "cabin": "Economy",
+        "totalPrice": 7778,
+        "confirmation": null,
+        "multiDay": false,
+        "segments": [
+          {
+            "flight": "UnitedUA 875",
+            "airline": "United",
+            "route": "SFO→HND",
+            "date": "2027-04-04",
+            "depart": "2027-04-04 10:25",
+            "arrive": "2027-04-05 13:55",
+            "layover": null
+          }
+        ],
+        "description": null,
+        "notes": null,
+        "_candidateId": "serp:7oqojt"
+      },
+      "return": null
+    },
+    "serp:18g42u7": {
+      "outbound": {
+        "date": "2027-04-04",
+        "route": "SFO→HND",
+        "airline": "JAL",
+        "cabin": "Economy",
+        "totalPrice": 7812,
+        "confirmation": null,
+        "multiDay": false,
+        "segments": [
+          {
+            "flight": "JALJL 1",
+            "airline": "JAL",
+            "route": "SFO→HND",
+            "date": "2027-04-04",
+            "depart": "2027-04-04 11:55",
+            "arrive": "2027-04-05 15:05",
+            "layover": null
+          }
+        ],
+        "description": null,
+        "notes": null,
+        "_candidateId": "serp:18g42u7"
+      },
+      "return": null
+    },
+    "serp:12f3nq4": {
+      "outbound": {
+        "date": "2027-04-04",
+        "route": "SFO→HND",
+        "airline": "EVA Air",
+        "cabin": "Economy",
+        "totalPrice": 4964,
+        "confirmation": null,
+        "multiDay": false,
+        "segments": [
+          {
+            "flight": "EVA AirBR 17",
+            "airline": "EVA Air",
+            "route": "SFO→TPE",
+            "date": "2027-04-04",
+            "depart": "2027-04-04 00:50",
+            "arrive": "2027-04-05 05:40",
+            "layover": null
+          },
+          {
+            "flight": "EVA AirBR 190",
+            "airline": "EVA Air",
+            "route": "TSA→HND",
+            "date": "2027-04-05",
+            "depart": "2027-04-05 16:20",
+            "arrive": "2027-04-05 20:20",
+            "layover": "10h 40m"
+          }
+        ],
+        "description": null,
+        "notes": null,
+        "_candidateId": "serp:12f3nq4"
+      },
+      "return": null
+    },
+    "serp:zas5vv": {
+      "outbound": {
+        "date": "2027-04-04",
+        "route": "SFO→HND",
+        "airline": "China Airlines",
+        "cabin": "Economy",
+        "totalPrice": 5454,
+        "confirmation": null,
+        "multiDay": false,
+        "segments": [
+          {
+            "flight": "China AirlinesCI 3",
+            "airline": "China Airlines",
+            "route": "SFO→TPE",
+            "date": "2027-04-04",
+            "depart": "2027-04-04 01:05",
+            "arrive": "2027-04-05 05:35",
+            "layover": null
+          },
+          {
+            "flight": "China AirlinesCI 222",
+            "airline": "China Airlines",
+            "route": "TSA→HND",
+            "date": "2027-04-05",
+            "depart": "2027-04-05 18:05",
+            "arrive": "2027-04-05 22:15",
+            "layover": "12h 30m"
+          }
+        ],
+        "description": null,
+        "notes": null,
+        "_candidateId": "serp:zas5vv"
+      },
+      "return": null
+    }
+  },
+  "promotedLodgingById": {
+    "serp:j0yxup": {
+      "name": "Tokyo Bay Shiomi Prince Hotel",
+      "location": "Tokyo",
+      "checkIn": "2027-04-04",
+      "checkOut": "2027-04-14",
+      "dates": null,
+      "nights": 10,
+      "stars": 4,
+      "total": 2287,
+      "pricePerNight": 229,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-1",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:j0yxup"
+    },
+    "serp:6zq6sq": {
+      "name": "Cliff Court102 Conveniently located just a 15-minute walk from Ikebukuro, the anime town",
+      "location": "Tokyo",
+      "checkIn": "2027-04-04",
+      "checkOut": "2027-04-14",
+      "dates": null,
+      "nights": 10,
+      "stars": null,
+      "total": 491,
+      "pricePerNight": 49,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-2",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:6zq6sq"
+    },
+    "serp:bgnvkb": {
+      "name": "Edo Sakura",
+      "location": "Tokyo",
+      "checkIn": "2027-04-04",
+      "checkOut": "2027-04-14",
+      "dates": null,
+      "nights": 10,
+      "stars": 3,
+      "total": 1528,
+      "pricePerNight": 153,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-3",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:bgnvkb"
+    },
+    "serp:jfchx6": {
+      "name": "Pierre-Auguste Renoir Tokyo Shibuya Shinjyuku 7min Free Wifi New Open",
+      "location": "Tokyo",
+      "checkIn": "2027-04-04",
+      "checkOut": "2027-04-14",
+      "dates": null,
+      "nights": 10,
+      "stars": null,
+      "total": 1004,
+      "pricePerNight": 100,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-4",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:jfchx6"
+    },
+    "serp:18dm8pr": {
+      "name": "美山小屋-临近东京夏日乐园，高尾山，相模湖游乐园",
+      "location": "Tokyo",
+      "checkIn": "2027-04-04",
+      "checkOut": "2027-04-14",
+      "dates": null,
+      "nights": 10,
+      "stars": null,
+      "total": 1031,
+      "pricePerNight": 103,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-5",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:18dm8pr"
+    },
+    "serp:1paicp3": {
+      "name": "The Tokyo Station Hotel",
+      "location": "Tokyo",
+      "checkIn": "2027-04-04",
+      "checkOut": "2027-04-14",
+      "dates": null,
+      "nights": 10,
+      "stars": 5,
+      "total": 4123,
+      "pricePerNight": 412,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-6",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:1paicp3"
+    },
+    "serp:10zai8c": {
+      "name": "Photogenic villa｜Disney 30 min｜Free parking (compact only)",
+      "location": "Tokyo",
+      "checkIn": "2027-04-04",
+      "checkOut": "2027-04-14",
+      "dates": null,
+      "nights": 10,
+      "stars": null,
+      "total": 1604,
+      "pricePerNight": 160,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-7",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:10zai8c"
+    },
+    "serp:1hkm43l": {
+      "name": "Newly built 301 4 minutes walk from JR and subway Asakusabashi station High speed WiFi Near Akihab / Chiyoda-ku Tokyo",
+      "location": "Tokyo",
+      "checkIn": "2027-04-04",
+      "checkOut": "2027-04-14",
+      "dates": null,
+      "nights": 10,
+      "stars": null,
+      "total": 1037,
+      "pricePerNight": 104,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-8",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:1hkm43l"
+    }
+  }
+}

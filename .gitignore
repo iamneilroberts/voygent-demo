@@ -3,3 +3,6 @@ dist
 .dev.vars
 .wrangler
 dist-web
+
+# one-time fixture capture raw dumps (may contain prod trip detail)
+scripts/_fixtures-raw/

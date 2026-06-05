@@ -1,0 +1,839 @@
+{
+  "route": {
+    "id": "rome-amalfi",
+    "label": "Rome + Amalfi",
+    "origin": "JFK",
+    "destination": "FCO",
+    "city": "Rome",
+    "depart": "2026-09-10",
+    "ret": "2026-09-20",
+    "adults": 2
+  },
+  "flights": [
+    {
+      "id": "serp:2yrmgw",
+      "source": "serp",
+      "offerId": null,
+      "price": 3366,
+      "currency": "USD",
+      "priceWithCcFee": null,
+      "fareType": null,
+      "validatingCarrier": "American",
+      "commissionProtected": false,
+      "cabin": "Economy",
+      "stops": 0,
+      "durationMinutes": 505,
+      "airlines": [
+        "American"
+      ],
+      "route": "JFK→FCO",
+      "flightNumbers": [
+        "AA236"
+      ],
+      "segments": [
+        {
+          "origin": "JFK",
+          "destination": "FCO",
+          "depart": "2026-09-10 19:25",
+          "arrive": "2026-09-11 09:50",
+          "carrier": "American",
+          "flightNumber": "AA 236",
+          "cabin": "Economy",
+          "durationMinutes": 505,
+          "layover": null,
+          "equipment": "Boeing 787",
+          "overnight": true
+        }
+      ],
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:08:29.533Z",
+      "query": {
+        "origin": "JFK",
+        "destination": "FCO",
+        "departure_date": "2026-09-10",
+        "return_date": "2026-09-20",
+        "adults": 2
+      },
+      "pricePerPerson": 1683,
+      "priceBasis": "per_person",
+      "pax": 2
+    },
+    {
+      "id": "serp:sntoyn",
+      "source": "serp",
+      "offerId": null,
+      "price": 3546,
+      "currency": "USD",
+      "priceWithCcFee": null,
+      "fareType": null,
+      "validatingCarrier": "ITA",
+      "commissionProtected": false,
+      "cabin": "Economy",
+      "stops": 0,
+      "durationMinutes": 515,
+      "airlines": [
+        "ITA"
+      ],
+      "route": "JFK→FCO",
+      "flightNumbers": [
+        "AZ609"
+      ],
+      "segments": [
+        {
+          "origin": "JFK",
+          "destination": "FCO",
+          "depart": "2026-09-10 16:05",
+          "arrive": "2026-09-11 06:40",
+          "carrier": "ITA",
+          "flightNumber": "AZ 609",
+          "cabin": "Economy",
+          "durationMinutes": 515,
+          "layover": null,
+          "equipment": "Airbus A330-900neo",
+          "overnight": true
+        }
+      ],
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:08:29.533Z",
+      "query": {
+        "origin": "JFK",
+        "destination": "FCO",
+        "departure_date": "2026-09-10",
+        "return_date": "2026-09-20",
+        "adults": 2
+      },
+      "pricePerPerson": 1773,
+      "priceBasis": "per_person",
+      "pax": 2
+    },
+    {
+      "id": "serp:1vsj49n",
+      "source": "serp",
+      "offerId": null,
+      "price": 3546,
+      "currency": "USD",
+      "priceWithCcFee": null,
+      "fareType": null,
+      "validatingCarrier": "ITA",
+      "commissionProtected": false,
+      "cabin": "Economy",
+      "stops": 0,
+      "durationMinutes": 520,
+      "airlines": [
+        "ITA"
+      ],
+      "route": "JFK→FCO",
+      "flightNumbers": [
+        "AZ611"
+      ],
+      "segments": [
+        {
+          "origin": "JFK",
+          "destination": "FCO",
+          "depart": "2026-09-10 21:10",
+          "arrive": "2026-09-11 11:50",
+          "carrier": "ITA",
+          "flightNumber": "AZ 611",
+          "cabin": "Economy",
+          "durationMinutes": 520,
+          "layover": null,
+          "equipment": "Airbus A330-900neo",
+          "overnight": true
+        }
+      ],
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:08:29.533Z",
+      "query": {
+        "origin": "JFK",
+        "destination": "FCO",
+        "departure_date": "2026-09-10",
+        "return_date": "2026-09-20",
+        "adults": 2
+      },
+      "pricePerPerson": 1773,
+      "priceBasis": "per_person",
+      "pax": 2
+    },
+    {
+      "id": "serp:1or3n08",
+      "source": "serp",
+      "offerId": null,
+      "price": 3954,
+      "currency": "USD",
+      "priceWithCcFee": null,
+      "fareType": null,
+      "validatingCarrier": "Delta",
+      "commissionProtected": false,
+      "cabin": "Economy",
+      "stops": 0,
+      "durationMinutes": 510,
+      "airlines": [
+        "Delta"
+      ],
+      "route": "JFK→FCO",
+      "flightNumbers": [
+        "DL182"
+      ],
+      "segments": [
+        {
+          "origin": "JFK",
+          "destination": "FCO",
+          "depart": "2026-09-10 17:25",
+          "arrive": "2026-09-11 07:55",
+          "carrier": "Delta",
+          "flightNumber": "DL 182",
+          "cabin": "Economy",
+          "durationMinutes": 510,
+          "layover": null,
+          "equipment": "Airbus A330",
+          "overnight": true
+        }
+      ],
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:08:29.533Z",
+      "query": {
+        "origin": "JFK",
+        "destination": "FCO",
+        "departure_date": "2026-09-10",
+        "return_date": "2026-09-20",
+        "adults": 2
+      },
+      "pricePerPerson": 1977,
+      "priceBasis": "per_person",
+      "pax": 2
+    }
+  ],
+  "hotels": [
+    {
+      "id": "serp:eqp00t",
+      "source": "serp",
+      "offerId": null,
+      "name": "Art in Accommodation - Double Room with Private Bathroom",
+      "starRating": null,
+      "reviewScore": 4.75,
+      "reviewScoreScale": 5,
+      "reviewCount": 8,
+      "pricePerNight": 72,
+      "priceTotal": 720,
+      "priceBasis": "both",
+      "nights": 10,
+      "currency": "USD",
+      "area": "Rome",
+      "otaPrices": [
+        {
+          "name": "Bluepillow.com",
+          "pricePerNight": 72,
+          "isOfficial": false
+        }
+      ],
+      "stayRef": "rome-2026-09-10-2026-09-20",
+      "stay": {
+        "location": "Rome",
+        "checkIn": "2026-09-10",
+        "checkOut": "2026-09-20"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:08:37.953Z",
+      "query": {
+        "destination": "Rome",
+        "check_in": "2026-09-10",
+        "check_out": "2026-09-20",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:2stm3t",
+      "source": "serp",
+      "offerId": null,
+      "name": "Close to downtown 5 stops with Metro to go to Vatican",
+      "starRating": null,
+      "reviewScore": null,
+      "reviewScoreScale": null,
+      "reviewCount": null,
+      "pricePerNight": 98,
+      "priceTotal": 979,
+      "priceBasis": "both",
+      "nights": 10,
+      "currency": "USD",
+      "area": "Rome",
+      "otaPrices": [
+        {
+          "name": "Vrbo.com",
+          "pricePerNight": 101,
+          "isOfficial": false
+        }
+      ],
+      "stayRef": "rome-2026-09-10-2026-09-20",
+      "stay": {
+        "location": "Rome",
+        "checkIn": "2026-09-10",
+        "checkOut": "2026-09-20"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:08:37.953Z",
+      "query": {
+        "destination": "Rome",
+        "check_in": "2026-09-10",
+        "check_out": "2026-09-20",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:zdw5la",
+      "source": "serp",
+      "offerId": null,
+      "name": "Room with private bathroom in penthouse",
+      "starRating": null,
+      "reviewScore": 3,
+      "reviewScoreScale": 5,
+      "reviewCount": 1,
+      "pricePerNight": 81,
+      "priceTotal": 808,
+      "priceBasis": "both",
+      "nights": 10,
+      "currency": "USD",
+      "area": "Rome",
+      "otaPrices": [
+        {
+          "name": "Vrbo.com",
+          "pricePerNight": 83,
+          "isOfficial": false
+        }
+      ],
+      "stayRef": "rome-2026-09-10-2026-09-20",
+      "stay": {
+        "location": "Rome",
+        "checkIn": "2026-09-10",
+        "checkOut": "2026-09-20"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:08:37.953Z",
+      "query": {
+        "destination": "Rome",
+        "check_in": "2026-09-10",
+        "check_out": "2026-09-20",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:1q7z3ev",
+      "source": "serp",
+      "offerId": null,
+      "name": "Valentina's House",
+      "starRating": null,
+      "reviewScore": 5,
+      "reviewScoreScale": 5,
+      "reviewCount": 6,
+      "pricePerNight": 99,
+      "priceTotal": 993,
+      "priceBasis": "both",
+      "nights": 10,
+      "currency": "USD",
+      "area": "Rome",
+      "otaPrices": [
+        {
+          "name": "Vrbo.com",
+          "pricePerNight": 102,
+          "isOfficial": false
+        }
+      ],
+      "stayRef": "rome-2026-09-10-2026-09-20",
+      "stay": {
+        "location": "Rome",
+        "checkIn": "2026-09-10",
+        "checkOut": "2026-09-20"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:08:37.953Z",
+      "query": {
+        "destination": "Rome",
+        "check_in": "2026-09-10",
+        "check_out": "2026-09-20",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:1dgocba",
+      "source": "serp",
+      "offerId": null,
+      "name": "Flaminio Garden, Indenpent Apt in Piccola Londra Street with Garden",
+      "starRating": null,
+      "reviewScore": 4.1575556,
+      "reviewScoreScale": 5,
+      "reviewCount": 45,
+      "pricePerNight": 123,
+      "priceTotal": 1230,
+      "priceBasis": "both",
+      "nights": 10,
+      "currency": "USD",
+      "area": "Rome",
+      "otaPrices": [
+        {
+          "name": "Vrbo.com",
+          "pricePerNight": 170,
+          "isOfficial": false
+        }
+      ],
+      "stayRef": "rome-2026-09-10-2026-09-20",
+      "stay": {
+        "location": "Rome",
+        "checkIn": "2026-09-10",
+        "checkOut": "2026-09-20"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:08:37.953Z",
+      "query": {
+        "destination": "Rome",
+        "check_in": "2026-09-10",
+        "check_out": "2026-09-20",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:vu2wwg",
+      "source": "serp",
+      "offerId": null,
+      "name": "Hotel Roma Tor Vergata",
+      "starRating": 4,
+      "reviewScore": 3.7,
+      "reviewScoreScale": 5,
+      "reviewCount": 2906,
+      "pricePerNight": 80,
+      "priceTotal": 797,
+      "priceBasis": "both",
+      "nights": 10,
+      "currency": "USD",
+      "area": "Rome",
+      "stayRef": "rome-2026-09-10-2026-09-20",
+      "stay": {
+        "location": "Rome",
+        "checkIn": "2026-09-10",
+        "checkOut": "2026-09-20"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:08:37.953Z",
+      "query": {
+        "destination": "Rome",
+        "check_in": "2026-09-10",
+        "check_out": "2026-09-20",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:1j2lsr8",
+      "source": "serp",
+      "offerId": null,
+      "name": "Roma Talenti Fucini",
+      "starRating": null,
+      "reviewScore": 4.6,
+      "reviewScoreScale": 5,
+      "reviewCount": 68,
+      "pricePerNight": 101,
+      "priceTotal": 1006,
+      "priceBasis": "both",
+      "nights": 10,
+      "currency": "USD",
+      "area": "Rome",
+      "stayRef": "rome-2026-09-10-2026-09-20",
+      "stay": {
+        "location": "Rome",
+        "checkIn": "2026-09-10",
+        "checkOut": "2026-09-20"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:08:37.953Z",
+      "query": {
+        "destination": "Rome",
+        "check_in": "2026-09-10",
+        "check_out": "2026-09-20",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:dca2hj",
+      "source": "serp",
+      "offerId": null,
+      "name": "Palace Rome Hostel",
+      "starRating": 3,
+      "reviewScore": 3.6,
+      "reviewScoreScale": 5,
+      "reviewCount": 392,
+      "pricePerNight": 73,
+      "priceTotal": 725,
+      "priceBasis": "both",
+      "nights": 10,
+      "currency": "USD",
+      "area": "Rome",
+      "stayRef": "rome-2026-09-10-2026-09-20",
+      "stay": {
+        "location": "Rome",
+        "checkIn": "2026-09-10",
+        "checkOut": "2026-09-20"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-05T23:08:37.953Z",
+      "query": {
+        "destination": "Rome",
+        "check_in": "2026-09-10",
+        "check_out": "2026-09-20",
+        "adults": 2
+      }
+    }
+  ],
+  "promotedFlightsById": {
+    "serp:2yrmgw": {
+      "outbound": {
+        "date": "2026-09-10",
+        "route": "JFK→FCO",
+        "airline": "American",
+        "cabin": "Economy",
+        "totalPrice": 3366,
+        "confirmation": null,
+        "multiDay": false,
+        "segments": [
+          {
+            "flight": "AmericanAA 236",
+            "airline": "American",
+            "route": "JFK→FCO",
+            "date": "2026-09-10",
+            "depart": "2026-09-10 19:25",
+            "arrive": "2026-09-11 09:50",
+            "layover": null
+          }
+        ],
+        "description": null,
+        "notes": null,
+        "_candidateId": "serp:2yrmgw"
+      },
+      "return": null
+    },
+    "serp:sntoyn": {
+      "outbound": {
+        "date": "2026-09-10",
+        "route": "JFK→FCO",
+        "airline": "ITA",
+        "cabin": "Economy",
+        "totalPrice": 3546,
+        "confirmation": null,
+        "multiDay": false,
+        "segments": [
+          {
+            "flight": "ITAAZ 609",
+            "airline": "ITA",
+            "route": "JFK→FCO",
+            "date": "2026-09-10",
+            "depart": "2026-09-10 16:05",
+            "arrive": "2026-09-11 06:40",
+            "layover": null
+          }
+        ],
+        "description": null,
+        "notes": null,
+        "_candidateId": "serp:sntoyn"
+      },
+      "return": null
+    },
+    "serp:1vsj49n": {
+      "outbound": {
+        "date": "2026-09-10",
+        "route": "JFK→FCO",
+        "airline": "ITA",
+        "cabin": "Economy",
+        "totalPrice": 3546,
+        "confirmation": null,
+        "multiDay": false,
+        "segments": [
+          {
+            "flight": "ITAAZ 611",
+            "airline": "ITA",
+            "route": "JFK→FCO",
+            "date": "2026-09-10",
+            "depart": "2026-09-10 21:10",
+            "arrive": "2026-09-11 11:50",
+            "layover": null
+          }
+        ],
+        "description": null,
+        "notes": null,
+        "_candidateId": "serp:1vsj49n"
+      },
+      "return": null
+    },
+    "serp:1or3n08": {
+      "outbound": {
+        "date": "2026-09-10",
+        "route": "JFK→FCO",
+        "airline": "Delta",
+        "cabin": "Economy",
+        "totalPrice": 3954,
+        "confirmation": null,
+        "multiDay": false,
+        "segments": [
+          {
+            "flight": "DeltaDL 182",
+            "airline": "Delta",
+            "route": "JFK→FCO",
+            "date": "2026-09-10",
+            "depart": "2026-09-10 17:25",
+            "arrive": "2026-09-11 07:55",
+            "layover": null
+          }
+        ],
+        "description": null,
+        "notes": null,
+        "_candidateId": "serp:1or3n08"
+      },
+      "return": null
+    }
+  },
+  "promotedLodgingById": {
+    "serp:eqp00t": {
+      "name": "Art in Accommodation - Double Room with Private Bathroom",
+      "location": "Rome",
+      "checkIn": "2026-09-10",
+      "checkOut": "2026-09-20",
+      "dates": null,
+      "nights": 10,
+      "stars": null,
+      "total": 720,
+      "pricePerNight": 72,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-1",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:eqp00t"
+    },
+    "serp:2stm3t": {
+      "name": "Close to downtown 5 stops with Metro to go to Vatican",
+      "location": "Rome",
+      "checkIn": "2026-09-10",
+      "checkOut": "2026-09-20",
+      "dates": null,
+      "nights": 10,
+      "stars": null,
+      "total": 979,
+      "pricePerNight": 98,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-2",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:2stm3t"
+    },
+    "serp:zdw5la": {
+      "name": "Room with private bathroom in penthouse",
+      "location": "Rome",
+      "checkIn": "2026-09-10",
+      "checkOut": "2026-09-20",
+      "dates": null,
+      "nights": 10,
+      "stars": null,
+      "total": 808,
+      "pricePerNight": 81,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-3",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:zdw5la"
+    },
+    "serp:1q7z3ev": {
+      "name": "Valentina's House",
+      "location": "Rome",
+      "checkIn": "2026-09-10",
+      "checkOut": "2026-09-20",
+      "dates": null,
+      "nights": 10,
+      "stars": null,
+      "total": 993,
+      "pricePerNight": 99,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-4",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:1q7z3ev"
+    },
+    "serp:1dgocba": {
+      "name": "Flaminio Garden, Indenpent Apt in Piccola Londra Street with Garden",
+      "location": "Rome",
+      "checkIn": "2026-09-10",
+      "checkOut": "2026-09-20",
+      "dates": null,
+      "nights": 10,
+      "stars": null,
+      "total": 1230,
+      "pricePerNight": 123,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-5",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:1dgocba"
+    },
+    "serp:vu2wwg": {
+      "name": "Hotel Roma Tor Vergata",
+      "location": "Rome",
+      "checkIn": "2026-09-10",
+      "checkOut": "2026-09-20",
+      "dates": null,
+      "nights": 10,
+      "stars": 4,
+      "total": 797,
+      "pricePerNight": 80,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-6",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:vu2wwg"
+    },
+    "serp:1j2lsr8": {
+      "name": "Roma Talenti Fucini",
+      "location": "Rome",
+      "checkIn": "2026-09-10",
+      "checkOut": "2026-09-20",
+      "dates": null,
+      "nights": 10,
+      "stars": null,
+      "total": 1006,
+      "pricePerNight": 101,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-7",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:1j2lsr8"
+    },
+    "serp:dca2hj": {
+      "name": "Palace Rome Hostel",
+      "location": "Rome",
+      "checkIn": "2026-09-10",
+      "checkOut": "2026-09-20",
+      "dates": null,
+      "nights": 10,
+      "stars": 3,
+      "total": 725,
+      "pricePerNight": 73,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-8",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:dca2hj"
+    }
+  }
+}
