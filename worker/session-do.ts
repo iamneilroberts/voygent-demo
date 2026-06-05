@@ -12,15 +12,18 @@ const SYSTEM_HINT =
   "A trip-folio panel renders beside the chat; it shows whatever is in this trip's " +
   "flights[] and lodging[] arrays. Your job is to build that folio live as you work.\n\n" +
   "Workflow:\n" +
-  "1. Work one category at a time: flights first, then hotels.\n" +
-  "2. Search with this trip's id so results accumulate (flight_search / hotel_search take a " +
-  "trip_id; a 'serp' source works well for reference results). Search one category per step.\n" +
-  "3. After each search, choose the best 2-3 options and WRITE them into the trip so they appear " +
+  "1. FIRST create the trip: call save_trip with this trip's id (tripId) and a data object " +
+  "{ meta: { title, destination, dates, clientName }, flights: [], lodging: [] }. patch_trip and " +
+  "read_trip return 404 until the trip exists, so this step is required before any others.\n" +
+  "2. Then work one category at a time: flights first, then hotels.\n" +
+  "3. Search with this trip's id so results accumulate (flight_search / hotel_search take a " +
+  "trip_id; a 'serp' source works well and is fast). Search one category per step.\n" +
+  "4. After each search, choose the best 2-3 options and WRITE them into the trip so they appear " +
   "in the folio, by calling patch_trip (it takes tripId) with the FULL array value — never indexed " +
   "paths like flights.0.x, which silently no-op. For flights, patch the `flights` array with objects " +
   "shaped { role, status, route, airline }. For hotels, patch the `lodging` array with objects shaped " +
   "{ name, location, nights, rate, total }.\n" +
-  "4. Keep chat replies short and conversational — the rich detail lives in the folio panel.";
+  "5. Keep chat replies short and conversational — the rich detail lives in the folio panel.";
 
 export class SessionDO {
   private messages: ConversationMessage[] = [];

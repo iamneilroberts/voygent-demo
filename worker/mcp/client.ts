@@ -7,7 +7,11 @@ export class McpClient {
   constructor(private url: string, private bearer: string, private f: Fetch = fetch) {}
 
   private async rpc(method: string, params: unknown): Promise<any> {
-    const res = await this.f(this.url, {
+    // Call through a local binding, NOT `this.f(...)`: invoking the global `fetch` as a
+    // method of this instance strips its required `this` and throws "Illegal invocation"
+    // under the Workers runtime (a unit test with a mock fetch can't catch this).
+    const doFetch = this.f;
+    const res = await doFetch(this.url, {
       method: "POST",
       headers: {
         "authorization": `Bearer ${this.bearer}`,
