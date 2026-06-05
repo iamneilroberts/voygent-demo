@@ -1,12 +1,20 @@
 export { SessionDO } from "./session-do";
 
-interface Env { SESSION: DurableObjectNamespace; }
+interface Env { SESSION: DurableObjectNamespace; DEMO_DISABLED?: string; }
 
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
     const url = new URL(req.url);
     if (req.method === "OPTIONS") return new Response(null, { headers: cors() });
     if (url.pathname === "/chat" && req.method === "POST") {
+      // Operational kill-switch for a public, money-spending endpoint: set the
+      // DEMO_DISABLED secret to pause it instantly (no redeploy needed).
+      if (env.DEMO_DISABLED) {
+        return new Response("The Voygent demo is paused right now. Check back soon.", {
+          status: 503,
+          headers: { ...cors(), "content-type": "text/plain" },
+        });
+      }
       const sessionId = url.searchParams.get("session") ?? "anon";
       const id = env.SESSION.idFromName(sessionId);
       const res = await env.SESSION.get(id).fetch(req);

@@ -3,6 +3,13 @@ main = "worker/index.ts"
 compatibility_date = "2024-05-12"
 compatibility_flags = ["nodejs_compat"]
 
+# Serve the built React SPA from the same Worker as the /chat API (single origin,
+# no CORS, one deploy). The Worker handles POST /chat; everything else falls back
+# to the SPA's index.html. Build the SPA first: VITE_API_BASE= npm run build:web
+[assets]
+directory = "./dist-web"
+not_found_handling = "single-page-application"
+
 [[durable_objects.bindings]]
 name = "SESSION"
 class_name = "SessionDO"
@@ -10,3 +17,14 @@ class_name = "SessionDO"
 [[migrations]]
 tag = "v1"
 new_sqlite_classes = ["SessionDO"]
+
+# NOTE: demo.voygent.ai is NOT attached here. The voygent.ai zone has a *.voygent.ai
+# wildcard routing every subdomain to the prod `voygent` Worker, which shadows a plain
+# custom-domain attachment and (observed 2026-06-05) regressed this Worker's workers.dev
+# route. Until that wildcard is coordinated, this Worker is served at
+# voygent-demo.somotravel.workers.dev.
+
+# Secrets (set via `wrangler secret put`, NOT checked in):
+#   ANTHROPIC_API_KEY, VOYGENT_MCP_URL, VOYGENT_MCP_BEARER, and optional DEMO_DISABLED.
+# Kept as secrets (not [vars]) so the MCP target can be flipped staging<->prod
+# with a single `wrangler secret put` and no redeploy.
