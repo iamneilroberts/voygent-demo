@@ -3,7 +3,7 @@ import { streamChat } from "./sse-client";
 import { ChatView, type ChatMessage, type Preset } from "./ChatView";
 import { FolioPanel } from "./FolioPanel";
 import type { FolioData } from "../../shared/events";
-import { Inspector, type InsTool, type InsTurn, type InsSummary } from "./Inspector";
+import { Inspector, type InsTool, type InsTurn, type InsSummary, type InsSavings, type InsOverhead } from "./Inspector";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8787";
 
@@ -19,6 +19,8 @@ export function App() {
   const [insTools, setInsTools] = useState<InsTool[]>([]);
   const [insTurns, setInsTurns] = useState<InsTurn[]>([]);
   const [insSummaries, setInsSummaries] = useState<InsSummary[]>([]);
+  const [insSavings, setInsSavings] = useState<InsSavings[]>([]);
+  const [insOverhead, setInsOverhead] = useState<InsOverhead[]>([]);
 
   useEffect(() => {
     fetch(`${API_BASE}/presets`)
@@ -54,7 +56,8 @@ export function App() {
           if (e.kind === "tool") setInsTools((t) => [...t, e]);
           else if (e.kind === "turn") setInsTurns((t) => [...t, e]);
           else if (e.kind === "summary") setInsSummaries((s) => [...s, e]);
-          // savings/overhead handled in Slice 2
+          else if (e.kind === "savings") setInsSavings((s) => [...s, e]);
+          else if (e.kind === "overhead") setInsOverhead((o) => [...o, e]);
         }
       });
     } catch (err) {
@@ -80,6 +83,7 @@ export function App() {
       <Inspector
         open={inspectorOpen} onClose={() => setInspectorOpen(false)}
         tools={insTools} turns={insTurns} summaries={insSummaries}
+        savings={insSavings} overhead={insOverhead}
       />
     </div>
   );

@@ -114,3 +114,6 @@ form button:disabled { opacity: .5; cursor: default; }
 .ins-note { color: #64748b; font-size: 11px; }
 .ins-sources summary { cursor: pointer; color: #94a3b8; font-size: 11px; }
 .ins-empty { color: #64748b; }
+.ins-saved h4, .ins-overhead h4 { font-size: 12px; color: #94a3b8; margin: 12px 0 4px; }
+.ins-saved-total { color: #34d399; font-weight: 600; }
+.ins-saved ul { margin: 4px 0; padding-left: 16px; } .ins-saved li { margin: 2px 0; }

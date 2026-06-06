@@ -15,6 +15,16 @@ export interface InsSummary {
   inputTokens: number; outputTokens: number; cacheReadTokens: number; cacheCreationTokens: number;
   costByModel: { haiku: number; sonnet: number; opus: number };
 }
+export interface InsSavings {
+  type: "inspector"; kind: "savings"; exchangeId: string;
+  mechanism: "patch" | "template" | "toolCatalog" | "searchDistill";
+  tokensSaved: number; basis: "chars/4"; scope: "perTurn" | "perRender" | "aggregate"; detail: string;
+}
+export interface InsOverhead {
+  type: "inspector"; kind: "overhead"; exchangeId: string;
+  instrumentationMs: number | null; instrumentationBytes: number; addedModelTokens: 0;
+  folioReprojectMs?: number | null; note?: string;
+}
 
 const STAGES: { key: string; label: string; tools: string[] }[] = [
   { key: "create",  label: "Create",  tools: ["save_trip"] },
@@ -45,8 +55,8 @@ function ToolRow({ t }: { t: InsTool }) {
 }
 
 export function Inspector(
-  { open, onClose, tools, turns, summaries }:
-  { open: boolean; onClose: () => void; tools: InsTool[]; turns: InsTurn[]; summaries: InsSummary[] },
+  { open, onClose, tools, turns, summaries, savings, overhead }:
+  { open: boolean; onClose: () => void; tools: InsTool[]; turns: InsTurn[]; summaries: InsSummary[]; savings: InsSavings[]; overhead: InsOverhead[] },
 ) {
   const [showCost, setShowCost] = useState(false);
   if (!open) return null;
@@ -65,6 +75,16 @@ export function Inspector(
     { haiku: 0, sonnet: 0, opus: 0 },
   );
   const sessionTokens = tokensIn + cacheRead;
+
+  // Context saved: sum perTurn (× turns) + aggregate; template (perRender) shown separately as latest/max.
+  const turnsCount = latest?.turns ?? turns.length;
+  const summed = savings.reduce((acc, s) => {
+    if (s.scope === "perTurn") acc.sum += s.tokensSaved * Math.max(1, turnsCount);
+    else if (s.scope === "aggregate") acc.sum += s.tokensSaved;
+    else if (s.mechanism === "template") acc.template = Math.max(acc.template, s.tokensSaved);
+    return acc;
+  }, { sum: 0, template: 0 });
+  const ov = overhead[overhead.length - 1];
 
   return (
     <aside className="inspector" role="complementary" aria-label="Engineering inspector">
@@ -126,6 +146,26 @@ export function Inspector(
             <p>Monthly estimate = window tokens × 1 fresh window/day × 30. Sources:</p>
             <ul>{TIER_SOURCES.map((s) => <li key={s.url}><a href={s.url} target="_blank" rel="noreferrer">{s.label}</a></li>)}</ul>
           </details>
+        </div>
+
+        <div className="ins-saved">
+          <h4>Context kept out of the model</h4>
+          <div className="ins-saved-total">≈ {fmt(summed.sum)} tokens kept out of context</div>
+          <ul>
+            {savings.filter((s) => s.scope !== "perRender").map((s, i) => (
+              <li key={i}><b>{s.mechanism}</b> · {fmt(s.tokensSaved)}{s.scope === "perTurn" ? "/turn" : ""} — {s.detail}</li>
+            ))}
+          </ul>
+          {summed.template > 0 && (
+            <div className="ins-note">Folio render: ≈ {fmt(summed.template)} tokens the model never generated (deterministic template, counterfactual — not summed above).</div>
+          )}
+        </div>
+
+        <div className="ins-overhead">
+          <h4>Observer effect — the cost of measuring</h4>
+          <div>Added model tokens: <b>0</b> (inspector data is a side channel, never in context)</div>
+          {ov && <div>Inspector client payload: <b>{(ov.instrumentationBytes / 1024).toFixed(1)} KB</b></div>}
+          <div>Instrumentation CPU: <b>{ov && ov.instrumentationMs != null ? `${ov.instrumentationMs} ms` : "below timer resolution"}</b></div>
         </div>
       </section>
     </aside>
