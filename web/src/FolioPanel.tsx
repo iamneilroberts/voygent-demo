@@ -1,4 +1,5 @@
 import type { FolioData, FolioFlight, FolioHotel } from "../../shared/events";
+import { SplitFlap } from "./SplitFlap";
 
 function stopsLabel(stops?: number): string | null {
   if (stops == null) return null;
@@ -7,10 +8,11 @@ function stopsLabel(stops?: number): string | null {
 
 function FlightCard({ f }: { f: FolioFlight }) {
   const meta = [f.carrier, f.date, stopsLabel(f.stops), f.cabin].filter(Boolean).join(" · ");
+  const code = f.route ?? f.label;
   return (
     <div className="card fade-in">
       <div className="card-main">
-        <div className="card-title">{f.route ?? f.label}</div>
+        <div className="card-title"><SplitFlap text={code} /></div>
         {meta && <div className="card-meta">{meta}</div>}
       </div>
       {f.price && <div className="card-price">{f.price}</div>}
@@ -42,7 +44,7 @@ export function FolioPanel({ folio }: { folio: FolioData | null }) {
   if (!folio) return <aside className="folio empty">Your trip-folio will build here as the agent works…</aside>;
   return (
     <aside className="folio">
-      <h2>{folio.title}</h2>
+      <h2 className="folio-title"><SplitFlap text={folio.title} as="span" /></h2>
       <section>
         <h3>Flights</h3>
         {folio.flights.length === 0 ? <p>—</p> : folio.flights.map((f, i) => <FlightCard key={i} f={f} />)}
