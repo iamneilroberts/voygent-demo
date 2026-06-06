@@ -14,6 +14,8 @@ import { BoardView } from "./BoardView";
 // so nothing leaks into the amber board skin.
 
 function FolioArtifact({ folio }: { folio: FolioData }) {
+  // A title-only card (trip created, nothing promoted yet) is just noise inline.
+  if (folio.flights.length === 0 && folio.hotels.length === 0) return null;
   return (
     <div className="cl-artifact" role="group" aria-label="Trip folio">
       <div className="cl-artifact-head">

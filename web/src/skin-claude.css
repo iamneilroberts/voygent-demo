@@ -198,6 +198,8 @@
 /* ---- app chrome adjustments in claude skin ---- */
 /* The outer board header isn't rendered; the footer stays (it's demo chrome). */
 :root[data-skin="claude"] .app { background: var(--board); }
+/* Give the chat pane the wider live column (board skin favors the inspector). */
+:root[data-skin="claude"] .stage[data-eng="live"] { grid-template-columns: 1.15fr 1fr; }
 :root[data-skin="claude"] .app > footer.meta { text-align: center; }
 
 /* ---- responsive (own rules; don't lean on the board skin's media query) ---- */
