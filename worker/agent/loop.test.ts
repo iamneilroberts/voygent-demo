@@ -22,7 +22,8 @@ describe("runAgentLoop", () => {
       onFolio: async () => {},
       emit: (e) => out.push(e),
     });
-    expect(out.map((e) => e.type)).toEqual(["text", "turn-complete"]);
+    expect(out.filter((e) => e.type !== "inspector").map((e) => e.type)).toEqual(["text", "turn-complete"]);
+    expect(out.some((e) => e.type === "inspector" && (e as any).kind === "turn")).toBe(true);
   });
 
   it("executes a tool call, feeds the result back, then completes", async () => {
@@ -71,5 +72,54 @@ describe("runAgentLoop", () => {
     const types = out.map((e) => e.type);
     expect(types[types.length - 1]).toBe("turn-complete");
     expect(types).toContain("tool");   // tool event was emitted — throw did NOT abort the turn
+  });
+
+  it("emits an inspector tool event with scrubbed args, ok flag, and numeric latency", async () => {
+    const asstWithTool: AssistantMessage = {
+      role: "assistant",
+      content: [{ type: "tool_use", id: "tu9", name: "flight_search", input: { trip_id: "t9", markupPct: 5 } }],
+    };
+    const asstFinal: AssistantMessage = { role: "assistant", content: [{ type: "text", text: "ok" }] };
+    const provider = fakeProvider([
+      [{ type: "tool-call", id: "tu9", name: "flight_search", input: { trip_id: "t9", markupPct: 5 } }, { type: "turn-complete", assistant: asstWithTool }],
+      [{ type: "text-delta", delta: "ok" }, { type: "turn-complete", assistant: asstFinal }],
+    ]);
+    const out: ServerEvent[] = [];
+    await runAgentLoop({
+      provider, tools: [], exchangeId: "EX1",
+      messages: [{ role: "user", content: "go" }] as ConversationMessage[],
+      callTool: async (name) => `result of ${name}`,
+      onFolio: async () => {},
+      emit: (e) => out.push(e),
+    });
+    const tool = out.find((e) => e.type === "inspector" && (e as any).kind === "tool") as any;
+    expect(tool).toBeTruthy();
+    expect(tool.name).toBe("flight_search");
+    expect(tool.args).toEqual({ trip_id: "t9" });
+    expect(tool.ok).toBe(true);
+    expect(typeof tool.latencyMs).toBe("number");
+    expect(tool.exchangeId).toBe("EX1");
+  });
+
+  it("marks ok=false when a tool throws", async () => {
+    const asstWithTool: AssistantMessage = {
+      role: "assistant", content: [{ type: "tool_use", id: "tuE", name: "hotel_search", input: {} }],
+    };
+    const asstFinal: AssistantMessage = { role: "assistant", content: [{ type: "text", text: "x" }] };
+    const provider = fakeProvider([
+      [{ type: "tool-call", id: "tuE", name: "hotel_search", input: {} }, { type: "turn-complete", assistant: asstWithTool }],
+      [{ type: "text-delta", delta: "x" }, { type: "turn-complete", assistant: asstFinal }],
+    ]);
+    const out: ServerEvent[] = [];
+    await runAgentLoop({
+      provider, tools: [], exchangeId: "EX2",
+      messages: [{ role: "user", content: "go" }] as ConversationMessage[],
+      callTool: async () => { throw new Error("boom"); },
+      onFolio: async () => {},
+      emit: (e) => out.push(e),
+    });
+    const tool = out.find((e) => e.type === "inspector" && (e as any).kind === "tool") as any;
+    expect(tool.ok).toBe(false);
+    expect(tool.result).toContain("boom");
   });
 });

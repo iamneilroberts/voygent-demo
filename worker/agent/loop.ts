@@ -1,6 +1,7 @@
 import type { LLMProvider, ToolSchema, ConversationMessage, TokenUsage } from "../llm/provider";
 import type { ServerEvent } from "../../shared/events";
 import { isTripMutating } from "./folio-sync";
+import { scrubArgs, scrubResultText } from "../inspector";
 
 export interface AgentLoopArgs {
   provider: LLMProvider;
@@ -12,16 +13,19 @@ export interface AgentLoopArgs {
   onUsage?: (usage: TokenUsage) => void;     // server-side cost telemetry (NOT sent to the client)
   maxTurns?: number;
   maxToolCalls?: number;
+  exchangeId?: string;
 }
 
 export async function runAgentLoop(args: AgentLoopArgs): Promise<void> {
   const { provider, tools, messages, callTool, onFolio, emit } = args;
+  const exchangeId = args.exchangeId ?? "";
   const maxTurns = args.maxTurns ?? 12;
   const maxToolCalls = args.maxToolCalls ?? 24;
   let totalToolCalls = 0;
 
   for (let turn = 0; turn < maxTurns; turn++) {
     const pendingTools: Array<{ id: string; name: string; input: Record<string, unknown> }> = [];
+    const tu: TokenUsage = { inputTokens: 0, outputTokens: 0, cacheCreationTokens: 0, cacheReadTokens: 0 };
 
     for await (const ev of provider.stream(messages, tools)) {
       if (ev.type === "text-delta") {
@@ -30,10 +34,22 @@ export async function runAgentLoop(args: AgentLoopArgs): Promise<void> {
         pendingTools.push({ id: ev.id, name: ev.name, input: ev.input });
       } else if (ev.type === "usage") {
         args.onUsage?.(ev.usage);
+        tu.inputTokens += ev.usage.inputTokens;
+        tu.outputTokens += ev.usage.outputTokens;
+        tu.cacheCreationTokens += ev.usage.cacheCreationTokens;
+        tu.cacheReadTokens += ev.usage.cacheReadTokens;
       } else if (ev.type === "turn-complete") {
         messages.push(ev.assistant);
       }
     }
+
+    // Exactly one turn event per provider call (incl. the final no-tool answer turn).
+    // costUsd:0 is filled by session-do's emit wrapper (loop stays pricing-agnostic).
+    emit({
+      type: "inspector", kind: "turn", exchangeId, turn,
+      inputTokens: tu.inputTokens, outputTokens: tu.outputTokens,
+      cacheReadTokens: tu.cacheReadTokens, cacheCreationTokens: tu.cacheCreationTokens, costUsd: 0,
+    });
 
     if (pendingTools.length === 0) { emit({ type: "turn-complete" }); return; }
 
@@ -42,10 +58,17 @@ export async function runAgentLoop(args: AgentLoopArgs): Promise<void> {
     };
     for (const t of pendingTools) {
       emit({ type: "tool", tool: t.name, phase: "start" });
+      const t0 = Date.now();
       let content: string;
-      try { content = await callTool(t.name, t.input); }
-      catch (e) { content = `ERROR: ${(e as Error).message}`; }
+      let ok = true;
+      try { content = await callTool(t.name, t.input); if (content.startsWith("ERROR:")) ok = false; }
+      catch (e) { content = `ERROR: ${(e as Error).message}`; ok = false; }
+      const latencyMs = Date.now() - t0;
       emit({ type: "tool", tool: t.name, phase: "done", summary: content.slice(0, 120) });
+      emit({
+        type: "inspector", kind: "tool", exchangeId, turn, name: t.name,
+        args: scrubArgs(t.input), result: scrubResultText(content), latencyMs, ok,
+      });
       results.content.push({ type: "tool_result", tool_use_id: t.id, content });
       if (isTripMutating(t.name, t.input)) {
         try { await onFolio(t.name, t.input); }
