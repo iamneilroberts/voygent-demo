@@ -6,7 +6,8 @@ import { FixtureReplay, type ReplayHelpers } from "./mcp/replay";
 import { presetRoutes } from "./fixtures/index";
 import { ClaudeProvider } from "./llm/claude";
 import { estimateCostUsd } from "./llm/cost";
-import { withInspectorCost, sessionCostByModel } from "./inspector";
+import { withInspectorCost, sessionCostByModel, estTokens, utf8Bytes } from "./inspector";
+import { encodeSse } from "../shared/events";
 import type { ConversationMessage, TokenUsage } from "./llm/provider";
 import type { ServerEvent } from "../shared/events";
 
@@ -74,6 +75,7 @@ export class SessionDO {
   private messages: ConversationMessage[] = [];
   private tripId = `demo-${crypto.randomUUID().slice(0, 8)}`;
   private replay = new FixtureReplay(this.tripId);
+  private lastBaselineTripJson: string | null = null;
   constructor(private state: DurableObjectState, private env: Env) {}
 
   // --- daily budget ledger (a single reserved DO instance, "__budget__") ---
@@ -118,10 +120,39 @@ export class SessionDO {
       },
       patchTrip: async (updates) => { await mcp.callTool("patch_trip", { tripId: this.tripId, updates }); },
     };
-    const callTool = (name: string, input: Record<string, unknown>): Promise<string> =>
+    const baseCallTool = (name: string, input: Record<string, unknown>): Promise<string> =>
       this.replay.isIntercepted(name)
         ? this.replay.handle(name, input as Record<string, any>, helpers)
         : mcp.callTool(name, input);
+
+    const callTool = async (name: string, input: Record<string, unknown>): Promise<string> => {
+      // patch savings: incremental patch vs full-trip rewrite (baseline-gated, clamped ≥0).
+      if (name === "patch_trip" && this.lastBaselineTripJson) {
+        const updates = (input as any).updates ?? input;
+        emit({
+          type: "inspector", kind: "savings", exchangeId, mechanism: "patch",
+          tokensSaved: Math.max(0, estTokens(this.lastBaselineTripJson) - estTokens(JSON.stringify(updates))),
+          basis: "chars/4", scope: "perTurn", detail: "incremental patch vs full-trip rewrite",
+        });
+      }
+      const out = await baseCallTool(name, input);
+      // searchDistill: prod response size (fixture meta) vs the slim payload the model saw.
+      if (this.replay.isIntercepted(name)) {
+        const m = this.replay.lastMeasurement();
+        const fx = this.replay.currentFixture();
+        const metaKey = m?.tool as ("flightSearch" | "flightList" | "hotelSearch" | "hotelList" | undefined);
+        const meta = metaKey && fx?.meta ? fx.meta[metaKey] : undefined;
+        if (m && meta) {
+          emit({
+            type: "inspector", kind: "savings", exchangeId, mechanism: "searchDistill",
+            tokensSaved: Math.max(0, meta.rawTokensEst - m.modelFacingTokens),
+            basis: "chars/4", scope: "aggregate",
+            detail: `prod ${m.tool} returned ~${meta.rawTokensEst} tok → model saw ~${m.modelFacingTokens} tok`,
+          });
+        }
+      }
+      return out;
+    };
 
     if (this.messages.length === 0) this.messages.push({ role: "user", content: `${SYSTEM_HINT}\n\nMy trip_id is ${this.tripId}.` });
     this.messages.push({ role: "user", content: message });
@@ -136,14 +167,23 @@ export class SessionDO {
     let toolCallCount = 0;
     let fullToolCount = 0;
     let exposedToolCount = 0;
+    let instrumentationBytes = 0;
+    let instrumentationMs = 0;
+    let maxFolioTokens = 0;
+    this.lastBaselineTripJson = null;
 
     // Cost-aware emit: inject real $ into zero-cost turn events; tally inspector counters.
     const emit = (e: ServerEvent): boolean => {
+      const t0 = Date.now();
       const ev = withInspectorCost(e, model);
       if (ev.type === "inspector") {
         if (ev.kind === "turn") turnCount++;
         else if (ev.kind === "tool") toolCallCount++;
+        if (ev.kind !== "overhead" && ev.kind !== "summary") {
+          instrumentationBytes += utf8Bytes(encodeSse(ev));
+        }
       }
+      instrumentationMs += Date.now() - t0;
       return mux.send(ev);
     };
 
@@ -154,6 +194,12 @@ export class SessionDO {
         fullToolCount = fullTools.length;
         const tools = fullTools.filter((t) => DEMO_TOOLS.has(t.name));
         exposedToolCount = tools.length;
+        emit({
+          type: "inspector", kind: "savings", exchangeId, mechanism: "toolCatalog",
+          tokensSaved: Math.max(0, estTokens(JSON.stringify(fullTools)) - estTokens(JSON.stringify(tools))),
+          basis: "chars/4", scope: "perTurn",
+          detail: `${exposedToolCount} of ${fullToolCount} tool schemas sent each turn`,
+        });
         await runAgentLoop({
           provider, tools, messages: this.messages, exchangeId,
           callTool,
@@ -162,10 +208,13 @@ export class SessionDO {
             let parsed: any = {};
             try { parsed = JSON.parse(raw); } catch { /* tolerate */ }
             const data = (parsed && typeof parsed === "object" && parsed.data) ? parsed.data : (parsed ?? {});
+            this.lastBaselineTripJson = JSON.stringify(data); // pre-overlay baseline for patch savings
             const promoted = this.replay.lastPromoted();
             if (promoted.flights != null) data.flights = promoted.flights;
             if (promoted.lodging != null) data.lodging = promoted.lodging;
-            mux.send({ type: "folio", folio: tripToFolio(this.tripId, { data }) });
+            const folio = tripToFolio(this.tripId, { data });
+            maxFolioTokens = Math.max(maxFolioTokens, estTokens(JSON.stringify(folio)));
+            mux.send({ type: "folio", folio });
           },
           onUsage: (turn) => {
             u.inputTokens += turn.inputTokens; u.outputTokens += turn.outputTokens;
@@ -177,6 +226,18 @@ export class SessionDO {
       } catch (e) {
         mux.send({ type: "error", message: (e as Error).message });
       } finally {
+        if (maxFolioTokens > 0) {
+          emit({
+            type: "inspector", kind: "savings", exchangeId, mechanism: "template",
+            tokensSaved: maxFolioTokens, basis: "chars/4", scope: "perRender",
+            detail: "deterministic render payload (chars÷4) the model never had to generate — not a model-measured count",
+          });
+        }
+        emit({
+          type: "inspector", kind: "overhead", exchangeId,
+          instrumentationMs: instrumentationMs > 0 ? instrumentationMs : null,
+          instrumentationBytes, addedModelTokens: 0,
+        });
         // Inspector summary — emitted while the stream is still open.
         emit({
           type: "inspector", kind: "summary", exchangeId,

@@ -88,6 +88,11 @@ export class FixtureReplay {
 
   lastMeasurement(): { tool: string; modelFacingTokens: number } | null { return this.measurement; }
 
+  currentFixture(): import("../fixtures/index").Fixture | null {
+    const id = this.flightRouteId ?? this.hotelRouteId;
+    return id ? FIXTURE_BY_ID[id] : null;
+  }
+
   isIntercepted(name: string): boolean {
     return INTERCEPTED.has(name);
   }
