@@ -38,8 +38,13 @@ assemble live, proving Neil built a real MCP-powered agentic travel system. It's
 > **searchDistill** savings card now has live data. NOTE: magnitudes are modest and clamped ≥0 — prod's MCP
 > already distills server-side before the demo captures (e.g. prod `flight_search` ≈ 1.0k tok), so the
 > demo-side slim-vs-prod delta is small or 0 for some tools. Honest + non-inflating by design.
-> **ONE ITEM STILL GATED ON NEIL:**
-> 1. **Deploy** — `rm -rf dist-web && VITE_API_BASE="" npm run build:web && npx wrangler deploy`. Optional: flip `LLM_MODEL` to sonnet; decide `[show $]` default.
+> **DEPLOYED 2026-06-06** — built (159.76 KB) + `npx wrangler deploy` → live at
+> https://voygent-demo.somotravel.workers.dev (root 200, `/presets` OK, asset `index-Bcsqh_bX.js`). Phase 3
+> Engineering Inspector is FULLY SHIPPED. Open follow-ups (not gating): optionally flip `LLM_MODEL` to sonnet
+> for a real demo; decide whether `[show $]` should default on; and the cross-repo telemetry work below.
+> **NEXT (separate session, voygent-lite):** expose supplier-raw response size so the demo's searchDistill
+> shows the BIG distillation (supplier→prod), not just prod→demo. See
+> `~/dev/voygent-lite/docs/summaries/handoff-2026-06-06-voygent-telemetry-supplier-raw.md`.
 
 ---
 
