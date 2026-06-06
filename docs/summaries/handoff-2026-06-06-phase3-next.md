@@ -23,6 +23,20 @@ assemble live, proving Neil built a real MCP-powered agentic travel system. It's
 
 **Next: Phase 3 — the Engineering Inspector** (the actual résumé payload). See "Next" below.
 
+> **UPDATE 2026-06-06 — Phase 3 BUILT + merged to `main` (NOT deployed).** The Engineering Inspector
+> shipped via subagent-driven TDD: drawer with 3 regions (Live this session / Behind the scenes / Business
+> case). Spec: `docs/superpowers/specs/2026-06-06-engineering-inspector-design.md`; plan:
+> `docs/superpowers/plans/2026-06-06-engineering-inspector.md`. Latest commit `fcdf143`, **58/58 vitest green,
+> tsc clean, SPA builds (159 KB)**. New: `worker/inspector.ts` (pure helpers), inspector SSE events
+> (`shared/events.ts`), loop emits tool/turn events, session-do emits savings(toolCatalog/patch/template/
+> searchDistill)+overhead+summary, `web/src/Inspector.tsx` + `inspector-data.ts`. Codex-reviewed twice (spec +
+> final) — fixed UTF-8 byte counting, searchDistill double-emit, savings-inflation math, instrumentation-timer
+> gating. Honesty invariants hold: model gets unscrubbed results / inspector is a side channel (0 added model
+> tokens) / estimates labeled / cost computed server-side.
+> **TWO ITEMS STILL GATED ON NEIL:**
+> 1. **Fixture recapture** (Plan Task 11) — run `VOYGENT_CAPTURE_MCP_URL="$(grep '^VOYGENT_MCP_URL_NEIL=' /home/neil/dev/voygent-lite/.env | cut -d= -f2- | tr -d '"')" node scripts/capture-fixtures.mjs` to populate fixture `meta` (prod response size+latency). Until then the **searchDistill** savings card is correctly omitted (the other savings show).
+> 2. **Deploy** — `rm -rf dist-web && VITE_API_BASE="" npm run build:web && npx wrangler deploy`. Optional: flip `LLM_MODEL` to sonnet; decide `[show $]` default.
+
 ---
 
 ## How it works (architecture — reuse, don't re-derive)
