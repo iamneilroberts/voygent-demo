@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voygent demo · UI design directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="./_system.css">
+<style>
+  body { background: var(--board); color: var(--ink); min-height: 100vh; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: clamp(32px, 8vw, 96px) var(--s6); }
+  .logo { font: 700 var(--t-44)/1 var(--sans); letter-spacing: -.035em; }
+  .logo span { color: var(--amber); }
+  .kick { font: 500 var(--t-13)/1 var(--mono); color: var(--amber); letter-spacing: .18em;
+    text-transform: uppercase; margin-bottom: var(--s4); }
+  .lede { color: var(--muted); max-width: 56ch; margin: var(--s4) 0 var(--s12); font-size: var(--t-18); line-height: 1.55; }
+  .lede b { color: var(--ink); font-weight: 600; }
+  .grid { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; }
+  a.cut { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--s4);
+    background: var(--board); padding: var(--s4) var(--s6); text-decoration: none; color: var(--ink);
+    transition: background .15s; }
+  a.cut:hover { background: var(--board-2); }
+  a.cut[aria-disabled="true"] { color: var(--muted-2); pointer-events: none; }
+  a.cut .n { font: 700 var(--t-13)/1 var(--mono); color: var(--amber); width: 1.4em; }
+  a.cut[aria-disabled="true"] .n { color: var(--muted-2); }
+  a.cut .h { font-weight: 600; font-size: var(--t-18); }
+  a.cut .d { font: 400 var(--t-13)/1.4 var(--mono); color: var(--muted); margin-top: 3px; }
+  a.cut .tag { font: 500 var(--t-12)/1 var(--mono); padding: 4px 10px; border-radius: 999px;
+    border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+  a.cut .tag.live { color: var(--board); background: var(--amber); border-color: var(--amber); }
+  .foot { margin-top: var(--s12); font: 400 var(--t-12)/1.6 var(--mono); color: var(--muted-2); }
+  .foot b { color: var(--muted); font-weight: 500; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="kick">design directions · departure-board × cli</div>
+    <div class="logo">voygent<span>.</span> demo</div>
+    <p class="lede">Four audience-tuned takes on one theme. The travel surfaces borrow
+      airport <b>split-flap signage</b>; the engineering boards run as an authentic amber
+      <b>CRT terminal</b>. Same tokens, intensity dialed per audience — so it reads as one
+      product, not four skins.</p>
+
+    <div class="grid">
+      <a class="cut" href="./interviewer.html">
+        <span class="n">01</span>
+        <span><span class="h">Interviewer</span><span class="d">Inspector is the hero · terminal-forward · every number is real</span></span>
+        <span class="tag live">live</span>
+      </a>
+      <a class="cut" href="./recruiter.html" aria-disabled="true">
+        <span class="n">02</span>
+        <span><span class="h">Recruiter</span><span class="d">The live folio building itself is the hero · warm · terminal as a reveal</span></span>
+        <span class="tag">next</span>
+      </a>
+      <a class="cut" href="./investor.html" aria-disabled="true">
+        <span class="n">03</span>
+        <span><span class="h">Investor</span><span class="d">Business case + scoreboard forward · $0 marginal · subscription vs API</span></span>
+        <span class="tag">next</span>
+      </a>
+      <a class="cut" href="./travel.html" aria-disabled="true">
+        <span class="n">04</span>
+        <span><span class="h">Travel / product</span><span class="d">Folio quality + supplier breadth · trustworthy · least terminal</span></span>
+        <span class="tag">next</span>
+      </a>
+    </div>
+
+    <p class="foot"><b>status:</b> interviewer cut built first (riskiest + most distinctive).
+      Recruiter / investor / travel fan out off the same system after sign-off.<br>
+      <b>note:</b> throwaway static mockups — the chosen direction gets reimplemented in React.</p>
+  </div>
+</body>
+</html>

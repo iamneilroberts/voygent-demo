@@ -1,0 +1,169 @@
+/* ============================================================================
+   Voygent demo — design system: "Departure Board × CLI"
+   One token set, two motifs:
+     · airport split-flap signage  → warm, travel-native (recruiter-friendly)
+     · authentic amber/green CRT    → the engineering boards (interviewer-hero)
+   Shared across all four audience mockups. Cut-specific layout lives in each .html.
+   Throwaway exploration — favors clarity over abstraction.
+   ============================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  /* --- surfaces (warm-tinted; no slate, no pure black/white) --- */
+  --board:   #0c0a07;   /* warm near-black: amber-CRT body & split-flap face   */
+  --board-2: #14110c;   /* raised terminal panel                               */
+  --board-3: #1d1810;   /* hover / inset                                       */
+  --paper:   #f4f0e6;   /* boarding-pass cream (warm light surface)            */
+  --paper-2: #ffffffee; /* card on paper                                       */
+
+  /* --- ink --- */
+  --ink:        #efe7d6; /* warm off-white text on board                       */
+  --ink-paper:  #211c14; /* warm near-black text on paper                      */
+  --muted:      #9a907c; /* warm gray (tinted toward amber, never slate-gray)  */
+  --muted-2:    #6f6757;
+
+  /* --- signature + status (CRT-authentic: amber primary, green ok) --- */
+  --amber:      #f5a623; /* THE signature — split-flap glow + terminal accent  */
+  --amber-hi:   #ffcf6b; /* active pipeline node / focus (NOT cyan)            */
+  --phosphor:   #79d98a; /* terminal "ok", context-saved                       */
+  --red:        #f0746a; /* errors                                             */
+
+  /* --- lines (warm) --- */
+  --line:        #26201a; /* on board */
+  --line-paper:  #e2dac8; /* on paper */
+
+  /* --- type --- */
+  --sans: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* --- modular scale (1.25) --- */
+  --t-12: .75rem; --t-13: .8125rem; --t-15: .9375rem; --t-18: 1.125rem;
+  --t-24: 1.5rem; --t-32: 2rem; --t-44: 2.75rem;
+
+  /* --- spacing (8px base) --- */
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s6: 24px; --s8: 32px; --s12: 48px;
+
+  --r: 8px;            /* boarding-pass radius; terminal stays square          */
+  --ease: cubic-bezier(.2,.7,.2,1);   /* ease-out-quart-ish, no bounce         */
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  font-family: var(--sans);
+  color: var(--ink-paper);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+  font-size: var(--t-15);
+  line-height: 1.5;
+}
+a { color: inherit; }
+::selection { background: var(--amber); color: var(--board); }
+
+/* keyboard focus: designed, not browser-default */
+:focus-visible { outline: 2px solid var(--amber-hi); outline-offset: 2px; border-radius: 3px; }
+
+/* ============================ shared: cut switcher ========================= */
+.cut-switch { display: inline-flex; gap: 2px; font: 500 var(--t-13)/1 var(--mono); }
+.cut-switch a {
+  text-decoration: none; padding: 5px 10px; border-radius: 5px; color: var(--muted);
+  letter-spacing: .02em; transition: color .15s, background .15s;
+}
+.cut-switch a:hover { color: var(--ink); background: #ffffff14; }
+.cut-switch a[aria-current] { color: var(--board); background: var(--amber); }
+
+/* ============================ shared: split-flap ========================== */
+/* A row of flap "cells" that clack in with a staggered flip. Mono + tabular so
+   codes align like real airport signage. */
+.flap { display: inline-flex; gap: 3px; }
+.flap b {
+  display: inline-grid; place-items: center;
+  min-width: 1.05em; padding: .16em .12em;
+  font: 700 1em/1 var(--mono);
+  color: var(--amber); background: #000;
+  border-radius: 3px; box-shadow: inset 0 -6px 8px #0008, inset 0 1px 0 #ffffff14;
+  position: relative; overflow: hidden;
+}
+.flap b::after { /* the split line of a flap display */
+  content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 1px;
+  background: #0009;
+}
+.flap.flip b { animation: flap-in .42s var(--ease) both; }
+.flap.flip b:nth-child(2) { animation-delay: .05s }
+.flap.flip b:nth-child(3) { animation-delay: .10s }
+.flap.flip b:nth-child(4) { animation-delay: .15s }
+.flap.flip b:nth-child(5) { animation-delay: .20s }
+.flap.flip b:nth-child(6) { animation-delay: .25s }
+.flap.flip b:nth-child(7) { animation-delay: .30s }
+.flap.flip b:nth-child(8) { animation-delay: .35s }
+@keyframes flap-in {
+  0%   { transform: rotateX(-90deg); opacity: 0 }
+  60%  { transform: rotateX(8deg);  opacity: 1 }
+  100% { transform: rotateX(0);     opacity: 1 }
+}
+
+/* ============================ shared: terminal ============================ */
+.term {
+  background: var(--board); color: var(--ink);
+  font: 400 var(--t-13)/1.55 var(--mono);
+  border: 1px solid var(--line);
+  position: relative; overflow: hidden;
+}
+/* very restrained CRT scanline + corner glow — homage, not gimmick */
+.term.crt::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 2;
+  background: repeating-linear-gradient(#0000 0 2px, #00000018 2px 3px);
+  mix-blend-mode: multiply; opacity: .5;
+}
+.term.crt::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 1;
+  background: radial-gradient(120% 80% at 80% 0%, #f5a62315, transparent 60%);
+}
+.term .prompt { color: var(--amber); }
+.term .ok  { color: var(--phosphor); }
+.term .err { color: var(--red); }
+.term .dim { color: var(--muted); }
+.term .hi  { color: var(--amber-hi); }
+
+/* blinking block cursor */
+.cursor { display: inline-block; width: .6em; height: 1.05em; vertical-align: -.18em;
+  background: var(--amber); animation: blink 1.05s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0 } }
+
+/* orchestration pipeline */
+.pipe { display: flex; align-items: center; flex-wrap: wrap; gap: 2px; position: relative; }
+.pipe .node { color: var(--muted-2); transition: color .2s, text-shadow .2s; }
+.pipe .node.done { color: var(--phosphor); }
+.pipe .node.active { color: var(--amber-hi); text-shadow: 0 0 10px var(--amber); }
+.pipe .arr { color: var(--line); margin: 0 1px; }
+/* traveling packet */
+.pipe .packet {
+  position: absolute; top: 50%; left: 0; width: 6px; height: 6px; border-radius: 50%;
+  background: var(--amber-hi); box-shadow: 0 0 8px 2px var(--amber);
+  transform: translateY(-50%); animation: packet 3.2s var(--ease) infinite;
+}
+@keyframes packet { 0% { left: 2% } 80% { left: 86% } 100% { left: 86%; opacity: 0 } }
+
+/* btop-ish sparkline */
+.spark { display: inline-flex; align-items: flex-end; gap: 2px; height: 14px; }
+.spark i { width: 4px; background: var(--amber); opacity: .85; border-radius: 1px; }
+
+/* odometer (count-up) */
+.odo { font: 700 1em/1 var(--mono); font-variant-numeric: tabular-nums; color: var(--phosphor); }
+
+/* collapsible board section */
+.fold > summary { cursor: pointer; list-style: none; color: var(--muted);
+  font: 500 var(--t-12)/1 var(--mono); letter-spacing: .08em; text-transform: uppercase;
+  padding: var(--s3) 0; border-top: 1px solid var(--line); }
+.fold > summary::before { content: "▸ "; color: var(--amber); }
+.fold[open] > summary::before { content: "▾ "; }
+.fold > summary:hover { color: var(--ink); }
+
+/* ============================ reduced motion ============================= */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .cursor { background: var(--amber); opacity: 1; }
+  .pipe .packet { display: none; }
+  .flap b { transform: none !important; opacity: 1 !important; }
+}

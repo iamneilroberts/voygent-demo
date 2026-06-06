@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voygent · interviewer cut</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="./_system.css">
+<style>
+  /* ---- interviewer cut: terminal-forward, Inspector is the hero ---- */
+  body { background: var(--board); color: var(--ink); }
+  .wrap { max-width: 1320px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
+
+  header.top {
+    display: flex; align-items: center; gap: var(--s4);
+    padding: var(--s4) var(--s6); border-bottom: 1px solid var(--line);
+  }
+  .mark { display: flex; align-items: baseline; gap: var(--s3); }
+  .mark .logo {
+    font: 700 var(--t-24)/1 var(--sans); letter-spacing: -.03em; color: var(--ink);
+  }
+  .mark .logo span { color: var(--amber); }
+  .mark .by { font: 400 var(--t-13)/1 var(--mono); color: var(--muted); }
+  header.top .cut-switch { margin-left: auto; }
+
+  .boot {
+    padding: var(--s2) var(--s6); font: 400 var(--t-12)/1.6 var(--mono); color: var(--muted);
+    border-bottom: 1px solid var(--line); white-space: nowrap; overflow: hidden;
+  }
+  .boot .ok { color: var(--phosphor); }
+  .boot .hi { color: var(--amber); }
+  .boot button { background: none; border: 1px solid var(--line); color: var(--muted);
+    font: inherit; padding: 1px 8px; border-radius: 4px; margin-left: var(--s3); cursor: pointer; }
+  .boot button:hover { color: var(--ink); border-color: var(--muted); }
+
+  main {
+    flex: 1; display: grid; grid-template-columns: 0.78fr 1fr; gap: 1px;
+    background: var(--line); min-height: 0;
+  }
+  .col { background: var(--board); min-height: 0; display: flex; flex-direction: column; }
+  .col-h {
+    font: 500 var(--t-12)/1 var(--mono); letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted-2); padding: var(--s4) var(--s6) var(--s3);
+  }
+  .col-h b { color: var(--amber); font-weight: 700; }
+
+  /* ---------- left: the product ---------- */
+  .product { padding: 0 var(--s6) var(--s6); overflow-y: auto; }
+
+  .chat { display: flex; flex-direction: column; gap: var(--s3); margin-bottom: var(--s6); }
+  .msg { max-width: 90%; padding: var(--s3) var(--s4); border-radius: var(--r); font-size: var(--t-15); }
+  .msg.user { align-self: flex-end; background: var(--amber); color: var(--board); font-weight: 500;
+    border-bottom-right-radius: 3px; }
+  .msg.bot { align-self: flex-start; background: var(--board-2); border: 1px solid var(--line);
+    border-bottom-left-radius: 3px; }
+  .msg.bot .tool { display: inline-flex; align-items: center; gap: 6px; margin-top: var(--s2);
+    font: 500 var(--t-12)/1 var(--mono); color: var(--amber); background: #f5a62318;
+    border: 1px solid #f5a62333; padding: 4px 9px; border-radius: 999px; }
+
+  /* ---------- folio: split-flap departure board ---------- */
+  .folio { background: var(--board-2); border: 1px solid var(--line); border-radius: var(--r);
+    padding: var(--s4); }
+  .folio-title { display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: var(--s4); }
+  .folio-title .where { font: 700 var(--t-12)/1 var(--mono); color: var(--muted);
+    letter-spacing: .1em; text-transform: uppercase; }
+
+  .leg { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: var(--s3);
+    padding: var(--s3) 0; border-top: 1px solid var(--line); }
+  .leg:first-of-type { border-top: none; }
+  .leg .glyph { font: var(--t-18) var(--mono); color: var(--amber); width: 1.4em; text-align: center; }
+  .leg .detail { min-width: 0; }
+  .leg .detail .name { font-weight: 600; font-size: var(--t-15); }
+  .leg .detail .sub { font: 400 var(--t-12)/1.4 var(--mono); color: var(--muted); margin-top: 2px; }
+  .leg .price { font: 600 var(--t-15)/1 var(--mono); color: var(--ink); font-variant-numeric: tabular-nums; }
+
+  .route { margin: var(--s3) 0; }
+  .route svg { display: block; width: 100%; height: 56px; }
+  .route path.arc { fill: none; stroke: var(--amber); stroke-width: 1.5;
+    stroke-dasharray: 240; stroke-dashoffset: 240; animation: draw 1.6s var(--ease) .4s forwards; }
+  .route .dot { fill: var(--amber-hi); }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+
+  .total { display: flex; align-items: baseline; justify-content: space-between;
+    margin-top: var(--s4); padding-top: var(--s3); border-top: 2px solid var(--amber); }
+  .total .lab { font: 500 var(--t-12)/1 var(--mono); letter-spacing: .1em; text-transform: uppercase;
+    color: var(--muted); }
+  .total .amt { font: 700 var(--t-24)/1 var(--mono); color: var(--amber); font-variant-numeric: tabular-nums; }
+
+  /* ---------- right: the engineering (HERO) ---------- */
+  .inspector { padding: 0 var(--s6) var(--s6); overflow-y: auto; }
+  .panel { background: var(--board); }
+  .term-pad { padding: var(--s4); }
+
+  .tail { white-space: pre-wrap; min-height: 84px; }
+  .tail .line { display: block; }
+
+  .board-row { display: flex; justify-content: space-between; gap: var(--s4);
+    padding: var(--s2) 0; }
+  .board-row .k { color: var(--muted); }
+  .board-row .v { font-variant-numeric: tabular-nums; }
+
+  .timeline { margin: var(--s3) 0; }
+  .timeline .row { display: grid; grid-template-columns: 1fr auto auto; gap: var(--s3);
+    padding: 4px 0; align-items: center; }
+  .timeline .row .lat { color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  .score { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--s3) var(--s6);
+    margin: var(--s3) 0; }
+  .stat .lab { font-size: var(--t-12); color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .stat .num { font: 700 var(--t-18)/1.1 var(--mono); color: var(--ink); font-variant-numeric: tabular-nums;
+    margin-top: 2px; display: flex; align-items: baseline; gap: 8px; }
+  .stat .num small { font-weight: 400; font-size: var(--t-12); color: var(--muted); }
+
+  .saved { background: #79d98a10; border: 1px solid #79d98a33; border-radius: 6px;
+    padding: var(--s3) var(--s4); margin: var(--s3) 0; }
+  .saved .big { font: 700 var(--t-32)/1 var(--mono); color: var(--phosphor); font-variant-numeric: tabular-nums; }
+  .saved .cap { font-size: var(--t-12); color: var(--muted); margin-top: 4px; }
+
+  .cards { display: flex; flex-direction: column; gap: var(--s2); padding: var(--s3) 0; }
+  .bts { border-left: 2px solid var(--amber); padding: 2px 0 2px var(--s3); }
+  .bts .t { font-weight: 600; font-size: var(--t-13); }
+  .bts .c { font: 400 var(--t-12)/1.45 var(--mono); color: var(--muted); margin-top: 2px; }
+
+  table.tiers { width: 100%; border-collapse: collapse; margin: var(--s3) 0; font-size: var(--t-12); }
+  table.tiers th, table.tiers td { text-align: right; padding: 5px 6px; border-bottom: 1px solid var(--line);
+    font-variant-numeric: tabular-nums; font-family: var(--mono); }
+  table.tiers th:first-child, table.tiers td:first-child { text-align: left; }
+  table.tiers th { color: var(--muted); font-weight: 500; }
+  .disc { font: 400 var(--t-12)/1.5 var(--mono); color: var(--muted-2); margin-top: var(--s2); }
+
+  footer.meta { padding: var(--s4) var(--s6); border-top: 1px solid var(--line);
+    font: 400 var(--t-12)/1.5 var(--mono); color: var(--muted-2); display: flex; gap: var(--s4); flex-wrap: wrap; }
+  footer.meta b { color: var(--muted); font-weight: 500; }
+
+  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="mark">
+      <span class="logo">voygent<span>.</span></span>
+      <span class="by">built by Neil Roberts</span>
+    </div>
+    <nav class="cut-switch" aria-label="audience cut">
+      <a href="./interviewer.html" aria-current="page">interviewer</a>
+      <a href="./recruiter.html">recruiter</a>
+      <a href="./investor.html">investor</a>
+      <a href="./travel.html">travel</a>
+    </nav>
+  </header>
+
+  <div class="boot" id="boot" aria-live="polite"></div>
+
+  <main>
+    <!-- ============ LEFT: the product (supporting) ============ -->
+    <section class="col">
+      <div class="col-h">the product</div>
+      <div class="product">
+        <div class="chat">
+          <div class="msg user">Plan a 5-day trip to Lisbon, mid-range, late September.</div>
+          <div class="msg bot">
+            Lisbon in late September is ideal — warm days, thinner crowds. I found
+            flights and a well-located base in Alfama, and I'm assembling your folio now.
+            <span class="tool">⚙ voygent · flight_search</span>
+            <span class="tool">⚙ voygent · hotel_search</span>
+          </div>
+        </div>
+
+        <div class="folio">
+          <div class="folio-title">
+            <span class="flap flip" data-flap="LISBON">&nbsp;</span>
+            <span class="where">5 days · 2 travelers</span>
+          </div>
+
+          <div class="leg">
+            <span class="glyph">✈</span>
+            <span class="detail">
+              <span class="name"><span class="flap flip" data-flap="TP1049">&nbsp;</span></span>
+              <span class="sub">JFK → LIS · 21:25 → 09:40 +1 · nonstop · TAP</span>
+            </span>
+            <span class="price">$612</span>
+          </div>
+
+          <div class="route" aria-hidden="true">
+            <svg viewBox="0 0 320 56" preserveAspectRatio="none">
+              <path class="arc" d="M14,46 Q160,-14 306,30"></path>
+              <circle class="dot" cx="14" cy="46" r="3.5"></circle>
+              <circle class="dot" cx="306" cy="30" r="3.5"></circle>
+            </svg>
+          </div>
+
+          <div class="leg">
+            <span class="glyph">⌂</span>
+            <span class="detail">
+              <span class="name">Memmo Alfama</span>
+              <span class="sub">4★ · Alfama · rooftop pool · $189/night × 4</span>
+            </span>
+            <span class="price">$756</span>
+          </div>
+
+          <div class="total">
+            <span class="lab">trip total</span>
+            <span class="amt"><span class="odo" data-odo="1840" data-prefix="$">$0</span></span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ RIGHT: the engineering (HERO) ============ -->
+    <section class="col">
+      <div class="col-h"><b>engineering</b> · live this session</div>
+      <div class="inspector">
+
+        <!-- live tail -->
+        <div class="term crt" style="border-radius:6px">
+          <div class="term-pad">
+            <div class="tail" id="tail"></div>
+          </div>
+        </div>
+
+        <!-- orchestration pipeline -->
+        <div class="term" style="border-radius:6px; margin-top:12px">
+          <div class="term-pad">
+            <div class="dim" style="margin-bottom:8px">orchestration</div>
+            <div class="pipe" aria-label="agent pipeline">
+              <span class="node done">●&nbsp;create</span><span class="arr">─▶</span>
+              <span class="node done">●&nbsp;search</span><span class="arr">─▶</span>
+              <span class="node active">◉&nbsp;distill</span><span class="arr">─▶</span>
+              <span class="node">○&nbsp;stage</span><span class="arr">─▶</span>
+              <span class="node">○&nbsp;promote</span><span class="arr">─▶</span>
+              <span class="node">○&nbsp;render</span>
+              <span class="packet" aria-hidden="true"></span>
+            </div>
+
+            <div class="timeline" style="margin-top:14px">
+              <div class="dim" style="margin-bottom:6px">tool timeline</div>
+              <div class="row"><span class="hi">flight_search</span><span class="lat">412ms</span><span class="ok">✓</span></div>
+              <div class="row"><span class="hi">hotel_search</span><span class="lat">503ms</span><span class="ok">✓</span></div>
+              <div class="row"><span class="hi">read_trip</span><span class="lat">71ms</span><span class="ok">✓</span></div>
+              <div class="row"><span class="hi">promote_flights</span><span class="lat">88ms</span><span class="ok">✓</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- scoreboard -->
+        <div class="term" style="border-radius:6px; margin-top:12px">
+          <div class="term-pad">
+            <div class="dim" style="margin-bottom:10px">scoreboard</div>
+            <div class="score">
+              <div class="stat"><div class="lab">turns / tools</div><div class="num">3 <small>turns</small> · 6 <small>tools</small></div></div>
+              <div class="stat"><div class="lab">tools exposed</div><div class="num">9 <small>of 79</small></div></div>
+              <div class="stat"><div class="lab">tokens in / out</div><div class="num">1.2k <small>/ 312</small></div></div>
+              <div class="stat">
+                <div class="lab">per-turn latency</div>
+                <div class="num"><span class="spark" id="spark"></span></div>
+              </div>
+            </div>
+
+            <div class="saved">
+              <div class="big"><span class="odo" data-odo="3120" data-suffix=" tok">0 tok</span></div>
+              <div class="cap">context kept <i>out</i> of the model — tool-catalog delta + patch diffs +
+                template render + search distillation. Real, not theoretical.</div>
+            </div>
+
+            <div class="board-row"><span class="k">observer effect</span>
+              <span class="v ok">+0 model tokens · ~7KB client · instrument &lt;1ms</span></div>
+          </div>
+        </div>
+
+        <!-- behind the scenes -->
+        <details class="fold" style="margin-top:12px">
+          <summary>behind the scenes — production capabilities</summary>
+          <div class="cards">
+            <div class="bts"><div class="t">Edge-native bot-defeat as a discipline</div>
+              <div class="c">23-supplier anti-bot catalog; TLS/JA3 from a Worker where the industry uses Playwright+VMs.</div></div>
+            <div class="bts"><div class="t">AI multi-persona QA + Judge</div>
+              <div class="c">13 personas × 22 scenarios make real MCP calls; an AI Judge scores 4 weighted dimensions, self-files issues.</div></div>
+            <div class="bts"><div class="t">/onboard vendor pipeline</div>
+              <div class="c">probe → classify → scaffold → wire → test → staged commit, in one command. Audit mode diffs against baselines.</div></div>
+            <div class="bts"><div class="t">Commission firewall (LAW 1)</div>
+              <div class="c">The client view is provably free of advisor economics — codified law with a grep-verify on the render path.</div></div>
+            <div class="bts"><div class="t">One server → Claude + ChatGPT</div>
+              <div class="c">OAuth 2.1 + DCR; per-user URL+token; tier-gated catalog locked per session. The driving model is swappable.</div></div>
+            <div class="bts"><div class="t">Scale</div>
+              <div class="c">119 tool registrations, ~30 supplier adapters — all on Workers fetch(), no browser/VM for anything worker-viable.</div></div>
+          </div>
+        </details>
+
+        <!-- business case -->
+        <details class="fold">
+          <summary>the business case — subscription vs API</summary>
+          <table class="tiers">
+            <thead><tr><th>plan</th><th>$/mo</th><th>window</th><th>est. tok/mo</th></tr></thead>
+            <tbody>
+              <tr><td>Free</td><td>$0</td><td>a few chats</td><td>—</td></tr>
+              <tr><td>Pro</td><td>$20</td><td>44k</td><td>1.32M</td></tr>
+              <tr><td>Max 5×</td><td>$100</td><td>88k</td><td>2.64M</td></tr>
+              <tr><td>Max 20×</td><td>$200</td><td>220k</td><td>6.60M</td></tr>
+            </tbody>
+          </table>
+          <div class="disc">Estimated — Anthropic meters by rolling 5-hour windows + weekly caps, not monthly
+            token quotas; community-observed, shared across claude.ai + Claude Code. The demo's marginal cost is
+            $0: it rides the visitor's own subscription window.</div>
+        </details>
+
+      </div>
+    </section>
+  </main>
+
+  <footer class="meta">
+    <span><b>honest by design:</b> every number above is this session's real telemetry — no invented multipliers.</span>
+    <span style="margin-left:auto">this interface was itself built by a coding agent · <a href="#" id="meta-toggle">why that matters →</a></span>
+  </footer>
+
+</div>
+
+<script>
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* ---- split-flap: render data-flap strings as flap cells ---- */
+  document.querySelectorAll('.flap[data-flap]').forEach(el => {
+    const txt = el.getAttribute('data-flap');
+    el.innerHTML = '';
+    for (const ch of txt) { const b = document.createElement('b'); b.textContent = ch === ' ' ? ' ' : ch; el.appendChild(b); }
+  });
+
+  /* ---- boot sequence (skippable) ---- */
+  const bootEl = document.getElementById('boot');
+  const bootSteps = [
+    'voygent · cold start…',
+    ' <span class="ok">isolate warm</span>',
+    ' · tools <span class="hi">9/79</span> loaded',
+    ' · MCP session locked',
+  ];
+  function renderBoot(n){ bootEl.innerHTML = '$ ' + bootSteps.slice(0,n).join('')
+     + (n < bootSteps.length ? '<span class="cursor"></span>' : ' <button id="skip" hidden></button>'); }
+  if (reduce) { bootEl.innerHTML = '$ voygent · cold start… <span class="ok">isolate warm</span> · tools <span class="hi">9/79</span> loaded · MCP session locked'; }
+  else {
+    let n = 0; renderBoot(0);
+    const bt = setInterval(() => { n++; renderBoot(n); if (n >= bootSteps.length) clearInterval(bt); }, 520);
+  }
+
+  /* ---- live tail: type the wrangler-tail log in ---- */
+  const tailEl = document.getElementById('tail');
+  const tailLines = [
+    ['prompt','$ voygent tail --session live'],
+    ['dim',   '─ POST /chat · session 0c1a…  msg #3'],
+    ['',      'tool_use  flight_search  {from:"JFK", to:"LIS", depart:"2026-09-22"}'],
+    ['ok',    '  ↳ 200  412ms  3 candidates  · supplier 18.4KB → model 1.1KB (distilled)'],
+    ['',      'tool_use  hotel_search   {city:"Lisbon", budget:"mid"}'],
+    ['ok',    '  ↳ 200  503ms  5 candidates'],
+    ['',      'tool_use  promote_flights / promote_hotels → folio patch'],
+    ['ok',    '  ↳ committed  88ms  · folio rev 4'],
+  ];
+  function lineHTML(cls, text){ return `<span class="line ${cls}">${text.replace(/</g,'&lt;')}</span>`; }
+  if (reduce) { tailEl.innerHTML = tailLines.map(([c,t]) => lineHTML(c,t)).join(''); }
+  else {
+    let i = 0;
+    (function next(){
+      if (i >= tailLines.length) { tailEl.insertAdjacentHTML('beforeend','<span class="line prompt">$ <span class="cursor"></span></span>'); return; }
+      const [c,t] = tailLines[i++];
+      tailEl.insertAdjacentHTML('beforeend', lineHTML(c,t));
+      setTimeout(next, 360);
+    })();
+  }
+
+  /* ---- odometer count-up ---- */
+  function countUp(el){
+    const target = +el.getAttribute('data-odo');
+    const pre = el.getAttribute('data-prefix') || '';
+    const suf = el.getAttribute('data-suffix') || '';
+    if (reduce) { el.textContent = pre + target.toLocaleString() + suf; return; }
+    const dur = 1100, t0 = performance.now();
+    (function tick(now){
+      const p = Math.min(1, (now - t0) / dur);
+      const e = 1 - Math.pow(1 - p, 4); // ease-out-quart
+      el.textContent = pre + Math.round(target * e).toLocaleString() + suf;
+      if (p < 1) requestAnimationFrame(tick);
+    })(t0);
+  }
+  // start odometers once the route arc has had a beat
+  setTimeout(() => document.querySelectorAll('.odo').forEach(countUp), reduce ? 0 : 900);
+
+  /* ---- sparkline (real-ish per-turn latency: 3 turns) ---- */
+  const sparkData = [9, 14, 7, 13, 5, 11]; // tool latencies, normalized bars
+  const spark = document.getElementById('spark');
+  const max = Math.max(...sparkData);
+  sparkData.forEach(v => { const i = document.createElement('i'); i.style.height = (3 + (v/max)*11) + 'px'; spark.appendChild(i); });
+
+  /* ---- meta footer toggle ---- */
+  document.getElementById('meta-toggle').addEventListener('click', e => {
+    e.preventDefault();
+    alert('The thesis of this demo is that a coding agent can build production-grade, non-generic software — '
+        + 'including this interface. The split-flap board, the CRT inspector, the orchestration packet: '
+        + 'all hand-built, all in service of one idea — show the work, honestly.');
+  });
+</script>
+</body>
+</html>

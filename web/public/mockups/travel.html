@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Voygent · travel cut (coming next)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="./_system.css">
+<style>
+  body{background:var(--board);color:var(--ink);min-height:100vh;display:flex;flex-direction:column}
+  header{display:flex;align-items:center;gap:16px;padding:16px 24px;border-bottom:1px solid var(--line)}
+  .logo{font:700 1.5rem/1 var(--sans);letter-spacing:-.03em}.logo span{color:var(--amber)}
+  .by{font:400 .8125rem/1 var(--mono);color:var(--muted)}
+  header .cut-switch{margin-left:auto}
+  main{flex:1;display:grid;place-items:center;text-align:center;padding:24px}
+  .kick{font:500 .8125rem/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--amber);margin-bottom:16px}
+  h1{font:700 clamp(2rem,6vw,2.75rem)/1.05 var(--sans);letter-spacing:-.03em;margin:0 0 16px}
+  p{color:var(--muted);max-width:48ch;margin:0 auto;font-size:1.125rem;line-height:1.55}
+  .back{margin-top:32px;font:500 .8125rem/1 var(--mono);color:var(--amber);text-decoration:none}
+  .back:hover{text-decoration:underline}
+</style></head>
+<body>
+  <header>
+    <span class="logo">voygent<span>.</span></span><span class="by">built by Neil Roberts</span>
+    <nav class="cut-switch" aria-label="audience cut">
+      <a href="./interviewer.html">interviewer</a>
+      <a href="./recruiter.html">recruiter</a>
+      <a href="./investor.html">investor</a>
+      <a href="./travel.html">travel</a>
+    </nav>
+  </header>
+  <main>
+    <div>
+      <div class="kick">travel cut</div>
+      <h1>Coming next</h1>
+      <p>Folio quality and supplier breadth forward — trustworthy and polished, the least terminal of the four. Built off the same design system once the interviewer direction is signed off.</p>
+      <a class="back" href="./interviewer.html">→ see the interviewer cut (live)</a>
+    </div>
+  </main>
+</body></html>
