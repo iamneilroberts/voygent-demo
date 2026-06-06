@@ -64,6 +64,37 @@ the winner into `styles.css`/components is a later session.
 earns its place), generous and consistent spacing, and ONE distinctive signature element per theme. Avoid:
 gradient-on-everything, emoji-as-design, centered-card-soup, the generic "AI assistant" purple.
 
+## Eye candy & interface flexes (the meta-flex: prove a coding agent can build elegant, non-generic UI)
+Neil wants deliberate "flex" moments that show craft — the *interface itself* is evidence that an agent can
+produce something that doesn't look like every other AI app. The brief: **elegant restraint + a few signature
+set-pieces**, not maximalism. Each flex must serve the theme, stay honest (no faked data/metrics), and respect
+`prefers-reduced-motion`. Lean on `impeccable:i-animate`, `i-delight`, `i-bolder` for these.
+
+Candidate flexes (pick a few that fit the chosen theme — don't do all of them):
+- **Terminal Inspector set-pieces** (interviewer cut): a `wrangler tail`-style **live log that types in** with a
+  blinking block cursor; the orchestration pipeline drawn in box-drawing chars with an **animated "packet" dot
+  traveling stage→stage** and nodes that pulse when active; a subtle **CRT/phosphor** treatment (faint scanline
+  + glow, very restrained — not a gimmick); a short, **skippable boot sequence** ("voygent · cold start… isolate
+  warm… tools 9/79 loaded") that earns the terminal framing.
+- **Odometer / count-up** readouts for tokens, cost, "context kept out of context" — numbers roll up as the run
+  proceeds (real values, animated reveal).
+- **Live folio assembly choreography** (recruiter cut): cards **slide/flip in** as each promote lands
+  (boarding-pass flip motif), the **price total ticks up** on an odometer, and an **SVG route arc draws** origin→
+  destination on a minimalist map/globe as the flight commits. This is the "wow, it's building itself" moment.
+- **Split-flap / departure-board** animation for the trip title or section headings (ties the travel theme to
+  the engineering theme).
+- **Sparklines** for per-turn latency / tokens in the scoreboard (`btop`-style), so the panel feels alive.
+- **Designed micro-interactions**: eased height transitions on tool-row expand, intentional hover/focus states
+  and focus rings (designed, not browser-default), tasteful depth/shadow, maybe a subtle grain texture.
+- **Custom iconography / a real wordmark** instead of the "V" lettermark + emoji (low priority, high polish).
+- **One honest meta-touch**: e.g. a quiet footer line or `?`-toggle noting the interface was itself built by a
+  coding agent — a wink that reinforces the thesis. Keep it classy, not a gimmick.
+
+**Craft signals worth showing on purpose** (these read as "senior front-end", not slop): `prefers-reduced-motion`
+fallbacks, 60fps transforms (animate `transform`/`opacity`, not layout), no CLS, keyboard-navigable + visible
+focus, and motion that has *easing and intent* rather than linear fades. Run `impeccable:i-polish` as the last
+pass on the chosen direction.
+
 ## Hosting the mockups (so Neil can view them remotely)
 Recommended **rapid** path — serve them as static assets off the already-deployed demo Worker:
 - Drop mockups in `web/public/mockups/` (vite copies `web/public/*` to `dist-web/` root on build), e.g.
