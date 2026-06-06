@@ -59,82 +59,127 @@ provider.stream ─▶ loop.ts ──emit──▶ session-do emit wrapper ─�
 
 Add to the `ServerEvent` union (discriminated by `kind` under one `type: "inspector"`):
 
+Every inspector event carries `exchangeId` (a per-`/chat`-call uuid, minted in the DO) so the client groups
+robustly without inferring boundaries from stream timing (Codex NICE-TO-HAVE).
+
 ```ts
-| { type: "inspector"; kind: "tool"; turn: number; name: string;
+| { type: "inspector"; kind: "tool"; exchangeId: string; turn: number; name: string;
     args: Record<string, unknown>; result: string; latencyMs: number; ok: boolean }
-| { type: "inspector"; kind: "turn"; turn: number;
+| { type: "inspector"; kind: "turn"; exchangeId: string; turn: number;
     inputTokens: number; outputTokens: number;
     cacheReadTokens: number; cacheCreationTokens: number; costUsd: number }
-| { type: "inspector"; kind: "savings"; mechanism: "patch" | "template" | "toolCatalog" | "searchDistill";
-    tokensSaved: number; detail: string }
-| { type: "inspector"; kind: "overhead";
-    instrumentationMs: number; instrumentationBytes: number; addedModelTokens: 0;
-    folioReprojectMs?: number; note?: string }
+| { type: "inspector"; kind: "savings"; exchangeId: string;
+    mechanism: "patch" | "template" | "toolCatalog" | "searchDistill";
+    tokensSaved: number; basis: "chars/4"; scope: "perTurn" | "perRender" | "aggregate";
+    detail: string }
+| { type: "inspector"; kind: "overhead"; exchangeId: string;
+    instrumentationMs: number | null; instrumentationBytes: number; addedModelTokens: 0;
+    folioReprojectMs?: number | null; note?: string }
+| { type: "inspector"; kind: "summary"; exchangeId: string;
+    turns: number; toolCalls: number; exposedToolCount: number; fullToolCount: number;
+    inputTokens: number; outputTokens: number; cacheReadTokens: number; cacheCreationTokens: number;
+    costByModel: { haiku: number; sonnet: number; opus: number } }
 ```
 
 - The existing `{ type: "tool"; phase; summary }` event **stays** (the ChatView chip strip uses it). The
   inspector `tool` event is the richer, persisted twin.
 - `addedModelTokens` is the literal `0` — encoded in the type to make the central honesty claim
   unmissable: instrumentation streams on a side channel and never enters model context.
+- `basis`/`scope` on every savings event prevent the UI from summing unlike quantities (Codex): only
+  `scope:"aggregate"` and `scope:"perTurn"` are summed; `perRender` is shown as a latest/max, not added.
+- **`summary` event** carries the all-three-model `costByModel` **computed server-side** (via the private
+  `estimateCostUsd`/`PRICING`), so the client renders the cost meter + business case **without duplicating
+  pricing** (Codex IMPORTANT). It also carries the real `exposedToolCount`/`fullToolCount` (no hardcoding).
+- Timer fields are `number | null`: `null` = "below timer resolution" (Workers coarsen `Date.now()`).
 
 ### 3.2 Worker data path
 
 **`worker/inspector.ts` (net-new, pure + unit-tested):**
-- `estTokens(s: string): number` → `Math.ceil(s.length / 4)`. Labeled everywhere as "approx (chars÷4)".
-- `withInspectorCost(ev: ServerEvent, model: string): ServerEvent` → if `ev` is `kind:"turn"` with
-  `costUsd === 0`, return a copy with `costUsd = estimateCostUsd(model, {…tokens})`; else passthrough.
-- `scrubAdvisorKeys(raw: string): string` → defense-in-depth: parse JSON; recursively drop keys matching
-  `/^(commission|commissionable|netRate|net_rate|markup|advisorNotes|advisor_only)/i`; re-stringify. On
-  parse failure, return input unchanged. (Search candidates carry none today; this guarantees the panel
-  can never leak economics even if a future fixture did.)
-- `ORCH_STAGES` + `stageForTool(name)` → maps tool name → orchestration stage
-  (`save_trip`→`create`; `flight_search`/`hotel_search`→`search`; `flight_list`/`hotel_list`→`distill`;
-  `patch_trip`→`stage`; `promote_*`→`promote`; folio event→`render`).
+- `estTokens(s: string): number` → `Math.ceil(s.length / 4)`. **Token estimate only** — labeled "approx
+  (chars÷4)" everywhere. **Never** used for wire-byte accounting.
+- `utf8Bytes(s: string): number` → `new TextEncoder().encode(s).length`. **Wire bytes** (UTF-8), used for
+  `instrumentationBytes` and the fixture `responseBytes`. (Codex CRITICAL: JS `.length` is UTF-16 code
+  units, not bytes — keep these two functions strictly separate.)
+- `withInspectorCost(ev, model)` → injects `costUsd` into a zero-cost `kind:"turn"` event via
+  `estimateCostUsd`; passthrough otherwise.
+- `sessionCostByModel(usage)` → `{ haiku, sonnet, opus }` via `estimateCostUsd` per model — feeds the
+  `summary` event so the client never needs the private `PRICING`.
+- `scrubAdvisor(value: unknown, depth = 0): unknown` → defense-in-depth, applied to **both `args` and
+  `result`** (Codex IMPORTANT). Recursively drops keys matching
+  `/^(commission|commissionable|netRate|net_rate|markup|advisorNotes|advisor_only)/i`; **max depth 8**,
+  bails to a `"[scrub: too deep]"` sentinel below that (Codex NICE-TO-HAVE: bounded recursion). String
+  wrappers `scrubArgs(obj)` / `scrubResultText(raw)` parse→scrub→stringify; on parse failure return input.
+- `ORCH_STAGES` + `stageForTool(name)` → tool name → orchestration stage.
 
 **`worker/agent/loop.ts` (touched):**
-- Wrap `callTool` with `const t0 = Date.now(); … ; const latencyMs = Date.now() - t0;`.
-- After each tool call, `emit({ type:"inspector", kind:"tool", turn, name, args: t.input,
-  result: scrubAdvisorKeys(content), latencyMs, ok })` (ok = no thrown error / no `ERROR:` prefix).
-- Accumulate per-turn usage inside the turn (the loop already receives `usage` stream events); at turn end
-  `emit({ type:"inspector", kind:"turn", turn, …tokens, costUsd: 0 })`. (`onUsage` server ledger unchanged.)
-- The loop imports only the pure `scrubAdvisorKeys` — it stays pricing-agnostic.
+- Wrap `callTool` with `Date.now()` start/end for `latencyMs`.
+- After each tool call, emit `kind:"tool"` with `exchangeId`, `turn`, `args: scrubArgs(t.input)`,
+  `result: scrubResultText(content)`, `latencyMs`, `ok` (ok = no thrown error / no `ERROR:` prefix).
+- **Per-turn usage semantics (Codex IMPORTANT):** the provider yields `usage` near `message_stop`; the loop
+  **accumulates all usage events within one `provider.stream` call** and emits **exactly one** `kind:"turn"`
+  event **per provider call, including the final no-tool answer turn** (`costUsd: 0`, filled by the wrapper).
+- The loop imports only pure helpers (`scrubArgs`/`scrubResultText`) — it stays pricing-agnostic.
 
 **`worker/session-do.ts` (touched):**
+- Mint `exchangeId = crypto.randomUUID()` per `/chat`; thread it into the loop so every inspector event
+  carries it.
 - `emit: (e) => mux.send(withInspectorCost(e, model))` — injects real cost into turn events.
-- **Tool-catalog savings (once):** after `(await mcp.listTools())` and `.filter(DEMO_TOOLS…)`, emit
-  `savings:"toolCatalog"` with `tokensSaved = estTokens(full) − estTokens(filtered)` and
-  `detail = "70 of 79 tool schemas withheld from every turn"`.
-- **patch savings:** keep `this.lastTripJson` updated whenever `onFolio` reads the trip. Wrap the `callTool`
-  closure so a `patch_trip` call emits `savings:"patch"` with
-  `tokensSaved = estTokens(this.lastTripJson) − estTokens(JSON.stringify(updates))`,
-  `detail = "incremental patch vs full-trip rewrite"`.
-- **template savings:** in `onFolio`, after building `folio`, emit `savings:"template"` with
-  `tokensSaved = estTokens(JSON.stringify(folio))`, `detail = "folio rendered by deterministic code — 0 model tokens"`.
-- **searchDistill savings:** the replay returns slimmed candidates; compare against the fixture's recorded
-  real prod response size (see §3.3) → emit `savings:"searchDistill"` with
-  `tokensSaved = rawTokensEst − estTokens(returnedResult)`,
-  `detail = "prod search returned ~{rawTokensEst} tok → model saw ~{slim} tok"`.
-- **Observer-effect/overhead:** measure additively (see §7); emit **one** aggregated `kind:"overhead"` event
-  at stream end per `/chat` call: `instrumentationMs` (best-effort timer summed over the inspector blocks),
-  `instrumentationBytes` (exact sum of `encodeSse(ev).length` for every inspector-type event),
-  `addedModelTokens: 0`, optional `folioReprojectMs`.
+- **Tool-catalog savings (Codex CRITICAL — reconcile the §3.2/§7.1 contradiction):** capture `fullTools`
+  **before** `.filter(DEMO_TOOLS…)`. Emit one `savings:"toolCatalog"` with `scope:"perTurn"`,
+  `tokensSaved = estTokens(JSON.stringify(full)) − estTokens(JSON.stringify(filtered))` (the **per-turn**
+  schema delta) and `detail` derived from real counts. The UI multiplies by the actual turn count from the
+  `summary` event; **never hardcode "70 of 79"** — `exposedToolCount`/`fullToolCount` ride the summary.
+- **patch savings (Codex IMPORTANT — guardrails):** baseline = the **raw unwrapped staging trip JSON
+  before any `lastPromoted` overlay**, cached on each `onFolio` read as `this.lastBaselineTripJson`. On a
+  `patch_trip` call emit `savings:"patch"` `scope:"perTurn"` with
+  `tokensSaved = max(0, estTokens(baseline) − estTokens(JSON.stringify(updates)))` — **emit only when a
+  baseline exists** (skip the first patch before any read), and **clamp at 0** (never negative).
+- **template savings (Codex CRITICAL — counterfactual, no double-count):** `onFolio` can fire after several
+  mutating tools, so do **not** sum. Track `this.maxFolioTokens` per exchange and emit a single
+  `savings:"template"` `scope:"perRender"` at exchange end with
+  `tokensSaved = maxFolioTokens`, `detail = "deterministic render payload (chars÷4) the model never had to
+  generate — not a model-measured count"`. UI shows it as a latest/max, not added to the perTurn sum.
+- **searchDistill savings (Codex CRITICAL — measurable side channel):** `session-do` only sees the returned
+  string, so add `FixtureReplay.lastMeasurement(): { tool, modelFacingTokens } | null` set inside
+  `flightSearch`/`hotelSearch` (and the `flight_list`/`hotel_list` paths) to `estTokens(returnedText)` for
+  the **exact intercepted response**. After an intercepted search returns, look up the matching fixture
+  `meta[tool].rawTokensEst` (measured from `result.content[].text`, §3.3) and emit `savings:"searchDistill"`
+  `scope:"aggregate"` with `tokensSaved = max(0, rawTokensEst − modelFacingTokens)`. **Emit only when the
+  fixture has matching `meta`** (older fixtures → omit the card, never show a placeholder).
+- **Observer-effect/overhead (Codex IMPORTANT — ordering + circularity):** accumulate `instrumentationMs`
+  (best-effort timer summed over the inspector blocks; `null` if it reads 0/below-resolution) and
+  `instrumentationBytes` (sum of `utf8Bytes(encodeSse(ev))` over every inspector event **emitted so far**,
+  i.e. **excluding the overhead and summary events themselves** to avoid circularity). Emit the single
+  aggregated `kind:"overhead"` event **before `mux.close()`** in the `finally` (the close currently precedes
+  any post-loop work — the overhead + summary emits must come first). `addedModelTokens: 0`.
+- **Summary:** emit `kind:"summary"` (also before `mux.close()`) with session totals + `costByModel` from
+  `sessionCostByModel(usage)` + real tool counts.
 
 ### 3.3 Fixture re-capture (D8)
 
-`scripts/capture-fixtures.mjs` (touched) records, per route, the **real prod tool-response size + latency**:
-- In `rpc()`/`callTool()`, time the fetch (`Date.now()` around it) and measure `text.length`.
-- Persist into `worker/fixtures/<routeId>.json` a new `meta` block:
+`scripts/capture-fixtures.mjs` (touched) records, per route + **per intercepted tool**, the **real prod
+model-facing response size + latency** (Codex CRITICAL — measure the right thing, apples-to-apples):
+- Measure from the **`result.content[].text`** (the exact text the model would receive), **not** the
+  JSON-RPC envelope. `callTool()` already extracts that `text` — record `utf8Bytes(text)` and time the
+  fetch (`Date.now()` around it). Keyed per intercepted tool so it matches what the replay later measures.
+- Persist into `worker/fixtures/<routeId>.json` a new `meta` block, one entry per intercepted response:
   ```json
   "meta": {
     "flightSearch": { "rawTokensEst": 8230, "responseBytes": 32918, "prodLatencyMs": 5120 },
+    "flightList":   { "rawTokensEst": 8120, "responseBytes": 32480, "prodLatencyMs": 410  },
     "hotelSearch":  { "rawTokensEst": 6410, "responseBytes": 25640, "prodLatencyMs": 3380 },
+    "hotelList":    { "rawTokensEst": 6300, "responseBytes": 25200, "prodLatencyMs": 360  },
     "capturedAt": "2026-06-06"
   }
   ```
-  (`rawTokensEst = ceil(responseBytes/4)`.) These are **real measured prod numbers**, used to show
-  "prod search took ~5.1 s and returned ~8.2k tok; the demo replays it in <1 ms and the model sees ~1.1k."
-- `worker/fixtures/index.ts` (touched): add optional `meta` to the `Fixture` interface; tolerate its
-  absence (older fixtures) so the build never breaks before a re-capture.
+  `responseBytes = utf8Bytes(content.text)`; `rawTokensEst = estTokens(content.text)` (chars÷4 on the same
+  text). Real measured prod numbers → "prod search took ~5.1 s and returned ~8.2k tok; the demo replays it
+  in <1 ms and the model sees ~1.1k." The replay's `lastMeasurement()` (§3.2) measures the **same** keyed
+  response so the before/after are comparable.
+- `worker/fixtures/index.ts` (touched): add optional `meta?: Record<string, {rawTokensEst; responseBytes;
+  prodLatencyMs}> & {capturedAt?: string}` to the `Fixture` interface; tolerate its absence (older fixtures)
+  so the build never breaks before a re-capture, and the UI **omits** the search-distill card when `meta` is
+  missing (Codex NICE-TO-HAVE — no placeholder).
 - **This requires a capture run** with Neil's prod creds (the documented secret-safe invocation). It is an
   explicit plan step gated on Neil — it uses his per-user token and hits prod (SERP cost ~$0.01–0.02/call).
 
@@ -190,9 +235,10 @@ Add to the `ServerEvent` union (discriminated by `kind` under one `type: "inspec
 
 ### 5.1 The live numbers (real)
 - Tokens in/out, cache read/write: summed from real `kind:"turn"` events.
-- **Per-model cost of *this exact session*** via `estimateCostUsd(M, realSessionUsage)` for haiku / sonnet /
-  opus — e.g. "this trip = **$0.026** haiku · **$0.13** sonnet · **$0.65** opus" (real tokens × real
-  `PRICING`). Shown only when `[show $]` is toggled on (D1).
+- **Per-model cost of *this exact session*** comes from the `summary` event's `costByModel` (computed
+  server-side via the private `estimateCostUsd`/`PRICING` — the client never duplicates pricing; Codex
+  IMPORTANT) — e.g. "this trip = **$0.026** haiku · **$0.13** sonnet · **$0.65** opus". Shown only when
+  `[show $]` is toggled on (D1).
 
 ### 5.2 Tier table (clearly-labeled estimate — D4)
 
@@ -227,10 +273,11 @@ Add to the `ServerEvent` union (discriminated by `kind` under one `type: "inspec
    with trip complexity, volume, and model tier**, while the subscription stays flat-capped.
 
 **Math (anchored on *this session's real tokens* — honest):**
-- `sessionCostByModel[M] = estimateCostUsd(M, realSessionUsage)` (real).
+- `costByModel[M]` arrives in the `summary` event (server-computed; §3.1) — the real cost of this session
+  per model.
 - Usage scenarios (labeled assumption: this session ≈ one typical trip):
   Light = 2 trips/mo · Medium = 8 · Heavy = 20.
-- `appApiInference[M][scenario] = sessionCostByModel[M] × tripsMo`.
+- `appApiInference[M][scenario] = costByModel[M] × tripsMo`.
 - Rendered table per Voygent price point ($0 / $12 / $29):
 
 ```
@@ -250,12 +297,19 @@ Voygent MCP                    $V + $0 marginal inference (your Claude sub — l
 ## 7. Context economy + observer effect (region 1 — D7/D9)
 
 ### 7.1 Context-saved meter (hybrid)
-**Live-measured (chars÷4, labeled), summed into "≈N tokens kept out of the model this session":**
-- `patch` — incremental patch vs full-trip rewrite.
-- `template` — folio rendered by code = tokens the model never generated.
-- `toolCatalog` — (full − filtered) tool-schema tokens × turns.
-- `searchDistill` — recorded real prod response size (§3.3) vs the slim payload the model saw.
-- `cache` — derived from real `cacheReadTokens` ("reprocessed at ~10% cost").
+**Live-measured (chars÷4, labeled).** Each savings event carries `scope` so the UI sums only like
+quantities (Codex):
+- `patch` (`perTurn`) — incremental patch vs full-trip rewrite; clamped ≥0, baseline-gated (§3.2).
+- `toolCatalog` (`perTurn`) — per-turn schema delta (full − filtered); **UI multiplies by the actual turn
+  count** from the `summary` event (resolves the earlier "once vs ×turns" contradiction — Codex CRITICAL).
+- `searchDistill` (`aggregate`) — recorded real prod response size (§3.3) vs the slim payload the model saw.
+- `cache` (`aggregate`) — derived from real `cacheReadTokens` ("reprocessed at ~10% cost").
+- `template` (`perRender`) — folio rendered by code; shown as a **latest/max**, **not summed** into the
+  above (counterfactual, double-count-safe; §3.2). Labeled "deterministic render payload, not a
+  model-measured count."
+
+The headline "≈N tokens kept out of the model this session" sums **only** the `perTurn` (× turns) and
+`aggregate` mechanisms; `template` is displayed alongside as a separate counterfactual figure.
 
 **Static cited cards (not exercised live):**
 - **R2 offload** — `add_trip_image` / `add_trip_document` store binaries on R2; only a URL (~10 tok) enters
@@ -269,19 +323,23 @@ Three honest buckets, never conflated with each other:
   rendering. (The numbers that would exist in production.)
 - **Demo-harness overhead** — fixture replay matching/slimming, folio re-projection reads. Labeled "demo
   scaffolding, not the product." Note: supplier searches are **replayed from cached real results
-  (<1 ms)** — in production these are live network calls (the recorded `prodLatencyMs`, §3.3); trip-state
-  runs live against staging.
+  (near-instant; rendered as "below timer resolution" when the timer can't resolve it)** — in production
+  these are live network calls (the recorded `prodLatencyMs`, §3.3); trip-state runs live against staging.
 - **Instrumentation overhead** (the Inspector itself):
   - **Added model tokens: 0** (exact, headline — inspector data is a side channel, never in context).
-  - **Client payload: ~N KB** (exact — sum of `encodeSse(ev).length` over inspector events).
-  - **CPU: <X ms** (best-effort timer around the instrumentation block).
+  - **Client payload: ~N KB** (exact — sum of `utf8Bytes(encodeSse(ev))` over inspector events, UTF-8 bytes
+    not UTF-16 `.length`; Codex CRITICAL).
+  - **CPU: `<X ms` or "below timer resolution"** — when the timer reads `0`/`null` (Workers coarsening) the
+    UI renders "below timer resolution," never `0 ms` dressed as a measurement.
 
 **Telemetry-vs-plain measurement method + caveat:** for each intercepted tool call, record `coreMs` (the
 actual `callTool`) and `instrumentationMs` (estTokens + scrub + stringify + emit) → scoreboard shows
 "tool work ~X ms · instrumentation ~Y ms (Z%)". **Caveat (documented in the expander):** Workers coarsen
-`Date.now()` (advances on I/O), so sub-millisecond CPU instrumentation may read `0`/below-resolution — we
-report that honestly rather than fabricate a number. **Byte counts and added-model-tokens (0) are exact**
-regardless of timer granularity, so the strongest claims don't depend on the soft timer.
+`Date.now()` (advances on I/O), so sub-millisecond CPU instrumentation may read `0`/below-resolution. When
+**either** side is `0`/`null`, the UI **suppresses the percentage** and the `<1 ms` replay claim and shows
+"below timer resolution" instead (Codex IMPORTANT — no timer-dependent load-bearing claim). **Byte counts
+and added-model-tokens (0) are exact** regardless of timer granularity, so the strongest claims never depend
+on the soft timer.
 
 **Production telemetry (static card, Behind the scenes):** `src/telemetry/index.ts` emits one **non-blocking**
 Analytics-Engine data point per tool call at the `tierGatedServer` chokepoint, **no-ops when `env.AE` is
@@ -323,7 +381,8 @@ built on. The live panel above shows only what THIS session actually did."*
 
 - Live region shows **only measured/real** data from this session. Estimates (chars÷4, tier allotments,
   business-case projections) are **labeled inline** every time.
-- `scrubAdvisorKeys` on every streamed raw result (defense-in-depth; the firewall is itself a flex).
+- `scrubAdvisor` on **both `args` and `result`** of every streamed inspector tool event (defense-in-depth,
+  bounded recursion; the firewall is itself a flex) — Codex IMPORTANT.
 - No fabricated numbers: where a real number isn't available (production-telemetry overhead, supplier-raw
   size beyond the MCP response), present qualitatively + cited rather than invent.
 - Static cards are framed as production capabilities, each citing a verifiable path; nothing aspirational.
@@ -336,16 +395,41 @@ built on. The live panel above shows only what THIS session actually did."*
 
 ## 10. Testing
 
-- `shared/events.test.ts` — encode/decode the four new inspector variants (incl. `addedModelTokens: 0`).
-- `worker/agent/loop.test.ts` — inspector `tool` events carry `name/args/result`, `ok===true`, numeric
-  `latencyMs`; a thrown tool emits `ok===false`; a `turn` event carries token fields.
-- `worker/inspector.test.ts` (net-new) — `estTokens`; `withInspectorCost` (injects real cost only into
-  zero-cost turn events); `scrubAdvisorKeys` (drops advisor-only keys, passes through non-JSON);
-  `stageForTool` mapping.
+- `shared/events.test.ts` — encode/decode the five new inspector variants (incl. literal `addedModelTokens: 0`,
+  the `summary` `costByModel` shape, `basis`/`scope`, and `exchangeId`).
+- `worker/agent/loop.test.ts` — inspector `tool` events carry `exchangeId/name/args/result`, `ok===true`,
+  numeric `latencyMs`; a thrown tool emits `ok===false`; **exactly one** `turn` event per provider call
+  (incl. the final no-tool turn) with accumulated token fields.
+- `worker/inspector.test.ts` (net-new) — `estTokens` vs `utf8Bytes` (assert they differ on a multibyte
+  string); `withInspectorCost` (injects real cost only into zero-cost turn events); `sessionCostByModel`
+  (three keys, sonnet fallback); `scrubAdvisor` (drops advisor-only keys in both args and result, depth-8
+  bound returns the sentinel, passes through non-JSON); `stageForTool` mapping.
+- `worker/inspector.test.ts` — savings math guards: patch clamps ≥0 and is baseline-gated; toolCatalog
+  emits a per-turn delta; searchDistill omitted when fixture `meta` absent.
 - `worker/fixtures/index` — tolerate fixtures with and without the new `meta` block.
 - **UI:** verified via `rm -rf dist-web && VITE_API_BASE="" npm run build:web` + Playwright screenshot
   (web/src has no automated tests today; matches repo norm). Manual E2E via `/tmp/demo-e2e.mjs`.
 - Full suite (`npm run test`, currently 42 green) + `npx tsc --noEmit` must stay green.
+
+---
+
+## 10b. Implementation slicing (Codex scope rec — adopt)
+
+The full feature is too large for one clean plan; build in three shippable slices so the first is honest and
+not blocked on the fixture re-capture or the trickier savings math:
+
+- **Slice 1 — Live inspector spine:** event union (`tool`/`turn`/`summary` + `exchangeId`), loop latency +
+  `tool`/`turn` emission, `scrubArgs`/`scrubResultText`, cost injection, `summary` event, drawer region 1
+  (orchestration graph, timeline w/ expand, scoreboard, cost meter + tier table). Ships a complete honest
+  Inspector with **no** savings/overhead and **no** recapture dependency.
+- **Slice 2 — Measured savings + overhead:** `savings` + `overhead` events, the four live mechanisms
+  (toolCatalog/patch/template/searchDistill) with their guards, `utf8Bytes` accounting, the capture-script
+  change + **the gated recapture run**, fixture `meta` + `lastMeasurement()` side channel, context-saved
+  meter + observer-effect breakdown.
+- **Slice 3 — Static + business case:** Behind-the-scenes cards (`inspector-data.ts`) + the business-case
+  section (parametric table off the `summary` `costByModel`).
+
+Each slice keeps `npm run test` + `tsc` green and is independently demoable.
 
 ---
 
