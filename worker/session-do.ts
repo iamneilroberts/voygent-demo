@@ -1,5 +1,6 @@
 import { SseMultiplexer } from "./agent/sse";
 import { runAgentLoop } from "./agent/loop";
+import { createBoardBuilder, type BoardBuilder } from "./agent/boards";
 import { tripToFolio } from "./agent/folio-sync";
 import { McpClient } from "./mcp/client";
 import { FixtureReplay, type ReplayHelpers } from "./mcp/replay";
@@ -68,6 +69,19 @@ const SYSTEM_HINT =
   "4. Always stage with patch_trip using the FULL array value, never indexed paths like flights.0.x.\n" +
   "5. Briefly narrate what you're doing in chat; let the folio carry the details.";
 
+// Boards mode (claude skin): the UI renders flight/hotel candidates as clickable
+// option cards beside the chat, so the model must present-and-wait instead of
+// auto-picking. Appended to the seed message ONLY when the client opts in —
+// the default path's seed stays byte-identical.
+const BOARDS_WORKFLOW_OVERRIDE =
+  "WHEN PRESENTING OPTIONS (this overrides the auto-pick steps above): after flight_search/flight_list " +
+  "(and hotel_search/hotel_list) return candidates, STOP and let the traveler choose. Do NOT stage or " +
+  "promote a flight or hotel until the traveler tells you which option they picked. Present the options " +
+  "in one short, friendly sentence — the option cards render beside your message, so don't enumerate them " +
+  "in text — and end your turn. When the traveler replies with a chosen option id, stage THAT exact id " +
+  "with patch_trip and call the matching promote tool. For hotels the traveler may pick one or more. " +
+  "Never auto-select.";
+
 function utcDate(): string { return new Date().toISOString().slice(0, 10); }
 interface BudgetRec { date: string; spent: number; }
 
@@ -76,6 +90,10 @@ export class SessionDO {
   private tripId = `demo-${crypto.randomUUID().slice(0, 8)}`;
   private replay = new FixtureReplay(this.tripId);
   private lastBaselineTripJson: string | null = null;
+  // Latched from the first /chat body; the whole session runs in one mode.
+  private boardsMode = false;
+  // Session-scoped so search→list dedupe survives across exchanges.
+  private boardBuilder: BoardBuilder = createBoardBuilder();
   constructor(private state: DurableObjectState, private env: Env) {}
 
   // --- daily budget ledger (a single reserved DO instance, "__budget__") ---
@@ -107,13 +125,17 @@ export class SessionDO {
   }
 
   private async handleChat(req: Request): Promise<Response> {
-    const { message } = await req.json<{ message: string }>();
+    const { message, mode } = await req.json<{ message: string; mode?: string }>();
     const model = this.env.LLM_MODEL || DEFAULT_MODEL;
     const mcp = new McpClient(this.env.VOYGENT_MCP_URL, this.env.VOYGENT_MCP_BEARER);
     const provider = new ClaudeProvider(this.env.ANTHROPIC_API_KEY, model);
     const mux = new SseMultiplexer();
 
-    if (this.messages.length === 0) this.messages.push({ role: "user", content: `${SYSTEM_HINT}\n\nMy trip_id is ${this.tripId}.` });
+    if (this.messages.length === 0) {
+      this.boardsMode = mode === "boards";
+      const seed = SYSTEM_HINT + (this.boardsMode ? `\n\n${BOARDS_WORKFLOW_OVERRIDE}` : "");
+      this.messages.push({ role: "user", content: `${seed}\n\nMy trip_id is ${this.tripId}.` });
+    }
     this.messages.push({ role: "user", content: message });
 
     // Per-session cost telemetry (server-side only — never sent to the client).
@@ -203,6 +225,9 @@ export class SessionDO {
         await runAgentLoop({
           provider, tools, messages: this.messages, exchangeId,
           callTool,
+          buildBoard: this.boardsMode
+            ? (name, resultText) => this.boardBuilder(name, resultText, this.tripId)
+            : undefined,
           onFolio: async () => {
             const raw = await mcp.callTool("read_trip", { tripId: this.tripId });
             let parsed: any = {};

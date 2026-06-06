@@ -11,6 +11,9 @@ export interface AgentLoopArgs {
   onFolio: (lastTool: string, input: Record<string, unknown>) => Promise<void>;
   emit: (ev: ServerEvent) => void;
   onUsage?: (usage: TokenUsage) => void;     // server-side cost telemetry (NOT sent to the client)
+  // Boards mode (claude skin): map a list-tool result to an inline chooser
+  // `board` event, or null. Absent → no board events (default path unchanged).
+  buildBoard?: (toolName: string, resultText: string) => ServerEvent | null;
   maxTurns?: number;
   maxToolCalls?: number;
   exchangeId?: string;
@@ -65,6 +68,10 @@ export async function runAgentLoop(args: AgentLoopArgs): Promise<void> {
       catch (e) { content = `ERROR: ${(e as Error).message}`; ok = false; }
       const latencyMs = Date.now() - t0;
       emit({ type: "tool", tool: t.name, phase: "done", summary: content.slice(0, 120) });
+      if (ok && args.buildBoard) {
+        const board = args.buildBoard(t.name, content);
+        if (board) emit(board);
+      }
       emit({
         type: "inspector", kind: "tool", exchangeId, turn, name: t.name,
         args: scrubArgs(t.input), result: scrubResultText(content), latencyMs, ok,

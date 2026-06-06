@@ -101,6 +101,78 @@ describe("runAgentLoop", () => {
     expect(tool.exchangeId).toBe("EX1");
   });
 
+  it("emits a board event after the tool done event when buildBoard returns one", async () => {
+    const asstWithTool: AssistantMessage = {
+      role: "assistant",
+      content: [{ type: "tool_use", id: "tuB", name: "flight_search", input: { trip_id: "tB" } }],
+    };
+    const asstFinal: AssistantMessage = { role: "assistant", content: [{ type: "text", text: "Pick one!" }] };
+    const provider = fakeProvider([
+      [{ type: "tool-call", id: "tuB", name: "flight_search", input: { trip_id: "tB" } }, { type: "turn-complete", assistant: asstWithTool }],
+      [{ type: "text-delta", delta: "Pick one!" }, { type: "turn-complete", assistant: asstFinal }],
+    ]);
+    const out: ServerEvent[] = [];
+    await runAgentLoop({
+      provider, tools: [],
+      messages: [{ role: "user", content: "find flights" }] as ConversationMessage[],
+      callTool: async () => JSON.stringify({ status: "ok", candidates: [{ id: "serp:x" }] }),
+      onFolio: async () => {},
+      buildBoard: (name) => name === "flight_search"
+        ? { type: "board", kind: "flight", boardId: "b1", tripId: "tB", candidates: [{ id: "serp:x", title: "X", summary: "X" }] }
+        : null,
+      emit: (e) => out.push(e),
+    });
+    const types = out.map((e) => e.type);
+    const doneIdx = out.findIndex((e) => e.type === "tool" && (e as any).phase === "done");
+    const boardIdx = types.indexOf("board");
+    expect(boardIdx).toBeGreaterThan(doneIdx);
+    expect((out[boardIdx] as any).candidates[0].id).toBe("serp:x");
+  });
+
+  it("emits no board events when buildBoard is absent (default path unchanged)", async () => {
+    const asstWithTool: AssistantMessage = {
+      role: "assistant",
+      content: [{ type: "tool_use", id: "tuN", name: "flight_search", input: { trip_id: "tN" } }],
+    };
+    const asstFinal: AssistantMessage = { role: "assistant", content: [{ type: "text", text: "done" }] };
+    const provider = fakeProvider([
+      [{ type: "tool-call", id: "tuN", name: "flight_search", input: { trip_id: "tN" } }, { type: "turn-complete", assistant: asstWithTool }],
+      [{ type: "text-delta", delta: "done" }, { type: "turn-complete", assistant: asstFinal }],
+    ]);
+    const out: ServerEvent[] = [];
+    await runAgentLoop({
+      provider, tools: [],
+      messages: [{ role: "user", content: "find flights" }] as ConversationMessage[],
+      callTool: async () => JSON.stringify({ status: "ok", candidates: [{ id: "serp:x" }] }),
+      onFolio: async () => {},
+      emit: (e) => out.push(e),
+    });
+    expect(out.some((e) => e.type === "board")).toBe(false);
+  });
+
+  it("does not call buildBoard for a failed tool call", async () => {
+    const asstWithTool: AssistantMessage = {
+      role: "assistant", content: [{ type: "tool_use", id: "tuF", name: "flight_search", input: {} }],
+    };
+    const asstFinal: AssistantMessage = { role: "assistant", content: [{ type: "text", text: "x" }] };
+    const provider = fakeProvider([
+      [{ type: "tool-call", id: "tuF", name: "flight_search", input: {} }, { type: "turn-complete", assistant: asstWithTool }],
+      [{ type: "text-delta", delta: "x" }, { type: "turn-complete", assistant: asstFinal }],
+    ]);
+    const out: ServerEvent[] = [];
+    let buildCalls = 0;
+    await runAgentLoop({
+      provider, tools: [],
+      messages: [{ role: "user", content: "go" }] as ConversationMessage[],
+      callTool: async () => { throw new Error("boom"); },
+      onFolio: async () => {},
+      buildBoard: () => { buildCalls++; return null; },
+      emit: (e) => out.push(e),
+    });
+    expect(buildCalls).toBe(0);
+    expect(out.some((e) => e.type === "board")).toBe(false);
+  });
+
   it("marks ok=false when a tool throws", async () => {
     const asstWithTool: AssistantMessage = {
       role: "assistant", content: [{ type: "tool_use", id: "tuE", name: "hotel_search", input: {} }],
