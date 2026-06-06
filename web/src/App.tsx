@@ -83,7 +83,7 @@ export function App() {
         </section>
         <section className="engineering" data-eng={eng}>
           <Inspector
-            collapsed={eng !== "live"}
+            state={eng}
             // Manual collapse only applies once live; toggling during the pre-trip idle rail is a
             // no-op so a stray click can't latch `collapsed` and suppress the first-tool reveal.
             onToggleCollapse={() => { if (insTools.length > 0) setCollapsed((c) => !c); }}

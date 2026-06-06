@@ -1,4 +1,5 @@
 import { useState } from "react";
+import type { EngState } from "./lib/inspector-state";
 import { PLAN_TIERS, TIER_DISCLAIMER, TIER_SOURCES, BTS_CARDS, BTS_DISCLAIMER, VOYGENT_PRICE_POINTS, USAGE_SCENARIOS, BIZ_ASSUMPTION } from "./inspector-data";
 
 export interface InsTool {
@@ -65,10 +66,30 @@ function Card({ c }: { c: { title: string; claim: string; detail: string; source
 }
 
 export function Inspector(
-  { collapsed, onToggleCollapse, tools, turns, summaries, savings, overhead }:
-  { collapsed: boolean; onToggleCollapse: () => void; tools: InsTool[]; turns: InsTurn[]; summaries: InsSummary[]; savings: InsSavings[]; overhead: InsOverhead[] },
+  { state, onToggleCollapse, tools, turns, summaries, savings, overhead }:
+  { state: EngState; onToggleCollapse: () => void; tools: InsTool[]; turns: InsTurn[]; summaries: InsSummary[]; savings: InsSavings[]; overhead: InsOverhead[] },
 ) {
   const [showCost, setShowCost] = useState(false);
+
+  // Quiet rail: idle (pre-trip) or manually collapsed → render a thin vertical
+  // affordance instead of the full panel. Idle renders nothing interactive; the
+  // heavy body (and its focusable controls) is not in the tab order until live.
+  if (state !== "live") {
+    return (
+      <aside className="inspector term crt collapsed" role="complementary" aria-label="Engineering inspector">
+        {state === "idle" ? (
+          <div className="ins-rail" aria-hidden="true">
+            <span className="ins-rail-label">Engineering</span>
+          </div>
+        ) : (
+          <button className="ins-rail" onClick={onToggleCollapse} aria-label="Expand engineering inspector">
+            <span className="ins-rail-label">Engineering</span>
+            <span className="ins-rail-caret" aria-hidden="true">▸</span>
+          </button>
+        )}
+      </aside>
+    );
+  }
 
   const firedTools = new Set(tools.map((t) => t.name));
   const hasFolio = tools.some((t) => t.name.startsWith("promote_"));
@@ -102,9 +123,7 @@ export function Inspector(
     <aside className="inspector term crt" role="complementary" aria-label="Engineering inspector">
       <div className="ins-head">
         <strong><span className="prompt">▌</span> Engineering Inspector</strong>
-        <button className="ins-collapse" onClick={onToggleCollapse} aria-label={collapsed ? "Expand inspector" : "Collapse inspector"}>
-          {collapsed ? "▸" : "▾"}
-        </button>
+        <button className="ins-collapse" onClick={onToggleCollapse} aria-label="Collapse inspector">▾</button>
       </div>
 
       <section className="ins-region">
