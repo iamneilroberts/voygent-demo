@@ -93,3 +93,24 @@ form button:disabled { opacity: .5; cursor: default; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 
 @media (max-width: 760px) { .cols { grid-template-columns: 1fr; } .folio { border-top: 1px solid var(--line); } }
+
+.inspector-toggle { margin-left: auto; font-size: 12px; padding: 4px 10px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; cursor: pointer; }
+.inspector { position: fixed; top: 0; right: 0; width: 380px; max-width: 92vw; height: 100vh; overflow-y: auto; background: #0f172a; color: #e2e8f0; box-shadow: -8px 0 24px rgba(0,0,0,.3); padding: 14px 16px; z-index: 50; font-size: 13px; }
+.ins-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.ins-close { background: none; border: none; color: #e2e8f0; font-size: 20px; cursor: pointer; }
+.ins-region h3 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: #94a3b8; margin: 12px 0 6px; }
+.ins-graph { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-bottom: 10px; }
+.ins-node { color: #64748b; } .ins-node.on { color: #38bdf8; font-weight: 600; }
+.ins-arrow { color: #475569; margin: 0 2px; }
+.ins-tool { border-top: 1px solid #1e293b; }
+.ins-tool.err .ins-tool-head { color: #fca5a5; }
+.ins-tool-head { width: 100%; display: flex; justify-content: space-between; background: none; border: none; color: inherit; padding: 6px 0; cursor: pointer; font-size: 13px; }
+.ins-lat { color: #94a3b8; }
+.ins-raw { background: #020617; border-radius: 6px; padding: 8px; overflow-x: auto; font-size: 11px; max-height: 280px; }
+.ins-scoreboard { margin: 10px 0; line-height: 1.6; color: #cbd5e1; }
+.ins-toggle { font-size: 11px; padding: 2px 8px; border: 1px solid #334155; border-radius: 5px; background: #1e293b; color: #e2e8f0; cursor: pointer; }
+.ins-tiers { width: 100%; border-collapse: collapse; margin: 8px 0; }
+.ins-tiers th, .ins-tiers td { text-align: left; padding: 3px 4px; border-bottom: 1px solid #1e293b; font-size: 12px; }
+.ins-note { color: #64748b; font-size: 11px; }
+.ins-sources summary { cursor: pointer; color: #94a3b8; font-size: 11px; }
+.ins-empty { color: #64748b; }

@@ -3,6 +3,7 @@ import { streamChat } from "./sse-client";
 import { ChatView, type ChatMessage, type Preset } from "./ChatView";
 import { FolioPanel } from "./FolioPanel";
 import type { FolioData } from "../../shared/events";
+import { Inspector, type InsTool, type InsTurn, type InsSummary } from "./Inspector";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8787";
 
@@ -14,6 +15,10 @@ export function App() {
   const [presets, setPresets] = useState<Preset[]>([]);
   const [geoCity, setGeoCity] = useState<string | null>(null);
   const sessionId = useRef(crypto.randomUUID()).current;
+  const [inspectorOpen, setInspectorOpen] = useState(false);
+  const [insTools, setInsTools] = useState<InsTool[]>([]);
+  const [insTurns, setInsTurns] = useState<InsTurn[]>([]);
+  const [insSummaries, setInsSummaries] = useState<InsSummary[]>([]);
 
   useEffect(() => {
     fetch(`${API_BASE}/presets`)
@@ -45,6 +50,12 @@ export function App() {
         else if (e.type === "tool" && e.phase === "start") setTools((t) => [...t, e.tool]);
         else if (e.type === "folio") setFolio(e.folio);
         else if (e.type === "error") showError(e.message);
+        else if (e.type === "inspector") {
+          if (e.kind === "tool") setInsTools((t) => [...t, e]);
+          else if (e.kind === "turn") setInsTurns((t) => [...t, e]);
+          else if (e.kind === "summary") setInsSummaries((s) => [...s, e]);
+          // savings/overhead handled in Slice 2
+        }
       });
     } catch (err) {
       showError((err as Error).message);
@@ -55,11 +66,21 @@ export function App() {
 
   return (
     <div className="app">
-      <header><strong>Voygent</strong> <span className="sub">AI travel-planning agent</span> <span className="by">built by Neil Roberts</span></header>
+      <header>
+        <strong>Voygent</strong> <span className="sub">AI travel-planning agent</span>{" "}
+        <span className="by">built by Neil Roberts</span>
+        <button className="inspector-toggle" onClick={() => setInspectorOpen((o) => !o)}>
+          🔍 Inspector
+        </button>
+      </header>
       <div className="cols">
         <ChatView messages={messages} tools={tools} onSend={send} busy={busy} presets={presets} geoCity={geoCity} />
         <FolioPanel folio={folio} />
       </div>
+      <Inspector
+        open={inspectorOpen} onClose={() => setInspectorOpen(false)}
+        tools={insTools} turns={insTurns} summaries={insSummaries}
+      />
     </div>
   );
 }
