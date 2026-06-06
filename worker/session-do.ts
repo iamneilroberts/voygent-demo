@@ -113,6 +113,39 @@ export class SessionDO {
     const provider = new ClaudeProvider(this.env.ANTHROPIC_API_KEY, model);
     const mux = new SseMultiplexer();
 
+    if (this.messages.length === 0) this.messages.push({ role: "user", content: `${SYSTEM_HINT}\n\nMy trip_id is ${this.tripId}.` });
+    this.messages.push({ role: "user", content: message });
+
+    // Per-session cost telemetry (server-side only — never sent to the client).
+    let sessionCost = 0;
+    const u: TokenUsage = { inputTokens: 0, outputTokens: 0, cacheCreationTokens: 0, cacheReadTokens: 0 };
+
+    // Inspector bookkeeping (Slice 1: summary spine).
+    const exchangeId = crypto.randomUUID();
+    let turnCount = 0;
+    let toolCallCount = 0;
+    let fullToolCount = 0;
+    let exposedToolCount = 0;
+    let instrumentationBytes = 0;
+    let instrumentationMs = 0;
+    let maxFolioTokens = 0;
+    this.lastBaselineTripJson = null;
+
+    // Cost-aware emit: inject real $ into zero-cost turn events; tally inspector counters.
+    const emit = (e: ServerEvent): boolean => {
+      const t0 = Date.now();
+      const ev = withInspectorCost(e, model);
+      if (ev.type === "inspector") {
+        if (ev.kind === "turn") turnCount++;
+        else if (ev.kind === "tool") toolCallCount++;
+        if (ev.kind !== "overhead" && ev.kind !== "summary") {
+          instrumentationBytes += utf8Bytes(encodeSse(ev));
+        }
+      }
+      instrumentationMs += Date.now() - t0;
+      return mux.send(ev);
+    };
+
     const helpers: ReplayHelpers = {
       readTrip: async () => {
         const raw = await mcp.callTool("read_trip", { tripId: this.tripId, raw: true });
@@ -152,39 +185,6 @@ export class SessionDO {
         }
       }
       return out;
-    };
-
-    if (this.messages.length === 0) this.messages.push({ role: "user", content: `${SYSTEM_HINT}\n\nMy trip_id is ${this.tripId}.` });
-    this.messages.push({ role: "user", content: message });
-
-    // Per-session cost telemetry (server-side only — never sent to the client).
-    let sessionCost = 0;
-    const u: TokenUsage = { inputTokens: 0, outputTokens: 0, cacheCreationTokens: 0, cacheReadTokens: 0 };
-
-    // Inspector bookkeeping (Slice 1: summary spine).
-    const exchangeId = crypto.randomUUID();
-    let turnCount = 0;
-    let toolCallCount = 0;
-    let fullToolCount = 0;
-    let exposedToolCount = 0;
-    let instrumentationBytes = 0;
-    let instrumentationMs = 0;
-    let maxFolioTokens = 0;
-    this.lastBaselineTripJson = null;
-
-    // Cost-aware emit: inject real $ into zero-cost turn events; tally inspector counters.
-    const emit = (e: ServerEvent): boolean => {
-      const t0 = Date.now();
-      const ev = withInspectorCost(e, model);
-      if (ev.type === "inspector") {
-        if (ev.kind === "turn") turnCount++;
-        else if (ev.kind === "tool") toolCallCount++;
-        if (ev.kind !== "overhead" && ev.kind !== "summary") {
-          instrumentationBytes += utf8Bytes(encodeSse(ev));
-        }
-      }
-      instrumentationMs += Date.now() - t0;
-      return mux.send(ev);
     };
 
     void (async () => {

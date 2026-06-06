@@ -103,6 +103,7 @@ export class FixtureReplay {
   }
 
   async handle(name: string, args: Record<string, any>, h: ReplayHelpers): Promise<string> {
+    this.measurement = null;
     switch (name) {
       case "flight_search": return this.flightSearch(args);
       case "flight_list": return this.flightList(args);

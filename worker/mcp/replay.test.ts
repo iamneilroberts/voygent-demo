@@ -143,4 +143,17 @@ describe("FixtureReplay measurement", () => {
     expect(m!.tool).toBe("flightSearch");
     expect(m!.modelFacingTokens).toBe(Math.ceil(out.length / 4));
   });
+
+  it("clears lastMeasurement on a non-measuring intercepted call (promote)", async () => {
+    const r = new FixtureReplay("demo-y");
+    const helpers = { readTrip: async () => ({ flights: [{ _candidateId: "x" }] }), patchTrip: async () => {} };
+    await r.handle("flight_search", { origin: "MOB", destination: "DUB" }, helpers as any);
+    expect(r.lastMeasurement()).toBeTruthy();
+    try {
+      await r.handle("promote_flights", {}, helpers as any);   // intercepted, but sets no measurement
+    } catch {
+      // promote may error (no valid candidate id), but the reset must have fired at entry
+    }
+    expect(r.lastMeasurement()).toBeNull();
+  });
 });
