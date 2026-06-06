@@ -1,6 +1,6 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { streamChat } from "./sse-client";
-import { ChatView, type ChatMessage } from "./ChatView";
+import { ChatView, type ChatMessage, type Preset } from "./ChatView";
 import { FolioPanel } from "./FolioPanel";
 import type { FolioData } from "../../shared/events";
 
@@ -11,7 +11,16 @@ export function App() {
   const [tools, setTools] = useState<string[]>([]);
   const [folio, setFolio] = useState<FolioData | null>(null);
   const [busy, setBusy] = useState(false);
+  const [presets, setPresets] = useState<Preset[]>([]);
+  const [geoCity, setGeoCity] = useState<string | null>(null);
   const sessionId = useRef(crypto.randomUUID()).current;
+
+  useEffect(() => {
+    fetch(`${API_BASE}/presets`)
+      .then((r) => r.json() as Promise<{ presets?: Preset[]; geo?: { city?: string | null } }>)
+      .then((d) => { setPresets(d.presets ?? []); setGeoCity(d.geo?.city ?? null); })
+      .catch(() => { /* welcome falls back to a generic greeting + text box */ });
+  }, []);
 
   // Write an error into the trailing empty assistant placeholder if present (so a failure
   // before any text doesn't leave a blank bubble + a second warning bubble); else append.
@@ -48,7 +57,7 @@ export function App() {
     <div className="app">
       <header><strong>Voygent</strong> <span className="sub">AI travel-planning agent</span> <span className="by">built by Neil Roberts</span></header>
       <div className="cols">
-        <ChatView messages={messages} tools={tools} onSend={send} busy={busy} />
+        <ChatView messages={messages} tools={tools} onSend={send} busy={busy} presets={presets} geoCity={geoCity} />
         <FolioPanel folio={folio} />
       </div>
     </div>

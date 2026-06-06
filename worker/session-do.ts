@@ -49,6 +49,9 @@ const SYSTEM_HINT =
   "A little **bold** or a short bullet list is fine; the occasional emoji is okay but don't overdo it.\n\n" +
   "You can build any of these standout trips with rich, real options — steer the traveler toward one (use its " +
   "origin, destination, and dates):\n" + FEATURED + "\n\n" +
+  "BEFORE BUILDING: if the traveler hasn't given you the essentials — where FROM, where TO, WHEN, and HOW MANY " +
+  "travelers — ask for the missing ones in one short, friendly question before you search. Never invent missing " +
+  "trip parameters. If they picked a featured trip or already gave everything, skip the questions and build.\n\n" +
   "WORKFLOW (one category at a time):\n" +
   "1. FIRST create the trip: call save_trip with this trip's id (tripId) and data " +
   "{ meta: { title, destination, dates }, flights: [], lodging: [] }. read_trip/patch_trip 404 until it exists.\n" +

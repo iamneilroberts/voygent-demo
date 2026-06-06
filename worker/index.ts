@@ -1,4 +1,5 @@
 export { SessionDO } from "./session-do";
+import { buildPresets } from "./presets";
 
 interface Env { SESSION: DurableObjectNamespace; DEMO_DISABLED?: string; }
 
@@ -15,6 +16,10 @@ export default {
   async fetch(req: Request, env: Env): Promise<Response> {
     const url = new URL(req.url);
     if (req.method === "OPTIONS") return new Response(null, { headers: cors() });
+    if (url.pathname === "/presets" && req.method === "GET") {
+      // Featured trips for the first-run chips + IP-geo greeting (no permission prompt).
+      return Response.json(buildPresets(req), { headers: cors() });
+    }
     if (url.pathname === "/chat" && req.method === "POST") {
       // Operational kill-switch for a public, money-spending endpoint: set the
       // DEMO_DISABLED secret to pause it instantly (no redeploy needed).
