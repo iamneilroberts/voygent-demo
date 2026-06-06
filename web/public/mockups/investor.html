@@ -1,39 +1,151 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8">
+<html lang="en">
+<head>
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Voygent · investor cut (coming next)</title>
+<title>Voygent · investor cut</title>
+<script>try{var t=localStorage.getItem('voy-theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="./_system.css">
 <style>
-  body{background:var(--board);color:var(--ink);min-height:100vh;display:flex;flex-direction:column}
-  header{display:flex;align-items:center;gap:16px;padding:16px 24px;border-bottom:1px solid var(--line)}
-  .logo{font:700 1.5rem/1 var(--sans);letter-spacing:-.03em}.logo span{color:var(--amber)}
-  .by{font:400 .8125rem/1 var(--mono);color:var(--muted)}
-  header .cut-switch{margin-left:auto}
-  main{flex:1;display:grid;place-items:center;text-align:center;padding:24px}
-  .kick{font:500 .8125rem/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--amber);margin-bottom:16px}
-  h1{font:700 clamp(2rem,6vw,2.75rem)/1.05 var(--sans);letter-spacing:-.03em;margin:0 0 16px}
-  p{color:var(--muted);max-width:48ch;margin:0 auto;font-size:1.125rem;line-height:1.55}
-  .back{margin-top:32px;font:500 .8125rem/1 var(--mono);color:var(--amber);text-decoration:none}
-  .back:hover{text-decoration:underline}
-</style></head>
+  /* ---- investor cut: business case + scoreboard forward; confident, metric-led ---- */
+  body { background: var(--board); color: var(--ink); }
+  .wrap { max-width: 880px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
+
+  header.top { display: flex; align-items: center; gap: var(--s4); padding: var(--s4) var(--s6); border-bottom: 1px solid var(--line); }
+  .mark { display: flex; align-items: baseline; gap: var(--s3); }
+  .mark .logo { font: 700 var(--t-24)/1 var(--sans); letter-spacing: -.03em; color: var(--ink); }
+  .mark .logo span { color: var(--amber); }
+  .mark .by { font: 400 var(--t-13)/1 var(--mono); color: var(--muted); }
+  header.top .cut-switch { margin-left: auto; }
+  .theme-bar { padding: var(--s2) var(--s6); border-bottom: 1px solid var(--line); background: var(--board-2); }
+
+  main { flex: 1; padding: clamp(28px, 7vw, 64px) var(--s6); }
+
+  .thesis { font: 600 clamp(1.7rem, 5.2vw, 2.6rem)/1.12 var(--sans); letter-spacing: -.025em; margin: 0 0 var(--s4); max-width: 20ch; }
+  .thesis em { font-style: normal; color: var(--amber); }
+  .sub { color: var(--muted); font-size: var(--t-18); line-height: 1.55; max-width: 56ch; margin: 0 0 var(--s12); }
+
+  .lab { font: 500 var(--t-12)/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--muted-2); margin-bottom: var(--s3); }
+
+  /* metrics board — a departure board of business numbers */
+  .metrics { background: var(--board-2); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; margin-bottom: var(--s12); }
+  .metric { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: var(--s4);
+    padding: var(--s4) var(--s6); border-top: 1px solid var(--line); }
+  .metric:first-child { border-top: none; }
+  .metric .k { color: var(--muted); font-size: var(--t-15); }
+  .metric .k b { color: var(--ink); font-weight: 600; display: block; font-size: var(--t-18); margin-bottom: 2px; }
+  .metric .v { font: 700 var(--t-32)/1 var(--mono); color: var(--amber); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+  .metric .v small { font: 400 var(--t-13)/1 var(--mono); color: var(--muted); display: block; margin-top: 4px; }
+
+  /* the economic centerpiece: subscription vs API */
+  .econ { margin-bottom: var(--s12); }
+  table.tiers { width: 100%; border-collapse: collapse; margin-top: var(--s3); }
+  table.tiers th, table.tiers td { text-align: right; padding: var(--s3) var(--s4); border-bottom: 1px solid var(--line);
+    font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: var(--t-15); }
+  table.tiers th:first-child, table.tiers td:first-child { text-align: left; }
+  table.tiers th { color: var(--muted); font-weight: 500; font-size: var(--t-13); }
+  table.tiers tr td:last-child { color: var(--amber); }
+  .disc { font: 400 var(--t-12)/1.5 var(--mono); color: var(--muted-2); margin-top: var(--s3); }
+
+  .points { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1px; background: var(--line);
+    border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .point { background: var(--board-2); padding: var(--s6); }
+  .point h3 { margin: 0 0 var(--s2); font-size: var(--t-15); display: flex; align-items: center; gap: 8px; }
+  .point h3::before { content: "▸"; color: var(--amber); }
+  .point p { margin: 0; color: var(--muted); font-size: var(--t-13); line-height: 1.55; }
+
+  footer.meta { margin-top: var(--s12); padding: var(--s6); border-top: 1px solid var(--line);
+    font: 400 var(--t-12)/1.5 var(--mono); color: var(--muted-2); }
+  footer.meta a { color: var(--amber); }
+
+  @media (max-width: 620px) {
+    header.top { flex-wrap: wrap; row-gap: var(--s3); padding: var(--s3) var(--s4); }
+    header.top .cut-switch { margin-left: 0; width: 100%; overflow-x: auto; }
+    .theme-bar, main, footer.meta { padding-left: var(--s4); padding-right: var(--s4); }
+    .metric { padding: var(--s4); } .metric .v { font-size: var(--t-24); }
+    table.tiers th, table.tiers td { padding: var(--s3) var(--s2); font-size: var(--t-13); }
+  }
+</style>
+</head>
 <body>
-  <header>
-    <span class="logo">voygent<span>.</span></span><span class="by">built by Neil Roberts</span>
+<div class="wrap">
+  <header class="top">
+    <div class="mark"><span class="logo">voygent<span>.</span></span><span class="by">built by Neil Roberts</span></div>
     <nav class="cut-switch" aria-label="audience cut">
       <a href="./interviewer.html">interviewer</a>
       <a href="./recruiter.html">recruiter</a>
-      <a href="./investor.html">investor</a>
+      <a href="./investor.html" aria-current="page">investor</a>
       <a href="./travel.html">travel</a>
     </nav>
   </header>
+  <div class="theme-bar">
+    <div class="theme-switch" id="themes" role="group" aria-label="color theme">
+      <span class="lab">palette</span>
+      <button data-theme="amber" aria-pressed="true"><span class="sw" style="--a:#f5a623;--b:#79d98a"></span>amber crt</button>
+      <button data-theme="phosphor"><span class="sw" style="--a:#3fb950;--b:#56d364"></span>green crt</button>
+      <button data-theme="sodium"><span class="sw" style="--a:#ff8c42;--b:#15120d"></span>sodium</button>
+      <button data-theme="dusk"><span class="sw" style="--a:#ff9e64;--b:#8bd4a0"></span>dusk</button>
+      <button data-theme="paper"><span class="sw" style="--a:#c2611c;--b:#f4f0e6"></span>paper</button>
+    </div>
+  </div>
+
   <main>
-    <div>
-      <div class="kick">investor cut</div>
-      <h1>Coming next</h1>
-      <p>The business case forward — $0 marginal cost, subscription-vs-API economics, the scoreboard as the lead. Confident and metric-led. Built off the same design system once the interviewer direction is signed off.</p>
-      <a class="back" href="./interviewer.html">→ see the interviewer cut (live)</a>
+    <h1 class="thesis">One server. <em>$0 marginal cost.</em> The model is swappable.</h1>
+    <p class="sub">Voygent is an MCP server that rides the user's own AI subscription — the per-session
+      inference is paid by their Claude (or ChatGPT) plan, not by us. The moat is the tools and the
+      orchestration, not a model vendor. Every number below is this demo session's real telemetry.</p>
+
+    <div class="lab">the unit economics, this session</div>
+    <div class="metrics">
+      <div class="metric">
+        <span class="k"><b>Marginal cost per session</b>Inference rides the visitor's own plan window</span>
+        <span class="v"><span class="odo" data-odo="0" data-prefix="$">$0</span></span>
+      </div>
+      <div class="metric">
+        <span class="k"><b>Tokens kept out of the model</b>Supplier data distilled before it reaches the AI</span>
+        <span class="v"><span class="odo" data-odo="3120">0</span><small>per trip · less context = less cost</small></span>
+      </div>
+      <div class="metric">
+        <span class="k"><b>Catalog exposed per session</b>Tier-gated + locked — only what the plan pays for</span>
+        <span class="v">9<small>of 79 tools</small></span>
+      </div>
+      <div class="metric">
+        <span class="k"><b>Production surface</b>All on Workers fetch() — no browser, no VM to run</span>
+        <span class="v">119<small>tools · ~30 supplier adapters</small></span>
+      </div>
+    </div>
+
+    <div class="econ">
+      <div class="lab">why $0 marginal — subscription vs. API</div>
+      <table class="tiers">
+        <thead><tr><th>plan</th><th>$/mo</th><th>context window</th><th>est. tokens/mo</th></tr></thead>
+        <tbody>
+          <tr><td>Free</td><td>$0</td><td>a few short chats</td><td>—</td></tr>
+          <tr><td>Pro</td><td>$20</td><td>44k</td><td>1.32M</td></tr>
+          <tr><td>Max 5×</td><td>$100</td><td>88k</td><td>2.64M</td></tr>
+          <tr><td>Max 20×</td><td>$200</td><td>220k</td><td>6.60M</td></tr>
+        </tbody>
+      </table>
+      <p class="disc">Estimated — Anthropic meters by rolling 5-hour windows + weekly caps, not monthly token
+        quotas; community-observed, shared across claude.ai + Claude Code. The point isn't the exact figure:
+        it's that a Voygent trip costs a sliver of a window the user has <i>already paid for</i>. We capture
+        value (advisor subscriptions, affiliate commission) without carrying inference COGS.</p>
+    </div>
+
+    <div class="lab">the defensibility</div>
+    <div class="points">
+      <div class="point"><h3>Model-swappable</h3><p>A hand-rolled MCP host drives the model — Claude today, ChatGPT or local tomorrow. We don't bet the company on one vendor's pricing.</p></div>
+      <div class="point"><h3>Tools are the moat</h3><p>~30 supplier integrations, many edge-native where the industry needs browser farms. Hard to copy, cheap to run.</p></div>
+      <div class="point"><h3>Two revenue rails</h3><p>Advisor subscriptions (the pro tool) and affiliate commission on bookings (the consumer front door) — same engine.</p></div>
     </div>
   </main>
-</body></html>
+
+  <footer class="meta">A portfolio demo by Neil Roberts · figures are this session's real telemetry; plan figures
+    are community-observed estimates, labeled as such. → <a href="./travel.html">the travel cut</a> ·
+    <a href="./interviewer.html">the engineering cut</a></footer>
+</div>
+<script src="./_chrome.js"></script>
+</body>
+</html>
