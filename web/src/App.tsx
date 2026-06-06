@@ -4,6 +4,8 @@ import { ChatView, type ChatMessage, type Preset } from "./ChatView";
 import { FolioPanel } from "./FolioPanel";
 import type { FolioData } from "../../shared/events";
 import { Inspector, type InsTool, type InsTurn, type InsSummary, type InsSavings, type InsOverhead } from "./Inspector";
+import { ThemeSwitch } from "./ThemeSwitch";
+import { engState } from "./lib/inspector-state";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8787";
 
@@ -15,7 +17,7 @@ export function App() {
   const [presets, setPresets] = useState<Preset[]>([]);
   const [geoCity, setGeoCity] = useState<string | null>(null);
   const sessionId = useRef(crypto.randomUUID()).current;
-  const [inspectorOpen, setInspectorOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const [insTools, setInsTools] = useState<InsTool[]>([]);
   const [insTurns, setInsTurns] = useState<InsTurn[]>([]);
   const [insSummaries, setInsSummaries] = useState<InsSummary[]>([]);
@@ -29,8 +31,6 @@ export function App() {
       .catch(() => { /* welcome falls back to a generic greeting + text box */ });
   }, []);
 
-  // Write an error into the trailing empty assistant placeholder if present (so a failure
-  // before any text doesn't leave a blank bubble + a second warning bubble); else append.
   function showError(msg: string) {
     setMessages((m) => {
       const c = [...m];
@@ -63,28 +63,34 @@ export function App() {
     } catch (err) {
       showError((err as Error).message);
     } finally {
-      setBusy(false); // always clear busy, even on network/CORS/stream failure
+      setBusy(false);
     }
   }
+
+  const eng = engState(insTools.length, collapsed);
 
   return (
     <div className="app">
       <header>
-        <strong>Voygent</strong> <span className="sub">AI travel-planning agent</span>{" "}
+        <span className="brand"><strong>Voygent</strong> <span className="sub">AI travel-planning agent</span></span>
         <span className="by">built by Neil Roberts</span>
-        <button className="inspector-toggle" onClick={() => setInspectorOpen((o) => !o)}>
-          🔍 Inspector
-        </button>
+        <ThemeSwitch />
       </header>
-      <div className="cols">
-        <ChatView messages={messages} tools={tools} onSend={send} busy={busy} presets={presets} geoCity={geoCity} />
-        <FolioPanel folio={folio} />
-      </div>
-      <Inspector
-        open={inspectorOpen} onClose={() => setInspectorOpen(false)}
-        tools={insTools} turns={insTurns} summaries={insSummaries}
-        savings={insSavings} overhead={insOverhead}
-      />
+      <main className="stage" data-eng={eng}>
+        <section className="product">
+          <ChatView messages={messages} tools={tools} onSend={send} busy={busy} presets={presets} geoCity={geoCity} />
+          <FolioPanel folio={folio} />
+        </section>
+        <section className="engineering" data-eng={eng}>
+          <Inspector
+            collapsed={eng !== "live"}
+            onToggleCollapse={() => setCollapsed((c) => !c)}
+            tools={insTools} turns={insTurns} summaries={insSummaries}
+            savings={insSavings} overhead={insOverhead}
+          />
+        </section>
+      </main>
+      <footer className="meta">This interface was itself built by a coding agent.</footer>
     </div>
   );
 }

@@ -65,11 +65,10 @@ function Card({ c }: { c: { title: string; claim: string; detail: string; source
 }
 
 export function Inspector(
-  { open, onClose, tools, turns, summaries, savings, overhead }:
-  { open: boolean; onClose: () => void; tools: InsTool[]; turns: InsTurn[]; summaries: InsSummary[]; savings: InsSavings[]; overhead: InsOverhead[] },
+  { collapsed, onToggleCollapse, tools, turns, summaries, savings, overhead }:
+  { collapsed: boolean; onToggleCollapse: () => void; tools: InsTool[]; turns: InsTurn[]; summaries: InsSummary[]; savings: InsSavings[]; overhead: InsOverhead[] },
 ) {
   const [showCost, setShowCost] = useState(false);
-  if (!open) return null;
 
   const firedTools = new Set(tools.map((t) => t.name));
   const hasFolio = tools.some((t) => t.name.startsWith("promote_"));
@@ -100,20 +99,23 @@ export function Inspector(
   const ov = overhead[overhead.length - 1];
 
   return (
-    <aside className="inspector" role="complementary" aria-label="Engineering inspector">
+    <aside className="inspector term crt" role="complementary" aria-label="Engineering inspector">
       <div className="ins-head">
-        <strong>Engineering Inspector</strong>
-        <button className="ins-close" onClick={onClose} aria-label="Close inspector">×</button>
+        <strong><span className="prompt">▌</span> Engineering Inspector</strong>
+        <button className="ins-collapse" onClick={onToggleCollapse} aria-label={collapsed ? "Expand inspector" : "Collapse inspector"}>
+          {collapsed ? "▸" : "▾"}
+        </button>
       </div>
 
       <section className="ins-region">
         <h3>Live this session</h3>
 
-        <div className="ins-graph">
+        <div className="pipe">
+          {STAGES.some(stageActive) && <span className="packet" aria-hidden="true" />}
           {STAGES.map((s, i) => (
             <span key={s.key}>
-              <span className={`ins-node ${stageActive(s) ? "on" : ""}`}>{stageActive(s) ? "●" : "○"} {s.label}</span>
-              {i < STAGES.length - 1 ? <span className="ins-arrow">→</span> : null}
+              <span className={`node ${stageActive(s) ? "active" : ""}`}>{stageActive(s) ? "●" : "○"} {s.label}</span>
+              {i < STAGES.length - 1 ? <span className="arr">→</span> : null}
             </span>
           ))}
         </div>
