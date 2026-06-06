@@ -136,6 +136,26 @@ button.ins-rail:hover { color: var(--ink); }
 .ins-card-body p { margin: var(--s1) 0; } .ins-src { color: var(--amber-hi); font-size: var(--t-12); word-break: break-all; }
 .ins-cost-rows { margin: var(--s2) 0; color: var(--ink); }
 
+/* ---- inspector head extra (relocated palette switcher in claude skin) ---- */
+.ins-extra { margin-bottom: var(--s3); position: relative; z-index: 3; }
+
+/* ---- skin switch: fixed demo-harness chrome, present in BOTH skins.
+        Hardcoded dark styling (not theme tokens) so it reads as part of the
+        demo rig and never follows the claude pane or a light palette. ---- */
+.skin-switch {
+  position: fixed; right: 10px; bottom: 36px; z-index: 50;
+  display: flex; align-items: center;
+  background: #14110ce8; border: 1px solid #26201a; border-radius: 999px;
+  padding: 3px 5px; backdrop-filter: blur(2px);
+}
+.skin-switch .lab { font: 500 var(--t-12)/1 var(--mono); color: #9a907c; letter-spacing: .08em; text-transform: uppercase; margin: 0 6px 0 4px; }
+.skin-switch button {
+  background: none; border: none; color: #9a907c; font: 500 var(--t-12)/1 var(--mono);
+  padding: 6px 10px; border-radius: 999px; cursor: pointer;
+}
+.skin-switch button:hover { color: #efe7d6; }
+.skin-switch button[aria-pressed="true"] { color: #0c0a07; background: #f5a623; }
+
 /* ---- footer meta-note ---- */
 .app > footer.meta { padding: var(--s2) var(--s6); border-top: 1px solid var(--line); background: var(--board-2); color: var(--muted-2); font: 400 var(--t-12)/1 var(--mono); text-align: center; }
 

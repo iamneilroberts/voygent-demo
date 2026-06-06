@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import type { EngState } from "./lib/inspector-state";
 import { PLAN_TIERS, TIER_DISCLAIMER, TIER_SOURCES, BTS_CARDS, BTS_DISCLAIMER, VOYGENT_PRICE_POINTS, USAGE_SCENARIOS, BIZ_ASSUMPTION } from "./inspector-data";
 
@@ -66,8 +66,11 @@ function Card({ c }: { c: { title: string; claim: string; detail: string; source
 }
 
 export function Inspector(
-  { state, onToggleCollapse, tools, turns, summaries, savings, overhead }:
-  { state: EngState; onToggleCollapse: () => void; tools: InsTool[]; turns: InsTurn[]; summaries: InsSummary[]; savings: InsSavings[]; overhead: InsOverhead[] },
+  { state, onToggleCollapse, tools, turns, summaries, savings, overhead, headExtra }:
+  { state: EngState; onToggleCollapse: () => void; tools: InsTool[]; turns: InsTurn[]; summaries: InsSummary[]; savings: InsSavings[]; overhead: InsOverhead[];
+    // Extra controls shown under the head when live — e.g. the palette switcher
+    // relocated here in the claude skin (its home header isn't rendered there).
+    headExtra?: ReactNode },
 ) {
   const [showCost, setShowCost] = useState(false);
 
@@ -125,6 +128,7 @@ export function Inspector(
         <strong><span className="prompt">▌</span> Engineering Inspector</strong>
         <button className="ins-collapse" onClick={onToggleCollapse} aria-label="Collapse inspector">▾</button>
       </div>
+      {headExtra && <div className="ins-extra">{headExtra}</div>}
 
       <section className="ins-region">
         <h3>Live this session</h3>

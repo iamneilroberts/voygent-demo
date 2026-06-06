@@ -2,9 +2,11 @@ import type { ServerEvent } from "../../shared/events";
 
 export async function streamChat(
   apiBase: string, sessionId: string, message: string, onEvent: (e: ServerEvent) => void,
+  mode?: "boards", // claude skin: ask the worker for present-and-wait + board events
 ): Promise<void> {
   const res = await fetch(`${apiBase}/chat?session=${encodeURIComponent(sessionId)}`, {
-    method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ message }),
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify(mode ? { message, mode } : { message }),
   });
   if (!res.ok) throw new Error(`chat request failed: HTTP ${res.status}`);
   if (!res.body) throw new Error("no response stream");
