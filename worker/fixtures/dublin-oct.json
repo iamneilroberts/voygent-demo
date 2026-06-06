@@ -353,6 +353,160 @@
       "pricePerPerson": 2199,
       "priceBasis": "per_person",
       "pax": 2
+    },
+    {
+      "id": "serp:xm3k14",
+      "source": "serp",
+      "offerId": null,
+      "price": 3516,
+      "currency": "USD",
+      "priceWithCcFee": null,
+      "fareType": null,
+      "validatingCarrier": "American",
+      "commissionProtected": false,
+      "cabin": "Economy",
+      "stops": 2,
+      "durationMinutes": 967,
+      "airlines": [
+        "American",
+        "British Airways"
+      ],
+      "route": "MOB→DUB",
+      "flightNumbers": [
+        "AA5162",
+        "AA50",
+        "BA826"
+      ],
+      "segments": [
+        {
+          "origin": "MOB",
+          "destination": "DFW",
+          "depart": "2026-10-12 11:33",
+          "arrive": "2026-10-12 13:34",
+          "carrier": "American",
+          "flightNumber": "AA 5162",
+          "cabin": "Economy",
+          "durationMinutes": 121,
+          "layover": null,
+          "equipment": "Canadair RJ 900"
+        },
+        {
+          "origin": "DFW",
+          "destination": "LHR",
+          "depart": "2026-10-12 15:25",
+          "arrive": "2026-10-13 06:20",
+          "carrier": "American",
+          "flightNumber": "AA 50",
+          "cabin": "Economy",
+          "durationMinutes": 535,
+          "layover": "1h 51m",
+          "equipment": "Boeing 787",
+          "overnight": true
+        },
+        {
+          "origin": "LHR",
+          "destination": "DUB",
+          "depart": "2026-10-13 08:15",
+          "arrive": "2026-10-13 09:40",
+          "carrier": "British Airways",
+          "flightNumber": "BA 826",
+          "cabin": "Economy",
+          "durationMinutes": 85,
+          "layover": "1h 55m",
+          "equipment": "Airbus A321neo"
+        }
+      ],
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-06T20:07:14.962Z",
+      "query": {
+        "origin": "MOB",
+        "destination": "DUB",
+        "departure_date": "2026-10-12",
+        "return_date": "2026-10-19",
+        "adults": 2
+      },
+      "pricePerPerson": 1758,
+      "priceBasis": "per_person",
+      "pax": 2
+    },
+    {
+      "id": "serp:yby4vc",
+      "source": "serp",
+      "offerId": null,
+      "price": 4396,
+      "currency": "USD",
+      "priceWithCcFee": null,
+      "fareType": null,
+      "validatingCarrier": "American",
+      "commissionProtected": false,
+      "cabin": "Economy",
+      "stops": 2,
+      "durationMinutes": 927,
+      "airlines": [
+        "American",
+        "Aer Lingus"
+      ],
+      "route": "MOB→DUB",
+      "flightNumbers": [
+        "AA5162",
+        "AA50",
+        "EI151"
+      ],
+      "segments": [
+        {
+          "origin": "MOB",
+          "destination": "DFW",
+          "depart": "2026-10-12 11:33",
+          "arrive": "2026-10-12 13:34",
+          "carrier": "American",
+          "flightNumber": "AA 5162",
+          "cabin": "Economy",
+          "durationMinutes": 121,
+          "layover": null,
+          "equipment": "Canadair RJ 900"
+        },
+        {
+          "origin": "DFW",
+          "destination": "LHR",
+          "depart": "2026-10-12 15:25",
+          "arrive": "2026-10-13 06:20",
+          "carrier": "American",
+          "flightNumber": "AA 50",
+          "cabin": "Economy",
+          "durationMinutes": 535,
+          "layover": "1h 51m",
+          "equipment": "Boeing 787",
+          "overnight": true
+        },
+        {
+          "origin": "LHR",
+          "destination": "DUB",
+          "depart": "2026-10-13 07:40",
+          "arrive": "2026-10-13 09:00",
+          "carrier": "Aer Lingus",
+          "flightNumber": "EI 151",
+          "cabin": "Economy",
+          "durationMinutes": 80,
+          "layover": "1h 20m",
+          "equipment": "Airbus A321"
+        }
+      ],
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-06T20:07:14.962Z",
+      "query": {
+        "origin": "MOB",
+        "destination": "DUB",
+        "departure_date": "2026-10-12",
+        "return_date": "2026-10-19",
+        "adults": 2
+      },
+      "pricePerPerson": 2198,
+      "priceBasis": "per_person",
+      "pax": 2
     }
   ],
   "hotels": [
@@ -437,7 +591,7 @@
       "reviewScoreScale": 5,
       "reviewCount": 1007,
       "pricePerNight": 137,
-      "priceTotal": 959,
+      "priceTotal": 961,
       "priceBasis": "both",
       "nights": 7,
       "currency": "USD",
@@ -451,7 +605,7 @@
       "bookable": false,
       "summary": null,
       "status": "candidate",
-      "searchedAt": "2026-06-05T23:05:34.552Z",
+      "searchedAt": "2026-06-06T20:07:30.063Z",
       "query": {
         "destination": "Dublin",
         "check_in": "2026-10-12",
@@ -619,6 +773,194 @@
       "summary": null,
       "status": "candidate",
       "searchedAt": "2026-06-05T23:05:34.552Z",
+      "query": {
+        "destination": "Dublin",
+        "check_in": "2026-10-12",
+        "check_out": "2026-10-19",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:14kgjtv",
+      "source": "serp",
+      "offerId": null,
+      "name": "Charming studio in fabulous Dublin with WiFi access",
+      "starRating": null,
+      "reviewScore": 3.1999998,
+      "reviewScoreScale": 5,
+      "reviewCount": 38,
+      "pricePerNight": 97,
+      "priceTotal": 678,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Dublin",
+      "otaPrices": [
+        {
+          "name": "Booking.com",
+          "pricePerNight": 97,
+          "isOfficial": false
+        }
+      ],
+      "stayRef": "dublin-2026-10-12-2026-10-19",
+      "stay": {
+        "location": "Dublin",
+        "checkIn": "2026-10-12",
+        "checkOut": "2026-10-19"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-06T20:07:30.063Z",
+      "query": {
+        "destination": "Dublin",
+        "check_in": "2026-10-12",
+        "check_out": "2026-10-19",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:ai15jn",
+      "source": "serp",
+      "offerId": null,
+      "name": "Room to let shared, kitchen. Large bedroom en suite bathroom Max 2. Twin beds. Bills included.",
+      "starRating": null,
+      "reviewScore": null,
+      "reviewScoreScale": null,
+      "reviewCount": null,
+      "pricePerNight": 119,
+      "priceTotal": 832,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Dublin",
+      "otaPrices": [
+        {
+          "name": "casamundo.com",
+          "pricePerNight": 119,
+          "isOfficial": false
+        }
+      ],
+      "stayRef": "dublin-2026-10-12-2026-10-19",
+      "stay": {
+        "location": "Dublin",
+        "checkIn": "2026-10-12",
+        "checkOut": "2026-10-19"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-06T20:07:30.063Z",
+      "query": {
+        "destination": "Dublin",
+        "check_in": "2026-10-12",
+        "check_out": "2026-10-19",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:6tubjc",
+      "source": "serp",
+      "offerId": null,
+      "name": "The Hive - Luxury Ensuite Room - Full Privacy as only room on the top floor! - Deluxe King Room",
+      "starRating": null,
+      "reviewScore": 5,
+      "reviewScoreScale": 5,
+      "reviewCount": 16,
+      "pricePerNight": 126,
+      "priceTotal": 879,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Dublin",
+      "otaPrices": [
+        {
+          "name": "Bluepillow.com",
+          "pricePerNight": 126,
+          "isOfficial": false
+        }
+      ],
+      "stayRef": "dublin-2026-10-12-2026-10-19",
+      "stay": {
+        "location": "Dublin",
+        "checkIn": "2026-10-12",
+        "checkOut": "2026-10-19"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-06T20:07:30.063Z",
+      "query": {
+        "destination": "Dublin",
+        "check_in": "2026-10-12",
+        "check_out": "2026-10-19",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:1sb2pb",
+      "source": "serp",
+      "offerId": null,
+      "name": "Beckett Locke - One-Bedroom Apartment",
+      "starRating": null,
+      "reviewScore": 4.95,
+      "reviewScoreScale": 5,
+      "reviewCount": 8,
+      "pricePerNight": 155,
+      "priceTotal": 1083,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Dublin",
+      "otaPrices": [
+        {
+          "name": "Bluepillow.com",
+          "pricePerNight": 155,
+          "isOfficial": false
+        }
+      ],
+      "stayRef": "dublin-2026-10-12-2026-10-19",
+      "stay": {
+        "location": "Dublin",
+        "checkIn": "2026-10-12",
+        "checkOut": "2026-10-19"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-06T20:07:30.063Z",
+      "query": {
+        "destination": "Dublin",
+        "check_in": "2026-10-12",
+        "check_out": "2026-10-19",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:11z9x91",
+      "source": "serp",
+      "offerId": null,
+      "name": "Gogarty's Temple Bar Hostel",
+      "starRating": 2,
+      "reviewScore": 4.3,
+      "reviewScoreScale": 5,
+      "reviewCount": 4593,
+      "pricePerNight": 84,
+      "priceTotal": 591,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Dublin",
+      "stayRef": "dublin-2026-10-12-2026-10-19",
+      "stay": {
+        "location": "Dublin",
+        "checkIn": "2026-10-12",
+        "checkOut": "2026-10-19"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-06T20:07:30.063Z",
       "query": {
         "destination": "Dublin",
         "check_in": "2026-10-12",
@@ -820,6 +1162,94 @@
         "_candidateId": "serp:tacag3"
       },
       "return": null
+    },
+    "serp:xm3k14": {
+      "outbound": {
+        "date": "2026-10-12",
+        "route": "MOB→DUB",
+        "airline": "American",
+        "cabin": "Economy",
+        "totalPrice": 3516,
+        "confirmation": null,
+        "multiDay": false,
+        "segments": [
+          {
+            "flight": "AmericanAA 5162",
+            "airline": "American",
+            "route": "MOB→DFW",
+            "date": "2026-10-12",
+            "depart": "2026-10-12 11:33",
+            "arrive": "2026-10-12 13:34",
+            "layover": null
+          },
+          {
+            "flight": "AmericanAA 50",
+            "airline": "American",
+            "route": "DFW→LHR",
+            "date": "2026-10-12",
+            "depart": "2026-10-12 15:25",
+            "arrive": "2026-10-13 06:20",
+            "layover": "1h 51m"
+          },
+          {
+            "flight": "British AirwaysBA 826",
+            "airline": "British Airways",
+            "route": "LHR→DUB",
+            "date": "2026-10-13",
+            "depart": "2026-10-13 08:15",
+            "arrive": "2026-10-13 09:40",
+            "layover": "1h 55m"
+          }
+        ],
+        "description": null,
+        "notes": null,
+        "_candidateId": "serp:xm3k14"
+      },
+      "return": null
+    },
+    "serp:yby4vc": {
+      "outbound": {
+        "date": "2026-10-12",
+        "route": "MOB→DUB",
+        "airline": "American",
+        "cabin": "Economy",
+        "totalPrice": 4396,
+        "confirmation": null,
+        "multiDay": false,
+        "segments": [
+          {
+            "flight": "AmericanAA 5162",
+            "airline": "American",
+            "route": "MOB→DFW",
+            "date": "2026-10-12",
+            "depart": "2026-10-12 11:33",
+            "arrive": "2026-10-12 13:34",
+            "layover": null
+          },
+          {
+            "flight": "AmericanAA 50",
+            "airline": "American",
+            "route": "DFW→LHR",
+            "date": "2026-10-12",
+            "depart": "2026-10-12 15:25",
+            "arrive": "2026-10-13 06:20",
+            "layover": "1h 51m"
+          },
+          {
+            "flight": "Aer LingusEI 151",
+            "airline": "Aer Lingus",
+            "route": "LHR→DUB",
+            "date": "2026-10-13",
+            "depart": "2026-10-13 07:40",
+            "arrive": "2026-10-13 09:00",
+            "layover": "1h 20m"
+          }
+        ],
+        "description": null,
+        "notes": null,
+        "_candidateId": "serp:yby4vc"
+      },
+      "return": null
     }
   },
   "promotedLodgingById": {
@@ -887,7 +1317,7 @@
       "dates": null,
       "nights": 7,
       "stars": 4,
-      "total": 959,
+      "total": 961,
       "pricePerNight": 137,
       "roomType": null,
       "notes": null,
@@ -1046,6 +1476,169 @@
       "anchor": "lodging-day-8",
       "proposalStatus": "proposed",
       "_candidateId": "serp:il1l58"
+    },
+    "serp:14kgjtv": {
+      "name": "Charming studio in fabulous Dublin with WiFi access",
+      "location": "Dublin",
+      "checkIn": "2026-10-12",
+      "checkOut": "2026-10-19",
+      "dates": null,
+      "nights": 7,
+      "stars": null,
+      "total": 678,
+      "pricePerNight": 97,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-9",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:14kgjtv"
+    },
+    "serp:ai15jn": {
+      "name": "Room to let shared, kitchen. Large bedroom en suite bathroom Max 2. Twin beds. Bills included.",
+      "location": "Dublin",
+      "checkIn": "2026-10-12",
+      "checkOut": "2026-10-19",
+      "dates": null,
+      "nights": 7,
+      "stars": null,
+      "total": 832,
+      "pricePerNight": 119,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-10",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:ai15jn"
+    },
+    "serp:6tubjc": {
+      "name": "The Hive - Luxury Ensuite Room - Full Privacy as only room on the top floor! - Deluxe King Room",
+      "location": "Dublin",
+      "checkIn": "2026-10-12",
+      "checkOut": "2026-10-19",
+      "dates": null,
+      "nights": 7,
+      "stars": null,
+      "total": 879,
+      "pricePerNight": 126,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-11",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:6tubjc"
+    },
+    "serp:1sb2pb": {
+      "name": "Beckett Locke - One-Bedroom Apartment",
+      "location": "Dublin",
+      "checkIn": "2026-10-12",
+      "checkOut": "2026-10-19",
+      "dates": null,
+      "nights": 7,
+      "stars": null,
+      "total": 1083,
+      "pricePerNight": 155,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-12",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:1sb2pb"
+    },
+    "serp:11z9x91": {
+      "name": "Gogarty's Temple Bar Hostel",
+      "location": "Dublin",
+      "checkIn": "2026-10-12",
+      "checkOut": "2026-10-19",
+      "dates": null,
+      "nights": 7,
+      "stars": 2,
+      "total": 591,
+      "pricePerNight": 84,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-13",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:11z9x91"
     }
+  },
+  "meta": {
+    "flightSearch": {
+      "rawTokensEst": 1067,
+      "responseBytes": 4266,
+      "prodLatencyMs": 21232
+    },
+    "flightList": {
+      "rawTokensEst": 2102,
+      "responseBytes": 8419,
+      "prodLatencyMs": 708
+    },
+    "hotelSearch": {
+      "rawTokensEst": 477,
+      "responseBytes": 1905,
+      "prodLatencyMs": 3231
+    },
+    "hotelList": {
+      "rawTokensEst": 2038,
+      "responseBytes": 8150,
+      "prodLatencyMs": 391
+    },
+    "capturedAt": "2026-06-06"
   }
 }

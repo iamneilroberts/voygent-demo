@@ -209,6 +209,184 @@
       "pricePerPerson": 1977,
       "priceBasis": "per_person",
       "pax": 2
+    },
+    {
+      "id": "serp:rms1ws",
+      "source": "serp",
+      "offerId": null,
+      "price": 3558,
+      "currency": "USD",
+      "priceWithCcFee": null,
+      "fareType": null,
+      "validatingCarrier": "Delta",
+      "commissionProtected": false,
+      "cabin": "Economy",
+      "stops": 0,
+      "durationMinutes": 510,
+      "airlines": [
+        "Delta"
+      ],
+      "route": "JFK→FCO",
+      "flightNumbers": [
+        "DL182"
+      ],
+      "segments": [
+        {
+          "origin": "JFK",
+          "destination": "FCO",
+          "depart": "2026-09-10 17:25",
+          "arrive": "2026-09-11 07:55",
+          "carrier": "Delta",
+          "flightNumber": "DL 182",
+          "cabin": "Economy",
+          "durationMinutes": 510,
+          "layover": null,
+          "equipment": "Airbus A330",
+          "overnight": true
+        }
+      ],
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-06T20:08:09.237Z",
+      "query": {
+        "origin": "JFK",
+        "destination": "FCO",
+        "departure_date": "2026-09-10",
+        "return_date": "2026-09-20",
+        "adults": 2
+      },
+      "pricePerPerson": 1779,
+      "priceBasis": "per_person",
+      "pax": 2
+    },
+    {
+      "id": "serp:1uj9wua",
+      "source": "serp",
+      "offerId": null,
+      "price": 2850,
+      "currency": "USD",
+      "priceWithCcFee": null,
+      "fareType": null,
+      "validatingCarrier": "Air Serbia",
+      "commissionProtected": false,
+      "cabin": "Economy",
+      "stops": 1,
+      "durationMinutes": 1095,
+      "airlines": [
+        "Air Serbia"
+      ],
+      "route": "JFK→FCO",
+      "flightNumbers": [
+        "JU501",
+        "JU404"
+      ],
+      "segments": [
+        {
+          "origin": "JFK",
+          "destination": "BEG",
+          "depart": "2026-09-10 19:30",
+          "arrive": "2026-09-11 10:20",
+          "carrier": "Air Serbia",
+          "flightNumber": "JU 501",
+          "cabin": "Economy",
+          "durationMinutes": 530,
+          "layover": null,
+          "equipment": "Airbus A330",
+          "overnight": true,
+          "oftenDelayed": true
+        },
+        {
+          "origin": "BEG",
+          "destination": "FCO",
+          "depart": "2026-09-11 18:10",
+          "arrive": "2026-09-11 19:45",
+          "carrier": "Air Serbia",
+          "flightNumber": "JU 404",
+          "cabin": "Economy",
+          "durationMinutes": 95,
+          "layover": "7h 50m",
+          "equipment": "Airbus A220-300 Passenger"
+        }
+      ],
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-06T20:08:09.237Z",
+      "query": {
+        "origin": "JFK",
+        "destination": "FCO",
+        "departure_date": "2026-09-10",
+        "return_date": "2026-09-20",
+        "adults": 2
+      },
+      "pricePerPerson": 1425,
+      "priceBasis": "per_person",
+      "pax": 2
+    },
+    {
+      "id": "serp:x4g21w",
+      "source": "serp",
+      "offerId": null,
+      "price": 2968,
+      "currency": "USD",
+      "priceWithCcFee": null,
+      "fareType": null,
+      "validatingCarrier": "Tap Air Portugal",
+      "commissionProtected": false,
+      "cabin": "Economy",
+      "stops": 1,
+      "durationMinutes": 1220,
+      "airlines": [
+        "Tap Air Portugal"
+      ],
+      "route": "JFK→FCO",
+      "flightNumbers": [
+        "TP210",
+        "TP838"
+      ],
+      "segments": [
+        {
+          "origin": "JFK",
+          "destination": "LIS",
+          "depart": "2026-09-10 22:05",
+          "arrive": "2026-09-11 10:15",
+          "carrier": "Tap Air Portugal",
+          "flightNumber": "TP 210",
+          "cabin": "Economy",
+          "durationMinutes": 430,
+          "layover": null,
+          "equipment": "Airbus A330",
+          "overnight": true
+        },
+        {
+          "origin": "LIS",
+          "destination": "FCO",
+          "depart": "2026-09-11 20:25",
+          "arrive": "2026-09-12 00:25",
+          "carrier": "Tap Air Portugal",
+          "flightNumber": "TP 838",
+          "cabin": "Economy",
+          "durationMinutes": 180,
+          "layover": "10h 10m",
+          "equipment": "Airbus A320",
+          "oftenDelayed": true
+        }
+      ],
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-06T20:08:09.237Z",
+      "query": {
+        "origin": "JFK",
+        "destination": "FCO",
+        "departure_date": "2026-09-10",
+        "return_date": "2026-09-20",
+        "adults": 2
+      },
+      "pricePerPerson": 1484,
+      "priceBasis": "per_person",
+      "pax": 2
     }
   ],
   "hotels": [
@@ -229,7 +407,7 @@
       "area": "Rome",
       "otaPrices": [
         {
-          "name": "Bluepillow.com",
+          "name": "br.Bluepillow.com",
           "pricePerNight": 72,
           "isOfficial": false
         }
@@ -243,7 +421,7 @@
       "bookable": false,
       "summary": null,
       "status": "candidate",
-      "searchedAt": "2026-06-05T23:08:37.953Z",
+      "searchedAt": "2026-06-06T20:08:24.233Z",
       "query": {
         "destination": "Rome",
         "check_in": "2026-09-10",
@@ -268,8 +446,8 @@
       "area": "Rome",
       "otaPrices": [
         {
-          "name": "Vrbo.com",
-          "pricePerNight": 101,
+          "name": "br.Bluepillow.com",
+          "pricePerNight": 98,
           "isOfficial": false
         }
       ],
@@ -282,7 +460,7 @@
       "bookable": false,
       "summary": null,
       "status": "candidate",
-      "searchedAt": "2026-06-05T23:08:37.953Z",
+      "searchedAt": "2026-06-06T20:08:24.233Z",
       "query": {
         "destination": "Rome",
         "check_in": "2026-09-10",
@@ -346,7 +524,7 @@
       "area": "Rome",
       "otaPrices": [
         {
-          "name": "Vrbo.com",
+          "name": "Expedia.com",
           "pricePerNight": 102,
           "isOfficial": false
         }
@@ -360,7 +538,7 @@
       "bookable": false,
       "summary": null,
       "status": "candidate",
-      "searchedAt": "2026-06-05T23:08:37.953Z",
+      "searchedAt": "2026-06-06T20:08:24.233Z",
       "query": {
         "destination": "Rome",
         "check_in": "2026-09-10",
@@ -385,7 +563,7 @@
       "area": "Rome",
       "otaPrices": [
         {
-          "name": "Vrbo.com",
+          "name": "Expedia.com",
           "pricePerNight": 170,
           "isOfficial": false
         }
@@ -399,7 +577,7 @@
       "bookable": false,
       "summary": null,
       "status": "candidate",
-      "searchedAt": "2026-06-05T23:08:37.953Z",
+      "searchedAt": "2026-06-06T20:08:24.233Z",
       "query": {
         "destination": "Rome",
         "check_in": "2026-09-10",
@@ -496,6 +674,77 @@
       "summary": null,
       "status": "candidate",
       "searchedAt": "2026-06-05T23:08:37.953Z",
+      "query": {
+        "destination": "Rome",
+        "check_in": "2026-09-10",
+        "check_out": "2026-09-20",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:1slm5fx",
+      "source": "serp",
+      "offerId": null,
+      "name": "Virtus Prestige - Rooms Apartments - Junior Suite with Private Pool",
+      "starRating": null,
+      "reviewScore": 5,
+      "reviewScoreScale": 5,
+      "reviewCount": 8,
+      "pricePerNight": 131,
+      "priceTotal": 1306,
+      "priceBasis": "both",
+      "nights": 10,
+      "currency": "USD",
+      "area": "Rome",
+      "otaPrices": [
+        {
+          "name": "br.Bluepillow.com",
+          "pricePerNight": 131,
+          "isOfficial": false
+        }
+      ],
+      "stayRef": "rome-2026-09-10-2026-09-20",
+      "stay": {
+        "location": "Rome",
+        "checkIn": "2026-09-10",
+        "checkOut": "2026-09-20"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-06T20:08:24.233Z",
+      "query": {
+        "destination": "Rome",
+        "check_in": "2026-09-10",
+        "check_out": "2026-09-20",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:1pih2z5",
+      "source": "serp",
+      "offerId": null,
+      "name": "Urban Garden Hotel",
+      "starRating": 3,
+      "reviewScore": 3.9,
+      "reviewScoreScale": 5,
+      "reviewCount": 947,
+      "pricePerNight": 73,
+      "priceTotal": 726,
+      "priceBasis": "both",
+      "nights": 10,
+      "currency": "USD",
+      "area": "Rome",
+      "stayRef": "rome-2026-09-10-2026-09-20",
+      "stay": {
+        "location": "Rome",
+        "checkIn": "2026-09-10",
+        "checkOut": "2026-09-20"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-06T20:08:24.233Z",
       "query": {
         "destination": "Rome",
         "check_in": "2026-09-10",
@@ -606,6 +855,102 @@
         "description": null,
         "notes": null,
         "_candidateId": "serp:1or3n08"
+      },
+      "return": null
+    },
+    "serp:rms1ws": {
+      "outbound": {
+        "date": "2026-09-10",
+        "route": "JFK→FCO",
+        "airline": "Delta",
+        "cabin": "Economy",
+        "totalPrice": 3558,
+        "confirmation": null,
+        "multiDay": false,
+        "segments": [
+          {
+            "flight": "DeltaDL 182",
+            "airline": "Delta",
+            "route": "JFK→FCO",
+            "date": "2026-09-10",
+            "depart": "2026-09-10 17:25",
+            "arrive": "2026-09-11 07:55",
+            "layover": null
+          }
+        ],
+        "description": null,
+        "notes": null,
+        "_candidateId": "serp:rms1ws"
+      },
+      "return": null
+    },
+    "serp:1uj9wua": {
+      "outbound": {
+        "date": "2026-09-10",
+        "route": "JFK→FCO",
+        "airline": "Air Serbia",
+        "cabin": "Economy",
+        "totalPrice": 2850,
+        "confirmation": null,
+        "multiDay": false,
+        "segments": [
+          {
+            "flight": "Air SerbiaJU 501",
+            "airline": "Air Serbia",
+            "route": "JFK→BEG",
+            "date": "2026-09-10",
+            "depart": "2026-09-10 19:30",
+            "arrive": "2026-09-11 10:20",
+            "layover": null
+          },
+          {
+            "flight": "Air SerbiaJU 404",
+            "airline": "Air Serbia",
+            "route": "BEG→FCO",
+            "date": "2026-09-11",
+            "depart": "2026-09-11 18:10",
+            "arrive": "2026-09-11 19:45",
+            "layover": "7h 50m"
+          }
+        ],
+        "description": null,
+        "notes": null,
+        "_candidateId": "serp:1uj9wua"
+      },
+      "return": null
+    },
+    "serp:x4g21w": {
+      "outbound": {
+        "date": "2026-09-10",
+        "route": "JFK→FCO",
+        "airline": "Tap Air Portugal",
+        "cabin": "Economy",
+        "totalPrice": 2968,
+        "confirmation": null,
+        "multiDay": false,
+        "segments": [
+          {
+            "flight": "Tap Air PortugalTP 210",
+            "airline": "Tap Air Portugal",
+            "route": "JFK→LIS",
+            "date": "2026-09-10",
+            "depart": "2026-09-10 22:05",
+            "arrive": "2026-09-11 10:15",
+            "layover": null
+          },
+          {
+            "flight": "Tap Air PortugalTP 838",
+            "airline": "Tap Air Portugal",
+            "route": "LIS→FCO",
+            "date": "2026-09-11",
+            "depart": "2026-09-11 20:25",
+            "arrive": "2026-09-12 00:25",
+            "layover": "10h 10m"
+          }
+        ],
+        "description": null,
+        "notes": null,
+        "_candidateId": "serp:x4g21w"
       },
       "return": null
     }
@@ -834,6 +1179,85 @@
       "anchor": "lodging-day-8",
       "proposalStatus": "proposed",
       "_candidateId": "serp:dca2hj"
+    },
+    "serp:1slm5fx": {
+      "name": "Virtus Prestige - Rooms Apartments - Junior Suite with Private Pool",
+      "location": "Rome",
+      "checkIn": "2026-09-10",
+      "checkOut": "2026-09-20",
+      "dates": null,
+      "nights": 10,
+      "stars": null,
+      "total": 1306,
+      "pricePerNight": 131,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-9",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:1slm5fx"
+    },
+    "serp:1pih2z5": {
+      "name": "Urban Garden Hotel",
+      "location": "Rome",
+      "checkIn": "2026-09-10",
+      "checkOut": "2026-09-20",
+      "dates": null,
+      "nights": 10,
+      "stars": 3,
+      "total": 726,
+      "pricePerNight": 73,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-10",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:1pih2z5"
     }
+  },
+  "meta": {
+    "flightSearch": {
+      "rawTokensEst": 710,
+      "responseBytes": 2839,
+      "prodLatencyMs": 1602
+    },
+    "flightList": {
+      "rawTokensEst": 1571,
+      "responseBytes": 6296,
+      "prodLatencyMs": 359
+    },
+    "hotelSearch": {
+      "rawTokensEst": 450,
+      "responseBytes": 1800,
+      "prodLatencyMs": 3605
+    },
+    "hotelList": {
+      "rawTokensEst": 1569,
+      "responseBytes": 6274,
+      "prodLatencyMs": 450
+    },
+    "capturedAt": "2026-06-06"
   }
 }

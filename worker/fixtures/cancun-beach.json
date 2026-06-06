@@ -109,7 +109,7 @@
       "bookable": false,
       "summary": null,
       "status": "candidate",
-      "searchedAt": "2026-06-05T23:09:43.988Z",
+      "searchedAt": "2026-06-06T20:07:35.201Z",
       "query": {
         "origin": "ATL",
         "destination": "CUN",
@@ -246,6 +246,55 @@
       "pricePerPerson": 1477,
       "priceBasis": "per_person",
       "pax": 2
+    },
+    {
+      "id": "serp:1g1xa5d",
+      "source": "serp",
+      "offerId": null,
+      "price": 3036,
+      "currency": "USD",
+      "priceWithCcFee": null,
+      "fareType": null,
+      "validatingCarrier": "Delta",
+      "commissionProtected": false,
+      "cabin": "Economy",
+      "stops": 0,
+      "durationMinutes": 170,
+      "airlines": [
+        "Delta"
+      ],
+      "route": "ATL→CUN",
+      "flightNumbers": [
+        "DL601"
+      ],
+      "segments": [
+        {
+          "origin": "ATL",
+          "destination": "CUN",
+          "depart": "2027-03-13 13:45",
+          "arrive": "2027-03-13 16:35",
+          "carrier": "Delta",
+          "flightNumber": "DL 601",
+          "cabin": "Economy",
+          "durationMinutes": 170,
+          "layover": null,
+          "equipment": "Airbus A321"
+        }
+      ],
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-06T20:07:35.201Z",
+      "query": {
+        "origin": "ATL",
+        "destination": "CUN",
+        "departure_date": "2027-03-13",
+        "return_date": "2027-03-20",
+        "adults": 2
+      },
+      "pricePerPerson": 1518,
+      "priceBasis": "per_person",
+      "pax": 2
     }
   ],
   "hotels": [
@@ -266,7 +315,7 @@
       "area": "Cancun",
       "otaPrices": [
         {
-          "name": "Vrbo.com",
+          "name": "Expedia.com",
           "pricePerNight": 176,
           "isOfficial": false
         }
@@ -280,7 +329,7 @@
       "bookable": false,
       "summary": null,
       "status": "candidate",
-      "searchedAt": "2026-06-05T23:09:53.011Z",
+      "searchedAt": "2026-06-06T20:07:46.587Z",
       "query": {
         "destination": "Cancun",
         "check_in": "2027-03-13",
@@ -328,7 +377,7 @@
       "starRating": 5,
       "reviewScore": 4.6,
       "reviewScoreScale": 5,
-      "reviewCount": 3931,
+      "reviewCount": 3932,
       "pricePerNight": 437,
       "priceTotal": 3061,
       "priceBasis": "both",
@@ -344,7 +393,7 @@
       "bookable": false,
       "summary": null,
       "status": "candidate",
-      "searchedAt": "2026-06-05T23:09:53.011Z",
+      "searchedAt": "2026-06-06T20:07:46.587Z",
       "query": {
         "destination": "Cancun",
         "check_in": "2027-03-13",
@@ -532,6 +581,187 @@
         "check_out": "2027-03-20",
         "adults": 2
       }
+    },
+    {
+      "id": "serp:1t19fxd",
+      "source": "serp",
+      "offerId": null,
+      "name": "Fiesta Americana Cancún Villas",
+      "starRating": 3,
+      "reviewScore": 4.5,
+      "reviewScoreScale": 5,
+      "reviewCount": 5408,
+      "pricePerNight": 178,
+      "priceTotal": 1245,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Cancun",
+      "stayRef": "cancun-2027-03-13-2027-03-20",
+      "stay": {
+        "location": "Cancun",
+        "checkIn": "2027-03-13",
+        "checkOut": "2027-03-20"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-06T20:07:46.587Z",
+      "query": {
+        "destination": "Cancun",
+        "check_in": "2027-03-13",
+        "check_out": "2027-03-20",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:1amoizm",
+      "source": "serp",
+      "offerId": null,
+      "name": "5 Star Private Beach front Beautiful Villa only steps from the Ocean",
+      "starRating": null,
+      "reviewScore": 5,
+      "reviewScoreScale": 5,
+      "reviewCount": 244,
+      "pricePerNight": 504,
+      "priceTotal": 3526,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Cancun",
+      "otaPrices": [
+        {
+          "name": "Vrbo.com",
+          "pricePerNight": 504,
+          "isOfficial": false
+        }
+      ],
+      "stayRef": "cancun-2027-03-13-2027-03-20",
+      "stay": {
+        "location": "Cancun",
+        "checkIn": "2027-03-13",
+        "checkOut": "2027-03-20"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-06T20:07:46.587Z",
+      "query": {
+        "destination": "Cancun",
+        "check_in": "2027-03-13",
+        "check_out": "2027-03-20",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:56qdgu",
+      "source": "serp",
+      "offerId": null,
+      "name": "Cancun - Beach front Residence with Private Pool - Hotel Zone",
+      "starRating": null,
+      "reviewScore": 4.8757195,
+      "reviewScoreScale": 5,
+      "reviewCount": 257,
+      "pricePerNight": 794,
+      "priceTotal": 5560,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Cancun",
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 794,
+          "isOfficial": false
+        }
+      ],
+      "stayRef": "cancun-2027-03-13-2027-03-20",
+      "stay": {
+        "location": "Cancun",
+        "checkIn": "2027-03-13",
+        "checkOut": "2027-03-20"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-06T20:07:46.587Z",
+      "query": {
+        "destination": "Cancun",
+        "check_in": "2027-03-13",
+        "check_out": "2027-03-20",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:1abjvi0",
+      "source": "serp",
+      "offerId": null,
+      "name": "Stunning 180° Sea View! Be on the Beach In 90 Seconds! WIFI! Just Renovated!",
+      "starRating": null,
+      "reviewScore": 4.806154,
+      "reviewScoreScale": 5,
+      "reviewCount": 390,
+      "pricePerNight": 134,
+      "priceTotal": 937,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Cancun",
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 134,
+          "isOfficial": false
+        }
+      ],
+      "stayRef": "cancun-2027-03-13-2027-03-20",
+      "stay": {
+        "location": "Cancun",
+        "checkIn": "2027-03-13",
+        "checkOut": "2027-03-20"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-06T20:07:46.587Z",
+      "query": {
+        "destination": "Cancun",
+        "check_in": "2027-03-13",
+        "check_out": "2027-03-20",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:hgf91d",
+      "source": "serp",
+      "offerId": null,
+      "name": "Marriott Cancun, An All-Inclusive Resort",
+      "starRating": 4,
+      "reviewScore": 4.6,
+      "reviewScoreScale": 5,
+      "reviewCount": 6383,
+      "pricePerNight": 569,
+      "priceTotal": 3983,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Cancun",
+      "stayRef": "cancun-2027-03-13-2027-03-20",
+      "stay": {
+        "location": "Cancun",
+        "checkIn": "2027-03-13",
+        "checkOut": "2027-03-20"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-06T20:07:46.587Z",
+      "query": {
+        "destination": "Cancun",
+        "check_in": "2027-03-13",
+        "check_out": "2027-03-20",
+        "adults": 2
+      }
     }
   ],
   "promotedFlightsById": {
@@ -663,6 +893,32 @@
         "description": null,
         "notes": null,
         "_candidateId": "serp:191afx3"
+      },
+      "return": null
+    },
+    "serp:1g1xa5d": {
+      "outbound": {
+        "date": "2027-03-13",
+        "route": "ATL→CUN",
+        "airline": "Delta",
+        "cabin": "Economy",
+        "totalPrice": 3036,
+        "confirmation": null,
+        "multiDay": false,
+        "segments": [
+          {
+            "flight": "DeltaDL 601",
+            "airline": "Delta",
+            "route": "ATL→CUN",
+            "date": "2027-03-13",
+            "depart": "2027-03-13 13:45",
+            "arrive": "2027-03-13 16:35",
+            "layover": null
+          }
+        ],
+        "description": null,
+        "notes": null,
+        "_candidateId": "serp:1g1xa5d"
       },
       "return": null
     }
@@ -891,6 +1147,169 @@
       "anchor": "lodging-day-8",
       "proposalStatus": "proposed",
       "_candidateId": "serp:vut90f"
+    },
+    "serp:1t19fxd": {
+      "name": "Fiesta Americana Cancún Villas",
+      "location": "Cancun",
+      "checkIn": "2027-03-13",
+      "checkOut": "2027-03-20",
+      "dates": null,
+      "nights": 7,
+      "stars": 3,
+      "total": 1245,
+      "pricePerNight": 178,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-9",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:1t19fxd"
+    },
+    "serp:1amoizm": {
+      "name": "5 Star Private Beach front Beautiful Villa only steps from the Ocean",
+      "location": "Cancun",
+      "checkIn": "2027-03-13",
+      "checkOut": "2027-03-20",
+      "dates": null,
+      "nights": 7,
+      "stars": null,
+      "total": 3526,
+      "pricePerNight": 504,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-10",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:1amoizm"
+    },
+    "serp:56qdgu": {
+      "name": "Cancun - Beach front Residence with Private Pool - Hotel Zone",
+      "location": "Cancun",
+      "checkIn": "2027-03-13",
+      "checkOut": "2027-03-20",
+      "dates": null,
+      "nights": 7,
+      "stars": null,
+      "total": 5560,
+      "pricePerNight": 794,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-11",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:56qdgu"
+    },
+    "serp:1abjvi0": {
+      "name": "Stunning 180° Sea View! Be on the Beach In 90 Seconds! WIFI! Just Renovated!",
+      "location": "Cancun",
+      "checkIn": "2027-03-13",
+      "checkOut": "2027-03-20",
+      "dates": null,
+      "nights": 7,
+      "stars": null,
+      "total": 937,
+      "pricePerNight": 134,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-12",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:1abjvi0"
+    },
+    "serp:hgf91d": {
+      "name": "Marriott Cancun, An All-Inclusive Resort",
+      "location": "Cancun",
+      "checkIn": "2027-03-13",
+      "checkOut": "2027-03-20",
+      "dates": null,
+      "nights": 7,
+      "stars": 4,
+      "total": 3983,
+      "pricePerNight": 569,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-13",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:hgf91d"
     }
+  },
+  "meta": {
+    "flightSearch": {
+      "rawTokensEst": 699,
+      "responseBytes": 2793,
+      "prodLatencyMs": 1445
+    },
+    "flightList": {
+      "rawTokensEst": 1195,
+      "responseBytes": 4790,
+      "prodLatencyMs": 386
+    },
+    "hotelSearch": {
+      "rawTokensEst": 478,
+      "responseBytes": 1911,
+      "prodLatencyMs": 3549
+    },
+    "hotelList": {
+      "rawTokensEst": 2075,
+      "responseBytes": 8304,
+      "prodLatencyMs": 302
+    },
+    "capturedAt": "2026-06-06"
   }
 }

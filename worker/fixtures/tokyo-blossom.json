@@ -283,6 +283,69 @@
       "pricePerPerson": 2727,
       "priceBasis": "per_person",
       "pax": 2
+    },
+    {
+      "id": "serp:10t50xm",
+      "source": "serp",
+      "offerId": null,
+      "price": 5294,
+      "currency": "USD",
+      "priceWithCcFee": null,
+      "fareType": null,
+      "validatingCarrier": "China Airlines",
+      "commissionProtected": false,
+      "cabin": "Economy",
+      "stops": 1,
+      "durationMinutes": 1750,
+      "airlines": [
+        "China Airlines"
+      ],
+      "route": "SFO→HND",
+      "flightNumbers": [
+        "CI3",
+        "CI222"
+      ],
+      "segments": [
+        {
+          "origin": "SFO",
+          "destination": "TPE",
+          "depart": "2027-04-04 01:05",
+          "arrive": "2027-04-05 05:35",
+          "carrier": "China Airlines",
+          "flightNumber": "CI 3",
+          "cabin": "Economy",
+          "durationMinutes": 810,
+          "layover": null,
+          "equipment": "Boeing 777",
+          "overnight": true
+        },
+        {
+          "origin": "TSA",
+          "destination": "HND",
+          "depart": "2027-04-05 18:05",
+          "arrive": "2027-04-05 22:15",
+          "carrier": "China Airlines",
+          "flightNumber": "CI 222",
+          "cabin": "Economy",
+          "durationMinutes": 190,
+          "layover": "12h 30m",
+          "equipment": "Airbus A330"
+        }
+      ],
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-06T20:07:51.568Z",
+      "query": {
+        "origin": "SFO",
+        "destination": "HND",
+        "departure_date": "2027-04-04",
+        "return_date": "2027-04-14",
+        "adults": 2
+      },
+      "pricePerPerson": 2647,
+      "priceBasis": "per_person",
+      "pax": 2
     }
   ],
   "hotels": [
@@ -365,7 +428,7 @@
       "starRating": 3,
       "reviewScore": 4.7,
       "reviewScoreScale": 5,
-      "reviewCount": 457,
+      "reviewCount": 458,
       "pricePerNight": 153,
       "priceTotal": 1528,
       "priceBasis": "both",
@@ -381,7 +444,7 @@
       "bookable": false,
       "summary": null,
       "status": "candidate",
-      "searchedAt": "2026-06-05T23:10:10.746Z",
+      "searchedAt": "2026-06-06T20:08:03.877Z",
       "query": {
         "destination": "Tokyo",
         "check_in": "2027-04-04",
@@ -576,6 +639,109 @@
         "check_out": "2027-04-14",
         "adults": 2
       }
+    },
+    {
+      "id": "serp:1prtmn2",
+      "source": "serp",
+      "offerId": null,
+      "name": "Tokyo Bay Shiomi Prince Hotel",
+      "starRating": 4,
+      "reviewScore": 4.4,
+      "reviewScoreScale": 5,
+      "reviewCount": 1574,
+      "pricePerNight": 228,
+      "priceTotal": 2284,
+      "priceBasis": "both",
+      "nights": 10,
+      "currency": "USD",
+      "area": "Tokyo",
+      "stayRef": "tokyo-2027-04-04-2027-04-14",
+      "stay": {
+        "location": "Tokyo",
+        "checkIn": "2027-04-04",
+        "checkOut": "2027-04-14"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-06T20:08:03.877Z",
+      "query": {
+        "destination": "Tokyo",
+        "check_in": "2027-04-04",
+        "check_out": "2027-04-14",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:6bh6g3",
+      "source": "serp",
+      "offerId": null,
+      "name": "Tobu Hotel Levant Tokyo",
+      "starRating": 3,
+      "reviewScore": 4.2,
+      "reviewScoreScale": 5,
+      "reviewCount": 5120,
+      "pricePerNight": 182,
+      "priceTotal": 1820,
+      "priceBasis": "both",
+      "nights": 10,
+      "currency": "USD",
+      "area": "Tokyo",
+      "stayRef": "tokyo-2027-04-04-2027-04-14",
+      "stay": {
+        "location": "Tokyo",
+        "checkIn": "2027-04-04",
+        "checkOut": "2027-04-14"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-06T20:08:03.877Z",
+      "query": {
+        "destination": "Tokyo",
+        "check_in": "2027-04-04",
+        "check_out": "2027-04-14",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:ddcvfj",
+      "source": "serp",
+      "offerId": null,
+      "name": "井上達也設計現代風旅館 京成線駅1分 都心移動便利 近北千住上野浅草銀座スカイツリー Wifi長期可 WAGAMAMA千住 N01",
+      "starRating": null,
+      "reviewScore": null,
+      "reviewScoreScale": null,
+      "reviewCount": null,
+      "pricePerNight": 53,
+      "priceTotal": 529,
+      "priceBasis": "both",
+      "nights": 10,
+      "currency": "USD",
+      "area": "Tokyo",
+      "otaPrices": [
+        {
+          "name": "Booking.com",
+          "pricePerNight": 53,
+          "isOfficial": false
+        }
+      ],
+      "stayRef": "tokyo-2027-04-04-2027-04-14",
+      "stay": {
+        "location": "Tokyo",
+        "checkIn": "2027-04-04",
+        "checkOut": "2027-04-14"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-06T20:08:03.877Z",
+      "query": {
+        "destination": "Tokyo",
+        "check_in": "2027-04-04",
+        "check_out": "2027-04-14",
+        "adults": 2
+      }
     }
   ],
   "promotedFlightsById": {
@@ -724,6 +890,41 @@
         "description": null,
         "notes": null,
         "_candidateId": "serp:zas5vv"
+      },
+      "return": null
+    },
+    "serp:10t50xm": {
+      "outbound": {
+        "date": "2027-04-04",
+        "route": "SFO→HND",
+        "airline": "China Airlines",
+        "cabin": "Economy",
+        "totalPrice": 5294,
+        "confirmation": null,
+        "multiDay": false,
+        "segments": [
+          {
+            "flight": "China AirlinesCI 3",
+            "airline": "China Airlines",
+            "route": "SFO→TPE",
+            "date": "2027-04-04",
+            "depart": "2027-04-04 01:05",
+            "arrive": "2027-04-05 05:35",
+            "layover": null
+          },
+          {
+            "flight": "China AirlinesCI 222",
+            "airline": "China Airlines",
+            "route": "TSA→HND",
+            "date": "2027-04-05",
+            "depart": "2027-04-05 18:05",
+            "arrive": "2027-04-05 22:15",
+            "layover": "12h 30m"
+          }
+        ],
+        "description": null,
+        "notes": null,
+        "_candidateId": "serp:10t50xm"
       },
       "return": null
     }
@@ -952,6 +1153,113 @@
       "anchor": "lodging-day-8",
       "proposalStatus": "proposed",
       "_candidateId": "serp:1hkm43l"
+    },
+    "serp:1prtmn2": {
+      "name": "Tokyo Bay Shiomi Prince Hotel",
+      "location": "Tokyo",
+      "checkIn": "2027-04-04",
+      "checkOut": "2027-04-14",
+      "dates": null,
+      "nights": 10,
+      "stars": 4,
+      "total": 2284,
+      "pricePerNight": 228,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-9",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:1prtmn2"
+    },
+    "serp:6bh6g3": {
+      "name": "Tobu Hotel Levant Tokyo",
+      "location": "Tokyo",
+      "checkIn": "2027-04-04",
+      "checkOut": "2027-04-14",
+      "dates": null,
+      "nights": 10,
+      "stars": 3,
+      "total": 1820,
+      "pricePerNight": 182,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-10",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:6bh6g3"
+    },
+    "serp:ddcvfj": {
+      "name": "井上達也設計現代風旅館 京成線駅1分 都心移動便利 近北千住上野浅草銀座スカイツリー Wifi長期可 WAGAMAMA千住 N01",
+      "location": "Tokyo",
+      "checkIn": "2027-04-04",
+      "checkOut": "2027-04-14",
+      "dates": null,
+      "nights": 10,
+      "stars": null,
+      "total": 529,
+      "pricePerNight": 53,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-11",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:ddcvfj"
     }
+  },
+  "meta": {
+    "flightSearch": {
+      "rawTokensEst": 700,
+      "responseBytes": 2798,
+      "prodLatencyMs": 1224
+    },
+    "flightList": {
+      "rawTokensEst": 1403,
+      "responseBytes": 5621,
+      "prodLatencyMs": 358
+    },
+    "hotelSearch": {
+      "rawTokensEst": 473,
+      "responseBytes": 2023,
+      "prodLatencyMs": 3196
+    },
+    "hotelList": {
+      "rawTokensEst": 1754,
+      "responseBytes": 7150,
+      "prodLatencyMs": 365
+    },
+    "capturedAt": "2026-06-06"
   }
 }
