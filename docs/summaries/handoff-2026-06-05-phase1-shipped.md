@@ -63,18 +63,39 @@ Polished honest agent UX:
 - Mechanism leaks closed: neutral no-result notes + hardened SYSTEM_HINT (no "captured/demo/fixture").
 - Verified live via Playwright screenshot (real Delta flight + 3 real hotels, full detail).
 
+## Cost work — DONE (2026-06-05, commit `f8c5fd2`, deployed)
+
+Demo `/chat` was sending all ~79 tools every turn, uncached, on Sonnet (~$0.40–0.65/visit).
+- Telemetry: per-session usage + USD logged (`[cost]` line via `wrangler tail`); model-aware
+  pricing in `worker/llm/cost.ts`.
+- Tool-filtering: catalog restricted to the 9 tools the demo uses (`DEMO_TOOLS`).
+- Prompt caching: `cache_control` on the tools block + static SYSTEM_HINT.
+- Cheap-mode: `LLM_MODEL` env, default **claude-haiku-4-5** (flip to sonnet via one secret).
+- Guardrail: global daily cap `BUDGET_DAILY_USD` (default **$5**) in a reserved DO instance
+  (`__budget__`, no migration); `/chat` 503s once exceeded. Kill switch `DEMO_DISABLED` remains.
+- **Measured live (haiku, full Dublin trip): $0.0264/session** (~15–25× cheaper).
+
+## Phase 2b — DONE (2026-06-05, commit `e311958`, deployed)
+
+- `GET /presets` (`worker/presets.ts`): 5 featured routes as cards with a complete one-click prompt
+  each + Cloudflare IP-geo (city/region/country), no permission prompt.
+- Welcome UI: "Where would you like to go?" + geo greeting + 5 clickable trip cards (one-click →
+  real trip); clears after first message; free-text box remains.
+- Interview-first for free-text: SYSTEM_HINT asks for missing essentials before building, never
+  invents params; skips when a preset already has everything.
+- Verified live: welcome renders 5 chips + geo; clicking Cancún builds a real folio.
+
 ## Next (from the full-path plan)
 
-1. **Phase 2b onboarding** — preset chips (the 5 routes above) + CF IP-geo origin prefill +
-   interview-first. The natural next step in plan order.
-2. **Phase 3 Engineering Inspector** — the résumé payload; all real tool telemetry already flows through
-   the hand-rolled host.
-3. **Phase 4 budget caps + housekeeping** — global daily $/tool ceiling, per-IP rate limit, input caps.
-   **Note:** every public visit writes a `demo-*` trip to **staging KV** (by design — the demo uses the
-   real trip engine). These accumulate; add a TTL/cleanup sweep here.
-
-(Cost posture per Neil 2026-06-05: not gating on cost while he monitors — Phase 4 caps are no longer
-the forced next step; proceed in plan order 2b → 3 → 4.)
+1. **Phase 3 — Engineering Inspector** (the résumé payload). A drawer/panel showing, per turn, the
+   REAL engineering: every MCP tool call (name, args, raw result, latency, success/error), the agent
+   loop (turns, tool round-trips, tokens, cache hits — the cost telemetry is already captured), the
+   orchestration graph (save→search→stage→promote→folio). Deeper flexes from the feature-discovery
+   doc: probe ladder, anti-Akamai/BMP, multi-persona QA, Telemetry P1, /onboard, cross-LLM routing.
+   NOTE: telemetry plumbing (usage per turn) already exists server-side — surface it here.
+2. **Phase 4 housekeeping** — per-IP rate limit, input caps, and a TTL/cleanup sweep for the `demo-*`
+   trips every visit writes to **staging KV** (by design; they accumulate). Daily $ cap already done.
+3. **Phase 5 portfolio framing / Phase 6 domain** — later.
 
 ## Don't
 - Don't point the PUBLIC demo at live prod creds (decision B keeps it on staging + fixtures = $0/visit).
