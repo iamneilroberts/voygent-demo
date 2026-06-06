@@ -24,3 +24,55 @@ export const TIER_SOURCES: { label: string; url: string }[] = [
   { label: "IntuitionLabs — Claude Max plan pricing & limits", url: "https://intuitionlabs.ai/articles/claude-max-plan-pricing-usage-limits" },
   { label: "TokenMix — Claude limits 2026 (5-hr / weekly)", url: "https://tokenmix.ai/blog/complete-claude-limits-guide-2026-tokens-uploads-5-hour" },
 ];
+
+export interface BtsCard { title: string; claim: string; detail: string; source: string; }
+
+export const BTS_DISCLAIMER =
+  "These are capabilities of the production Voygent system this demo is built on. " +
+  "The live panel above shows only what THIS session actually did.";
+
+export const BTS_CARDS: BtsCard[] = [
+  { title: "Edge-native bot-defeat as a discipline",
+    claim: "23-supplier anti-bot catalog; TLS/JA3 from a Worker where the industry uses Playwright+VMs.",
+    detail: "Falsification discipline: earlier 'worker-viable' verdicts (AA Vacations, FareBuzz) were overturned by byte-cert and recorded as such.",
+    source: "docs/probes/2026-04-29-defense-bypass-catalog.md" },
+  { title: "AI multi-persona QA + Judge",
+    claim: "13 advisor personas × 22 scenarios make real MCP calls; an AI Judge scores 4 weighted dimensions.",
+    detail: "Self-files issues + auto-writes cold-start fix-prompts + synthesizes regression scenarios from open issues.",
+    source: "voygent-desktop/src/testing/ + docs/QA-TESTING-SYSTEM.md" },
+  { title: "/onboard vendor pipeline",
+    claim: "probe → classify → scaffold (category template) → wire → test → staged commit, in one command.",
+    detail: "Audit mode diffs a shipped adapter against captured baselines and auto-files an issue.",
+    source: ".claude/skills/onboard/SKILL.md" },
+  { title: "Commission firewall (LAW 1)",
+    claim: "The client view is provably free of advisor economics — enforced as a codified law with a grep-verify.",
+    detail: "assertNoAdvisorKeys runs on the client render path; economics are served separately behind Bearer + no-store.",
+    source: "src/folio-board/allowlist.ts + LAWS.md" },
+  { title: "One server → Claude + ChatGPT",
+    claim: "OAuth 2.1 + Dynamic Client Registration; per-user URL+token; tier-gated catalog locked per session.",
+    detail: "The hand-rolled host makes the driving model swappable — the moat is tools+orchestration, not a model vendor.",
+    source: "src/mcp/oauth.ts + docs/adr/0004" },
+  { title: "Scale",
+    claim: "119 tool registrations, ~30 supplier adapters across cruise/flight/hotel/package/car/excursion.",
+    detail: "All on Workers fetch() — no browser, no VM, for everything that probes worker-viable.",
+    source: "src/mcp/tools/ + src/adapters/" },
+  { title: "Curator confabulation guard + LAWS",
+    claim: "A read-only verification agent whose cardinal rule is 'no evidence → no verdict'.",
+    detail: "Runs the grep-verifies behind 6 codified invariants (≤6 laws by design).",
+    source: "~/.claude/agents/curator.md + LAWS.md" },
+  { title: "Production telemetry",
+    claim: "One non-blocking Analytics-Engine data point per tool call at the tier-gate chokepoint.",
+    detail: "No-ops when AE is unbound and never throws (test: 'never throws if writeDataPoint itself throws') — fire-and-forget, negligible hot-path overhead.",
+    source: "src/telemetry/index.ts" },
+];
+
+// Business case (parametric). The live API-equivalent $ comes from the summary event's costByModel.
+export const VOYGENT_PRICE_POINTS = [0, 12, 29];
+export const USAGE_SCENARIOS = [
+  { label: "Light", tripsMo: 2 },
+  { label: "Medium", tripsMo: 8 },
+  { label: "Heavy", tripsMo: 20 },
+];
+export const BIZ_ASSUMPTION =
+  "Assumes 1 trip ≈ this session's measured tokens; infra + margin not modeled. " +
+  "API-equivalent $ is real (this session × each model's published rates).";

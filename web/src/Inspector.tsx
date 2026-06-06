@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { PLAN_TIERS, TIER_DISCLAIMER, TIER_SOURCES } from "./inspector-data";
+import { PLAN_TIERS, TIER_DISCLAIMER, TIER_SOURCES, BTS_CARDS, BTS_DISCLAIMER, VOYGENT_PRICE_POINTS, USAGE_SCENARIOS, BIZ_ASSUMPTION } from "./inspector-data";
 
 export interface InsTool {
   type: "inspector"; kind: "tool"; exchangeId: string; turn: number;
@@ -50,6 +50,16 @@ function ToolRow({ t }: { t: InsTool }) {
       {open && (
         <pre className="ins-raw">{JSON.stringify({ args: t.args, result: safeParse(t.result) }, null, 2)}</pre>
       )}
+    </div>
+  );
+}
+
+function Card({ c }: { c: { title: string; claim: string; detail: string; source: string } }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="ins-card">
+      <button className="ins-card-head" onClick={() => setOpen((o) => !o)}>{open ? "▾" : "▸"} {c.title}</button>
+      {open && <div className="ins-card-body"><p>{c.claim}</p><p className="ins-note">{c.detail}</p><code className="ins-src">{c.source}</code></div>}
     </div>
   );
 }
@@ -167,6 +177,34 @@ export function Inspector(
           {ov && <div>Inspector client payload: <b>{(ov.instrumentationBytes / 1024).toFixed(1)} KB</b></div>}
           <div>Instrumentation CPU: <b>{ov && ov.instrumentationMs != null ? `${ov.instrumentationMs} ms` : "below timer resolution"}</b></div>
         </div>
+      </section>
+
+      <section className="ins-region">
+        <h3>Behind the scenes</h3>
+        <p className="ins-note">{BTS_DISCLAIMER}</p>
+        {BTS_CARDS.map((c) => <Card key={c.title} c={c} />)}
+      </section>
+
+      <section className="ins-region">
+        <h3>The business case</h3>
+        <p>Under the MCP model, Voygent's marginal inference cost is <b>$0</b> — your flat Claude subscription already paid for the tokens. You get frontier-model reasoning at a flat rate; a standalone app must meter, mark up, and bear billing/abuse/infra liability, and that cost compounds with volume and model tier.</p>
+        {latest ? (
+          <table className="ins-tiers">
+            <thead><tr><th>Per month</th>{USAGE_SCENARIOS.map((s) => <th key={s.label}>{s.label} ({s.tripsMo})</th>)}</tr></thead>
+            <tbody>
+              {(["haiku", "sonnet", "opus"] as const).map((m) => (
+                <tr key={m}>
+                  <td>App (API, {m})</td>
+                  {USAGE_SCENARIOS.map((s) => <td key={s.label}>{usd(cost[m] * s.tripsMo)}</td>)}
+                </tr>
+              ))}
+              {VOYGENT_PRICE_POINTS.map((v) => (
+                <tr key={v}><td>Voygent ${v} + your Claude sub</td>{USAGE_SCENARIOS.map((s) => <td key={s.label}>${v} + $0 inference</td>)}</tr>
+              ))}
+            </tbody>
+          </table>
+        ) : <p className="ins-note">Build a trip to populate the live cost basis.</p>}
+        <p className="ins-note">{BIZ_ASSUMPTION}</p>
       </section>
     </aside>
   );
