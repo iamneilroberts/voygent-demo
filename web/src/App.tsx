@@ -76,7 +76,7 @@ export function App() {
         <span className="by">built by Neil Roberts</span>
         <ThemeSwitch />
       </header>
-      <main className="stage" data-eng={eng}>
+      <div className="stage" data-eng={eng}>
         <section className="product">
           <ChatView messages={messages} tools={tools} onSend={send} busy={busy} presets={presets} geoCity={geoCity} />
           <FolioPanel folio={folio} />
@@ -84,12 +84,14 @@ export function App() {
         <section className="engineering" data-eng={eng}>
           <Inspector
             collapsed={eng !== "live"}
-            onToggleCollapse={() => setCollapsed((c) => !c)}
+            // Manual collapse only applies once live; toggling during the pre-trip idle rail is a
+            // no-op so a stray click can't latch `collapsed` and suppress the first-tool reveal.
+            onToggleCollapse={() => { if (insTools.length > 0) setCollapsed((c) => !c); }}
             tools={insTools} turns={insTurns} summaries={insSummaries}
             savings={insSavings} overhead={insOverhead}
           />
         </section>
-      </main>
+      </div>
       <footer className="meta">This interface was itself built by a coding agent.</footer>
     </div>
   );

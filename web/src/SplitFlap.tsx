@@ -23,7 +23,9 @@ export function SplitFlap(
   }, [text]);
 
   return (
-    <Tag className={`flap ${flip ? "flip" : ""} ${className}`.trim()} aria-label={text}>
+    <Tag className={`flap ${flip ? "flip" : ""} ${className}`.trim()}>
+      {/* Readable text for assistive tech; the animated cells below are decorative. */}
+      <span className="sr-only">{text}</span>
       {cells.map((c, i) => (
         <b key={i} aria-hidden="true">{c === " " ? " " : c}</b>
       ))}
