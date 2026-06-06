@@ -33,9 +33,13 @@ assemble live, proving Neil built a real MCP-powered agentic travel system. It's
 > final) — fixed UTF-8 byte counting, searchDistill double-emit, savings-inflation math, instrumentation-timer
 > gating. Honesty invariants hold: model gets unscrubbed results / inspector is a side channel (0 added model
 > tokens) / estimates labeled / cost computed server-side.
-> **TWO ITEMS STILL GATED ON NEIL:**
-> 1. **Fixture recapture** (Plan Task 11) — run `VOYGENT_CAPTURE_MCP_URL="$(grep '^VOYGENT_MCP_URL_NEIL=' /home/neil/dev/voygent-lite/.env | cut -d= -f2- | tr -d '"')" node scripts/capture-fixtures.mjs` to populate fixture `meta` (prod response size+latency). Until then the **searchDistill** savings card is correctly omitted (the other savings show).
-> 2. **Deploy** — `rm -rf dist-web && VITE_API_BASE="" npm run build:web && npx wrangler deploy`. Optional: flip `LLM_MODEL` to sonnet; decide `[show $]` default.
+> **RECAPTURE DONE (2026-06-06, commit `057e95a`).** All 5 fixtures now carry real prod `meta`
+> (responseBytes / rawTokensEst / prodLatencyMs per flightSearch/flightList/hotelSearch/hotelList), so the
+> **searchDistill** savings card now has live data. NOTE: magnitudes are modest and clamped ≥0 — prod's MCP
+> already distills server-side before the demo captures (e.g. prod `flight_search` ≈ 1.0k tok), so the
+> demo-side slim-vs-prod delta is small or 0 for some tools. Honest + non-inflating by design.
+> **ONE ITEM STILL GATED ON NEIL:**
+> 1. **Deploy** — `rm -rf dist-web && VITE_API_BASE="" npm run build:web && npx wrangler deploy`. Optional: flip `LLM_MODEL` to sonnet; decide `[show $]` default.
 
 ---
 
