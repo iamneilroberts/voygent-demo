@@ -6,7 +6,9 @@ import { FixtureReplay, type ReplayHelpers } from "./mcp/replay";
 import { presetRoutes } from "./fixtures/index";
 import { ClaudeProvider } from "./llm/claude";
 import { estimateCostUsd } from "./llm/cost";
+import { withInspectorCost, sessionCostByModel } from "./inspector";
 import type { ConversationMessage, TokenUsage } from "./llm/provider";
+import type { ServerEvent } from "../shared/events";
 
 interface Env {
   ANTHROPIC_API_KEY: string;
@@ -128,12 +130,32 @@ export class SessionDO {
     let sessionCost = 0;
     const u: TokenUsage = { inputTokens: 0, outputTokens: 0, cacheCreationTokens: 0, cacheReadTokens: 0 };
 
+    // Inspector bookkeeping (Slice 1: summary spine).
+    const exchangeId = crypto.randomUUID();
+    let turnCount = 0;
+    let toolCallCount = 0;
+    let fullToolCount = 0;
+    let exposedToolCount = 0;
+
+    // Cost-aware emit: inject real $ into zero-cost turn events; tally inspector counters.
+    const emit = (e: ServerEvent): boolean => {
+      const ev = withInspectorCost(e, model);
+      if (ev.type === "inspector") {
+        if (ev.kind === "turn") turnCount++;
+        else if (ev.kind === "tool") toolCallCount++;
+      }
+      return mux.send(ev);
+    };
+
     void (async () => {
       try {
         // Restrict the catalog to the tools the demo actually uses (cost guardrail).
-        const tools = (await mcp.listTools()).filter((t) => DEMO_TOOLS.has(t.name));
+        const fullTools = await mcp.listTools();
+        fullToolCount = fullTools.length;
+        const tools = fullTools.filter((t) => DEMO_TOOLS.has(t.name));
+        exposedToolCount = tools.length;
         await runAgentLoop({
-          provider, tools, messages: this.messages,
+          provider, tools, messages: this.messages, exchangeId,
           callTool,
           onFolio: async () => {
             const raw = await mcp.callTool("read_trip", { tripId: this.tripId });
@@ -150,11 +172,19 @@ export class SessionDO {
             u.cacheCreationTokens += turn.cacheCreationTokens; u.cacheReadTokens += turn.cacheReadTokens;
             sessionCost += estimateCostUsd(model, turn);
           },
-          emit: (e) => mux.send(e),
+          emit,
         });
       } catch (e) {
         mux.send({ type: "error", message: (e as Error).message });
       } finally {
+        // Inspector summary — emitted while the stream is still open.
+        emit({
+          type: "inspector", kind: "summary", exchangeId,
+          turns: turnCount, toolCalls: toolCallCount, exposedToolCount, fullToolCount,
+          inputTokens: u.inputTokens, outputTokens: u.outputTokens,
+          cacheReadTokens: u.cacheReadTokens, cacheCreationTokens: u.cacheCreationTokens,
+          costByModel: sessionCostByModel(u),
+        });
         mux.close();
         // Record cost: log (visible via `wrangler tail`) + add to the daily ledger.
         console.log(`[cost] model=${model} trip=${this.tripId} in=${u.inputTokens} out=${u.outputTokens} cacheR=${u.cacheReadTokens} cacheW=${u.cacheCreationTokens} usd=${sessionCost.toFixed(4)}`);
