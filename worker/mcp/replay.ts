@@ -17,6 +17,7 @@ import {
   FIXTURE_BY_ID, matchFlightFixture, matchHotelFixture, presetRoutes,
   type FlightCandidate, type HotelCandidate,
 } from "../fixtures/index";
+import { estTokens } from "../inspector";
 
 const INTERCEPTED = new Set([
   "flight_search", "hotel_search",
@@ -81,8 +82,11 @@ export class FixtureReplay {
   // Cloudflare KV's eventual consistency and momentarily miss a just-written array).
   private promotedFlights: unknown = null;
   private promotedLodging: Array<Record<string, unknown>> | null = null;
+  private measurement: { tool: string; modelFacingTokens: number } | null = null;
 
   constructor(private tripId: string) {}
+
+  lastMeasurement(): { tool: string; modelFacingTokens: number } | null { return this.measurement; }
 
   isIntercepted(name: string): boolean {
     return INTERCEPTED.has(name);
@@ -116,10 +120,12 @@ export class FixtureReplay {
     }
     this.flightRouteId = fixture.route.id;
     const candidates = fixture.flights.map(slimFlight);
-    return JSON.stringify({
+    const payload = JSON.stringify({
       status: "ok", source: "serp", tripId: this.tripId, count: candidates.length, candidates,
       _next: "Pick ONE round-trip option, stage it with patch_trip updates {flights:[{_candidateId:'<id>'}]}, then call promote_flights.",
     });
+    this.measurement = { tool: "flightSearch", modelFacingTokens: estTokens(payload) };
+    return payload;
   }
 
   private flightList(args: Record<string, any>): string {
@@ -131,7 +137,9 @@ export class FixtureReplay {
       return JSON.stringify({ status: "ok", action: "list", tripId: this.tripId, count: 0, candidates: [], note: "Run flight_search first." });
     }
     const candidates = fixture.flights.map(slimFlight);
-    return JSON.stringify({ status: "ok", action: "list", tripId: this.tripId, count: candidates.length, version: 1, candidates });
+    const payload = JSON.stringify({ status: "ok", action: "list", tripId: this.tripId, count: candidates.length, version: 1, candidates });
+    this.measurement = { tool: "flightList", modelFacingTokens: estTokens(payload) };
+    return payload;
   }
 
   private async promoteFlights(args: Record<string, any>, h: ReplayHelpers): Promise<string> {
@@ -176,10 +184,12 @@ export class FixtureReplay {
     }
     this.hotelRouteId = fixture.route.id;
     const candidates = fixture.hotels.map(slimHotel);
-    return JSON.stringify({
+    const payload = JSON.stringify({
       status: "ok", source: "serp", tripId: this.tripId, count: candidates.length, candidates,
       _next: "Stage 2-3 picks with patch_trip updates {hotels:[{_candidateId:'<id>'},...]}, then call promote_hotels_to_lodging.",
     });
+    this.measurement = { tool: "hotelSearch", modelFacingTokens: estTokens(payload) };
+    return payload;
   }
 
   private hotelList(args: Record<string, any>): string {
@@ -191,7 +201,9 @@ export class FixtureReplay {
       return JSON.stringify({ status: "ok", action: "list", tripId: this.tripId, count: 0, candidates: [], note: "Run hotel_search first." });
     }
     const candidates = fixture.hotels.map(slimHotel);
-    return JSON.stringify({ status: "ok", action: "list", tripId: this.tripId, count: candidates.length, version: 1, candidates });
+    const payload = JSON.stringify({ status: "ok", action: "list", tripId: this.tripId, count: candidates.length, version: 1, candidates });
+    this.measurement = { tool: "hotelList", modelFacingTokens: estTokens(payload) };
+    return payload;
   }
 
   private async promoteHotels(h: ReplayHelpers): Promise<string> {

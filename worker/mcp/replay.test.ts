@@ -132,3 +132,15 @@ describe("promote_hotels_to_lodging fabrication guard", () => {
     expect(out.error.code).toBe("no_staged_candidates");
   });
 });
+
+describe("FixtureReplay measurement", () => {
+  it("records lastMeasurement for an intercepted flight_search", async () => {
+    const r = new FixtureReplay("demo-x");
+    const helpers = { readTrip: async () => ({}), patchTrip: async () => {} };
+    const out = await r.handle("flight_search", { origin: "MOB", destination: "DUB" }, helpers as any);
+    const m = r.lastMeasurement();
+    expect(m).toBeTruthy();
+    expect(m!.tool).toBe("flightSearch");
+    expect(m!.modelFacingTokens).toBe(Math.ceil(out.length / 4));
+  });
+});
