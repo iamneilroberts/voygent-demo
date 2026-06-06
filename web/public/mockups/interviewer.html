@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Voygent · interviewer cut</title>
+<script>/* set theme before paint to avoid a flash */
+  try { var t = localStorage.getItem('voy-theme'); if (t) document.documentElement.dataset.theme = t; } catch(e){}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="./_system.css">
@@ -24,9 +27,13 @@
   .mark .by { font: 400 var(--t-13)/1 var(--mono); color: var(--muted); }
   header.top .cut-switch { margin-left: auto; }
 
+  .theme-bar {
+    padding: var(--s2) var(--s6); border-bottom: 1px solid var(--line);
+    background: var(--board-2);
+  }
   .boot {
     padding: var(--s2) var(--s6); font: 400 var(--t-12)/1.6 var(--mono); color: var(--muted);
-    border-bottom: 1px solid var(--line); white-space: nowrap; overflow: hidden;
+    border-bottom: 1px solid var(--line); white-space: nowrap; overflow-x: auto;
   }
   .boot .ok { color: var(--phosphor); }
   .boot .hi { color: var(--amber); }
@@ -134,7 +141,24 @@
     font: 400 var(--t-12)/1.5 var(--mono); color: var(--muted-2); display: flex; gap: var(--s4); flex-wrap: wrap; }
   footer.meta b { color: var(--muted); font-weight: 500; }
 
-  @media (max-width: 900px) { main { grid-template-columns: 1fr; } }
+  /* terminal text must wrap on narrow screens, never clip */
+  .tail, .tail .line, .timeline .row span, .board-row .v { overflow-wrap: anywhere; word-break: break-word; }
+
+  @media (max-width: 900px) {
+    main { grid-template-columns: 1fr; }
+    /* engineering is the hero in this cut — show it first on a phone */
+    main > .col:nth-child(2) { order: -1; }
+  }
+  @media (max-width: 620px) {
+    header.top { flex-wrap: wrap; row-gap: var(--s3); padding: var(--s3) var(--s4); }
+    header.top .cut-switch { margin-left: 0; width: 100%; overflow-x: auto; }
+    .theme-bar, .boot { padding-left: var(--s4); padding-right: var(--s4); }
+    .product, .inspector { padding-left: var(--s4); padding-right: var(--s4); }
+    .col-h { padding-left: var(--s4); padding-right: var(--s4); }
+    .score { grid-template-columns: 1fr; gap: var(--s3); }
+    .pipe { font-size: var(--t-12); }
+    .saved .big { font-size: var(--t-24); }
+  }
 </style>
 </head>
 <body>
@@ -152,6 +176,17 @@
       <a href="./travel.html">travel</a>
     </nav>
   </header>
+
+  <div class="theme-bar">
+    <div class="theme-switch" id="themes" role="group" aria-label="color theme">
+      <span class="lab">palette</span>
+      <button data-theme="amber"    aria-pressed="true"><span class="sw" style="--a:#f5a623;--b:#79d98a"></span>amber crt</button>
+      <button data-theme="phosphor"><span class="sw" style="--a:#3fb950;--b:#56d364"></span>green crt</button>
+      <button data-theme="sodium"><span class="sw" style="--a:#ff8c42;--b:#15120d"></span>sodium</button>
+      <button data-theme="dusk"><span class="sw" style="--a:#ff9e64;--b:#8bd4a0"></span>dusk</button>
+      <button data-theme="paper"><span class="sw" style="--a:#c2611c;--b:#f4f0e6"></span>paper</button>
+    </div>
+  </div>
 
   <div class="boot" id="boot" aria-live="polite"></div>
 
@@ -390,6 +425,17 @@
   const spark = document.getElementById('spark');
   const max = Math.max(...sparkData);
   sparkData.forEach(v => { const i = document.createElement('i'); i.style.height = (3 + (v/max)*11) + 'px'; spark.appendChild(i); });
+
+  /* ---- theme switcher ---- */
+  const themes = document.getElementById('themes');
+  const saved = (() => { try { return localStorage.getItem('voy-theme'); } catch(e){ return null; } })() || 'amber';
+  function setTheme(name){
+    document.documentElement.dataset.theme = name;
+    try { localStorage.setItem('voy-theme', name); } catch(e){}
+    themes.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.theme === name)));
+  }
+  themes.querySelectorAll('button').forEach(b => b.addEventListener('click', () => setTheme(b.dataset.theme)));
+  setTheme(saved);
 
   /* ---- meta footer toggle ---- */
   document.getElementById('meta-toggle').addEventListener('click', e => {

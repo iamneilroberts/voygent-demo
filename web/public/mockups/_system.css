@@ -160,6 +160,65 @@ a { color: inherit; }
 .fold[open] > summary::before { content: "▾ "; }
 .fold > summary:hover { color: var(--ink); }
 
+/* ============================ theme variants ============================= */
+/* Same "departure-board × CLI" concept, different palette mood. Each overrides
+   only the color tokens; layout/motion are theme-agnostic. Set via
+   <html data-theme="…">. The split-flap face stays dark on every theme
+   (real airport boards always are) — only its glyph color follows --amber. */
+
+/* 1 · amber  — warm amber CRT (default; identical to :root, named for the switcher) */
+:root[data-theme="amber"] {}
+
+/* 2 · phosphor — green P1 CRT, near-monochrome green */
+:root[data-theme="phosphor"] {
+  --board:#050a06; --board-2:#0a140c; --board-3:#10200f;
+  --ink:#d6f5dd; --muted:#6f8f76; --muted-2:#4d6a53;
+  --amber:#3fb950; --amber-hi:#56d364; --phosphor:#56d364; --red:#ff7b72;
+  --line:#16271a;
+}
+
+/* 3 · sodium — near-monochrome warm grayscale + one sodium-vapor accent (minimal) */
+:root[data-theme="sodium"] {
+  --board:#0c0a07; --board-2:#15120d; --board-3:#1e1912;
+  --ink:#ece4d6; --muted:#8a8276; --muted-2:#5e574b;
+  --amber:#ff8c42; --amber-hi:#ffb375; --phosphor:#ff8c42; --red:#f0746a;
+  --line:#241e16;
+}
+
+/* 4 · paper — light boarding-pass / light IDE (the one light option) */
+:root[data-theme="paper"] {
+  --board:#f4f0e6; --board-2:#fffdf7; --board-3:#efe8d6;
+  --ink:#211c14; --muted:#6f6757; --muted-2:#928974;
+  --amber:#c2611c; --amber-hi:#9a4a12; --phosphor:#2f8f50; --red:#c0392b;
+  --line:#e2dac8;
+}
+
+/* 5 · dusk — warm aubergine night + apricot accent (travel-at-dusk mood) */
+:root[data-theme="dusk"] {
+  --board:#15101b; --board-2:#1e1828; --board-3:#271f33;
+  --ink:#efe6f2; --muted:#a092ad; --muted-2:#6f6280;
+  --amber:#ff9e64; --amber-hi:#ffc4a0; --phosphor:#8bd4a0; --red:#f4798b;
+  --line:#2a2236;
+}
+
+/* ============================ theme switcher ============================= */
+.theme-switch { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap;
+  overflow-x: auto; -webkit-overflow-scrolling: touch; padding: 2px; scrollbar-width: none; }
+.theme-switch::-webkit-scrollbar { display: none; }
+.theme-switch .lab { font: 500 var(--t-12)/1 var(--mono); color: var(--muted);
+  letter-spacing: .08em; text-transform: uppercase; white-space: nowrap; margin-right: 2px; }
+.theme-switch button {
+  display: inline-flex; align-items: center; gap: 7px; flex: 0 0 auto;
+  background: none; border: 1px solid var(--line); color: var(--muted);
+  font: 500 var(--t-12)/1 var(--mono); padding: 7px 11px; border-radius: 999px;
+  cursor: pointer; white-space: nowrap; transition: color .15s, border-color .15s;
+  min-height: 34px; /* comfortable tap target */
+}
+.theme-switch button:hover { color: var(--ink); border-color: var(--muted); }
+.theme-switch button[aria-pressed="true"] { color: var(--ink); border-color: var(--amber); }
+.theme-switch .sw { width: 13px; height: 13px; border-radius: 50%; border: 1px solid #0003;
+  background: linear-gradient(135deg, var(--a) 0 50%, var(--b) 50% 100%); }
+
 /* ============================ reduced motion ============================= */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
