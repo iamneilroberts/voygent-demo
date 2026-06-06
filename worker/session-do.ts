@@ -141,8 +141,8 @@ export class SessionDO {
         if (ev.kind !== "overhead" && ev.kind !== "summary") {
           instrumentationBytes += utf8Bytes(encodeSse(ev));
         }
+        instrumentationMs += Date.now() - t0;
       }
-      instrumentationMs += Date.now() - t0;
       return mux.send(ev);
     };
 
@@ -165,7 +165,7 @@ export class SessionDO {
         emit({
           type: "inspector", kind: "savings", exchangeId, mechanism: "patch",
           tokensSaved: Math.max(0, estTokens(this.lastBaselineTripJson) - estTokens(JSON.stringify(updates))),
-          basis: "chars/4", scope: "perTurn", detail: "incremental patch vs full-trip rewrite",
+          basis: "chars/4", scope: "aggregate", detail: "incremental patch vs full-trip rewrite",
         });
       }
       const out = await baseCallTool(name, input);

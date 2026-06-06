@@ -86,14 +86,17 @@ export function Inspector(
   );
   const sessionTokens = tokensIn + cacheRead;
 
-  // Context saved: sum perTurn (× turns) + aggregate; template (perRender) shown separately as latest/max.
-  const turnsCount = latest?.turns ?? turns.length;
-  const summed = savings.reduce((acc, s) => {
-    if (s.scope === "perTurn") acc.sum += s.tokensSaved * Math.max(1, turnsCount);
-    else if (s.scope === "aggregate") acc.sum += s.tokensSaved;
-    else if (s.mechanism === "template") acc.template = Math.max(acc.template, s.tokensSaved);
-    return acc;
-  }, { sum: 0, template: 0 });
+  // Honest context-saved model:
+  //  - aggregate (patch, searchDistill): one-time savings, summed directly.
+  //  - perTurn (toolCatalog): the same schema delta is withheld EVERY turn → one
+  //    representative delta × total session turns (NOT summed across the repeated events).
+  //  - perRender (template): counterfactual, shown separately as a latest/max, never summed.
+  const turnsTotal = turns.length;
+  const aggregateSum = savings.filter((s) => s.scope === "aggregate").reduce((a, s) => a + s.tokensSaved, 0);
+  const perTurnDelta = savings.filter((s) => s.scope === "perTurn").reduce((m, s) => Math.max(m, s.tokensSaved), 0);
+  const perTurnTotal = perTurnDelta * turnsTotal;
+  const templateMax = savings.filter((s) => s.scope === "perRender").reduce((m, s) => Math.max(m, s.tokensSaved), 0);
+  const savedHeadline = aggregateSum + perTurnTotal;
   const ov = overhead[overhead.length - 1];
 
   return (
@@ -160,14 +163,17 @@ export function Inspector(
 
         <div className="ins-saved">
           <h4>Context kept out of the model</h4>
-          <div className="ins-saved-total">≈ {fmt(summed.sum)} tokens kept out of context</div>
+          <div className="ins-saved-total">≈ {fmt(savedHeadline)} tokens kept out of context</div>
           <ul>
-            {savings.filter((s) => s.scope !== "perRender").map((s, i) => (
-              <li key={i}><b>{s.mechanism}</b> · {fmt(s.tokensSaved)}{s.scope === "perTurn" ? "/turn" : ""} — {s.detail}</li>
+            {savings.filter((s) => s.scope === "aggregate").map((s, i) => (
+              <li key={i}><b>{s.mechanism}</b> · {fmt(s.tokensSaved)} — {s.detail}</li>
             ))}
+            {perTurnDelta > 0 && (
+              <li><b>toolCatalog</b> · ~{fmt(perTurnDelta)}/turn × {turnsTotal} turns = {fmt(perTurnTotal)} — fewer tool schemas sent each turn</li>
+            )}
           </ul>
-          {summed.template > 0 && (
-            <div className="ins-note">Folio render: ≈ {fmt(summed.template)} tokens the model never generated (deterministic template, counterfactual — not summed above).</div>
+          {templateMax > 0 && (
+            <div className="ins-note">Folio render: ≈ {fmt(templateMax)} tokens the model never generated (deterministic template, counterfactual — not summed above).</div>
           )}
         </div>
 
@@ -175,7 +181,7 @@ export function Inspector(
           <h4>Observer effect — the cost of measuring</h4>
           <div>Added model tokens: <b>0</b> (inspector data is a side channel, never in context)</div>
           {ov && <div>Inspector client payload: <b>{(ov.instrumentationBytes / 1024).toFixed(1)} KB</b></div>}
-          <div>Instrumentation CPU: <b>{ov && ov.instrumentationMs != null ? `${ov.instrumentationMs} ms` : "below timer resolution"}</b></div>
+          <div>Instrumentation CPU: <b>{!ov ? "—" : (ov.instrumentationMs != null ? `${ov.instrumentationMs} ms` : "below timer resolution")}</b></div>
         </div>
       </section>
 
