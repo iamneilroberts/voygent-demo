@@ -42,6 +42,13 @@ export interface Fixture {
   // Real promoted lodging cards per hotel-candidate id, as prod's
   // promote_hotels_to_lodging produced them.
   promotedLodgingById: Record<string, Record<string, unknown>>;
+  meta?: {
+    flightSearch?: { rawTokensEst: number; responseBytes: number; prodLatencyMs: number };
+    flightList?: { rawTokensEst: number; responseBytes: number; prodLatencyMs: number };
+    hotelSearch?: { rawTokensEst: number; responseBytes: number; prodLatencyMs: number };
+    hotelList?: { rawTokensEst: number; responseBytes: number; prodLatencyMs: number };
+    capturedAt?: string;
+  };
 }
 
 export const FIXTURES: Fixture[] = [

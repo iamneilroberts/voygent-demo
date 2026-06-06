@@ -44,45 +44,46 @@ const ROUTES = [
   { id: "nyc-weekend",  label: "NYC long weekend",         origin: "ORD", destination: "JFK", city: "New York",      depart: "2027-02-12", ret: "2027-02-15", adults: 2 },
 ];
 
+const ENC = new TextEncoder();
 let rpcId = 0;
 async function rpc(method, params) {
+  const t0 = Date.now();
   const res = await fetch(MCP_URL, {
     method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "accept": "application/json, text/event-stream",
-    },
+    headers: { "content-type": "application/json", "accept": "application/json, text/event-stream" },
     body: JSON.stringify({ jsonrpc: "2.0", id: ++rpcId, method, params }),
   });
   const ct = res.headers.get("content-type") || "";
   const text = await res.text();
+  const latencyMs = Date.now() - t0;
   if (!res.ok) throw new Error(`MCP ${method} HTTP ${res.status}: ${text.slice(0, 200)}`);
   let payload = {};
-  if (!ct.includes("text/event-stream")) {
-    payload = JSON.parse(text);
-  } else {
+  if (!ct.includes("text/event-stream")) { payload = JSON.parse(text); }
+  else {
     for (const frame of text.split(/\n\n+/)) {
-      const data = frame.split("\n").filter((l) => l.startsWith("data:"))
-        .map((l) => l.slice(5).replace(/^ /, "")).join("\n").trim();
+      const data = frame.split("\n").filter((l) => l.startsWith("data:")).map((l) => l.slice(5).replace(/^ /, "")).join("\n").trim();
       if (!data) continue;
       try { payload = JSON.parse(data); } catch { /* skip */ }
     }
   }
   if (payload.error) throw new Error(`MCP ${method}: ${JSON.stringify(payload.error).slice(0, 300)}`);
-  return payload.result;
+  return { result: payload.result, latencyMs };
 }
 
-// tools/call returns { content:[{type:'text',text}], ... }. Most Voygent tools
-// return a single JSON text block; parse it when possible, else keep raw text.
 async function callTool(name, args) {
-  const result = await rpc("tools/call", { name, arguments: args });
+  const { result, latencyMs } = await rpc("tools/call", { name, arguments: args });
   const text = (result?.content ?? []).filter((c) => c.type === "text").map((c) => c.text).join("\n");
   let json = null;
   try { json = JSON.parse(text); } catch { /* not json */ }
-  return { text, json, raw: result };
+  return { text, json, raw: result, latencyMs, responseBytes: ENC.encode(text).length };
 }
 
 function log(...a) { console.log(...a); }
+
+function metaFrom(out) {
+  if (!out) return undefined;
+  return { rawTokensEst: Math.ceil((out.text?.length ?? 0) / 4), responseBytes: out.responseBytes, prodLatencyMs: out.latencyMs };
+}
 
 // Map a real HotelCandidate to the trip.hotels[] staging shape that
 // promote_hotels_to_lodging reads (name, area, checkIn/checkOut, nights,
@@ -126,12 +127,14 @@ async function captureRoute(r) {
     departure_date: r.depart, return_date: r.ret, adults: r.adults,
   });
   record("flight_search", { source: "serp", origin: r.origin, destination: r.destination }, out);
+  const flightSearchOut = out;
   const flightSearchRaw = out.json ?? out.text;
   log(`  flight_search: ${out.json?.status ?? "?"}`);
 
   // 3. flight_list action=list -> real FlightCandidate[]
   out = await callTool("flight_list", { tripId, action: "list" });
   record("flight_list", { tripId, action: "list" }, out);
+  const flightListOut = out;
   const flightCandidates = out.json?.candidates ?? [];
   log(`  flight_list: ${flightCandidates.length} candidates`);
 
@@ -154,11 +157,13 @@ async function captureRoute(r) {
     check_in: r.depart, check_out: r.ret, adults: r.adults,
   });
   record("hotel_search", { source: "serp", location: r.city }, out);
+  const hotelSearchOut = out;
   log(`  hotel_search: ${out.json?.status ?? "?"}`);
 
   // 6. hotel_list action=list -> real HotelCandidate[]
   out = await callTool("hotel_list", { tripId, action: "list" });
   record("hotel_list", { tripId, action: "list" }, out);
+  const hotelListOut = out;
   const hotelCandidates = out.json?.candidates ?? [];
   log(`  hotel_list: ${hotelCandidates.length} candidates`);
 
@@ -180,6 +185,14 @@ async function captureRoute(r) {
     log(`  promoted lodging: ${Object.keys(promotedLodgingById).length}/${hotelCandidates.length}`);
   }
 
+  const meta = {
+    flightSearch: metaFrom(flightSearchOut),
+    flightList:   metaFrom(flightListOut),
+    hotelSearch:  metaFrom(hotelSearchOut),
+    hotelList:    metaFrom(hotelListOut),
+    capturedAt: new Date().toISOString().slice(0, 10),
+  };
+
   // raw dump (for inspection; gitignored)
   await writeFile(resolve(RAW_DIR, `${r.id}.json`), JSON.stringify({
     route: r, steps, flightSearchRaw, flightCandidates, hotelCandidates, promotedFlightsById, promotedLodgingById,
@@ -192,6 +205,7 @@ async function captureRoute(r) {
     hotels: hotelCandidates,
     promotedFlightsById,
     promotedLodgingById,
+    meta,
   }, null, 2));
 
   // cleanup unless --keep
