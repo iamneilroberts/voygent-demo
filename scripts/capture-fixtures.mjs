@@ -46,6 +46,7 @@ const ROUTES = [
 
 const ENC = new TextEncoder();
 function daysBetween(a, b) { return Math.round((Date.parse(b) - Date.parse(a)) / 86400000) || 1; }
+function numOrNull(v) { const n = Number(v); return Number.isFinite(n) ? n : null; }
 function addDays(d, n) { const t = new Date(Date.parse(d) + n * 86400000); return t.toISOString().slice(0, 10); }
 let rpcId = 0;
 async function rpc(method, params) {
@@ -198,20 +199,23 @@ async function captureRoute(r) {
     const raw = ex.json?.candidates ?? ex.json?.products ?? [];
     // Spread across days round-robin so each demo day gets activity content.
     const dayCount = Math.max(1, Math.min(5, daysBetween(r.depart, r.ret)));
-    excursions = raw.slice(0, 6).map((c, i) => ({
-      productCode: c.productCode ?? c.product_code ?? c.id,
-      title: c.title ?? c.name,
-      day: (i % dayCount) + 1,
-      free: Number(c.priceFrom ?? c.price_from ?? 0) === 0,
-      priceFrom: c.priceFrom ?? c.price_from ?? null,
-      currency: c.currency ?? "USD",
-      durationMinutes: c.durationMinutes ?? c.duration_minutes ?? null,
-      rating: c.rating ?? null,
-      reviewCount: c.reviewCount ?? c.review_count ?? null,
-      description: (c.description ?? c.descriptionShort ?? "").slice(0, 200),
-      bookingUrl: c.bookingUrl ?? c.booking_url ?? null,
-      coverImage: c.coverImage ?? c.cover_image ?? null,
-    })).filter((e) => e.productCode && e.title);
+    excursions = raw.slice(0, 6).map((c, i) => {
+      const priceFrom = numOrNull(c.priceFrom ?? c.price_from);
+      return {
+        productCode: String(c.productCode ?? c.product_code ?? c.id ?? ""),
+        title: c.title ?? c.name,
+        day: (i % dayCount) + 1,
+        free: priceFrom === 0,
+        priceFrom,
+        currency: c.currency ?? "USD",
+        durationMinutes: numOrNull(c.durationMinutes ?? c.duration_minutes),
+        rating: numOrNull(c.rating),
+        reviewCount: numOrNull(c.reviewCount ?? c.review_count),
+        description: (c.description ?? c.descriptionShort ?? "").slice(0, 200),
+        bookingUrl: c.bookingUrl ?? c.booking_url ?? null,
+        coverImage: c.coverImage ?? c.cover_image ?? null,
+      };
+    }).filter((e) => e.productCode && e.title);
     log(`  excursions: ${excursions.length}`);
   } catch (e) { log(`  excursion_search FAILED: ${e.message}`); }
 
@@ -227,8 +231,8 @@ async function captureRoute(r) {
       name: c.name,
       day: (i % dayCount) + 1,
       cuisine: c.cuisine ?? (Array.isArray(c.cuisines) ? c.cuisines[0] : null),
-      rating: c.rating ?? null,
-      reviewCount: c.reviewCount ?? c.num_reviews ?? null,
+      rating: numOrNull(c.rating),
+      reviewCount: numOrNull(c.reviewCount ?? c.num_reviews),
       priceLevel: c.priceLevel ?? c.price_level ?? null,
       description: (c.description ?? "").slice(0, 200),
       url: c.url ?? c.web_url ?? null,
@@ -242,7 +246,10 @@ async function captureRoute(r) {
     day: i + 1,
     date: addDays(r.depart, i),
     location: r.city,
-    title: i === 0 ? `Arrive ${r.city}` : i === dayCount - 1 ? `Depart ${r.city}` : `${r.city} — Day ${i + 1}`,
+    // Day 1 is the arrival; later days are generic. We do NOT label a "Depart" day:
+    // dayCount is capped at 5, so the last generated day isn't guaranteed to be r.ret.
+    // Exact day structure/labels for the showcased trip are finalized at capture time.
+    title: i === 0 ? `Arrive ${r.city}` : `${r.city} — Day ${i + 1}`,
   }));
 
   const meta = {
