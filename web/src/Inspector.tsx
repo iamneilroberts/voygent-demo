@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
 import type { EngState } from "./lib/inspector-state";
 import { PLAN_TIERS, TIER_DISCLAIMER, TIER_SOURCES, BTS_CARDS, BTS_DISCLAIMER, VOYGENT_PRICE_POINTS, USAGE_SCENARIOS, BIZ_ASSUMPTION } from "./inspector-data";
+import { costWeightedTokens, cacheHitRate } from "./lib/usage";
 
 export interface InsTool {
   type: "inspector"; kind: "tool"; exchangeId: string; turn: number;
@@ -102,12 +103,18 @@ export function Inspector(
   const tokensIn = turns.reduce((a, t) => a + t.inputTokens, 0);
   const tokensOut = turns.reduce((a, t) => a + t.outputTokens, 0);
   const cacheRead = turns.reduce((a, t) => a + t.cacheReadTokens, 0);
+  const cacheWrite = turns.reduce((a, t) => a + t.cacheCreationTokens, 0);
   const latest = summaries[summaries.length - 1];
   const cost = summaries.reduce(
     (a, s) => ({ haiku: a.haiku + s.costByModel.haiku, sonnet: a.sonnet + s.costByModel.sonnet, opus: a.opus + s.costByModel.opus }),
     { haiku: 0, sonnet: 0, opus: 0 },
   );
-  const sessionTokens = tokensIn + cacheRead;
+  // Cost-weighted (reads 0.1x, writes 1.25x) — the raw in+cacheRead sum read
+  // 5-10x pessimistic against the sub-window estimate once the moving cache
+  // breakpoint landed. See lib/usage.ts.
+  const usage = { inputTokens: tokensIn, cacheReadTokens: cacheRead, cacheCreationTokens: cacheWrite };
+  const sessionTokens = costWeightedTokens(usage);
+  const hitRate = cacheHitRate(usage);
 
   // Honest context-saved model:
   //  - aggregate (patch, searchDistill): one-time savings, summed directly.
@@ -152,6 +159,11 @@ export function Inspector(
           <div>{turns.length} turns · {tools.length} tool calls</div>
           {latest && <div>{latest.exposedToolCount} of {latest.fullToolCount} tools exposed</div>}
           <div>{fmt(tokensIn)} in · {fmt(tokensOut)} out · {fmt(cacheRead)} cache-read</div>
+          {hitRate != null && (
+            <div className="ins-hitrate">
+              cache hit rate <b>{(hitRate * 100).toFixed(0)}%</b> · ≈{fmt(sessionTokens)} cost-weighted tokens
+            </div>
+          )}
         </div>
 
         <div className="ins-cost">
@@ -172,7 +184,7 @@ export function Inspector(
                   <tr key={p.id}>
                     <td>{p.name}</td>
                     <td>${p.priceMo}</td>
-                    <td>{p.windowTokens ? `~${fmt(p.windowTokens)}${pct != null ? ` · this trip ≈ ${pct.toFixed(pct < 1 ? 2 : 0)}%` : ""}` : p.windowNote}</td>
+                    <td>{p.windowTokens ? `~${fmt(p.windowTokens)}${pct != null ? ` · this trip ≈ ${pct.toFixed(pct < 1 ? 2 : 0)}% (cost-wtd)` : ""}` : p.windowNote}</td>
                   </tr>
                 );
               })}
@@ -181,7 +193,7 @@ export function Inspector(
           <p className="ins-note">{TIER_DISCLAIMER}</p>
           <details className="ins-sources">
             <summary>how we estimate</summary>
-            <p>Monthly estimate = window tokens × 1 fresh window/day × 30. Sources:</p>
+            <p>Monthly estimate = window tokens × 1 fresh window/day × 30. Trip usage is cost-weighted: cache reads count at 0.1×, cache writes at 1.25× — matching how they bill. Sources:</p>
             <ul>{TIER_SOURCES.map((s) => <li key={s.url}><a href={s.url} target="_blank" rel="noreferrer">{s.label}</a></li>)}</ul>
           </details>
         </div>
