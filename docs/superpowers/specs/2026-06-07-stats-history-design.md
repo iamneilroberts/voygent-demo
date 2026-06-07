@@ -26,10 +26,10 @@ Persist the per-exchange engineering stats the Inspector already computes, so th
     routing_json TEXT,                   -- the ModelRouting
     turns INTEGER, tool_calls INTEGER, exposed_tools INTEGER, full_tools INTEGER,
     in_tok INTEGER, out_tok INTEGER, cache_read INTEGER, cache_write INTEGER,
-    actual_cost_usd REAL,                -- measured routed spend
-    actual_cost_by_model_json TEXT,
+    actual_cost_usd REAL,                -- measured routed spend (sum of per-turn cost)
+    actual_haiku REAL, actual_sonnet REAL, actual_opus REAL,  -- routed spend split (SQL-summable)
     cost_haiku REAL, cost_sonnet REAL, cost_opus REAL,  -- counterfactual (all-tier)
-    saved_tokens INTEGER                 -- tokens kept out of context (aggregate savings)
+    saved_tokens INTEGER                 -- tokens kept out of context (see definition below)
   );
   CREATE INDEX IF NOT EXISTS idx_session_stats_session ON session_stats (session_id, ts);
   CREATE INDEX IF NOT EXISTS idx_session_stats_ts ON session_stats (ts);
@@ -46,7 +46,7 @@ Persist the per-exchange engineering stats the Inspector already computes, so th
   ```
   - **`isTest` excluded** (same flag as the budget bypass) so smoke/Playwright runs don't pollute history.
   - No-op when `STATS_DB` is unbound (local dev without D1) — never throws.
-  - `saved_tokens` = the same headline the panel shows (aggregate savings sum + perTurn×turns); computed worker-side from the savings events already tallied, or recomputed from the summary. (Keep it simple: sum the savings the worker emitted this exchange.)
+  - **`saved_tokens` (concrete):** a `savedTokens` accumulator in `handleChat` sums `tokensSaved` from every `kind:"savings"` event as it is emitted this exchange (patch + searchDistill + toolCatalog + template). One number per exchange = "tokens kept out of context." Defined as the sum of emitted savings (differs slightly from the panel's perTurn×turns headline math — acceptable).
 
 ## Read path
 - `GET /stats` (top-level worker, **public**, `cache-control: public, max-age=60`):
@@ -54,12 +54,11 @@ Persist the per-exchange engineering stats the Inspector already computes, so th
   SELECT COUNT(*) exchanges, COUNT(DISTINCT session_id) sessions,
          COUNT(DISTINCT trip_id) trips,
          SUM(actual_cost_usd) totalActualCostUsd, SUM(saved_tokens) totalSavedTokens,
-         SUM(in_tok+out_tok+cache_read+cache_write) totalTokens
+         SUM(in_tok+out_tok+cache_read+cache_write) totalTokens,
+         SUM(actual_haiku) actualHaiku, SUM(actual_sonnet) actualSonnet, SUM(actual_opus) actualOpus
   FROM session_stats;
-  -- + SUM per model from actual_cost_by_model_json (computed in JS over a recent window) OR
-  --   a second query summing cost_* columns; byModel via JS reduce over recent rows.
   ```
-  Returns `{ sessions, exchanges, trips, totalActualCostUsd, totalSavedTokens, totalTokens, byModel, recent: [...] }`. `recent` = last ~10 rows, **anonymized** (no session_id/exchange_id/trip_id — just stats + ts). No-op/empty shape when `STATS_DB` unbound.
+  One clean aggregate query (byModel = the three `actual_*` SUMs — no JSON parsing). Returns `{ sessions, exchanges, trips, totalActualCostUsd, totalSavedTokens, totalTokens, byModel: {haiku,sonnet,opus}, recent: [...] }`. `recent` = a second query for the last ~10 rows, **anonymized** (no session_id/exchange_id/trip_id — just stats + ts). No-op/empty shape when `STATS_DB` unbound.
 - Aggregation query is cheap (indexed, demo-scale rows); the 60s cache absorbs visitor load.
 
 ## UI
@@ -73,7 +72,7 @@ Persist the per-exchange engineering stats the Inspector already computes, so th
 ## Components / files
 - `wrangler.toml` — `[[d1_databases]]` binding `STATS_DB` + `database_id`.
 - `migrations/0001_session_stats.sql` — schema (applied via `wrangler d1 execute --file` / `migrations`).
-- `worker/stats.ts` (+ `.test.ts`) — `statsRowFromSummary()` mapper + `aggregateStats(rows)` shaping helper (pure, tested).
+- `worker/stats.ts` (+ `.test.ts`) — `statsRowFromSummary(summary, ctx, savedTokens, ts)` mapper (→ ordered bind tuple, incl. actual_* split from `actualCostByModel`) + `shapeStats(aggRow, recentRows)` (pure, tested).
 - `worker/session-do.ts` — Env `STATS_DB?: D1Database`; best-effort insert in `finally` (skip on `isTest`/unbound); compute `saved_tokens`.
 - `worker/index.ts` — Env `STATS_DB?`; `GET /stats` handler (cached).
 - `web/src/App.tsx` — fetch `/stats` on mount; pass to Inspector.
@@ -81,7 +80,7 @@ Persist the per-exchange engineering stats the Inspector already computes, so th
 - `shared/events.ts` — (only if a shared StatsSummary type helps; otherwise local).
 
 ## Testing
-- `worker/stats.test.ts`: `statsRowFromSummary` maps a summary+ctx to the right bind tuple; `aggregateStats` sums/derives byModel + handles empty.
+- `worker/stats.test.ts`: `statsRowFromSummary` maps summary+ctx to the right ordered bind tuple (incl. actual_* split); `shapeStats` derives the response + handles empty/null sums.
 - `worker/index` `/stats` shape via a fake `STATS_DB` (prepare/all stub) if cheap; else manual.
 - Full `vitest run` + `tsc`; post-deploy `wrangler d1 execute voygent-demo-stats --command "SELECT COUNT(*) FROM session_stats"` to confirm rows land; `curl /stats`.
 
