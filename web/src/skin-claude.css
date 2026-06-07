@@ -115,6 +115,8 @@
 }
 :root[data-skin="claude"] .cl-board-title { font: 600 .9375rem/1.3 var(--cl-sans); margin-bottom: 10px; }
 :root[data-skin="claude"] .cl-board-list { display: flex; flex-direction: column; gap: 8px; }
+:root[data-skin="claude"] .cl-option-wrap { display: flex; flex-direction: column; transition: opacity .2s; }
+:root[data-skin="claude"] .cl-option-wrap.dimmed { opacity: .45; }
 :root[data-skin="claude"] .cl-option {
   display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
   background: var(--cl-bg); border: 1px solid var(--cl-line); border-radius: 10px;
@@ -123,8 +125,9 @@
 }
 :root[data-skin="claude"] .cl-option:hover:not(:disabled) { border-color: var(--cl-accent); box-shadow: 0 1px 4px rgba(201, 100, 66, .15); }
 :root[data-skin="claude"] .cl-option:disabled { cursor: default; }
-:root[data-skin="claude"] .cl-option.picked { border-color: var(--cl-accent); background: #fdf6f2; }
-:root[data-skin="claude"] .cl-option.dimmed { opacity: .45; }
+:root[data-skin="claude"] .cl-option-wrap.picked .cl-option { border-color: var(--cl-accent); background: #fdf6f2; }
+:root[data-skin="claude"] .cl-option-detail { align-self: flex-end; margin: 3px 4px 0; font-size: .75rem; color: var(--cl-accent); text-decoration: none; }
+:root[data-skin="claude"] .cl-option-detail:hover { text-decoration: underline; }
 :root[data-skin="claude"] .cl-option-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 :root[data-skin="claude"] .cl-option-title { font-weight: 600; font-size: .9375rem; }
 :root[data-skin="claude"] .cl-option-meta { font-size: .8125rem; color: var(--cl-muted); }

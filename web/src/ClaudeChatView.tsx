@@ -6,6 +6,7 @@ import type { TimelineItem, BoardItem } from "./timeline";
 import { ClaudeToolChip } from "./ClaudeToolChip";
 import { BoardView } from "./BoardView";
 import { commissionLabel, commissionTotal, fmtUsd } from "./lib/advisor";
+import { safeHttpUrl } from "./lib/url";
 
 // claude.ai-lookalike left pane. Deliberately close to claude.ai's layout
 // (centered column, user bubbles right, assistant prose on the page, inline
@@ -78,23 +79,29 @@ function FolioArtifact({ folio, advisor }: { folio: FolioData; advisor: boolean 
               </div>
               {d.activities.length > 0 && (
                 <ul className="cl-day-list">
-                  {d.activities.map((a, j) => (
-                    <li key={j}>
-                      {a.url ? <a href={a.url} target="_blank" rel="noreferrer">{a.name}</a> : a.name}
-                      {a.description && <span className="cl-day-desc"> — {a.description}</span>}
-                    </li>
-                  ))}
+                  {d.activities.map((a, j) => {
+                    const au = safeHttpUrl(a.url);
+                    return (
+                      <li key={j}>
+                        {au ? <a href={au} target="_blank" rel="noopener noreferrer">{a.name}</a> : a.name}
+                        {a.description && <span className="cl-day-desc"> — {a.description}</span>}
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
               {d.dining.length > 0 && (
                 <div className="cl-day-dining">
                   <span className="cl-day-dining-label">Local picks:</span>{" "}
-                  {d.dining.map((m, j) => (
-                    <span key={j} className="cl-dining-item">
-                      {m.url ? <a href={m.url} target="_blank" rel="noreferrer">{m.name}</a> : m.name}
-                      {m.cuisine ? ` (${m.cuisine})` : ""}{j < d.dining.length - 1 ? ", " : ""}
-                    </span>
-                  ))}
+                  {d.dining.map((m, j) => {
+                    const mu = safeHttpUrl(m.url);
+                    return (
+                      <span key={j} className="cl-dining-item">
+                        {mu ? <a href={mu} target="_blank" rel="noopener noreferrer">{m.name}</a> : m.name}
+                        {m.cuisine ? ` (${m.cuisine})` : ""}{j < d.dining.length - 1 ? ", " : ""}
+                      </span>
+                    );
+                  })}
                 </div>
               )}
               {d.stay && <div className="cl-day-stay">Stay: {d.stay}</div>}

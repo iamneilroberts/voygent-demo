@@ -1,6 +1,7 @@
 import type { FolioData, FolioFlight, FolioHotel } from "../../shared/events";
 import { SplitFlap } from "./SplitFlap";
 import { commissionLabel, commissionTotal, fmtUsd } from "./lib/advisor";
+import { safeHttpUrl } from "./lib/url";
 
 function stopsLabel(stops?: number): string | null {
   if (stops == null) return null;
@@ -67,12 +68,15 @@ export function FolioPanel({ folio, advisor }: { folio: FolioData | null; adviso
           {folio.days.map((d, i) => (
             <div key={i} className="folio-day">
               <div className="folio-day-title">{d.title}{d.date ? ` · ${d.date}` : ""}</div>
-              {d.activities.map((a, j) => (
-                <div key={j} className="folio-day-act">
-                  {a.url ? <a href={a.url} target="_blank" rel="noreferrer">{a.name}</a> : a.name}
-                  {a.description ? <span className="card-sub"> {a.description}</span> : null}
-                </div>
-              ))}
+              {d.activities.map((a, j) => {
+                const au = safeHttpUrl(a.url);
+                return (
+                  <div key={j} className="folio-day-act">
+                    {au ? <a href={au} target="_blank" rel="noopener noreferrer">{a.name}</a> : a.name}
+                    {a.description ? <span className="card-sub"> {a.description}</span> : null}
+                  </div>
+                );
+              })}
               {d.dining.length > 0 && (
                 <div className="folio-day-dining">Local picks: {d.dining.map((m) => m.name + (m.cuisine ? ` (${m.cuisine})` : "")).join(", ")}</div>
               )}

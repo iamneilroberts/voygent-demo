@@ -1,6 +1,7 @@
 import type { BoardCandidate } from "../../shared/events";
 import type { BoardItem } from "./timeline";
 import { commissionLabel } from "./lib/advisor";
+import { safeHttpUrl } from "./lib/url";
 
 // Inline chooser board — the claude.ai "MCP app" moment. Candidates render as
 // clickable option cards; a click sends the selection back to the agent as the
@@ -18,26 +19,31 @@ export function BoardView(
       <div className="cl-board-list">
         {board.candidates.map((c) => {
           const picked = board.resolvedId === c.id;
+          const detail = safeHttpUrl(c.detailUrl);
           return (
-            <button
-              key={c.id}
-              type="button"
-              className={`cl-option ${picked ? "picked" : ""} ${locked && !picked ? "dimmed" : ""}`}
-              disabled={locked || busy}
-              onClick={() => onPick(board, c)}
-            >
-              <span className="cl-option-main">
-                <span className="cl-option-title">{c.title}</span>
-                {c.meta && <span className="cl-option-meta">{c.meta}</span>}
-              </span>
-              <span className="cl-option-econ">
-                {c.price && <span className="cl-option-price">{c.price}</span>}
-                {advisor && typeof c.commission === "number" && (
-                  <span className="cl-option-comm">{commissionLabel(c.commission, c.commissionPct)}</span>
-                )}
-              </span>
-              <span className="cl-option-mark" aria-hidden="true">{picked ? "✓" : ""}</span>
-            </button>
+            <div key={c.id} className={`cl-option-wrap ${picked ? "picked" : ""} ${locked && !picked ? "dimmed" : ""}`}>
+              <button
+                type="button"
+                className="cl-option"
+                disabled={locked || busy}
+                onClick={() => onPick(board, c)}
+              >
+                <span className="cl-option-main">
+                  <span className="cl-option-title">{c.title}</span>
+                  {c.meta && <span className="cl-option-meta">{c.meta}</span>}
+                </span>
+                <span className="cl-option-econ">
+                  {c.price && <span className="cl-option-price">{c.price}</span>}
+                  {advisor && typeof c.commission === "number" && (
+                    <span className="cl-option-comm">{commissionLabel(c.commission, c.commissionPct)}</span>
+                  )}
+                </span>
+                <span className="cl-option-mark" aria-hidden="true">{picked ? "✓" : ""}</span>
+              </button>
+              {detail && (
+                <a className="cl-option-detail" href={detail} target="_blank" rel="noopener noreferrer">details ↗</a>
+              )}
+            </div>
           );
         })}
       </div>
