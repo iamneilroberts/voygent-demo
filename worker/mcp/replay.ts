@@ -393,9 +393,12 @@ export class FixtureReplay {
       return JSON.stringify({ status: "ok", tripId: this.tripId, count: 0, candidates: [], note: `No dining results for ${args.location ?? "?"}.` });
     }
     const candidates = fixture.dining.map(slimDining);
-    // Editorial dining is fixture-curated, not model-authored: writing it here
-    // (search-doubles-as-apply) keeps it fabrication-safe by construction.
-    if (typeof args.trip_id === "string" || typeof args.tripId === "string") {
+    // Search-doubles-as-apply: always write the resolved route's fixture dining.
+    // Editorial dining is fixture-curated, not model-authored, so it stays
+    // fabrication-safe by construction. We do NOT gate on trip_id: the real
+    // tripadvisor_search schema (which the model sees) has no trip_id field, the
+    // demo session is always enriching its trip, and the folio is replay-controlled.
+    {
       const byId = new Map((fixture.dining ?? []).map((d) => [d.id, d]));
       for (const d of byId.values()) {
         const day = this.ensureDay(fixture, d.day);

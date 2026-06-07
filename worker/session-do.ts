@@ -92,7 +92,7 @@ const ENRICHMENT_WORKFLOW =
   "6. EXCURSIONS & FREE THINGS: call excursion_search with { source:'viator', trip_id:<tripId>, destination:<city>, date:<departure_date> }. " +
   "From the candidates, choose 2-3 great ones — mix at least one free option (free:true) with a paid highlight — then call apply_gap_tour_picks with " +
   "{ tripId:<tripId>, picks:[ { day:<n>, productCode:'<id>' }, ... ] } using each candidate's own day and productCode. They appear in the day-by-day folio.\n" +
-  "7. DINING (local picks): call tripadvisor_search with { trip_id:<tripId>, location:<city>, category:'restaurants' }. These are editorial local " +
+  "7. DINING (local picks): call tripadvisor_search with { query:'best restaurants in <city>', category:'restaurants' }. These are editorial local " +
   "recommendations, NOT bookable inventory — mention a couple in chat as suggestions to consider; they appear under each day in the folio.\n" +
   "8. Briefly tell the traveler the day-by-day plan now includes what's-included notes and travel tips — the folio carries the detail.\n" +
   "DATA RULES (unchanged): use ONLY tool-returned data for bookable items (flights, hotels, excursions). Dining picks are clearly framed as suggestions. " +

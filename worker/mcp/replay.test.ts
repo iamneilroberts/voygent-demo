@@ -297,3 +297,15 @@ describe("dublin-oct free things (LLM-proposed + TA-validated value-add)", () =>
     expect(got.priceFrom == null || got.priceFrom === 0).toBe(true);
   });
 });
+
+describe("tripadvisor_search writes dining WITHOUT a trip_id (real schema has none)", () => {
+  it("dining lands when the model calls tripadvisor_search with only query/category", async () => {
+    const r = new FixtureReplay("demo-x");
+    const { trip, h } = makeHelpers();
+    // mimic the real-schema call the model actually makes: query, no trip_id/location
+    await r.handle("tripadvisor_search", { query: "best restaurants in Dublin", category: "restaurants" }, h);
+    const dining = (trip.itinerary ?? []).flatMap((d: any) => d.dining ?? []);
+    expect(dining.length).toBe((DUBLIN.dining ?? []).length);
+    for (const d of dining) expect(r.fixtureDiningIds().includes(d.id)).toBe(true);
+  });
+});

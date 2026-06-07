@@ -121,6 +121,6 @@ describe("isTripMutating enrichment tools", () => {
     expect(isTripMutating("apply_gap_tour_picks", {})).toBe(true);
     expect(isTripMutating("tripadvisor_search", { trip_id: "t1" })).toBe(true);
     expect(isTripMutating("tripadvisor_search", { tripId: "t1" })).toBe(true); // camelCase accepted
-    expect(isTripMutating("tripadvisor_search", {})).toBe(false);
+    expect(isTripMutating("tripadvisor_search", {})).toBe(true); // doubles as apply; real schema has no trip_id
   });
 });

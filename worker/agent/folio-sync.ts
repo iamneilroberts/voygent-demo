@@ -9,7 +9,10 @@ const MUTATING = new Set([
 
 export function isTripMutating(tool: string, args: Record<string, unknown>): boolean {
   if (!MUTATING.has(tool)) return false;
-  // searches only mutate when accumulating into a trip (snake or camel id)
+  // tripadvisor_search doubles as its own apply (writes dining) and the real tool
+  // schema has no trip_id field, so it always mutates.
+  if (tool === "tripadvisor_search") return true;
+  // other searches only mutate when accumulating into a trip (snake or camel id)
   if (tool.endsWith("_search")) return typeof args.trip_id === "string" || typeof args.tripId === "string";
   return true;
 }
