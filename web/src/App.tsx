@@ -10,6 +10,7 @@ import { SkinSwitch } from "./SkinSwitch";
 import { engState } from "./lib/inspector-state";
 import { applyTheme, loadTheme } from "./lib/theme";
 import { resolveInitialSkin, applySkin, type SkinId } from "./lib/skin";
+import { createRecorder } from "./lib/recorder";
 import { isChatMessage, type TimelineItem, type BoardItem } from "./timeline";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8787";
@@ -25,6 +26,8 @@ export function App() {
   const [presets, setPresets] = useState<Preset[]>([]);
   const [geoCity, setGeoCity] = useState<string | null>(null);
   const sessionId = useRef(crypto.randomUUID()).current;
+  const recordParam = (() => { try { return new URLSearchParams(window.location.search).get("record") === "1"; } catch { return false; } })();
+  const recorder = useRef(recordParam ? createRecorder("dublin-oct") : null).current;
   const [collapsed, setCollapsed] = useState(false);
   const [skin, setSkin] = useState<SkinId>(resolveInitialSkin);
   const [insTools, setInsTools] = useState<InsTool[]>([]);
@@ -37,6 +40,22 @@ export function App() {
   useEffect(() => { applySkin(skin); }, [skin]);
   // Restore the persisted palette even when ThemeSwitch isn't mounted (claude skin).
   useEffect(() => { applyTheme(loadTheme()); }, []);
+
+  useEffect(() => {
+    if (!recorder) return;
+    (window as any).__exportRecording = () => {
+      const data = JSON.stringify(recorder.export(), null, 2);
+      // eslint-disable-next-line no-console
+      console.log("RECORDING_JSON_START\n" + data + "\nRECORDING_JSON_END");
+      try {
+        const blob = new Blob([data], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob); a.download = "dublin-oct.json"; a.click();
+      } catch { /* console copy is the fallback */ }
+      return data;
+    };
+    return () => { try { delete (window as any).__exportRecording; } catch { /* ignore */ } };
+  }, [recorder]);
 
   useEffect(() => {
     fetch(`${API_BASE}/presets`)
@@ -114,13 +133,15 @@ export function App() {
   async function send(text: string) {
     const claude = skin === "claude";
     setItems((m) => [...m, { role: "user", text }, { role: "assistant", text: "" }]);
+    recorder?.recordUser(text);
     setBusy(true); setTools([]);
     try {
-      await streamChat(API_BASE, sessionId, text, (e) => applyEvent(e, claude), claude ? "boards" : undefined);
+      await streamChat(API_BASE, sessionId, text, (e) => { recorder?.recordEvent(e); applyEvent(e, claude); }, claude ? "boards" : undefined);
     } catch (err) {
       showError((err as Error).message);
     } finally {
       setBusy(false);
+      recorder?.recordTurnEnd();
     }
   }
 
