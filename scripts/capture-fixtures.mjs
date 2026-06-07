@@ -45,6 +45,8 @@ const ROUTES = [
 ];
 
 const ENC = new TextEncoder();
+function daysBetween(a, b) { return Math.round((Date.parse(b) - Date.parse(a)) / 86400000) || 1; }
+function addDays(d, n) { const t = new Date(Date.parse(d) + n * 86400000); return t.toISOString().slice(0, 10); }
 let rpcId = 0;
 async function rpc(method, params) {
   const t0 = Date.now();
@@ -185,6 +187,64 @@ async function captureRoute(r) {
     log(`  promoted lodging: ${Object.keys(promotedLodgingById).length}/${hotelCandidates.length}`);
   }
 
+  // 8. EXCURSIONS (viator) — real candidates for the demo's enrichment replay.
+  //    Viator needs a destination_id; resolve via excursion_search's destination_name
+  //    fallback, or pass a known code. Capture whatever comes back; map to the
+  //    demo's ExcursionCandidate shape (productCode is load-bearing).
+  let excursions = [];
+  try {
+    const ex = await callTool("excursion_search", { source: "viator", trip_id: tripId, destination_name: r.city, date: r.depart, max_results: 8 });
+    record("excursion_search", { source: "viator", destination_name: r.city }, ex);
+    const raw = ex.json?.candidates ?? ex.json?.products ?? [];
+    // Spread across days round-robin so each demo day gets activity content.
+    const dayCount = Math.max(1, Math.min(5, daysBetween(r.depart, r.ret)));
+    excursions = raw.slice(0, 6).map((c, i) => ({
+      productCode: c.productCode ?? c.product_code ?? c.id,
+      title: c.title ?? c.name,
+      day: (i % dayCount) + 1,
+      free: Number(c.priceFrom ?? c.price_from ?? 0) === 0,
+      priceFrom: c.priceFrom ?? c.price_from ?? null,
+      currency: c.currency ?? "USD",
+      durationMinutes: c.durationMinutes ?? c.duration_minutes ?? null,
+      rating: c.rating ?? null,
+      reviewCount: c.reviewCount ?? c.review_count ?? null,
+      description: (c.description ?? c.descriptionShort ?? "").slice(0, 200),
+      bookingUrl: c.bookingUrl ?? c.booking_url ?? null,
+      coverImage: c.coverImage ?? c.cover_image ?? null,
+    })).filter((e) => e.productCode && e.title);
+    log(`  excursions: ${excursions.length}`);
+  } catch (e) { log(`  excursion_search FAILED: ${e.message}`); }
+
+  // 9. DINING (tripadvisor) — editorial local picks.
+  let dining = [];
+  try {
+    const di = await callTool("tripadvisor_search", { trip_id: tripId, location: r.city, category: "restaurants", max_results: 8 });
+    record("tripadvisor_search", { location: r.city }, di);
+    const raw = di.json?.candidates ?? di.json?.results ?? di.json?.locations ?? [];
+    const dayCount = Math.max(1, Math.min(5, daysBetween(r.depart, r.ret)));
+    dining = raw.slice(0, 6).map((c, i) => ({
+      id: String(c.id ?? c.location_id ?? c.locationId ?? i),
+      name: c.name,
+      day: (i % dayCount) + 1,
+      cuisine: c.cuisine ?? (Array.isArray(c.cuisines) ? c.cuisines[0] : null),
+      rating: c.rating ?? null,
+      reviewCount: c.reviewCount ?? c.num_reviews ?? null,
+      priceLevel: c.priceLevel ?? c.price_level ?? null,
+      description: (c.description ?? "").slice(0, 200),
+      url: c.url ?? c.web_url ?? null,
+    })).filter((d) => d.name);
+    log(`  dining: ${dining.length}`);
+  } catch (e) { log(`  tripadvisor_search FAILED: ${e.message}`); }
+
+  // Day scaffold (date + location + title per demo day).
+  const dayCount = Math.max(1, Math.min(5, daysBetween(r.depart, r.ret)));
+  const itineraryDays = Array.from({ length: dayCount }, (_, i) => ({
+    day: i + 1,
+    date: addDays(r.depart, i),
+    location: r.city,
+    title: i === 0 ? `Arrive ${r.city}` : i === dayCount - 1 ? `Depart ${r.city}` : `${r.city} — Day ${i + 1}`,
+  }));
+
   const meta = {
     flightSearch: metaFrom(flightSearchOut),
     flightList:   metaFrom(flightListOut),
@@ -203,6 +263,9 @@ async function captureRoute(r) {
     route: { id: r.id, label: r.label, origin: r.origin, destination: r.destination, city: r.city, depart: r.depart, ret: r.ret, adults: r.adults },
     flights: flightCandidates,
     hotels: hotelCandidates,
+    excursions,
+    dining,
+    itineraryDays,
     promotedFlightsById,
     promotedLodgingById,
     meta,
