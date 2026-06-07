@@ -19,3 +19,28 @@ describe("recorder", () => {
     for (const f of out.frames) expect(f.delayMs).toBeGreaterThanOrEqual(0);
   });
 });
+
+import { replayChat } from "./recording";
+import type { ServerEvent } from "../../../shared/events";
+
+describe("replayChat", () => {
+  it("drives the reducer to the recorded end-state (instant in tests)", async () => {
+    const rec: Recording = { skin: "claude", trip: "t", frames: [
+      { delayMs: 5, kind: "user", text: "Plan Dublin" },
+      { delayMs: 5, kind: "event", event: { type: "text", delta: "On it!" } as ServerEvent },
+      { delayMs: 5, kind: "event", event: { type: "folio", folio: { tripId: "t", title: "Dublin", flights: [], hotels: [], days: [{ title: "Day 1", activities: [], dining: [], stay: "Hotel" }] } } as ServerEvent },
+      { delayMs: 5, kind: "turn-end" },
+    ] };
+    const events: ServerEvent[] = [];
+    const users: string[] = [];
+    const busy: boolean[] = [];
+    await replayChat(rec, {
+      applyEvent: (e) => events.push(e),
+      pushUser: (t) => users.push(t),
+      setBusy: (b) => busy.push(b),
+    }, { wait: async () => {} }); // instant
+    expect(users).toEqual(["Plan Dublin"]);
+    expect(events.map((e) => e.type)).toEqual(["text", "folio"]);
+    expect(busy).toEqual([true, false]);
+  });
+});

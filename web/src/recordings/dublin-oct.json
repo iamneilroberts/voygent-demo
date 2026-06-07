@@ -1,0 +1,9 @@
+{
+  "skin": "claude",
+  "trip": "dublin-oct",
+  "frames": [
+    { "delayMs": 300, "kind": "user", "text": "Plan the Dublin in October trip for 2." },
+    { "delayMs": 600, "kind": "event", "event": { "type": "text", "delta": "Building your Dublin trip now…" } },
+    { "delayMs": 400, "kind": "turn-end" }
+  ]
+}

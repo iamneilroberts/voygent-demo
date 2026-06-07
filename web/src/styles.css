@@ -156,6 +156,15 @@ button.ins-rail:hover { color: var(--ink); }
 .skin-switch button:hover { color: #efe7d6; }
 .skin-switch button[aria-pressed="true"] { color: #0c0a07; background: #f5a623; }
 
+/* ---- watch-demo toggle: sits to the left of .skin-switch (right:10px ~175px wide → this at 12.5rem ≈ 200px clears it). ---- */
+.watch-demo {
+  position: fixed; bottom: 1rem; right: 12.5rem; z-index: 50;
+  font: 600 0.72rem/1 var(--mono, ui-monospace, monospace);
+  padding: 0.4rem 0.7rem; border-radius: 999px;
+  background: #1a1a1a; color: #e8e8e8; border: 1px solid #333; cursor: pointer;
+}
+.watch-demo:hover { background: #262626; }
+
 /* ---- footer meta-note ---- */
 .app > footer.meta { padding: var(--s2) var(--s6); border-top: 1px solid var(--line); background: var(--board-2); color: var(--muted-2); font: 400 var(--t-12)/1 var(--mono); text-align: center; }
 

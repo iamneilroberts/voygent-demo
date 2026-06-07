@@ -11,6 +11,9 @@ import { engState } from "./lib/inspector-state";
 import { applyTheme, loadTheme } from "./lib/theme";
 import { resolveInitialSkin, applySkin, type SkinId } from "./lib/skin";
 import { createRecorder } from "./lib/recorder";
+import { resolveInitialMode, persistMode, type ModeId } from "./lib/mode";
+import { replayChat, type Recording } from "./lib/recording";
+import dublinRecording from "./recordings/dublin-oct.json";
 import { isChatMessage, type TimelineItem, type BoardItem } from "./timeline";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8787";
@@ -38,6 +41,10 @@ export function App() {
   const [insSavings, setInsSavings] = useState<InsSavings[]>([]);
   const [insOverhead, setInsOverhead] = useState<InsOverhead[]>([]);
 
+  const [mode] = useState<ModeId>(resolveInitialMode);
+  const replayAbort = useRef<AbortController | null>(null);
+  useEffect(() => { persistMode(mode); }, [mode]);
+
   // Skin is React state (component trees differ) AND a data attribute (CSS scoping).
   useEffect(() => { applySkin(skin); }, [skin]);
   // Restore the persisted palette even when ThemeSwitch isn't mounted (claude skin).
@@ -58,6 +65,22 @@ export function App() {
     };
     return () => { try { delete (window as any).__exportRecording; } catch { /* ignore */ } };
   }, [recorder]);
+
+  useEffect(() => {
+    if (mode !== "auto") return;
+    if (skin !== "claude") setSkin("claude");      // auto always plays in the claude skin
+    const ac = new AbortController();
+    replayAbort.current?.abort();
+    replayAbort.current = ac;
+    const reduced = (() => { try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; } })();
+    void replayChat(dublinRecording as Recording, {
+      applyEvent: (e) => applyEvent(e, true),
+      pushUser,
+      setBusy,
+    }, { reducedMotion: reduced, signal: ac.signal });
+    return () => ac.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
 
   useEffect(() => {
     fetch(`${API_BASE}/presets`)
@@ -132,11 +155,16 @@ export function App() {
     }
   }
 
+  function pushUser(text: string) {
+    setItems((m) => [...m, { role: "user", text }, { role: "assistant", text: "" }]);
+    setTools([]);
+  }
+
   async function send(text: string) {
     const claude = skin === "claude";
-    setItems((m) => [...m, { role: "user", text }, { role: "assistant", text: "" }]);
+    pushUser(text);
     recorder?.recordUser(text);
-    setBusy(true); setTools([]);
+    setBusy(true);
     try {
       await streamChat(API_BASE, sessionId, text, (e) => { recorder?.recordEvent(e); applyEvent(e, claude); }, claude ? "boards" : undefined);
     } catch (err) {
@@ -194,6 +222,22 @@ export function App() {
       </div>
       <footer className="meta">This interface was itself built by a coding agent.</footer>
       <SkinSwitch skin={skin} onPick={setSkin} />
+      <button
+        type="button"
+        className="watch-demo"
+        onClick={() => {
+          const next: ModeId = mode === "auto" ? "live" : "auto";
+          persistMode(next);
+          try {
+            const u = new URL(window.location.href);
+            u.searchParams.set("mode", next);
+            if (next === "auto") u.searchParams.set("skin", "claude");
+            window.location.href = u.toString();   // reload re-latches the session cleanly
+          } catch { /* no-op */ }
+        }}
+      >
+        {mode === "auto" ? "● build your own" : "▶ watch the demo"}
+      </button>
     </div>
   );
 }
