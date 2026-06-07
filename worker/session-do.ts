@@ -88,15 +88,17 @@ const BOARDS_WORKFLOW_OVERRIDE =
 // Excursion selection boards are NOT built yet (deferred), so enrichment
 // categories auto-add even in boards mode.
 const ENRICHMENT_WORKFLOW =
-  "AFTER flights and hotels are in the folio, enrich the trip (these categories do NOT use option cards — pick good ones yourself and add them):\n" +
-  "6. EXCURSIONS & FREE THINGS: call excursion_search with { source:'viator', trip_id:<tripId>, destination:<city>, date:<departure_date> }. " +
-  "From the candidates, choose 2-3 great ones — mix at least one free option (free:true) with a paid highlight — then call apply_gap_tour_picks with " +
-  "{ tripId:<tripId>, picks:[ { day:<n>, productCode:'<id>' }, ... ] } using each candidate's own day and productCode. They appear in the day-by-day folio.\n" +
-  "7. DINING (local picks): call tripadvisor_search with { query:'best restaurants in <city>', category:'restaurants' }. These are editorial local " +
-  "recommendations, NOT bookable inventory — mention a couple in chat as suggestions to consider; they appear under each day in the folio.\n" +
-  "8. Briefly tell the traveler the day-by-day plan now includes what's-included notes and travel tips — the folio carries the detail.\n" +
-  "DATA RULES (unchanged): use ONLY tool-returned data for bookable items (flights, hotels, excursions). Dining picks are clearly framed as suggestions. " +
-  "Never invent excursions, restaurants, prices, or ratings.";
+  "ENRICHMENT IS MANDATORY — the trip is NOT complete after flights and hotels. Immediately after promote_hotels_to_lodging succeeds, " +
+  "in the SAME turn and without waiting to be asked, complete ALL of steps 6-8 in order (no option cards for these — pick good ones yourself):\n" +
+  "6. EXCURSIONS & FREE THINGS — TWO tool calls, BOTH required. First: excursion_search { source:'viator', destination_name:<city>, date:<departure_date> }. " +
+  "Then choose 2-3 candidates — at least one free (free:true) and one paid — and call apply_gap_tour_picks " +
+  "{ tripId:<tripId>, picks:[ { day:<candidate's day>, productCode:<candidate's productCode> }, ... ] }. " +
+  "excursion_search alone saves NOTHING — picks only persist via apply_gap_tour_picks.\n" +
+  "7. DINING — call tripadvisor_search { query:'best restaurants in <city>', category:'restaurants' }. The returned picks save to the trip automatically; " +
+  "mention 2-3 of THEM by their exact names from the tool result, framed as local suggestions (editorial, not bookable).\n" +
+  "8. Then tell the traveler the folio now carries the day-by-day plan, dining picks, and what's-included notes.\n" +
+  "HARD DATA RULE: NEVER name a specific tour, activity, restaurant, price, or rating that did not come from a tool result in THIS conversation. " +
+  "If you have not called the tool yet, CALL IT — do not describe options from memory. Naming an un-returned item is a critical failure.";
 
 function utcDate(): string { return new Date().toISOString().slice(0, 10); }
 interface BudgetRec { date: string; spent: number; }
