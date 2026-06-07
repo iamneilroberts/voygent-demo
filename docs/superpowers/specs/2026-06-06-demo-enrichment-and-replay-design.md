@@ -2,7 +2,7 @@
 
 **Date:** 2026-06-06
 **Repo:** `~/dev/voygent-demo` (branch `demo-enrichment`, off `main` `eddffa5`)
-**Status:** Design (approved in brainstorming; awaiting spec review → writing-plans)
+**Status:** Approved (spec review passed 2026-06-06; dining source locked to `tripadvisor_search`) → writing-plans
 
 ## Goal
 
@@ -74,7 +74,8 @@ Component A (worker)                          Component B (client)
 Add (names verified against the live voygent catalog during planning):
 - `excursion_search` (Viator — licensed/safe) and its promote/apply step,
 - `suggest_gap_tours` / `apply_gap_tour_picks` (free things to fill open days),
-- one dining source — `google_places_lookup` **or** `tripadvisor_search` (local picks).
+- one dining source — `tripadvisor_search` (local picks). **Locked 2026-06-06** (was a
+  `google_places_lookup`-vs-`tripadvisor_search` choice; Neil chose TripAdvisor for meal recs for now).
 
 Keep the cost guardrail intact: only the tools the golden run uses are added; the Inspector's
 `toolCatalog` savings number simply reflects the new (still-small) count.
@@ -204,11 +205,12 @@ Hand-trim timings if needed; commit.
   shipped board event); **no amber-CRT reskin** of boards.
 - Skin is **another session's concern**; this work is skin-agnostic (worker + data + replay).
 - Dining/free = **mixed** (excursions + free via real tools; dining as framed editorial picks).
+  Dining source = **`tripadvisor_search`** (locked 2026-06-06).
 - Golden/dev trip = **Dublin** (existing fixtures; claude-skin's test trip). Swappable.
 - Soft defaults, decided at capture: the exact 1–2 showcased edits.
 
 ## Open items resolved during planning (not blockers)
-- Exact voygent tool names/return shapes for excursion/gap/dining + the excursion promote/apply
-  mechanism (verify against the live catalog).
+- Exact voygent tool names/return shapes for excursion/gap/dining (dining = `tripadvisor_search`,
+  locked) + the excursion promote/apply mechanism (verify against the live catalog).
 - The trip-side fields the enrichment tools write (drives `tripToFolio` source paths).
 - Placement of the "Watch the demo / Build your own" entry control vs `SkinSwitch`.
