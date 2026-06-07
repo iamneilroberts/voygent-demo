@@ -1234,6 +1234,62 @@
       "description": "Voted No. 1 Day Tour on Tripadvisor. Full Day Tour to Wicklow mountains, Glendalough and Kilkenny. Expert tour guides with separate coach driver. 5 star award winning luxury touring coaches with Free ",
       "bookingUrl": "https://www.viator.com/tours/Dublin/Wicklow-mountains-Glendalough-and-Kilkenny-Day-Tour-from-Dublin/d503-33832P1?pid=P00005400&mcid=58086&currency=USD&medium=api",
       "coverImage": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-720x480/06/7b/27/53.jpg"
+    },
+    {
+      "productCode": "TA-189054",
+      "title": "St Stephen's Green",
+      "day": 1,
+      "free": true,
+      "priceFrom": 0,
+      "currency": "USD",
+      "durationMinutes": null,
+      "rating": 4.5,
+      "reviewCount": 17094,
+      "description": "Dublin's beloved Victorian public park off Grafton Street — free, central, perfect for a stroll.",
+      "bookingUrl": "https://heritageireland.ie/visit/places-to-visit/st-stephens-green/",
+      "coverImage": null
+    },
+    {
+      "productCode": "TA-189068",
+      "title": "Phoenix Park",
+      "day": 2,
+      "free": true,
+      "priceFrom": 0,
+      "currency": "USD",
+      "durationMinutes": null,
+      "rating": 4.6,
+      "reviewCount": 4877,
+      "description": "One of Europe's largest enclosed city parks — free to roam, with wild fallow deer and miles of trails.",
+      "bookingUrl": "http://www.phoenixpark.ie",
+      "coverImage": null
+    },
+    {
+      "productCode": "TA-274489",
+      "title": "National Museum of Ireland – Archaeology",
+      "day": 3,
+      "free": true,
+      "priceFrom": 0,
+      "currency": "USD",
+      "durationMinutes": null,
+      "rating": 4.6,
+      "reviewCount": 5921,
+      "description": "Free national museum on Kildare Street — Celtic gold, bog bodies, and Viking Dublin.",
+      "bookingUrl": "https://www.museum.ie/",
+      "coverImage": null
+    },
+    {
+      "productCode": "TA-216272",
+      "title": "Ha'penny Bridge",
+      "day": 4,
+      "free": true,
+      "priceFrom": 0,
+      "currency": "USD",
+      "durationMinutes": null,
+      "rating": 4.1,
+      "reviewCount": 2460,
+      "description": "The iconic cast-iron pedestrian bridge over the Liffey — a free, classic Dublin photo stop.",
+      "bookingUrl": "http://www.bridgesofdublin.ie/bridges/hapenny-bridge",
+      "coverImage": null
     }
   ],
   "dining": [
@@ -2129,22 +2185,22 @@
     "flightSearch": {
       "rawTokensEst": 1067,
       "responseBytes": 4266,
-      "prodLatencyMs": 1101
+      "prodLatencyMs": 662
     },
     "flightList": {
       "rawTokensEst": 2102,
       "responseBytes": 8419,
-      "prodLatencyMs": 363
+      "prodLatencyMs": 543
     },
     "hotelSearch": {
       "rawTokensEst": 470,
       "responseBytes": 1879,
-      "prodLatencyMs": 465
+      "prodLatencyMs": 609
     },
     "hotelList": {
       "rawTokensEst": 2838,
       "responseBytes": 11349,
-      "prodLatencyMs": 346
+      "prodLatencyMs": 337
     },
     "capturedAt": "2026-06-07"
   }

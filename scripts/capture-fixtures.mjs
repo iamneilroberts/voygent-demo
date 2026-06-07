@@ -44,6 +44,33 @@ const ROUTES = [
   { id: "nyc-weekend",  label: "NYC long weekend",         origin: "ORD", destination: "JFK", city: "New York",      depart: "2027-02-12", ret: "2027-02-15", adults: 2 },
 ];
 
+// LLM-proposed + TripAdvisor-validated free "things to do" — the model's value-add:
+// internal-knowledge candidates, each confirmed legit via tripadvisor_search
+// (category=attractions) on 2026-06-06; the TA location_id + reviewCount are the
+// evidence. Viator returns only paid tours, so these deliver the demo's "& free
+// things". Editorial, not bookable: productCode = "TA-<location_id>". Route-scoped
+// so a re-capture preserves them (merged into excursions in captureRoute).
+const FREE_THINGS_BY_ID = {
+  "dublin-oct": [
+    { productCode: "TA-189054", title: "St Stephen's Green", day: 1, free: true, priceFrom: 0, currency: "USD",
+      durationMinutes: null, rating: 4.5, reviewCount: 17094,
+      description: "Dublin's beloved Victorian public park off Grafton Street — free, central, perfect for a stroll.",
+      bookingUrl: "https://heritageireland.ie/visit/places-to-visit/st-stephens-green/", coverImage: null },
+    { productCode: "TA-189068", title: "Phoenix Park", day: 2, free: true, priceFrom: 0, currency: "USD",
+      durationMinutes: null, rating: 4.6, reviewCount: 4877,
+      description: "One of Europe's largest enclosed city parks — free to roam, with wild fallow deer and miles of trails.",
+      bookingUrl: "http://www.phoenixpark.ie", coverImage: null },
+    { productCode: "TA-274489", title: "National Museum of Ireland \u2013 Archaeology", day: 3, free: true, priceFrom: 0, currency: "USD",
+      durationMinutes: null, rating: 4.6, reviewCount: 5921,
+      description: "Free national museum on Kildare Street — Celtic gold, bog bodies, and Viking Dublin.",
+      bookingUrl: "https://www.museum.ie/", coverImage: null },
+    { productCode: "TA-216272", title: "Ha'penny Bridge", day: 4, free: true, priceFrom: 0, currency: "USD",
+      durationMinutes: null, rating: 4.1, reviewCount: 2460,
+      description: "The iconic cast-iron pedestrian bridge over the Liffey — a free, classic Dublin photo stop.",
+      bookingUrl: "http://www.bridgesofdublin.ie/bridges/hapenny-bridge", coverImage: null },
+  ],
+};
+
 const ENC = new TextEncoder();
 function daysBetween(a, b) { return Math.round((Date.parse(b) - Date.parse(a)) / 86400000) || 1; }
 function numOrNull(v) { const n = Number(v); return Number.isFinite(n) ? n : null; }
@@ -225,6 +252,8 @@ async function captureRoute(r) {
     }).filter((e) => e.productCode && e.title);
     log(`  excursions: ${excursions.length}`);
   } catch (e) { log(`  excursion_search FAILED: ${e.message}`); }
+  // Merge the LLM-proposed + TA-validated free things for this route (the value-add).
+  { const free = FREE_THINGS_BY_ID[r.id] ?? []; if (free.length) { excursions = excursions.concat(free); log(`  free things (LLM+TA-validated): ${free.length}`); } }
 
   // 9. DINING (tripadvisor) — editorial local picks.
   let dining = [];

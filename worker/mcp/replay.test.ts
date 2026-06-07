@@ -276,3 +276,24 @@ describe("dublin-oct fixture enrichment (real captured data — D1)", () => {
     expect(dining.length).toBe((DUBLIN.dining ?? []).length);
   });
 });
+
+describe("dublin-oct free things (LLM-proposed + TA-validated value-add)", () => {
+  it("the fixture carries at least one free excursion and one paid one (mix the prompt asks for)", () => {
+    const ex = DUBLIN.excursions ?? [];
+    expect(ex.some((e) => e.free === true && (e.priceFrom == null || e.priceFrom === 0))).toBe(true);
+    expect(ex.some((e) => e.free === false && (e.priceFrom ?? 0) > 0)).toBe(true);
+  });
+
+  it("a picked free thing writes a fixture-keyed, $0 activity into the itinerary", async () => {
+    const r = new FixtureReplay("demo-x");
+    const { trip, h } = makeHelpers();
+    await r.handle("excursion_search", { source: "viator", trip_id: "demo-x", destination: "Dublin" }, h);
+    const freebie = (DUBLIN.excursions ?? []).find((e) => e.free === true)!;
+    await r.handle("apply_gap_tour_picks", { tripId: "demo-x", picks: [{ day: freebie.day, productCode: freebie.productCode }] }, h);
+    const acts = (trip.itinerary ?? []).flatMap((d: any) => d.activities ?? []);
+    const got = acts.find((a: any) => a.productCode === freebie.productCode);
+    expect(got).toBeTruthy();
+    expect(got.free).toBe(true);
+    expect(got.priceFrom == null || got.priceFrom === 0).toBe(true);
+  });
+});
