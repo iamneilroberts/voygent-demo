@@ -499,6 +499,202 @@
       "pricePerPerson": 594,
       "priceBasis": "per_person",
       "pax": 2
+    },
+    {
+      "id": "serp:1sb78yc",
+      "source": "serp",
+      "offerId": null,
+      "price": 928,
+      "currency": "USD",
+      "priceWithCcFee": null,
+      "fareType": null,
+      "validatingCarrier": "Delta",
+      "commissionProtected": false,
+      "cabin": "Economy",
+      "stops": 0,
+      "durationMinutes": 140,
+      "airlines": [
+        "Delta"
+      ],
+      "route": "ORD→JFK",
+      "flightNumbers": [
+        "DL5241"
+      ],
+      "segments": [
+        {
+          "origin": "ORD",
+          "destination": "JFK",
+          "depart": "2027-02-12 06:00",
+          "arrive": "2027-02-12 09:20",
+          "carrier": "Delta",
+          "flightNumber": "DL 5241",
+          "cabin": "Economy",
+          "durationMinutes": 140,
+          "layover": null,
+          "equipment": "Canadair RJ 900"
+        }
+      ],
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-07T17:30:02.654Z",
+      "query": {
+        "origin": "ORD",
+        "destination": "JFK",
+        "departure_date": "2027-02-12",
+        "return_date": "2027-02-15",
+        "adults": 2
+      },
+      "pricePerPerson": 464,
+      "priceBasis": "per_person",
+      "pax": 2
+    },
+    {
+      "id": "serp:1jyaxv0",
+      "source": "serp",
+      "offerId": null,
+      "price": 1028,
+      "currency": "USD",
+      "priceWithCcFee": null,
+      "fareType": null,
+      "validatingCarrier": "Delta",
+      "commissionProtected": false,
+      "cabin": "Economy",
+      "stops": 0,
+      "durationMinutes": 144,
+      "airlines": [
+        "Delta"
+      ],
+      "route": "ORD→JFK",
+      "flightNumbers": [
+        "DL5799"
+      ],
+      "segments": [
+        {
+          "origin": "ORD",
+          "destination": "JFK",
+          "depart": "2027-02-12 10:40",
+          "arrive": "2027-02-12 14:04",
+          "carrier": "Delta",
+          "flightNumber": "DL 5799",
+          "cabin": "Economy",
+          "durationMinutes": 144,
+          "layover": null,
+          "equipment": "Embraer 175"
+        }
+      ],
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-07T17:30:02.654Z",
+      "query": {
+        "origin": "ORD",
+        "destination": "JFK",
+        "departure_date": "2027-02-12",
+        "return_date": "2027-02-15",
+        "adults": 2
+      },
+      "pricePerPerson": 514,
+      "priceBasis": "per_person",
+      "pax": 2
+    },
+    {
+      "id": "serp:1k8ajjz",
+      "source": "serp",
+      "offerId": null,
+      "price": 1028,
+      "currency": "USD",
+      "priceWithCcFee": null,
+      "fareType": null,
+      "validatingCarrier": "Delta",
+      "commissionProtected": false,
+      "cabin": "Economy",
+      "stops": 0,
+      "durationMinutes": 145,
+      "airlines": [
+        "Delta"
+      ],
+      "route": "ORD→JFK",
+      "flightNumbers": [
+        "DL5035"
+      ],
+      "segments": [
+        {
+          "origin": "ORD",
+          "destination": "JFK",
+          "depart": "2027-02-12 13:30",
+          "arrive": "2027-02-12 16:55",
+          "carrier": "Delta",
+          "flightNumber": "DL 5035",
+          "cabin": "Economy",
+          "durationMinutes": 145,
+          "layover": null,
+          "equipment": "Canadair RJ 900"
+        }
+      ],
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-07T17:30:02.654Z",
+      "query": {
+        "origin": "ORD",
+        "destination": "JFK",
+        "departure_date": "2027-02-12",
+        "return_date": "2027-02-15",
+        "adults": 2
+      },
+      "pricePerPerson": 514,
+      "priceBasis": "per_person",
+      "pax": 2
+    },
+    {
+      "id": "serp:1lcc3tu",
+      "source": "serp",
+      "offerId": null,
+      "price": 1028,
+      "currency": "USD",
+      "priceWithCcFee": null,
+      "fareType": null,
+      "validatingCarrier": "Delta",
+      "commissionProtected": false,
+      "cabin": "Economy",
+      "stops": 0,
+      "durationMinutes": 155,
+      "airlines": [
+        "Delta"
+      ],
+      "route": "ORD→JFK",
+      "flightNumbers": [
+        "DL5788"
+      ],
+      "segments": [
+        {
+          "origin": "ORD",
+          "destination": "JFK",
+          "depart": "2027-02-12 18:10",
+          "arrive": "2027-02-12 21:45",
+          "carrier": "Delta",
+          "flightNumber": "DL 5788",
+          "cabin": "Economy",
+          "durationMinutes": 155,
+          "layover": null,
+          "equipment": "Embraer 175"
+        }
+      ],
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-07T17:30:02.654Z",
+      "query": {
+        "origin": "ORD",
+        "destination": "JFK",
+        "departure_date": "2027-02-12",
+        "return_date": "2027-02-15",
+        "adults": 2
+      },
+      "pricePerPerson": 514,
+      "priceBasis": "per_person",
+      "pax": 2
     }
   ],
   "hotels": [
@@ -670,7 +866,7 @@
       "starRating": 4,
       "reviewScore": 3.8,
       "reviewScoreScale": 5,
-      "reviewCount": 12383,
+      "reviewCount": 12389,
       "pricePerNight": 201,
       "priceTotal": 603,
       "priceBasis": "both",
@@ -686,7 +882,7 @@
       "bookable": false,
       "summary": null,
       "status": "candidate",
-      "searchedAt": "2026-06-05T23:10:28.668Z",
+      "searchedAt": "2026-06-07T17:30:24.269Z",
       "query": {
         "destination": "New York",
         "check_in": "2027-02-12",
@@ -862,7 +1058,7 @@
       "starRating": 3,
       "reviewScore": 4.2,
       "reviewScoreScale": 5,
-      "reviewCount": 1952,
+      "reviewCount": 1954,
       "pricePerNight": 180,
       "priceTotal": 540,
       "priceBasis": "both",
@@ -878,7 +1074,7 @@
       "bookable": false,
       "summary": null,
       "status": "candidate",
-      "searchedAt": "2026-06-06T20:08:47.074Z",
+      "searchedAt": "2026-06-07T17:30:24.269Z",
       "query": {
         "destination": "New York",
         "check_in": "2027-02-12",
@@ -981,6 +1177,372 @@
         "check_out": "2027-02-15",
         "adults": 2
       }
+    },
+    {
+      "id": "serp:jr6ed5",
+      "source": "serp",
+      "offerId": null,
+      "name": "Park Central Hotel New York",
+      "starRating": 4,
+      "reviewScore": 3.8,
+      "reviewScoreScale": 5,
+      "reviewCount": 7656,
+      "pricePerNight": 166,
+      "priceTotal": 499,
+      "priceBasis": "both",
+      "nights": 3,
+      "currency": "USD",
+      "area": "New York",
+      "stayRef": "new-york-2027-02-12-2027-02-15",
+      "stay": {
+        "location": "New York",
+        "checkIn": "2027-02-12",
+        "checkOut": "2027-02-15"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-07T17:30:24.269Z",
+      "query": {
+        "destination": "New York",
+        "check_in": "2027-02-12",
+        "check_out": "2027-02-15",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:doi3k4",
+      "source": "serp",
+      "offerId": null,
+      "name": "Royalton New York",
+      "starRating": 4,
+      "reviewScore": 3.9,
+      "reviewScoreScale": 5,
+      "reviewCount": 1422,
+      "pricePerNight": 170,
+      "priceTotal": 510,
+      "priceBasis": "both",
+      "nights": 3,
+      "currency": "USD",
+      "area": "New York",
+      "stayRef": "new-york-2027-02-12-2027-02-15",
+      "stay": {
+        "location": "New York",
+        "checkIn": "2027-02-12",
+        "checkOut": "2027-02-15"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-07T17:30:24.269Z",
+      "query": {
+        "destination": "New York",
+        "check_in": "2027-02-12",
+        "check_out": "2027-02-15",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:if1k1g",
+      "source": "serp",
+      "offerId": null,
+      "name": "The Manhattan at Times Square Hotel",
+      "starRating": 4,
+      "reviewScore": 3,
+      "reviewScoreScale": 5,
+      "reviewCount": 10037,
+      "pricePerNight": 207,
+      "priceTotal": 621,
+      "priceBasis": "both",
+      "nights": 3,
+      "currency": "USD",
+      "area": "New York",
+      "stayRef": "new-york-2027-02-12-2027-02-15",
+      "stay": {
+        "location": "New York",
+        "checkIn": "2027-02-12",
+        "checkOut": "2027-02-15"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-07T17:30:24.269Z",
+      "query": {
+        "destination": "New York",
+        "check_in": "2027-02-12",
+        "check_out": "2027-02-15",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:1womfil",
+      "source": "serp",
+      "offerId": null,
+      "name": "The Empire Hotel",
+      "starRating": 4,
+      "reviewScore": 3.8,
+      "reviewScoreScale": 5,
+      "reviewCount": 5545,
+      "pricePerNight": 192,
+      "priceTotal": 575,
+      "priceBasis": "both",
+      "nights": 3,
+      "currency": "USD",
+      "area": "New York",
+      "stayRef": "new-york-2027-02-12-2027-02-15",
+      "stay": {
+        "location": "New York",
+        "checkIn": "2027-02-12",
+        "checkOut": "2027-02-15"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-07T17:30:24.269Z",
+      "query": {
+        "destination": "New York",
+        "check_in": "2027-02-12",
+        "check_out": "2027-02-15",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:1ptc20y",
+      "source": "serp",
+      "offerId": null,
+      "name": "The Shelburne Sonesta New York",
+      "starRating": 4,
+      "reviewScore": 4.2,
+      "reviewScoreScale": 5,
+      "reviewCount": 2028,
+      "pricePerNight": 169,
+      "priceTotal": 507,
+      "priceBasis": "both",
+      "nights": 3,
+      "currency": "USD",
+      "area": "New York",
+      "stayRef": "new-york-2027-02-12-2027-02-15",
+      "stay": {
+        "location": "New York",
+        "checkIn": "2027-02-12",
+        "checkOut": "2027-02-15"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-07T17:30:24.269Z",
+      "query": {
+        "destination": "New York",
+        "check_in": "2027-02-12",
+        "check_out": "2027-02-15",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:1143g28",
+      "source": "serp",
+      "offerId": null,
+      "name": "Holiday Inn Express New York City-Wall Street, an IHG Hotel",
+      "starRating": 3,
+      "reviewScore": 3.8,
+      "reviewScoreScale": 5,
+      "reviewCount": 1293,
+      "pricePerNight": 132,
+      "priceTotal": 395,
+      "priceBasis": "both",
+      "nights": 3,
+      "currency": "USD",
+      "area": "New York",
+      "stayRef": "new-york-2027-02-12-2027-02-15",
+      "stay": {
+        "location": "New York",
+        "checkIn": "2027-02-12",
+        "checkOut": "2027-02-15"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-07T17:30:24.269Z",
+      "query": {
+        "destination": "New York",
+        "check_in": "2027-02-12",
+        "check_out": "2027-02-15",
+        "adults": 2
+      }
+    }
+  ],
+  "excursions": [
+    {
+      "productCode": "7081NYCDAY",
+      "title": "New York in One Day Guided Sightseeing Tour",
+      "day": 1,
+      "free": false,
+      "priceFrom": 99,
+      "currency": "USD",
+      "durationMinutes": 360,
+      "rating": 4.7667456,
+      "reviewCount": 13526,
+      "description": "Experience the best of New York City with a knowledgeable, licensed tour guide by your side. Our guides will make your journey unforgettable as they hop off the bus at each stop, giving you an exclusi",
+      "bookingUrl": "https://www.viator.com/tours/New-York-City/New-York-in-One-Day-Guided-Sightseeing-Tour/d687-7081NYCDAY?pid=P00005400&mcid=58086&currency=USD&medium=api",
+      "coverImage": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-720x480/15/4f/b8/d4.jpg"
+    },
+    {
+      "productCode": "5250LIBERTYELLIS",
+      "title": "Statue of Liberty & Ellis Island Tour with Reserved Ferry Entry",
+      "day": 2,
+      "free": false,
+      "priceFrom": 59,
+      "currency": "USD",
+      "durationMinutes": 180,
+      "rating": 4.808138,
+      "reviewCount": 14156,
+      "description": "Experience America’s most iconic symbols of freedom without the guesswork. This comprehensive guided tour takes you from the bustling shores of Battery Park through the hallowed halls of Ellis Island.",
+      "bookingUrl": "https://www.viator.com/tours/New-York-City/Statue-of-Liberty-and-Ellis-Island-Guided-Tour/d687-5250LIBERTYELLIS?pid=P00005400&mcid=58086&currency=USD&medium=api",
+      "coverImage": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-720x480/16/22/8a/1c.jpg"
+    },
+    {
+      "productCode": "480910P1",
+      "title": "New York City 90-Minute Cruise: Lady Liberty, Bridges and Skyline",
+      "day": 3,
+      "free": false,
+      "priceFrom": 29.99,
+      "currency": "USD",
+      "durationMinutes": 90,
+      "rating": 4.552909,
+      "reviewCount": 2183,
+      "description": "Explore NYC's iconic landmarks and soak in breathtaking views of the city in just 90 minutes! With multiple departures throughout the day, including a sunset cruise and evening city lights option, cru",
+      "bookingUrl": "https://www.viator.com/tours/New-York-City/New-York-City-90-Minute-Cruise-Lady-Liberty-Bridges-and-Skyline/d687-480910P1?pid=P00005400&mcid=58086&currency=USD&medium=api",
+      "coverImage": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-720x480/12/e3/21/58.jpg"
+    },
+    {
+      "productCode": "7167P6",
+      "title": "Statue of Liberty and Ellis Island Guided Tour with Ferry",
+      "day": 1,
+      "free": false,
+      "priceFrom": 59,
+      "currency": "USD",
+      "durationMinutes": 120,
+      "rating": 4.6941624,
+      "reviewCount": 2364,
+      "description": "The Statue of Liberty is a verifiable American icon and a must-do on anyone's New York bucket list. This flexible tour offers two convenient options for visiting Lady Liberty with expert insights so y",
+      "bookingUrl": "https://www.viator.com/tours/New-York-City/Small-Group-Early-Access-Statue-of-Liberty-Tour-and-Ellis-Island/d687-7167P6?pid=P00005400&mcid=58086&currency=USD&medium=api",
+      "coverImage": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-720x480/09/c3/41/1a.jpg"
+    },
+    {
+      "productCode": "7195SEPT11",
+      "title": "9/11 Memorial Museum Admission Ticket",
+      "day": 2,
+      "free": false,
+      "priceFrom": 36,
+      "currency": "USD",
+      "durationMinutes": 120,
+      "rating": 4.7348843,
+      "reviewCount": 6533,
+      "description": "The 9/11 Memorial Museum in Lower Manhattan preserves the history of the attacks on the World Trade Center, and documents the significance of those events through building remnants, personal artifacts",
+      "bookingUrl": "https://www.viator.com/tours/New-York-City/9-11-Memorial-Museum-Admission/d687-7195SEPT11?pid=P00005400&mcid=58086&currency=USD&medium=api",
+      "coverImage": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-720x480/07/7f/62/5b.jpg"
+    },
+    {
+      "productCode": "3784TOPROCK",
+      "title": "Top of the Rock Observation Deck New York City Ticket",
+      "day": 3,
+      "free": false,
+      "priceFrom": 45.73,
+      "currency": "USD",
+      "durationMinutes": 60,
+      "rating": 4.2914457,
+      "reviewCount": 4711,
+      "description": "Experience New York City from 70 stories up at the legendary Top of the Rock. This isn’t just a view; it’s a 360-degree panorama of the skyline that leaves every other vantage point in the dust.\n\nYour",
+      "bookingUrl": "https://www.viator.com/tours/New-York-City/Top-of-the-Rock-Observation-Deck-New-York/d687-3784TOPROCK?pid=P00005400&mcid=58086&currency=USD&medium=api",
+      "coverImage": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-720x480/16/56/58/bc.jpg"
+    }
+  ],
+  "dining": [
+    {
+      "id": "970327",
+      "name": "New York Cafe",
+      "day": 1,
+      "cuisine": "Cafe",
+      "rating": 3.9,
+      "reviewCount": 21750,
+      "priceLevel": "$$$$",
+      "description": "",
+      "url": "https://www.tripadvisor.com/Restaurant_Review-g274887-d970327-Reviews-New_York_Cafe-Budapest_Central_Hungary.html?m=66827"
+    },
+    {
+      "id": "478026",
+      "name": "Patsy's Italian Restaurant",
+      "day": 2,
+      "cuisine": "Italian",
+      "rating": 4.5,
+      "reviewCount": 5606,
+      "priceLevel": "$$ - $$$",
+      "description": "",
+      "url": "https://www.tripadvisor.com/Restaurant_Review-g60763-d478026-Reviews-Patsy_s_Italian_Restaurant-New_York_City_New_York.html?m=66827"
+    },
+    {
+      "id": "2386900",
+      "name": "New York Restaurant",
+      "day": 3,
+      "cuisine": "Steakhouse",
+      "rating": 4.3,
+      "reviewCount": 498,
+      "priceLevel": "$$ - $$$",
+      "description": "",
+      "url": "https://www.tripadvisor.com/Restaurant_Review-g312564-d2386900-Reviews-New_York_Restaurant-Bloemfontein_Free_State.html?m=66827"
+    },
+    {
+      "id": "1010004",
+      "name": "New York New York Greek Restaurant",
+      "day": 1,
+      "cuisine": "Mediterranean",
+      "rating": 4.3,
+      "reviewCount": 358,
+      "priceLevel": "$$ - $$$",
+      "description": "",
+      "url": "https://www.tripadvisor.com/Restaurant_Review-g183462-d1010004-Reviews-New_York_New_York_Greek_Restaurant-Surrey_British_Columbia.html?m=66827"
+    },
+    {
+      "id": "424441",
+      "name": "Sardi's Restaurant",
+      "day": 2,
+      "cuisine": "Italian",
+      "rating": 4,
+      "reviewCount": 2176,
+      "priceLevel": "$$ - $$$",
+      "description": "",
+      "url": "https://www.tripadvisor.com/Restaurant_Review-g60763-d424441-Reviews-Sardi_s_Restaurant-New_York_City_New_York.html?m=66827"
+    },
+    {
+      "id": "15214498",
+      "name": "Rh Rooftop Restaurant At Rh New York",
+      "day": 3,
+      "cuisine": "American",
+      "rating": 4.2,
+      "reviewCount": 213,
+      "priceLevel": "$$ - $$$",
+      "description": "",
+      "url": "https://www.tripadvisor.com/Restaurant_Review-g60763-d15214498-Reviews-Rh_Rooftop_Restaurant_At_Rh_New_York-New_York_City_New_York.html?m=66827"
+    }
+  ],
+  "itineraryDays": [
+    {
+      "day": 1,
+      "date": "2027-02-12",
+      "location": "New York",
+      "title": "Arrive New York"
+    },
+    {
+      "day": 2,
+      "date": "2027-02-13",
+      "location": "New York",
+      "title": "New York — Day 2"
+    },
+    {
+      "day": 3,
+      "date": "2027-02-14",
+      "location": "New York",
+      "title": "New York — Day 3"
     }
   ],
   "promotedFlightsById": {
@@ -1241,6 +1803,110 @@
         "description": null,
         "notes": null,
         "_candidateId": "serp:h1gp0e"
+      },
+      "return": null
+    },
+    "serp:1sb78yc": {
+      "outbound": {
+        "date": "2027-02-12",
+        "route": "ORD→JFK",
+        "airline": "Delta",
+        "cabin": "Economy",
+        "totalPrice": 928,
+        "confirmation": null,
+        "multiDay": false,
+        "segments": [
+          {
+            "flight": "DeltaDL 5241",
+            "airline": "Delta",
+            "route": "ORD→JFK",
+            "date": "2027-02-12",
+            "depart": "2027-02-12 06:00",
+            "arrive": "2027-02-12 09:20",
+            "layover": null
+          }
+        ],
+        "description": null,
+        "notes": null,
+        "_candidateId": "serp:1sb78yc"
+      },
+      "return": null
+    },
+    "serp:1jyaxv0": {
+      "outbound": {
+        "date": "2027-02-12",
+        "route": "ORD→JFK",
+        "airline": "Delta",
+        "cabin": "Economy",
+        "totalPrice": 1028,
+        "confirmation": null,
+        "multiDay": false,
+        "segments": [
+          {
+            "flight": "DeltaDL 5799",
+            "airline": "Delta",
+            "route": "ORD→JFK",
+            "date": "2027-02-12",
+            "depart": "2027-02-12 10:40",
+            "arrive": "2027-02-12 14:04",
+            "layover": null
+          }
+        ],
+        "description": null,
+        "notes": null,
+        "_candidateId": "serp:1jyaxv0"
+      },
+      "return": null
+    },
+    "serp:1k8ajjz": {
+      "outbound": {
+        "date": "2027-02-12",
+        "route": "ORD→JFK",
+        "airline": "Delta",
+        "cabin": "Economy",
+        "totalPrice": 1028,
+        "confirmation": null,
+        "multiDay": false,
+        "segments": [
+          {
+            "flight": "DeltaDL 5035",
+            "airline": "Delta",
+            "route": "ORD→JFK",
+            "date": "2027-02-12",
+            "depart": "2027-02-12 13:30",
+            "arrive": "2027-02-12 16:55",
+            "layover": null
+          }
+        ],
+        "description": null,
+        "notes": null,
+        "_candidateId": "serp:1k8ajjz"
+      },
+      "return": null
+    },
+    "serp:1lcc3tu": {
+      "outbound": {
+        "date": "2027-02-12",
+        "route": "ORD→JFK",
+        "airline": "Delta",
+        "cabin": "Economy",
+        "totalPrice": 1028,
+        "confirmation": null,
+        "multiDay": false,
+        "segments": [
+          {
+            "flight": "DeltaDL 5788",
+            "airline": "Delta",
+            "route": "ORD→JFK",
+            "date": "2027-02-12",
+            "depart": "2027-02-12 18:10",
+            "arrive": "2027-02-12 21:45",
+            "layover": null
+          }
+        ],
+        "description": null,
+        "notes": null,
+        "_candidateId": "serp:1lcc3tu"
       },
       "return": null
     }
@@ -1665,29 +2331,197 @@
       "anchor": "lodging-day-15",
       "proposalStatus": "proposed",
       "_candidateId": "serp:1fhc0ji"
+    },
+    "serp:jr6ed5": {
+      "name": "Park Central Hotel New York",
+      "location": "New York",
+      "checkIn": "2027-02-12",
+      "checkOut": "2027-02-15",
+      "dates": null,
+      "nights": 3,
+      "stars": 4,
+      "total": 499,
+      "pricePerNight": 166,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-16",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:jr6ed5"
+    },
+    "serp:doi3k4": {
+      "name": "Royalton New York",
+      "location": "New York",
+      "checkIn": "2027-02-12",
+      "checkOut": "2027-02-15",
+      "dates": null,
+      "nights": 3,
+      "stars": 4,
+      "total": 510,
+      "pricePerNight": 170,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-17",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:doi3k4"
+    },
+    "serp:if1k1g": {
+      "name": "The Manhattan at Times Square Hotel",
+      "location": "New York",
+      "checkIn": "2027-02-12",
+      "checkOut": "2027-02-15",
+      "dates": null,
+      "nights": 3,
+      "stars": 4,
+      "total": 621,
+      "pricePerNight": 207,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-18",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:if1k1g"
+    },
+    "serp:1womfil": {
+      "name": "The Empire Hotel",
+      "location": "New York",
+      "checkIn": "2027-02-12",
+      "checkOut": "2027-02-15",
+      "dates": null,
+      "nights": 3,
+      "stars": 4,
+      "total": 575,
+      "pricePerNight": 192,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-19",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:1womfil"
+    },
+    "serp:1ptc20y": {
+      "name": "The Shelburne Sonesta New York",
+      "location": "New York",
+      "checkIn": "2027-02-12",
+      "checkOut": "2027-02-15",
+      "dates": null,
+      "nights": 3,
+      "stars": 4,
+      "total": 507,
+      "pricePerNight": 169,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-20",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:1ptc20y"
+    },
+    "serp:1143g28": {
+      "name": "Holiday Inn Express New York City-Wall Street, an IHG Hotel",
+      "location": "New York",
+      "checkIn": "2027-02-12",
+      "checkOut": "2027-02-15",
+      "dates": null,
+      "nights": 3,
+      "stars": 3,
+      "total": 395,
+      "pricePerNight": 132,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-21",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:1143g28"
     }
   },
   "meta": {
     "flightSearch": {
       "rawTokensEst": 557,
       "responseBytes": 2225,
-      "prodLatencyMs": 1194
+      "prodLatencyMs": 4131
     },
     "flightList": {
-      "rawTokensEst": 1995,
-      "responseBytes": 7999,
-      "prodLatencyMs": 350
+      "rawTokensEst": 2781,
+      "responseBytes": 11150,
+      "prodLatencyMs": 677
     },
     "hotelSearch": {
       "rawTokensEst": 353,
       "responseBytes": 1412,
-      "prodLatencyMs": 2746
+      "prodLatencyMs": 2299
     },
     "hotelList": {
-      "rawTokensEst": 2202,
-      "responseBytes": 8808,
-      "prodLatencyMs": 332
+      "rawTokensEst": 3069,
+      "responseBytes": 12276,
+      "prodLatencyMs": 208
     },
-    "capturedAt": "2026-06-06"
+    "capturedAt": "2026-06-07"
   }
 }

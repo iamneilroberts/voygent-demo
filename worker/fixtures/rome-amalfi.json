@@ -387,6 +387,69 @@
       "pricePerPerson": 1484,
       "priceBasis": "per_person",
       "pax": 2
+    },
+    {
+      "id": "serp:1mp1z3z",
+      "source": "serp",
+      "offerId": null,
+      "price": 2864,
+      "currency": "USD",
+      "priceWithCcFee": null,
+      "fareType": null,
+      "validatingCarrier": "Tap Air Portugal",
+      "commissionProtected": false,
+      "cabin": "Economy",
+      "stops": 1,
+      "durationMinutes": 1815,
+      "airlines": [
+        "Tap Air Portugal"
+      ],
+      "route": "JFK→FCO",
+      "flightNumbers": [
+        "TP210",
+        "TP830"
+      ],
+      "segments": [
+        {
+          "origin": "JFK",
+          "destination": "LIS",
+          "depart": "2026-09-10 22:05",
+          "arrive": "2026-09-11 10:15",
+          "carrier": "Tap Air Portugal",
+          "flightNumber": "TP 210",
+          "cabin": "Economy",
+          "durationMinutes": 430,
+          "layover": null,
+          "equipment": "Airbus A330",
+          "overnight": true
+        },
+        {
+          "origin": "LIS",
+          "destination": "FCO",
+          "depart": "2026-09-12 06:20",
+          "arrive": "2026-09-12 10:20",
+          "carrier": "Tap Air Portugal",
+          "flightNumber": "TP 830",
+          "cabin": "Economy",
+          "durationMinutes": 180,
+          "layover": "20h 5m",
+          "equipment": "Airbus A320"
+        }
+      ],
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-07T17:30:33.180Z",
+      "query": {
+        "origin": "JFK",
+        "destination": "FCO",
+        "departure_date": "2026-09-10",
+        "return_date": "2026-09-20",
+        "adults": 2
+      },
+      "pricePerPerson": 1432,
+      "priceBasis": "per_person",
+      "pax": 2
     }
   ],
   "hotels": [
@@ -407,7 +470,7 @@
       "area": "Rome",
       "otaPrices": [
         {
-          "name": "br.Bluepillow.com",
+          "name": "Bluepillow.com",
           "pricePerNight": 72,
           "isOfficial": false
         }
@@ -421,7 +484,7 @@
       "bookable": false,
       "summary": null,
       "status": "candidate",
-      "searchedAt": "2026-06-06T20:08:24.233Z",
+      "searchedAt": "2026-06-07T17:30:52.433Z",
       "query": {
         "destination": "Rome",
         "check_in": "2026-09-10",
@@ -728,7 +791,7 @@
       "starRating": 3,
       "reviewScore": 3.9,
       "reviewScoreScale": 5,
-      "reviewCount": 947,
+      "reviewCount": 948,
       "pricePerNight": 73,
       "priceTotal": 726,
       "priceBasis": "both",
@@ -744,13 +807,419 @@
       "bookable": false,
       "summary": null,
       "status": "candidate",
-      "searchedAt": "2026-06-06T20:08:24.233Z",
+      "searchedAt": "2026-06-07T17:30:52.433Z",
       "query": {
         "destination": "Rome",
         "check_in": "2026-09-10",
         "check_out": "2026-09-20",
         "adults": 2
       }
+    },
+    {
+      "id": "serp:1k0v21i",
+      "source": "serp",
+      "offerId": null,
+      "name": "Vatican PENTHOUSE",
+      "starRating": null,
+      "reviewScore": 4.6,
+      "reviewScoreScale": 5,
+      "reviewCount": 9,
+      "pricePerNight": 139,
+      "priceTotal": 1388,
+      "priceBasis": "both",
+      "nights": 10,
+      "currency": "USD",
+      "area": "Rome",
+      "otaPrices": [
+        {
+          "name": "Booking.com",
+          "pricePerNight": 139,
+          "isOfficial": false
+        }
+      ],
+      "stayRef": "rome-2026-09-10-2026-09-20",
+      "stay": {
+        "location": "Rome",
+        "checkIn": "2026-09-10",
+        "checkOut": "2026-09-20"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-07T17:30:52.433Z",
+      "query": {
+        "destination": "Rome",
+        "check_in": "2026-09-10",
+        "check_out": "2026-09-20",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:1isavsd",
+      "source": "serp",
+      "offerId": null,
+      "name": "La Casetta Trastevere",
+      "starRating": null,
+      "reviewScore": 4.25,
+      "reviewScoreScale": 5,
+      "reviewCount": 54,
+      "pricePerNight": 144,
+      "priceTotal": 1442,
+      "priceBasis": "both",
+      "nights": 10,
+      "currency": "USD",
+      "area": "Rome",
+      "otaPrices": [
+        {
+          "name": "Booking.com",
+          "pricePerNight": 144,
+          "isOfficial": false
+        }
+      ],
+      "stayRef": "rome-2026-09-10-2026-09-20",
+      "stay": {
+        "location": "Rome",
+        "checkIn": "2026-09-10",
+        "checkOut": "2026-09-20"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-07T17:30:52.433Z",
+      "query": {
+        "destination": "Rome",
+        "check_in": "2026-09-10",
+        "check_out": "2026-09-20",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:81s81s",
+      "source": "serp",
+      "offerId": null,
+      "name": "Close to downtown 5 stops with Metro to go to Vatican",
+      "starRating": null,
+      "reviewScore": null,
+      "reviewScoreScale": null,
+      "reviewCount": null,
+      "pricePerNight": 97,
+      "priceTotal": 971,
+      "priceBasis": "both",
+      "nights": 10,
+      "currency": "USD",
+      "area": "Rome",
+      "otaPrices": [
+        {
+          "name": "Vrbo.com",
+          "pricePerNight": 101,
+          "isOfficial": false
+        }
+      ],
+      "stayRef": "rome-2026-09-10-2026-09-20",
+      "stay": {
+        "location": "Rome",
+        "checkIn": "2026-09-10",
+        "checkOut": "2026-09-20"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-07T17:30:52.433Z",
+      "query": {
+        "destination": "Rome",
+        "check_in": "2026-09-10",
+        "check_out": "2026-09-20",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:1i2cs2j",
+      "source": "serp",
+      "offerId": null,
+      "name": "Rome Giardino Segreto Holiday Home with private parking",
+      "starRating": null,
+      "reviewScore": 4.9,
+      "reviewScoreScale": 5,
+      "reviewCount": 14,
+      "pricePerNight": 133,
+      "priceTotal": 1329,
+      "priceBasis": "both",
+      "nights": 10,
+      "currency": "USD",
+      "area": "Rome",
+      "otaPrices": [
+        {
+          "name": "Booking.com",
+          "pricePerNight": 133,
+          "isOfficial": false
+        }
+      ],
+      "stayRef": "rome-2026-09-10-2026-09-20",
+      "stay": {
+        "location": "Rome",
+        "checkIn": "2026-09-10",
+        "checkOut": "2026-09-20"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-07T17:30:52.433Z",
+      "query": {
+        "destination": "Rome",
+        "check_in": "2026-09-10",
+        "check_out": "2026-09-20",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:13mplcj",
+      "source": "serp",
+      "offerId": null,
+      "name": "Roma Talenti BREME Remote Check-in",
+      "starRating": 3,
+      "reviewScore": 4.4,
+      "reviewScoreScale": 5,
+      "reviewCount": 167,
+      "pricePerNight": 99,
+      "priceTotal": 986,
+      "priceBasis": "both",
+      "nights": 10,
+      "currency": "USD",
+      "area": "Rome",
+      "stayRef": "rome-2026-09-10-2026-09-20",
+      "stay": {
+        "location": "Rome",
+        "checkIn": "2026-09-10",
+        "checkOut": "2026-09-20"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-07T17:30:52.433Z",
+      "query": {
+        "destination": "Rome",
+        "check_in": "2026-09-10",
+        "check_out": "2026-09-20",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:1g400ud",
+      "source": "serp",
+      "offerId": null,
+      "name": "Hotel La Ville",
+      "starRating": 4,
+      "reviewScore": 4.7,
+      "reviewScoreScale": 5,
+      "reviewCount": 210,
+      "pricePerNight": 227,
+      "priceTotal": 2272,
+      "priceBasis": "both",
+      "nights": 10,
+      "currency": "USD",
+      "area": "Rome",
+      "stayRef": "rome-2026-09-10-2026-09-20",
+      "stay": {
+        "location": "Rome",
+        "checkIn": "2026-09-10",
+        "checkOut": "2026-09-20"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-07T17:30:52.433Z",
+      "query": {
+        "destination": "Rome",
+        "check_in": "2026-09-10",
+        "check_out": "2026-09-20",
+        "adults": 2
+      }
+    }
+  ],
+  "excursions": [
+    {
+      "productCode": "3731VATICAN",
+      "title": "Vatican Museums, Sistine Chapel & St Peter’s Basilica Guided Tour",
+      "day": 1,
+      "free": false,
+      "priceFrom": 81.05,
+      "currency": "USD",
+      "durationMinutes": 180,
+      "rating": 4.489562,
+      "reviewCount": 40526,
+      "description": "Spend more time inside with no-wait access to the Vatican Museums, Sistine Chapel & St. Peter's Basilica through an official Vatican partner entrance. On this comprehensive guided tour, you'll experie",
+      "bookingUrl": "https://www.viator.com/tours/Rome/Skip-the-Line-Vatican-Museums-and-Sistine-Chapel-Guided-Tour/d511-3731VATICAN?pid=P00005400&mcid=58086&currency=USD&medium=api",
+      "coverImage": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-720x480/0f/ba/c1/d8.jpg"
+    },
+    {
+      "productCode": "62972P2",
+      "title": "Colosseum Arena Floor, Roman Forum and Palatine Hill Tour",
+      "day": 2,
+      "free": false,
+      "priceFrom": 34.07,
+      "currency": "USD",
+      "durationMinutes": 150,
+      "rating": 4.3068433,
+      "reviewCount": 8972,
+      "description": "With exclusive access you will enter the Colosseum through the Gladiator’s Gate, walking directly onto the arena floor. Experience the grandeur of the arena from a unique perspective, as you stand whe",
+      "bookingUrl": "https://www.viator.com/tours/Rome/Colosseum-Arena-Floor-Roman-Forum-and-Palatine-Hill-Guided-Tour/d511-62972P2?pid=P00005400&mcid=58086&currency=USD&medium=api",
+      "coverImage": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-720x480/09/f9/18/a6.jpg"
+    },
+    {
+      "productCode": "120123P3",
+      "title": "Skip-the-Line Group Tour of the Vatican, Sistine Chapel & St. Peter's Basilica",
+      "day": 3,
+      "free": false,
+      "priceFrom": 39.94,
+      "currency": "USD",
+      "durationMinutes": 180,
+      "rating": 4.612499,
+      "reviewCount": 14129,
+      "description": "A holiday in Rome without visiting the Vatican is like a day at the beach without swimming in the sea. See the best of the Vatican museums and gain direct entrance with skip-the-line access to the Sis",
+      "bookingUrl": "https://www.viator.com/tours/Rome/Skip-the-Line-Group-Tour-of-the-Vatican-Sistine-Chapel-and-St-Peters-Basilica/d511-120123P3?pid=P00005400&mcid=58086&currency=USD&medium=api",
+      "coverImage": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-720x480/07/0a/13/fb.jpg"
+    },
+    {
+      "productCode": "403837P9",
+      "title": "Skip-The-Line Vatican Museums,Sistine Chapel& Basilica Experience",
+      "day": 4,
+      "free": false,
+      "priceFrom": 49.1,
+      "currency": "USD",
+      "durationMinutes": 60,
+      "rating": 4.6666665,
+      "reviewCount": 753,
+      "description": "Your Tour Guide will make sure you don't miss out the highlights and also receive the right information making your visit informative. Discover the amazing art pieces collected by the popes throughout",
+      "bookingUrl": "https://www.viator.com/tours/Vatican-City/Small-Group-Tour-of-Vatican-Museums-Sistine-Chapel-and-Basilica/d60477-403837P9?pid=P00005400&mcid=58086&currency=USD&medium=api",
+      "coverImage": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-720x480/15/0f/e0/15.jpg"
+    },
+    {
+      "productCode": "3731COLOSSEUM",
+      "title": "Rome: Colosseum, Roman Forum and Palatine Hill Guided Tour",
+      "day": 5,
+      "free": false,
+      "priceFrom": 57.56,
+      "currency": "USD",
+      "durationMinutes": 180,
+      "rating": 4.5436134,
+      "reviewCount": 24740,
+      "description": "The ancient glory of Rome is reborn! Skip the Line at three of the most significant surviving remnants of the Eternal City: the Colosseum, Palatine Hill and Roman Forum. Your English-speaking expert h",
+      "bookingUrl": "https://www.viator.com/tours/Rome/Colosseum-and-Ancient-Rome-Tour-with-Roman-Forum-and-Palatine-Hill/d511-3731COLOSSEUM?pid=P00005400&mcid=58086&currency=USD&medium=api",
+      "coverImage": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-720x480/15/55/0f/86.jpg"
+    },
+    {
+      "productCode": "55341P7",
+      "title": "Expert Guided Tour of Colosseum Arena OR Underground, and Forum",
+      "day": 1,
+      "free": false,
+      "priceFrom": 116.29,
+      "currency": "USD",
+      "durationMinutes": 180,
+      "rating": 4.670656,
+      "reviewCount": 5180,
+      "description": "Explore the world's most visited monument in the most comfortable and complete way. Visit areas of the Colosseum not accessible by regular-ticket holders. Step on the exclusive Arena floor OR descend ",
+      "bookingUrl": "https://www.viator.com/tours/Rome/Expert-Guided-Tour-of-Colosseum-Underground-Arena-and-Forum/d511-55341P7?pid=P00005400&mcid=58086&currency=USD&medium=api",
+      "coverImage": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-720x480/0b/9b/6b/e9.jpg"
+    }
+  ],
+  "dining": [
+    {
+      "id": "3598856",
+      "name": "La Fata Ignorante - Rooftop Restaurant & Bar",
+      "day": 1,
+      "cuisine": "Seafood",
+      "rating": 4.7,
+      "reviewCount": 7429,
+      "priceLevel": "$$ - $$$",
+      "description": "",
+      "url": "https://www.tripadvisor.com/Restaurant_Review-g187791-d3598856-Reviews-La_Fata_Ignorante_Rooftop_Restaurant_Bar-Rome_Lazio.html?m=66827"
+    },
+    {
+      "id": "3674983",
+      "name": "Ambrosia Rooftop Restaurant & Bar",
+      "day": 2,
+      "cuisine": "Italian",
+      "rating": 4.7,
+      "reviewCount": 2241,
+      "priceLevel": "$$ - $$$",
+      "description": "",
+      "url": "https://www.tripadvisor.com/Restaurant_Review-g187791-d3674983-Reviews-Ambrosia_Rooftop_Restaurant_Bar-Rome_Lazio.html?m=66827"
+    },
+    {
+      "id": "14121704",
+      "name": "Cipasso",
+      "day": 3,
+      "cuisine": "Italian",
+      "rating": 4.9,
+      "reviewCount": 4273,
+      "priceLevel": "$$ - $$$",
+      "description": "",
+      "url": "https://www.tripadvisor.com/Restaurant_Review-g187791-d14121704-Reviews-Cipasso-Rome_Lazio.html?m=66827"
+    },
+    {
+      "id": "13443832",
+      "name": "Tonnarello",
+      "day": 4,
+      "cuisine": "Italian",
+      "rating": 4.7,
+      "reviewCount": 41389,
+      "priceLevel": "$$ - $$$",
+      "description": "",
+      "url": "https://www.tripadvisor.com/Restaurant_Review-g187791-d13443832-Reviews-Tonnarello-Rome_Lazio.html?m=66827"
+    },
+    {
+      "id": "1024861",
+      "name": "Le Mani in Pasta",
+      "day": 5,
+      "cuisine": "Italian",
+      "rating": 4.2,
+      "reviewCount": 2052,
+      "priceLevel": "$$ - $$$",
+      "description": "",
+      "url": "https://www.tripadvisor.com/Restaurant_Review-g187791-d1024861-Reviews-Le_Mani_in_Pasta-Rome_Lazio.html?m=66827"
+    },
+    {
+      "id": "4258943",
+      "name": "Pizza in Trevi",
+      "day": 1,
+      "cuisine": "Italian",
+      "rating": 4.4,
+      "reviewCount": 2676,
+      "priceLevel": "$",
+      "description": "",
+      "url": "https://www.tripadvisor.com/Restaurant_Review-g187791-d4258943-Reviews-Pizza_in_Trevi-Rome_Lazio.html?m=66827"
+    }
+  ],
+  "itineraryDays": [
+    {
+      "day": 1,
+      "date": "2026-09-10",
+      "location": "Rome",
+      "title": "Arrive Rome"
+    },
+    {
+      "day": 2,
+      "date": "2026-09-11",
+      "location": "Rome",
+      "title": "Rome — Day 2"
+    },
+    {
+      "day": 3,
+      "date": "2026-09-12",
+      "location": "Rome",
+      "title": "Rome — Day 3"
+    },
+    {
+      "day": 4,
+      "date": "2026-09-13",
+      "location": "Rome",
+      "title": "Rome — Day 4"
+    },
+    {
+      "day": 5,
+      "date": "2026-09-14",
+      "location": "Rome",
+      "title": "Rome — Day 5"
     }
   ],
   "promotedFlightsById": {
@@ -951,6 +1420,41 @@
         "description": null,
         "notes": null,
         "_candidateId": "serp:x4g21w"
+      },
+      "return": null
+    },
+    "serp:1mp1z3z": {
+      "outbound": {
+        "date": "2026-09-10",
+        "route": "JFK→FCO",
+        "airline": "Tap Air Portugal",
+        "cabin": "Economy",
+        "totalPrice": 2864,
+        "confirmation": null,
+        "multiDay": false,
+        "segments": [
+          {
+            "flight": "Tap Air PortugalTP 210",
+            "airline": "Tap Air Portugal",
+            "route": "JFK→LIS",
+            "date": "2026-09-10",
+            "depart": "2026-09-10 22:05",
+            "arrive": "2026-09-11 10:15",
+            "layover": null
+          },
+          {
+            "flight": "Tap Air PortugalTP 830",
+            "airline": "Tap Air Portugal",
+            "route": "LIS→FCO",
+            "date": "2026-09-12",
+            "depart": "2026-09-12 06:20",
+            "arrive": "2026-09-12 10:20",
+            "layover": "20h 5m"
+          }
+        ],
+        "description": null,
+        "notes": null,
+        "_candidateId": "serp:1mp1z3z"
       },
       "return": null
     }
@@ -1235,29 +1739,197 @@
       "anchor": "lodging-day-10",
       "proposalStatus": "proposed",
       "_candidateId": "serp:1pih2z5"
+    },
+    "serp:1k0v21i": {
+      "name": "Vatican PENTHOUSE",
+      "location": "Rome",
+      "checkIn": "2026-09-10",
+      "checkOut": "2026-09-20",
+      "dates": null,
+      "nights": 10,
+      "stars": null,
+      "total": 1388,
+      "pricePerNight": 139,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-11",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:1k0v21i"
+    },
+    "serp:1isavsd": {
+      "name": "La Casetta Trastevere",
+      "location": "Rome",
+      "checkIn": "2026-09-10",
+      "checkOut": "2026-09-20",
+      "dates": null,
+      "nights": 10,
+      "stars": null,
+      "total": 1442,
+      "pricePerNight": 144,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-12",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:1isavsd"
+    },
+    "serp:81s81s": {
+      "name": "Close to downtown 5 stops with Metro to go to Vatican",
+      "location": "Rome",
+      "checkIn": "2026-09-10",
+      "checkOut": "2026-09-20",
+      "dates": null,
+      "nights": 10,
+      "stars": null,
+      "total": 971,
+      "pricePerNight": 97,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-13",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:81s81s"
+    },
+    "serp:1i2cs2j": {
+      "name": "Rome Giardino Segreto Holiday Home with private parking",
+      "location": "Rome",
+      "checkIn": "2026-09-10",
+      "checkOut": "2026-09-20",
+      "dates": null,
+      "nights": 10,
+      "stars": null,
+      "total": 1329,
+      "pricePerNight": 133,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-14",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:1i2cs2j"
+    },
+    "serp:13mplcj": {
+      "name": "Roma Talenti BREME Remote Check-in",
+      "location": "Rome",
+      "checkIn": "2026-09-10",
+      "checkOut": "2026-09-20",
+      "dates": null,
+      "nights": 10,
+      "stars": 3,
+      "total": 986,
+      "pricePerNight": 99,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-15",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:13mplcj"
+    },
+    "serp:1g400ud": {
+      "name": "Hotel La Ville",
+      "location": "Rome",
+      "checkIn": "2026-09-10",
+      "checkOut": "2026-09-20",
+      "dates": null,
+      "nights": 10,
+      "stars": 4,
+      "total": 2272,
+      "pricePerNight": 227,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-16",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:1g400ud"
     }
   },
   "meta": {
     "flightSearch": {
       "rawTokensEst": 710,
       "responseBytes": 2839,
-      "prodLatencyMs": 1602
+      "prodLatencyMs": 1757
     },
     "flightList": {
-      "rawTokensEst": 1571,
-      "responseBytes": 6296,
-      "prodLatencyMs": 359
+      "rawTokensEst": 1839,
+      "responseBytes": 7371,
+      "prodLatencyMs": 311
     },
     "hotelSearch": {
-      "rawTokensEst": 450,
-      "responseBytes": 1800,
-      "prodLatencyMs": 3605
+      "rawTokensEst": 433,
+      "responseBytes": 1731,
+      "prodLatencyMs": 7736
     },
     "hotelList": {
-      "rawTokensEst": 1569,
-      "responseBytes": 6274,
-      "prodLatencyMs": 450
+      "rawTokensEst": 2494,
+      "responseBytes": 9973,
+      "prodLatencyMs": 344
     },
-    "capturedAt": "2026-06-06"
+    "capturedAt": "2026-06-07"
   }
 }

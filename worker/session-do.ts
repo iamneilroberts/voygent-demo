@@ -107,7 +107,7 @@ const ENRICHMENT_WORKFLOW =
   "exact tool sequence BEFORE writing any summary text:\n" +
   "6a. excursion_search { source:'viator', destination_name:<city>, date:<departure_date> }\n" +
   "6b. apply_gap_tour_picks { tripId:<tripId>, picks:[ { day:<candidate's day>, productCode:<candidate's productCode> }, ... ] } — choose 2-3 " +
-  "candidates from 6a's results, at least one free (free:true) and one paid. Do NOT present candidates and ask; do NOT skip this call — " +
+  "candidates from 6a's results — when any free (free:true) candidates exist include at least one, and always include at least one paid. Do NOT present candidates and ask; do NOT skip this call — " +
   "excursion_search alone saves NOTHING.\n" +
   "7. tripadvisor_search { query:'best restaurants in <city>', category:'restaurants' } — the returned dining picks save automatically.\n" +
   "8. ONLY AFTER 6b and 7 have both returned, write your message: summarize what you ADDED using exact names from the tool results, and note the " +
