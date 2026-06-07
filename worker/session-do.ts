@@ -84,6 +84,19 @@ const BOARDS_WORKFLOW_OVERRIDE =
   "with patch_trip and call the matching promote tool. For hotels the traveler may pick one or more. " +
   "Never auto-select.";
 
+// Category sequencing (boards mode only, additive): Neil's 2026-06-07 feedback —
+// the model searched flights+hotels in parallel and presented both boards at
+// once. Desired demo flow: flights -> traveler picks -> ack -> hotels with a
+// short opinionated recommendation -> traveler picks -> enrichment.
+const SEQUENCED_BOARDS_WORKFLOW =
+  "CATEGORY SEQUENCING (strict): work ONE category at a time, flights THEN hotels. On the first build turn call " +
+  "save_trip and flight_search ONLY — do NOT call hotel_search until the traveler has picked a flight. Present the " +
+  "flight options and end your turn. After the traveler picks a flight, stage and promote it, acknowledge the " +
+  "lock-in in one short sentence, then IN THE SAME TURN call hotel_search and present the hotel options. When " +
+  "presenting hotels, add a 2-3 line recommendation: which one or two YOU would pick and why (value, location, " +
+  "rating) — the cards carry the details, your text carries the judgment. Enrichment (excursions + dining) still " +
+  "runs only after promote_hotels_to_lodging, per the enrichment rules.";
+
 // Enrichment workflow (additive, all sessions): after flights+hotels, build out
 // the rest of the trip. Orthogonal to BOARDS_WORKFLOW_OVERRIDE — both are appended.
 // Excursion selection boards are NOT built yet (deferred), so enrichment
@@ -193,7 +206,7 @@ export class SessionDO {
     if (this.messages.length === 0) {
       this.boardsMode = mode === "boards";
       const seed = SYSTEM_HINT
-        + (this.boardsMode ? `\n\n${BOARDS_WORKFLOW_OVERRIDE}` : "")
+        + (this.boardsMode ? `\n\n${BOARDS_WORKFLOW_OVERRIDE}\n\n${SEQUENCED_BOARDS_WORKFLOW}` : "")
         + `\n\n${ENRICHMENT_WORKFLOW}`;
       this.messages.push({ role: "user", content: `${seed}\n\nMy trip_id is ${this.tripId}.` });
     }
