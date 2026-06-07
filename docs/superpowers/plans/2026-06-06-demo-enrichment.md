@@ -30,7 +30,10 @@ These were the spec's deferred items; verified against the voygent-lite source o
 2. **Dining source = `tripadvisor_search`** (locked with Neil at spec sign-off). Intercepted. Dining is *editorial, not bookable* → there is no promote step: `tripadvisor_search` with a `trip_id` **doubles as its own apply** — it returns slim candidates AND writes the fixture dining into `trip.itinerary[n].dining[]`. The model authors no dining content (fabrication-safe by construction).
 3. **Includes = static boilerplate template** (`DEMO_INCLUDES` in `folio-sync.ts`), attached by `tripToFolio` once the trip has any itinerary days. Generic travel tips carry no supplier data, so a static template is both fabrication-irrelevant and deterministic. The prompt has the model *narrate* that it added "what's included / travel tips"; the content itself is template-seeded.
 4. **Trip-side source fields driving `tripToFolio`:** day-by-day from `trip.itinerary[]` (each `{day, date, location, title, activities[], dining[]}`); flights/hotels unchanged (`trip.flights`, `trip.lodging`). `tripToFolio` is tolerant — absent `itinerary` → no `days`/`includes`, renders flights+hotels only as today.
-5. **Fabrication guard for enrichment** mirrors `promoteHotels`: the interception holds the itinerary in replay state (seeded from `fixture.itineraryDays`), and writes **only** activities/dining whose `productCode`/`id` exist in the fixture. An unknown `productCode` passed to `apply_gap_tour_picks` is dropped. The model can never inject invented excursion/dining data.
+5. **Fabrication guard for enrichment** is *stronger* than flights/hotels (hardened per the 2026-06-06 codex-review of this plan). Two layers:
+   - **The folio's itinerary is ALWAYS replay-controlled.** `onFolio` sets `data.itinerary = promoted.itinerary` *unconditionally* (null → the folio shows no days). The live staging read's `itinerary` is never trusted. So even if the model writes a fabricated `itinerary` via live `patch_trip`, it can never reach `tripToFolio`.
+   - **Model-initiated `patch_trip` is sanitized** in `session-do`'s `callTool` wrapper: `itinerary`/`days`/`activities`/`dining`/`includes` keys are stripped before the live write. Replay's own `helpers.patchTrip` calls `mcp.callTool` directly (bypassing that wrapper), so the fixture-keyed enrichment writes still go through.
+   - The interception holds the itinerary in replay state (`itineraryByDay`, seeded from `fixture.itineraryDays`) and writes **only** activities/dining whose `productCode`/`id` exist in the fixture; an unknown `productCode` passed to `apply_gap_tour_picks` is dropped. `itineraryByDay` is cleared when the resolved enrichment fixture changes (no cross-route leakage within a session).
 6. **"Watch the demo / Build your own" control** sits beside `SkinSwitch` (bottom-right harness chrome), as a sibling pill. `?mode=auto` loads the claude skin and autoplays.
 7. **Golden/dev trip = Dublin** (`dublin-oct` fixture). The 1–2 showcased edits are chosen with Neil at capture time (Task D2).
 
@@ -180,9 +183,10 @@ describe("tripToFolio enrichment projection", () => {
 });
 
 describe("isTripMutating enrichment tools", () => {
-  it("flags apply_gap_tour_picks always, and tripadvisor_search with a trip_id", () => {
+  it("flags apply_gap_tour_picks always, and tripadvisor_search with a trip id (snake or camel)", () => {
     expect(isTripMutating("apply_gap_tour_picks", {})).toBe(true);
     expect(isTripMutating("tripadvisor_search", { trip_id: "t1" })).toBe(true);
+    expect(isTripMutating("tripadvisor_search", { tripId: "t1" })).toBe(true); // camelCase accepted
     expect(isTripMutating("tripadvisor_search", {})).toBe(false);
   });
 });
@@ -212,6 +216,17 @@ const MUTATING = new Set([
   "promote_hotels_to_lodging", "add_booking",
   "apply_gap_tour_picks", "tripadvisor_search",
 ]);
+```
+
+(b2) Update `isTripMutating` so `_search` tools fire on a camelCase `tripId` too (the enrichment handlers accept either; without this `tripadvisor_search({tripId})` wouldn't re-project the folio). Replace the body:
+
+```ts
+export function isTripMutating(tool: string, args: Record<string, unknown>): boolean {
+  if (!MUTATING.has(tool)) return false;
+  // searches only mutate when accumulating into a trip (snake or camel id)
+  if (tool.endsWith("_search")) return typeof args.trip_id === "string" || typeof args.tripId === "string";
+  return true;
+}
 ```
 
 (c) Add the static includes template near the top (after `MUTATING`):
@@ -260,9 +275,10 @@ function projectDays(itinerary: unknown): FolioDay[] {
           cuisine: asStr(m.cuisine),
           url: asStr(m.url),
         }));
-      const title = asStr(d.title)
-        ?? [asStr(d.day) ? `Day ${d.day}` : undefined, asStr(d.location)].filter(Boolean).join(" — ")
-        ?? "Day";
+      // NB: a join of an all-empty array returns "" (not nullish), so `?? "Day"`
+      // would never fire — use `|| "Day"` on the fallback to catch the empty case.
+      const fallback = [asStr(d.day) ? `Day ${d.day}` : undefined, asStr(d.location)].filter(Boolean).join(" — ");
+      const title = asStr(d.title) ?? (fallback || "Day");
       return {
         date: asStr(d.date),
         title,
@@ -410,7 +426,54 @@ describe("enrichment interception (fabrication guard)", () => {
 });
 ```
 
-> Note: these tests are tolerant of an enrichment-empty fixture (they assert the *guard* holds, not a specific count) so they pass before Task D1 captures real Dublin data. The hard count assertions come once `dublin-oct.json` carries enrichment (Task D1 adds a count-bearing test).
+Then add a **positive-write** test that injects a tiny fixture (proves fixture-keyed activities/dining actually land — Codex flagged that the guard-only tests above don't prove this before D1):
+
+```ts
+import type { Fixture } from "../fixtures/index";
+
+const TEST_FIXTURE: Record<string, Fixture> = {
+  "test-dub": {
+    route: { id: "test-dub", label: "T", origin: "MOB", destination: "DUB", city: "Dublin", depart: "2026-10-12", ret: "2026-10-14", adults: 2 },
+    flights: [], hotels: [], promotedFlightsById: {}, promotedLodgingById: {},
+    itineraryDays: [{ day: 1, date: "2026-10-12", location: "Dublin", title: "Arrive Dublin" }],
+    excursions: [{ productCode: "VX1", title: "Kilmainham Gaol", day: 1, free: false, priceFrom: 26, currency: "USD", durationMinutes: 90, rating: 4.7, reviewCount: 1200, description: "Historic gaol.", bookingUrl: "https://v/1", coverImage: null }],
+    dining: [{ id: "TA1", name: "The Winding Stair", day: 1, cuisine: "Irish", rating: 4.5, reviewCount: 800, priceLevel: "$$ - $$$", description: "Riverside.", url: "https://t/1" }],
+  } as unknown as Fixture,
+};
+
+describe("enrichment positive writes (injected fixture)", () => {
+  it("apply_gap_tour_picks writes the fixture-keyed activity into itinerary[day].activities", async () => {
+    const r = new FixtureReplay("demo-x", TEST_FIXTURE);
+    const { trip, h } = makeHelpers();
+    await r.handle("excursion_search", { source: "viator", trip_id: "demo-x", destination: "Dublin" }, h);
+    await r.handle("apply_gap_tour_picks", { tripId: "demo-x", picks: [{ day: 1, productCode: "VX1" }] }, h);
+    const acts = (trip.itinerary ?? []).flatMap((d: any) => d.activities ?? []);
+    expect(acts).toHaveLength(1);
+    expect(acts[0]).toMatchObject({ name: "Kilmainham Gaol", productCode: "VX1", addedBy: "gap-recommender" });
+  });
+
+  it("tripadvisor_search writes the fixture dining into itinerary[day].dining", async () => {
+    const r = new FixtureReplay("demo-x", TEST_FIXTURE);
+    const { trip, h } = makeHelpers();
+    await r.handle("tripadvisor_search", { trip_id: "demo-x", location: "Dublin", category: "restaurants" }, h);
+    const dining = (trip.itinerary ?? []).flatMap((d: any) => d.dining ?? []);
+    expect(dining).toHaveLength(1);
+    expect(dining[0]).toMatchObject({ id: "TA1", name: "The Winding Stair" });
+  });
+
+  it("clears accumulated days when the enrichment route changes", async () => {
+    const r = new FixtureReplay("demo-x", TEST_FIXTURE);
+    const { h } = makeHelpers();
+    await r.handle("excursion_search", { source: "viator", trip_id: "demo-x", destination: "Dublin" }, h);
+    await r.handle("apply_gap_tour_picks", { tripId: "demo-x", picks: [{ day: 1, productCode: "VX1" }] }, h);
+    // A search that resolves to no known fixture must reset the held itinerary.
+    await r.handle("excursion_search", { source: "viator", trip_id: "demo-x", destination: "Nowhereville" }, h);
+    expect(r.lastPromoted().itinerary).toBeNull();
+  });
+});
+```
+
+> Note: the guard-only tests above are tolerant of an enrichment-empty *real* fixture (they assert the *guard* holds, not a count) so they pass before Task D1 captures real Dublin data. The injected-fixture tests prove positive writes now. Hard count assertions against the real `dublin-oct.json` come in Task D1.
 
 - [ ] **Step 3: Run to verify they fail**
 
@@ -484,6 +547,33 @@ function slimDining(c: DiningCandidate) {
   private itineraryByDay: Map<number, Record<string, any>> = new Map();
 ```
 
+(d0) Add a fixtures-injection seam so enrichment lookups can be unit-tested before real capture (Task D1). Change the constructor and add a `lookupHotelFixture` helper. Replace `constructor(private tripId: string) {}` with:
+
+```ts
+  // `fixtures` defaults to the real captured map; tests inject a small fixture
+  // to exercise positive fixture-keyed writes before D1 captures real data.
+  constructor(private tripId: string, private fixtures: Record<string, import("../fixtures/index").Fixture> = FIXTURE_BY_ID) {}
+
+  // Match a destination/location to one of this replay's fixtures (mirrors
+  // matchHotelFixture but over the injected map so tests can override).
+  private lookupHotelFixture(location: unknown): import("../fixtures/index").Fixture | null {
+    const m = matchHotelFixture(location);
+    if (m && this.fixtures[m.route.id]) return this.fixtures[m.route.id];
+    // Injected test fixtures aren't in the global FIXTURES that matchHotelFixture
+    // scans, so fall back to a direct city/code match over this.fixtures.
+    const norm = (s: unknown) => String(s ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+    const t = norm(location);
+    if (!t) return null;
+    for (const f of Object.values(this.fixtures)) {
+      const c = norm(f.route.destination), ci = norm(f.route.city);
+      if (t === c || (ci && (t === ci || t.includes(ci) || ci.includes(t)))) return f;
+    }
+    return null;
+  }
+```
+
+Everywhere this class currently reads `FIXTURE_BY_ID[...]` (in `currentFixture`, `applyGapTourPicks`, `fixtureExcursionCodes`, `fixtureDiningIds`, and the enrichment handlers below), read `this.fixtures[...]` instead. Flight/hotel matching (`matchFlightFixture`/`matchHotelFixture` + `flightRouteId`/`hotelRouteId`) is unchanged — only the enrichment path needs the override, and it goes through `lookupHotelFixture`.
+
 (e) Extend `lastPromoted()` to also surface the itinerary:
 
 ```ts
@@ -501,12 +591,12 @@ function slimDining(c: DiningCandidate) {
 ```ts
   /** Test helper: productCodes available in the active enrichment fixture. */
   fixtureExcursionCodes(): string[] {
-    const fx = this.enrichRouteId ? FIXTURE_BY_ID[this.enrichRouteId] : null;
+    const fx = this.enrichRouteId ? this.fixtures[this.enrichRouteId] : null;
     return (fx?.excursions ?? []).map((e) => e.productCode);
   }
   /** Test helper: dining ids available in the active enrichment fixture. */
   fixtureDiningIds(): string[] {
-    const fx = this.enrichRouteId ? FIXTURE_BY_ID[this.enrichRouteId] : null;
+    const fx = this.enrichRouteId ? this.fixtures[this.enrichRouteId] : null;
     return (fx?.dining ?? []).map((d) => d.id);
   }
 ```
@@ -526,8 +616,12 @@ function slimDining(c: DiningCandidate) {
   // hotelSearch does. Sets enrichRouteId so apply/dining steps can find it.
   private resolveEnrichFixture(args: Record<string, any>): import("../fixtures/index").Fixture | null {
     const loc = args.destination ?? args.location ?? args.destination_name ?? args.query;
-    const fixture = matchHotelFixture(loc);
-    this.enrichRouteId = fixture ? fixture.route.id : null;
+    const fixture = this.lookupHotelFixture(loc);
+    const nextId = fixture ? fixture.route.id : null;
+    // Clear accumulated days when the enrichment route changes (or resolves to
+    // none) so a later route in the same session can't mix into old day objects.
+    if (nextId !== this.enrichRouteId) this.itineraryByDay.clear();
+    this.enrichRouteId = nextId;
     return fixture;
   }
 
@@ -567,7 +661,7 @@ function slimDining(c: DiningCandidate) {
   }
 
   private async applyGapTourPicks(args: Record<string, any>, h: ReplayHelpers): Promise<string> {
-    const fixture = this.enrichRouteId ? FIXTURE_BY_ID[this.enrichRouteId] : null;
+    const fixture = this.enrichRouteId ? this.fixtures[this.enrichRouteId] : null;
     if (!fixture || !(fixture.excursions && fixture.excursions.length)) {
       return JSON.stringify({ status: "error", persisted: false, tripId: this.tripId, error: "No excursion candidates — call excursion_search first." });
     }
@@ -705,16 +799,34 @@ In `handleChat`, change the seed assembly so enrichment is appended for every se
     }
 ```
 
-- [ ] **Step 4: Overlay the promoted itinerary in `onFolio`**
+- [ ] **Step 4: Overlay the promoted itinerary in `onFolio` (always replay-controlled)**
 
-In the `onFolio` callback, after the existing flights/lodging overlay lines, add the itinerary overlay (so the folio is built from authoritative replay state, dodging the KV read race — same rationale as flights/lodging):
+In the `onFolio` callback, after the existing flights/lodging overlay lines, set the itinerary **unconditionally** from replay state. Unlike flights/lodging (which only overlay when non-null), the itinerary is *always* replay-controlled: the folio must never render a model-authored itinerary written via live `patch_trip`. This is the primary half of the enrichment fabrication guard (codex-review BLOCKER fix):
 
 ```ts
             const promoted = this.replay.lastPromoted();
             if (promoted.flights != null) data.flights = promoted.flights;
             if (promoted.lodging != null) data.lodging = promoted.lodging;
+            // ALWAYS replay-controlled — a live/model-written itinerary is dropped.
             if (promoted.itinerary != null) data.itinerary = promoted.itinerary;
+            else delete data.itinerary;
 ```
+
+- [ ] **Step 4b: Sanitize model-initiated `patch_trip` (second half of the guard)**
+
+In the `callTool` wrapper in `session-do.ts`, strip enrichment-content keys from a model `patch_trip` before the live staging write, so the model can't even persist a fabricated itinerary to staging. Replay's own `helpers.patchTrip` calls `mcp.callTool` directly and bypasses this wrapper, so fixture-keyed enrichment writes are unaffected. At the top of `callTool`, before the patch-savings block:
+
+```ts
+      if (name === "patch_trip") {
+        const inAny = input as any;
+        const updates = inAny.updates ?? inAny;
+        if (updates && typeof updates === "object") {
+          for (const k of ["itinerary", "days", "activities", "dining", "includes"]) delete updates[k];
+        }
+      }
+```
+
+> This sits inside `callTool` (the model-facing path), NOT `baseCallTool`/`helpers`. Verify by reading the current `callTool`/`helpers.patchTrip` split with `cat -n worker/session-do.ts` around lines 171–210 before editing.
 
 - [ ] **Step 5: Typecheck + full suite**
 
@@ -1112,7 +1224,7 @@ In `send()`, hook the recorder at three points:
 - inside the `streamChat` callback, wrap the delegate: `(e) => { recorder?.recordEvent(e); applyEvent(e, claude); }`
 - in the `finally` block: `recorder?.recordTurnEnd();`
 
-Add a tiny export affordance (so Neil can grab the JSON during capture). After the `finally`, expose on window when recording:
+Add a tiny export affordance (so Neil can grab the JSON during capture). This is a **top-level `useEffect` inside `App`, placed beside the existing effects (NOT inside `send()` — a hook inside a function/callback is an invalid-hook-call runtime error).** It registers `window.__exportRecording` and cleans it up on unmount:
 
 ```ts
   useEffect(() => {
@@ -1128,6 +1240,7 @@ Add a tiny export affordance (so Neil can grab the JSON during capture). After t
       } catch { /* console copy is the fallback */ }
       return data;
     };
+    return () => { try { delete (window as any).__exportRecording; } catch { /* ignore */ } };
   }, [recorder]);
 ```
 
@@ -1205,10 +1318,19 @@ export interface ReplayOpts {
   signal?: AbortSignal;                  // abort an in-flight replay (restart / mode switch)
 }
 
-const defaultWait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+// Abort-aware sleep: resolves on timeout OR immediately when the signal aborts,
+// so a long recorded delay doesn't leave replay hanging after a restart/mode switch.
+function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise<void>((resolve) => {
+    if (signal?.aborted) return resolve();
+    const t = setTimeout(done, ms);
+    function done() { signal?.removeEventListener("abort", done); clearTimeout(t); resolve(); }
+    signal?.addEventListener("abort", done, { once: true });
+  });
+}
 
 export async function replayChat(rec: Recording, h: ReplayHandlers, opts: ReplayOpts = {}): Promise<void> {
-  const wait = opts.wait ?? defaultWait;
+  const wait = opts.wait ?? ((ms: number) => sleep(ms, opts.signal));
   const scale = opts.reducedMotion ? 0.2 : 1;
   for (const f of rec.frames) {
     if (opts.signal?.aborted) return;
@@ -1251,11 +1373,12 @@ import { replayChat, type Recording } from "./lib/recording";
 import dublinRecording from "./recordings/dublin-oct.json";
 ```
 
-Add state + a replay-abort ref:
+Add state + a replay-abort ref, and persist the resolved mode on load (so `?mode=auto` is sticky like the skin axis — codex-review nit):
 
 ```ts
   const [mode] = useState<ModeId>(resolveInitialMode);
   const replayAbort = useRef<AbortController | null>(null);
+  useEffect(() => { persistMode(mode); }, [mode]);
 ```
 
 Add `pushUser` (the user-bubble half of `send`, factored so replay can drive it):
@@ -1292,7 +1415,7 @@ Add a restart handler and a "Watch the demo / Build your own" control. Simplest:
 ```tsx
       <button
         type="button"
-        className="skin-switch watch-demo"
+        className="watch-demo"
         onClick={() => {
           const next: ModeId = mode === "auto" ? "live" : "auto";
           persistMode(next);
@@ -1310,13 +1433,19 @@ Add a restart handler and a "Watch the demo / Build your own" control. Simplest:
 
 (Reload-to-switch keeps it simple and re-latches the worker session; in-place restart can be a later polish.)
 
-Add minimal styling — append to `web/src/styles.css`:
+Add standalone styling (do NOT reuse `.skin-switch` — that's a wrapper-with-child-buttons style; this is a standalone `<button>`). Append to `web/src/styles.css`:
 
 ```css
-.watch-demo { right: 9.5rem; }  /* sit left of the skin pill (which is bottom-right) */
+.watch-demo {
+  position: fixed; bottom: 1rem; right: 9.5rem; z-index: 50;
+  font: 600 0.72rem/1 var(--mono, ui-monospace, monospace);
+  padding: 0.4rem 0.7rem; border-radius: 999px;
+  background: #1a1a1a; color: #e8e8e8; border: 1px solid #333; cursor: pointer;
+}
+.watch-demo:hover { background: #262626; }
 ```
 
-> Verify the `SkinSwitch` pill's fixed position first (`cat -n web/src/SkinSwitch.tsx` / its CSS) and adjust the `right` offset so the two pills don't overlap.
+> Verify the `SkinSwitch` pill's actual fixed position/offset first (`cat -n web/src/SkinSwitch.tsx` and grep `.skin-switch` in `styles.css`) and adjust `right`/`bottom` so the two pills sit side by side without overlapping.
 
 - [ ] **Step 7: Typecheck + suite + build**
 
@@ -1611,8 +1740,8 @@ Then verify live on `voygent-demo.somotravel.workers.dev/?mode=auto` and `/?skin
 ## Final self-review checklist (run before requesting review)
 
 - [ ] `npx tsc --noEmit` clean; `npx vitest run` all green (87 baseline + new tests).
-- [ ] Default `/` (board skin, live mode, no record) behaves byte-identically to pre-change.
-- [ ] Fabrication guard holds: no path writes a non-fixture excursion/dining into the trip (covered by replay.test.ts).
+- [ ] Default `/` (board skin, live mode, no record): same shell + flight/hotel board/auto-pick behavior as before, **plus** the trip now continues into excursions/dining/includes after hotels and the board-skin folio renders the new day-by-day/dining/includes sections. (NOT byte-identical by design — `ENRICHMENT_WORKFLOW` is appended to all sessions; the *only* byte-identical guarantees are `SYSTEM_HINT`, `BOARDS_WORKFLOW_OVERRIDE`, and the pre-enrichment flight/hotel flow.)
+- [ ] Fabrication guard holds: no model path (incl. a direct `patch_trip {itinerary}`) writes non-fixture excursion/dining/itinerary into the rendered folio — itinerary is always replay-controlled in `onFolio` and stripped from model `patch_trip` (covered by replay.test.ts + the onFolio/sanitize edits).
 - [ ] `SYSTEM_HINT` and `BOARDS_WORKFLOW_OVERRIDE` are byte-identical; enrichment is a separate appended constant.
 - [ ] No `cl-*` leakage into the board skin; no `--board/--ink/--amber` overrides in `skin-claude.css`.
 - [ ] `kind:"excursion"` boards NOT added; `worker/agent/boards.ts` untouched.
