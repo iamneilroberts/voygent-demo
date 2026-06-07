@@ -1,23 +1,79 @@
-import type { FolioData, FolioFlight, FolioHotel } from "../../shared/events";
+import type { FolioData, FolioFlight, FolioHotel, FolioDay, FolioActivity, FolioDining, FolioInclude } from "../../shared/events";
 
 const MUTATING = new Set([
   "flight_search", "hotel_search", "excursion_search",
   "patch_trip", "confirm_lodging", "promote_flights",
   "promote_hotels_to_lodging", "add_booking",
+  "apply_gap_tour_picks", "tripadvisor_search",
 ]);
 
 export function isTripMutating(tool: string, args: Record<string, unknown>): boolean {
   if (!MUTATING.has(tool)) return false;
-  // searches only mutate when accumulating into a trip
-  if (tool.endsWith("_search")) return typeof args.trip_id === "string";
+  // searches only mutate when accumulating into a trip (snake or camel id)
+  if (tool.endsWith("_search")) return typeof args.trip_id === "string" || typeof args.tripId === "string";
   return true;
 }
+
+// Deterministic boilerplate "includes" — generic travel boilerplate carries no
+// supplier data, so a static template is both fabrication-irrelevant and stable.
+// Attached by tripToFolio once the trip has any itinerary days.
+const DEMO_INCLUDES: FolioInclude[] = [
+  { key: "whats-included", title: "What's included",
+    body: "Round-trip flights, hand-picked hotels, and the day-by-day plan below — all booked and managed in one place." },
+  { key: "good-to-know", title: "Good to know",
+    body: "Activity and dining picks are suggestions you can swap anytime. Prices are live at time of search and confirmed before you book." },
+  { key: "travel-tips", title: "Travel tips",
+    body: "Bring layers for changeable weather, carry a contactless card for transit, and book popular excursions a few days ahead." },
+];
 
 function asPrice(v: unknown): string | undefined {
   if (v == null) return undefined;
   if (typeof v === "number") return `$${v}`;
   const s = String(v).trim();
   return s ? s : undefined;
+}
+
+function asStr(v: unknown): string | undefined {
+  if (v == null) return undefined;
+  const s = String(v).trim();
+  return s ? s : undefined;
+}
+
+function projectDays(itinerary: unknown): FolioDay[] {
+  if (!Array.isArray(itinerary)) return [];
+  return itinerary
+    .filter((d: any) => d && typeof d === "object")
+    .map((d: any) => {
+      const activities: FolioActivity[] = (Array.isArray(d.activities) ? d.activities : [])
+        .filter((a: any) => a && typeof a === "object" && a.name)
+        .map((a: any) => ({
+          time: asStr(a.time),
+          name: String(a.name),
+          description: asStr(a.description),
+          url: asStr(a.url ?? a.bookingUrl),
+        }));
+      const dining: FolioDining[] = (Array.isArray(d.dining) ? d.dining : [])
+        .filter((m: any) => m && typeof m === "object" && m.name)
+        .map((m: any) => ({
+          name: String(m.name),
+          description: asStr(m.description),
+          cuisine: asStr(m.cuisine),
+          url: asStr(m.url),
+        }));
+      // NB: a join of an all-empty array returns "" (not nullish), so "?? Day"
+      // would never fire — use "|| Day" on the fallback to catch the empty case.
+      const fallback = [asStr(d.day) ? `Day ${d.day}` : undefined, asStr(d.location)].filter(Boolean).join(" — ");
+      const title = asStr(d.title) ?? (fallback || "Day");
+      return {
+        date: asStr(d.date),
+        title,
+        location: asStr(d.location),
+        activities,
+        dining,
+        stay: asStr(d.stay ?? d.lodging?.name),
+      };
+    })
+    .filter((day: FolioDay) => day.activities.length > 0 || day.dining.length > 0 || !!day.stay);
 }
 
 // `read_trip` wraps the trip under `data`: { status, tripId, data: { meta, flights, lodging } }.
@@ -71,5 +127,8 @@ export function tripToFolio(tripId: string, raw: any): FolioData {
     perNight: asPrice(h.pricePerNight),
   }));
 
-  return { tripId, title, flights, hotels };
+  const days = projectDays(t.itinerary);
+  const base: FolioData = { tripId, title, flights, hotels };
+  if (days.length > 0) { base.days = days; base.includes = DEMO_INCLUDES; }
+  return base;
 }
