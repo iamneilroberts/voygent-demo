@@ -67,6 +67,7 @@ function slimExcursion(c: ExcursionCandidate) {
   return {
     productCode: c.productCode,
     title: c.title,
+    day: c.day,            // fixture-authoritative day; the prompt asks the model to echo it in picks
     free: !!c.free,
     priceFrom: c.priceFrom ?? null,
     currency: c.currency ?? "USD",
