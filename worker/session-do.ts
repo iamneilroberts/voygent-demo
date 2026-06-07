@@ -110,7 +110,8 @@ const LIVE_TRIP_WORKFLOW =
 // short opinionated recommendation -> traveler picks -> enrichment.
 const SEQUENCED_BOARDS_WORKFLOW =
   "CATEGORY SEQUENCING (strict): work ONE category at a time, flights THEN hotels. On the first build turn call " +
-  "save_trip and flight_search ONLY — do NOT call hotel_search until the traveler has picked a flight. Present the " +
+  "save_trip and flight_search — plus flight_list { tripId, action:'list' } when this is a live (non-featured) trip, " +
+  "so the option cards can render — and NO hotel tools until the traveler has picked a flight. Present the " +
   "flight options and end your turn. After the traveler picks a flight, stage and promote it, acknowledge the " +
   "lock-in in one short sentence, then IN THE SAME TURN call hotel_search and present the hotel options. When " +
   "presenting hotels, add a 2-3 line recommendation: which one or two YOU would pick and why (value, location, " +
@@ -345,9 +346,32 @@ export class SessionDO {
         // backstop for the prompt's "same turn, before summary" rule.
         let enrichmentSeen = false;
         let enrichmentNudged = false;
+        let flightListSeen = false;
+        let flightListNudged = false;
+        let hsrSeen = false;
+        let hsrNudged = false;
         const nudge = (batch: Array<{ name: string; input: Record<string, unknown> }>): string | null => {
           const names = new Set(batch.map((b) => b.name));
           if (names.has("apply_gap_tour_picks") || names.has("excursion_search")) enrichmentSeen = true;
+          if (names.has("flight_list")) flightListSeen = true;
+          if (names.has("hotel_search_and_rank")) hsrSeen = true;
+          // Live hotels: hotel_search_and_rank carries commission data AND a
+          // board-renderable shape; plain serp hotel_search renders no cards.
+          if (this.liveMode && names.has("hotel_search") && !hsrSeen && !hsrNudged) {
+            hsrNudged = true;
+            return "[host reminder] This is a live trip: hotels come from hotel_search_and_rank { destination, check_in, "
+              + "check_out, travelers:{ adults } } — call it now and present from ITS results (it carries advisor "
+              + "commission and renders the traveler's option cards). hotel_search is only the fallback if it fails.";
+          }
+          // Live flights distill: raw flight_search results carry no candidate
+          // ids, so the option cards can't render until flight_list runs. The
+          // model reliably skips the buried conditional — remind it once.
+          if (this.liveMode && names.has("flight_search") && !flightListSeen && !flightListNudged) {
+            flightListNudged = true;
+            return "[host reminder] This is a live trip: now call flight_list { tripId, action:'list' } to distill the "
+              + "flight candidates, and present from ITS results — the traveler's option cards only render from "
+              + "flight_list. Do not stage or promote a flight before flight_list has returned its candidate ids.";
+          }
           const lodgingPatched = batch.some((b) => {
             if (b.name !== "patch_trip") return false;
             const updates = (b.input as any).updates ?? b.input;
