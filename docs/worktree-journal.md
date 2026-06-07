@@ -6,6 +6,17 @@ when the work ships or is abandoned.
 
 ## Active
 
+### demo-enrichment
+- **Started:** 2026-06-06 19:37
+- **Branch:** `demo-enrichment`
+- **Worktree:** `/home/neil/dev/voygent-demo-demo-enrichment`
+- **Base:** `main` (eddffa5)
+- **Description:** Sub-project 1 — worker-only content-enrichment pipeline (excursions/free/dining/includes/day-by-day) + client-only automated record/replay "▶ Watch the demo" mode.
+- **Working on:** spec signed off (dining=tripadvisor); plan written + codex-reviewed (1 blocker + 7 fixes folded in); ready for subagent-driven build from Phase A. Golden recording + deploy gated on Neil.
+- **Last update:** 2026-06-06 19:37
+- **Don't touch:** `worker/agent/boards.ts`, the `board` SSE event, `BOARDS_WORKFLOW_OVERRIDE`, the `buildBoard` wiring (claude-skin owns; enrichment is additive). No `kind:"excursion"` board (deferred to sub-project 2).
+- **Status:** active
+
 ## Coordination
 
 Cross-cutting constraints active across sessions. Format:
