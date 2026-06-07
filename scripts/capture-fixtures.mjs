@@ -194,9 +194,16 @@ async function captureRoute(r) {
   //    demo's ExcursionCandidate shape (productCode is load-bearing).
   let excursions = [];
   try {
-    const ex = await callTool("excursion_search", { source: "viator", trip_id: tripId, destination_name: r.city, date: r.depart, max_results: 8 });
-    record("excursion_search", { source: "viator", destination_name: r.city }, ex);
-    const raw = ex.json?.candidates ?? ex.json?.products ?? [];
+    // Viator requires a numeric destination_id — resolve the city first.
+    const dest = await callTool("resolve_destination", { query: r.city });
+    record("resolve_destination", { query: r.city }, dest);
+    const destinationId = dest.json?.viator?.destinationId ?? null;
+    if (!destinationId) log(`  resolve_destination: no viator id for ${r.city}`);
+    const ex = destinationId
+      ? await callTool("excursion_search", { source: "viator", destination_id: destinationId, destination_name: r.city, date: r.depart, max_results: 10 })
+      : { json: {}, text: "" };
+    record("excursion_search", { source: "viator", destination_id: destinationId, destination_name: r.city }, ex);
+    const raw = ex.json?.products ?? ex.json?.candidates ?? [];
     // Spread across days round-robin so each demo day gets activity content.
     const dayCount = Math.max(1, Math.min(5, daysBetween(r.depart, r.ret)));
     excursions = raw.slice(0, 6).map((c, i) => {
@@ -222,20 +229,20 @@ async function captureRoute(r) {
   // 9. DINING (tripadvisor) — editorial local picks.
   let dining = [];
   try {
-    const di = await callTool("tripadvisor_search", { trip_id: tripId, location: r.city, category: "restaurants", max_results: 8 });
-    record("tripadvisor_search", { location: r.city }, di);
-    const raw = di.json?.candidates ?? di.json?.results ?? di.json?.locations ?? [];
+    const di = await callTool("tripadvisor_search", { query: `best restaurants in ${r.city}`, category: "restaurants", max_results: 10, include_reviews: false });
+    record("tripadvisor_search", { query: `best restaurants in ${r.city}`, category: "restaurants" }, di);
+    const raw = di.json?.results ?? di.json?.candidates ?? di.json?.locations ?? [];
     const dayCount = Math.max(1, Math.min(5, daysBetween(r.depart, r.ret)));
     dining = raw.slice(0, 6).map((c, i) => ({
       id: String(c.id ?? c.location_id ?? c.locationId ?? i),
       name: c.name,
       day: (i % dayCount) + 1,
-      cuisine: c.cuisine ?? (Array.isArray(c.cuisines) ? c.cuisines[0] : null),
+      cuisine: Array.isArray(c.cuisine) ? (c.cuisine[0] ?? null) : (c.cuisine ?? (Array.isArray(c.cuisines) ? c.cuisines[0] : null)),
       rating: numOrNull(c.rating),
       reviewCount: numOrNull(c.reviewCount ?? c.num_reviews),
       priceLevel: c.priceLevel ?? c.price_level ?? null,
       description: (c.description ?? "").slice(0, 200),
-      url: c.url ?? c.web_url ?? null,
+      url: c.url ?? c.tripadvisor_url ?? c.website ?? c.web_url ?? null,
     })).filter((d) => d.name);
     log(`  dining: ${dining.length}`);
   } catch (e) { log(`  tripadvisor_search FAILED: ${e.message}`); }
