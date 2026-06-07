@@ -10,6 +10,7 @@
 //                 storage.list({ prefix: "msg:" }) returns them in order.
 import type { ConversationMessage } from "./llm/provider";
 import type { ReplaySnapshot } from "./mcp/replay";
+import type { ModelRouting } from "../shared/models";
 
 export interface SessRecord {
   tripId: string;
@@ -19,6 +20,11 @@ export interface SessRecord {
   // observed). Session-scoped: persisted so a nudge can't re-fire after an
   // exchange boundary or a DO eviction.
   nudges?: { enrichment: boolean; flightList: boolean; hsr: boolean };
+  // Model routing chosen by the visitor (already server-coerced before persist).
+  routing?: ModelRouting;
+  // Outcome-based phase milestone: true once a hotel lock succeeded with lodging.
+  // Re-derived from replay state on hydrate to survive mid-stream DO death.
+  hotelsPromoted?: boolean;
   replay: ReplaySnapshot;
 }
 

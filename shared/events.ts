@@ -52,7 +52,7 @@ export type InspectorEvent =
       args: Record<string, unknown>; result: string; latencyMs: number; ok: boolean }
   | { type: "inspector"; kind: "turn"; exchangeId: string; turn: number;
       inputTokens: number; outputTokens: number; cacheReadTokens: number; cacheCreationTokens: number;
-      costUsd: number }
+      costUsd: number; model?: string }
   | { type: "inspector"; kind: "savings"; exchangeId: string;
       mechanism: "patch" | "template" | "toolCatalog" | "searchDistill";
       tokensSaved: number; basis: "chars/4"; scope: "perTurn" | "perRender" | "aggregate"; detail: string }
@@ -62,7 +62,10 @@ export type InspectorEvent =
   | { type: "inspector"; kind: "summary"; exchangeId: string;
       turns: number; toolCalls: number; exposedToolCount: number; fullToolCount: number;
       inputTokens: number; outputTokens: number; cacheReadTokens: number; cacheCreationTokens: number;
-      costByModel: { haiku: number; sonnet: number; opus: number } };
+      // costByModel = COUNTERFACTUAL (what the aggregate usage would cost priced entirely as each tier).
+      // actualCostUsd = MEASURED routed spend (sum of per-turn cost at that turn's model).
+      costByModel: { haiku: number; sonnet: number; opus: number };
+      actualCostUsd: number; actualCostByModel?: Record<string, number> };
 
 export function encodeSse(ev: ServerEvent): string {
   return `data: ${JSON.stringify(ev)}\n\n`;

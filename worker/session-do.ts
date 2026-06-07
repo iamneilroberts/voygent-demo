@@ -5,6 +5,7 @@ import { tripToFolio } from "./agent/folio-sync";
 import { McpClient } from "./mcp/client";
 import { FixtureReplay, type ReplayHelpers } from "./mcp/replay";
 import { msgKey, shrinkForStorage, MSG_PREFIX, type SessRecord } from "./session-store";
+import { type ModelId, type ModelRouting, DEFAULT_ROUTING, enabledModels, buildRouting, resolveRoutingModel } from "../shared/models";
 import { presetRoutes } from "./fixtures/index";
 import { ClaudeProvider } from "./llm/claude";
 import { estimateCostUsd } from "./llm/cost";
@@ -18,8 +19,9 @@ interface Env {
   VOYGENT_MCP_URL: string;
   VOYGENT_MCP_BEARER: string;
   SESSION: DurableObjectNamespace;        // self-namespace; a reserved instance is the budget ledger
-  LLM_MODEL?: string;                     // cheap default while developing; override to sonnet for quality
+  LLM_MODEL?: string;                     // default/fallback model; per-turn routing overrides per call
   BUDGET_DAILY_USD?: string;              // global daily spend cap (default 5)
+  DEMO_OPUS_ENABLED?: string;             // when set, Opus is offered/accepted (abuse gate; default off)
 }
 
 // Public-surface denylist (Neil 2026-06-07): the catalog stays claude.ai-faithful
@@ -171,6 +173,9 @@ export class SessionDO {
   // the instance + SessRecord so a nudge can't re-fire across exchange
   // boundaries or after a DO eviction.
   private nudges = { enrichment: false, flightList: false, hsr: false };
+  // Visitor's model routing (server-coerced) + outcome-based phase milestone.
+  private routing: ModelRouting = DEFAULT_ROUTING;
+  private hotelsPromoted = false;
   // Session-scoped so search→list dedupe survives across exchanges.
   private boardBuilder: BoardBuilder = createBoardBuilder();
   // How many of this.messages are already in durable storage (hydrated or persisted).
@@ -190,8 +195,13 @@ export class SessionDO {
       this.boardsMode = sess.boardsMode;
       this.liveMode = sess.liveMode ?? false;
       this.nudges = sess.nudges ?? { enrichment: false, flightList: false, hsr: false };
+      this.routing = sess.routing ?? DEFAULT_ROUTING;
       this.replay = new FixtureReplay(this.tripId);
       this.replay.restore(sess.replay);
+      // Re-derive the milestone from replay state so a mid-stream DO death (lodging
+      // promoted but persist never ran) doesn't lose the phase (Codex #6).
+      const promotedLodging = this.replay.lastPromoted().lodging;
+      this.hotelsPromoted = (sess.hotelsPromoted ?? false) || !!(promotedLodging && promotedLodging.length);
       const stored = await this.state.storage.list<ConversationMessage>({ prefix: MSG_PREFIX });
       this.messages = [...stored.values()]; // zero-padded keys → list order = insertion order
       this.persistedMsgCount = this.messages.length;
@@ -204,7 +214,7 @@ export class SessionDO {
   private async persistSession(): Promise<void> {
     try {
       const puts: Record<string, unknown> = {
-        sess: { tripId: this.tripId, boardsMode: this.boardsMode, liveMode: this.liveMode, nudges: this.nudges, replay: this.replay.snapshot() } satisfies SessRecord,
+        sess: { tripId: this.tripId, boardsMode: this.boardsMode, liveMode: this.liveMode, nudges: this.nudges, routing: this.routing, hotelsPromoted: this.hotelsPromoted, replay: this.replay.snapshot() } satisfies SessRecord,
       };
       for (let i = this.persistedMsgCount; i < this.messages.length; i++) {
         puts[msgKey(i)] = shrinkForStorage(this.messages[i]);
@@ -245,8 +255,13 @@ export class SessionDO {
   }
 
   private async handleChat(req: Request): Promise<Response> {
-    const { message, mode } = await req.json<{ message: string; mode?: string }>();
-    const model = this.env.LLM_MODEL || DEFAULT_MODEL;
+    const body = await req.json<{ message: string; mode?: string; model?: unknown; routing?: { discovery?: unknown; enrichment?: unknown } }>();
+    const { message, mode } = body;
+    const fallbackModel = (this.env.LLM_MODEL || DEFAULT_MODEL) as ModelId;
+    const model = fallbackModel; // ClaudeProvider default + cost fallback; per-turn routing overrides per call
+    // Server-coerce the visitor's model choice through the enabled allowlist (the real Opus gate).
+    const enabled = enabledModels(!!this.env.DEMO_OPUS_ENABLED);
+    this.routing = buildRouting({ model: body.model, routing: body.routing }, enabled, fallbackModel);
     const mcp = new McpClient(this.env.VOYGENT_MCP_URL, this.env.VOYGENT_MCP_BEARER);
     const provider = new ClaudeProvider(this.env.ANTHROPIC_API_KEY, model);
     const mux = new SseMultiplexer();
@@ -261,8 +276,14 @@ export class SessionDO {
     this.messages.push({ role: "user", content: message });
 
     // Per-session cost telemetry (server-side only — never sent to the client).
+    // sessionCost = MEASURED actual routed spend (per-turn model). Distinct from
+    // the counterfactual sessionCostByModel(u) shown in the business case.
     let sessionCost = 0;
+    const actualCostByModel: Record<string, number> = {};
     const u: TokenUsage = { inputTokens: 0, outputTokens: 0, cacheCreationTokens: 0, cacheReadTokens: 0 };
+    // Resolve the model for the upcoming turn from the visitor's routing + the
+    // live milestone (re-read every turn so the model can flip mid-exchange).
+    const nextModel = (): string => resolveRoutingModel(this.routing, this.hotelsPromoted);
 
     // Inspector bookkeeping (Slice 1: summary spine).
     const exchangeId = crypto.randomUUID();
@@ -332,6 +353,21 @@ export class SessionDO {
         });
       }
       const out = await baseCallTool(name, input);
+      // Outcome-based phase milestone (Codex #1): flip to enrichment only when a
+      // hotel lock actually SUCCEEDED with lodging — never on intent alone.
+      if (!this.hotelsPromoted && !out.startsWith("ERROR")) {
+        if (name === "promote_hotels_to_lodging") this.hotelsPromoted = true;
+        else if (this.liveMode && name === "patch_trip") {
+          const updates = (input as any).updates ?? input;
+          const lodging = updates && typeof updates === "object" ? (updates as any).lodging : undefined;
+          if (Array.isArray(lodging) && lodging.length) this.hotelsPromoted = true;
+        }
+        // Featured trips promote via the replay layer — trust its committed lodging.
+        if (!this.hotelsPromoted && !this.liveMode) {
+          const pl = this.replay.lastPromoted().lodging;
+          if (pl && pl.length) this.hotelsPromoted = true;
+        }
+      }
       // searchDistill: prod response size (fixture meta) vs the slim payload the model saw.
       if (this.replay.isIntercepted(name)) {
         const m = this.replay.lastMeasurement();
@@ -405,7 +441,7 @@ export class SessionDO {
         };
         await runAgentLoop({
           provider, tools, messages: this.messages, exchangeId,
-          callTool, nudge,
+          callTool, nudge, nextModel,
           buildBoard: this.boardsMode
             ? (name, resultText) => this.boardBuilder(name, resultText, this.tripId)
             : undefined,
@@ -428,10 +464,13 @@ export class SessionDO {
             maxFolioTokens = Math.max(maxFolioTokens, estTokens(JSON.stringify(folio)));
             mux.send({ type: "folio", folio });
           },
-          onUsage: (turn) => {
+          onUsage: (turn, turnModel) => {
             u.inputTokens += turn.inputTokens; u.outputTokens += turn.outputTokens;
             u.cacheCreationTokens += turn.cacheCreationTokens; u.cacheReadTokens += turn.cacheReadTokens;
-            sessionCost += estimateCostUsd(model, turn);
+            const m = turnModel || model;
+            const c = estimateCostUsd(m, turn);
+            sessionCost += c;                                   // MEASURED routed spend
+            actualCostByModel[m] = (actualCostByModel[m] ?? 0) + c;
           },
           emit,
         });
@@ -456,7 +495,9 @@ export class SessionDO {
           turns: turnCount, toolCalls: toolCallCount, exposedToolCount, fullToolCount,
           inputTokens: u.inputTokens, outputTokens: u.outputTokens,
           cacheReadTokens: u.cacheReadTokens, cacheCreationTokens: u.cacheCreationTokens,
-          costByModel: sessionCostByModel(u),
+          costByModel: sessionCostByModel(u),          // counterfactual (all-tier)
+          actualCostUsd: sessionCost,                  // measured routed spend
+          actualCostByModel: { ...actualCostByModel },
         });
         mux.close();
         // Record cost: log (visible via `wrangler tail`) + add to the daily ledger.

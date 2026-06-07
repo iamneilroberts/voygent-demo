@@ -26,6 +26,7 @@ describe("encodeSse", () => {
       turns: 3, toolCalls: 6, exposedToolCount: 9, fullToolCount: 79,
       inputTokens: 1200, outputTokens: 300, cacheReadTokens: 980, cacheCreationTokens: 0,
       costByModel: { haiku: 0.0026, sonnet: 0.013, opus: 0.065 },
+      actualCostUsd: 0.0091, actualCostByModel: { "claude-sonnet-4-6": 0.008, "claude-haiku-4-5": 0.0011 },
     };
     const decoded = JSON.parse(encodeSse(ev).slice("data: ".length).trim());
     expect(decoded).toEqual(ev);

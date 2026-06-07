@@ -37,5 +37,6 @@ export type ProviderEvent =
   | { type: "turn-complete"; assistant: AssistantMessage };
 
 export interface LLMProvider {
-  stream(messages: ConversationMessage[], tools: ToolSchema[]): AsyncIterable<ProviderEvent>;
+  // opts.model overrides the provider's default model for THIS call (per-turn routing).
+  stream(messages: ConversationMessage[], tools: ToolSchema[], opts?: { model?: string }): AsyncIterable<ProviderEvent>;
 }

@@ -108,7 +108,7 @@ function withMessageCache(messages: ConversationMessage[]): unknown[] {
 
 export class ClaudeProvider implements LLMProvider {
   constructor(private apiKey: string, private model = "claude-sonnet-4-6") {}
-  async *stream(messages: ConversationMessage[], tools: ToolSchema[]): AsyncIterable<ProviderEvent> {
+  async *stream(messages: ConversationMessage[], tools: ToolSchema[], opts?: { model?: string }): AsyncIterable<ProviderEvent> {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -117,7 +117,7 @@ export class ClaudeProvider implements LLMProvider {
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        model: this.model, max_tokens: 4096, stream: true,
+        model: opts?.model ?? this.model, max_tokens: 4096, stream: true,
         tools: withToolCache(tools),
         messages: withMessageCache(messages),
       }),

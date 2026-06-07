@@ -26,6 +26,44 @@ describe("runAgentLoop", () => {
     expect(out.some((e) => e.type === "inspector" && (e as any).kind === "turn")).toBe(true);
   });
 
+  it("routes each provider turn through nextModel(): stamps turn event, passes opts.model + onUsage model", async () => {
+    const seenModels: (string | undefined)[] = [];
+    const usage = { inputTokens: 10, outputTokens: 5, cacheCreationTokens: 0, cacheReadTokens: 0 };
+    const asstTool: AssistantMessage = { role: "assistant", content: [{ type: "tool_use", id: "x", name: "promote_hotels_to_lodging", input: {} }] };
+    const asstFinal: AssistantMessage = { role: "assistant", content: [{ type: "text", text: "ok" }] };
+    let call = 0;
+    const provider: LLMProvider = {
+      async *stream(_m, _t, opts): AsyncIterable<ProviderEvent> {
+        seenModels.push(opts?.model);
+        if (call++ === 0) {
+          yield { type: "tool-call", id: "x", name: "promote_hotels_to_lodging", input: {} };
+          yield { type: "usage", usage };
+          yield { type: "turn-complete", assistant: asstTool };
+        } else {
+          yield { type: "usage", usage };
+          yield { type: "turn-complete", assistant: asstFinal };
+        }
+      },
+    };
+    const onUsageModels: string[] = [];
+    const out: ServerEvent[] = [];
+    // Phase flips after the hotel promote: turn 0 = discovery (sonnet), turn 1 = enrichment (haiku).
+    let promoted = false;
+    await runAgentLoop({
+      provider, tools: [],
+      messages: [{ role: "user", content: "go" }] as ConversationMessage[],
+      callTool: async (name) => { if (name === "promote_hotels_to_lodging") promoted = true; return "ok"; },
+      onFolio: async () => {},
+      onUsage: (_u, model) => onUsageModels.push(model),
+      nextModel: () => (promoted ? "claude-haiku-4-5" : "claude-sonnet-4-6"),
+      emit: (e) => out.push(e),
+    });
+    expect(seenModels).toEqual(["claude-sonnet-4-6", "claude-haiku-4-5"]);
+    expect(onUsageModels).toEqual(["claude-sonnet-4-6", "claude-haiku-4-5"]);
+    const turnModels = out.filter((e) => e.type === "inspector" && (e as any).kind === "turn").map((e) => (e as any).model);
+    expect(turnModels).toEqual(["claude-sonnet-4-6", "claude-haiku-4-5"]);
+  });
+
   it("executes a tool call, feeds the result back, then completes", async () => {
     const asstWithTool: AssistantMessage = {
       role: "assistant",

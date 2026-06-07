@@ -11,7 +11,11 @@ export interface AgentLoopArgs {
   callTool: (name: string, input: Record<string, unknown>) => Promise<string>;
   onFolio: (lastTool: string, input: Record<string, unknown>) => Promise<void>;
   emit: (ev: ServerEvent) => void;
-  onUsage?: (usage: TokenUsage) => void;     // server-side cost telemetry (NOT sent to the client)
+  onUsage?: (usage: TokenUsage, model: string) => void;  // server-side cost telemetry (NOT sent to the client); model = the turn's resolved model
+  // Per-turn model routing: resolved BEFORE each provider.stream() (model choice
+  // must precede the call). Returns the model id for the upcoming turn; absent →
+  // the provider's default model drives every turn.
+  nextModel?: () => string;
   // Boards mode (claude skin): map a list-tool result to an inline chooser
   // `board` event, or null. Absent → no board events (default path unchanged).
   buildBoard?: (toolName: string, resultText: string) => ServerEvent | null;
@@ -36,14 +40,16 @@ export async function runAgentLoop(args: AgentLoopArgs): Promise<void> {
   for (let turn = 0; turn < maxTurns; turn++) {
     const pendingTools: Array<{ id: string; name: string; input: Record<string, unknown> }> = [];
     const tu: TokenUsage = { inputTokens: 0, outputTokens: 0, cacheCreationTokens: 0, cacheReadTokens: 0 };
+    // Resolve the model for THIS turn (phase routing happens before the call).
+    const turnModel = args.nextModel?.() ?? "";
 
-    for await (const ev of provider.stream(messages, tools)) {
+    for await (const ev of provider.stream(messages, tools, turnModel ? { model: turnModel } : undefined)) {
       if (ev.type === "text-delta") {
         emit({ type: "text", delta: ev.delta });
       } else if (ev.type === "tool-call") {
         pendingTools.push({ id: ev.id, name: ev.name, input: ev.input });
       } else if (ev.type === "usage") {
-        args.onUsage?.(ev.usage);
+        args.onUsage?.(ev.usage, turnModel);
         tu.inputTokens += ev.usage.inputTokens;
         tu.outputTokens += ev.usage.outputTokens;
         tu.cacheCreationTokens += ev.usage.cacheCreationTokens;
@@ -59,6 +65,7 @@ export async function runAgentLoop(args: AgentLoopArgs): Promise<void> {
       type: "inspector", kind: "turn", exchangeId, turn,
       inputTokens: tu.inputTokens, outputTokens: tu.outputTokens,
       cacheReadTokens: tu.cacheReadTokens, cacheCreationTokens: tu.cacheCreationTokens, costUsd: 0,
+      ...(turnModel ? { model: turnModel } : {}),
     });
 
     if (pendingTools.length === 0) { emit({ type: "turn-complete" }); return; }

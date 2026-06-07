@@ -1,8 +1,9 @@
 export { SessionDO } from "./session-do";
 import { buildPresets } from "./presets";
 import { infoPageHtml } from "./info/pages";
+import { enabledModels, DEFAULT_SMART_MAP } from "../shared/models";
 
-interface Env { SESSION: DurableObjectNamespace; DEMO_DISABLED?: string; }
+interface Env { SESSION: DurableObjectNamespace; DEMO_DISABLED?: string; DEMO_OPUS_ENABLED?: string; }
 
 async function dailyBudgetExceeded(env: Env): Promise<boolean> {
   try {
@@ -30,7 +31,12 @@ export default {
     }
     if (url.pathname === "/presets" && req.method === "GET") {
       // Featured trips for the first-run chips + IP-geo greeting (no permission prompt).
-      return Response.json(buildPresets(req), { headers: cors() });
+      // Also advertise the enabled model set (Opus gate) + default smart map so the
+      // client selector renders only acceptable models.
+      return Response.json(
+        { ...buildPresets(req), enabledModels: enabledModels(!!env.DEMO_OPUS_ENABLED), smartMap: DEFAULT_SMART_MAP },
+        { headers: cors() },
+      );
     }
     if (url.pathname === "/chat" && req.method === "POST") {
       // Operational kill-switch for a public, money-spending endpoint: set the
