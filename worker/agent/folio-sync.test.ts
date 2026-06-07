@@ -31,6 +31,26 @@ describe("tripToFolio", () => {
     expect(folio.flights[0].label).toBe("Atlanta (ATL) -> Athens (ATH)");
     expect(folio.hotels[0].name).toBe("Hilton Cancun Mar Caribe");
     expect(folio.hotels[0].price).toBe("$3430");
+    expect(folio.hotels[0].commission).toBeUndefined(); // serp lodging: no commission, never invented
+  });
+
+  it("passes through real commission on lodging (cpmaxx) and supports both pct spellings", () => {
+    const raw = {
+      data: {
+        meta: { title: "Cancún Escape" },
+        lodging: [
+          { name: "Omni Cancun", total: 8122.3, commission: 2436.69, commission_pct: 30 },
+          { name: "JW Marriott", total: 5000, commission: 1200, commissionPct: 24 },
+          { name: "Serp Inn", total: 900 },
+        ],
+      },
+    };
+    const folio = tripToFolio("t1", raw);
+    expect(folio.hotels[0].commission).toBe(2436.69);
+    expect(folio.hotels[0].commissionPct).toBe(30);
+    expect(folio.hotels[1].commissionPct).toBe(24);
+    expect(folio.hotels[2].commission).toBeUndefined();
+    expect(folio.hotels[2].commissionPct).toBeUndefined();
   });
 
   it("maps the promoted { outbound, return } flights object (post promote_flights)", () => {

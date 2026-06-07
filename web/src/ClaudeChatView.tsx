@@ -5,6 +5,7 @@ import type { FolioData, BoardCandidate } from "../../shared/events";
 import type { TimelineItem, BoardItem } from "./timeline";
 import { ClaudeToolChip } from "./ClaudeToolChip";
 import { BoardView } from "./BoardView";
+import { commissionLabel, commissionTotal, fmtUsd } from "./lib/advisor";
 
 // claude.ai-lookalike left pane. Deliberately close to claude.ai's layout
 // (centered column, user bubbles right, assistant prose on the page, inline
@@ -13,7 +14,8 @@ import { BoardView } from "./BoardView";
 // the whole pane a simulation. All classes are cl-* (scoped in skin-claude.css)
 // so nothing leaks into the amber board skin.
 
-function FolioArtifact({ folio }: { folio: FolioData }) {
+function FolioArtifact({ folio, advisor }: { folio: FolioData; advisor: boolean }) {
+  const commTotal = advisor ? commissionTotal(folio.hotels) : null;
   // A title-only card (trip created, nothing promoted yet) is just noise inline.
   const hasDays = !!folio.days && folio.days.length > 0;
   const hasIncludes = !!folio.includes && folio.includes.length > 0;
@@ -49,9 +51,20 @@ function FolioArtifact({ folio }: { folio: FolioData }) {
                   {[h.area, typeof h.stars === "number" ? `${h.stars}★` : null, typeof h.nights === "number" ? `${h.nights} nights` : null].filter(Boolean).join(" · ")}
                 </span>
               </span>
-              <span className="cl-artifact-price">{h.price ?? ""}{h.perNight ? <span className="cl-artifact-sub">{h.perNight}/night</span> : null}</span>
+              <span className="cl-artifact-price">
+                {h.price ?? ""}{h.perNight ? <span className="cl-artifact-sub">{h.perNight}/night</span> : null}
+                {advisor && typeof h.commission === "number" && (
+                  <span className="cl-artifact-comm">{commissionLabel(h.commission, h.commissionPct)}</span>
+                )}
+              </span>
             </div>
           ))}
+          {commTotal != null && (
+            <div className="cl-artifact-row cl-artifact-totalrow">
+              <span className="cl-artifact-main"><span className="cl-artifact-name">Trip commission</span></span>
+              <span className="cl-artifact-comm cl-artifact-total">{fmtUsd(commTotal)}</span>
+            </div>
+          )}
         </div>
       )}
       {hasDays && (
@@ -124,7 +137,7 @@ function Welcome({ presets, geoCity, onSend, busy }: { presets: Preset[]; geoCit
 }
 
 export function ClaudeChatView(
-  { items, folio, onSend, onPick, busy, presets, geoCity }:
+  { items, folio, onSend, onPick, busy, presets, geoCity, advisor }:
   {
     items: TimelineItem[];
     folio: FolioData | null;
@@ -133,6 +146,7 @@ export function ClaudeChatView(
     busy: boolean;
     presets: Preset[];
     geoCity: string | null;
+    advisor: boolean;
   },
 ) {
   const [input, setInput] = useState("");
@@ -155,12 +169,12 @@ export function ClaudeChatView(
           {firstRun && <Welcome presets={presets} geoCity={geoCity} onSend={onSend} busy={busy} />}
           {items.map((it, i) => {
             if (it.role === "toolchip") return <ClaudeToolChip key={i} item={it} />;
-            if (it.role === "board") return <BoardView key={it.boardId} board={it} busy={busy} onPick={onPick} />;
+            if (it.role === "board") return <BoardView key={it.boardId} board={it} busy={busy} advisor={advisor} onPick={onPick} />;
             if (it.role === "user") return <div key={i} className="cl-msg-user">{it.text}</div>;
             if (it.text) return <div key={i} className="cl-prose"><Prose text={it.text} /></div>;
             return busy && i === lastIdx ? <div key={i} className="cl-thinking" aria-label="Thinking"><span /></div> : null;
           })}
-          {folio && <FolioArtifact folio={folio} />}
+          {folio && <FolioArtifact folio={folio} advisor={advisor} />}
           <div ref={endRef} />
         </div>
       </div>

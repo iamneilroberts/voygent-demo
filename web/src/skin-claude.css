@@ -129,6 +129,11 @@
 :root[data-skin="claude"] .cl-option-title { font-weight: 600; font-size: .9375rem; }
 :root[data-skin="claude"] .cl-option-meta { font-size: .8125rem; color: var(--cl-muted); }
 :root[data-skin="claude"] .cl-option-price { font-weight: 600; font-size: .9375rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
+:root[data-skin="claude"] .cl-option-econ { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
+:root[data-skin="claude"] .cl-option-comm,
+:root[data-skin="claude"] .cl-artifact-comm { display: block; font-weight: 600; font-size: .75rem; color: #1a7f37; white-space: nowrap; font-variant-numeric: tabular-nums; }
+:root[data-skin="claude"] .cl-artifact-total { font-size: .875rem; }
+:root[data-skin="claude"] .cl-artifact-totalrow { border-top: 1px dashed #d9d2c5; margin-top: 4px; padding-top: 6px; }
 :root[data-skin="claude"] .cl-option-mark { width: 18px; color: var(--cl-accent); font-weight: 700; }
 :root[data-skin="claude"] .cl-board-hint { margin-top: 8px; font-size: .75rem; color: var(--cl-muted); }
 

@@ -1,13 +1,14 @@
 import type { BoardCandidate } from "../../shared/events";
 import type { BoardItem } from "./timeline";
+import { commissionLabel } from "./lib/advisor";
 
 // Inline chooser board — the claude.ai "MCP app" moment. Candidates render as
 // clickable option cards; a click sends the selection back to the agent as the
 // next user turn. Once resolved (clicked, or the agent promoted after a typed
 // reply) the board locks: the pick stays highlighted, siblings dim.
 export function BoardView(
-  { board, busy, onPick }:
-  { board: BoardItem; busy: boolean; onPick: (board: BoardItem, c: BoardCandidate) => void },
+  { board, busy, advisor, onPick }:
+  { board: BoardItem; busy: boolean; advisor: boolean; onPick: (board: BoardItem, c: BoardCandidate) => void },
 ) {
   const locked = board.resolved || !!board.resolvedId;
   const title = board.kind === "flight" ? "Select a flight" : "Choose a hotel";
@@ -29,7 +30,12 @@ export function BoardView(
                 <span className="cl-option-title">{c.title}</span>
                 {c.meta && <span className="cl-option-meta">{c.meta}</span>}
               </span>
-              {c.price && <span className="cl-option-price">{c.price}</span>}
+              <span className="cl-option-econ">
+                {c.price && <span className="cl-option-price">{c.price}</span>}
+                {advisor && typeof c.commission === "number" && (
+                  <span className="cl-option-comm">{commissionLabel(c.commission, c.commissionPct)}</span>
+                )}
+              </span>
               <span className="cl-option-mark" aria-hidden="true">{picked ? "✓" : ""}</span>
             </button>
           );

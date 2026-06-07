@@ -7,6 +7,8 @@ import type { ServerEvent, FolioData, BoardCandidate } from "../../shared/events
 import { Inspector, type InsTool, type InsTurn, type InsSummary, type InsSavings, type InsOverhead } from "./Inspector";
 import { ThemeSwitch } from "./ThemeSwitch";
 import { SkinSwitch } from "./SkinSwitch";
+import { AdvisorSwitch } from "./AdvisorSwitch";
+import { resolveInitialAdvisor, persistAdvisor } from "./lib/advisor";
 import { engState } from "./lib/inspector-state";
 import { applyTheme, loadTheme } from "./lib/theme";
 import { resolveInitialSkin, applySkin, type SkinId } from "./lib/skin";
@@ -52,6 +54,9 @@ export function App() {
   const [insOverhead, setInsOverhead] = useState<InsOverhead[]>([]);
 
   const [mode] = useState<ModeId>(resolveInitialMode);
+  // Advisor view: commission per item + trip total (real supplier data only).
+  const [advisor, setAdvisor] = useState<boolean>(resolveInitialAdvisor);
+  useEffect(() => { persistAdvisor(advisor); }, [advisor]);
   const replayAbort = useRef<AbortController | null>(null);
   useEffect(() => { persistMode(mode); }, [mode]);
 
@@ -201,6 +206,7 @@ export function App() {
         <header>
           <span className="brand"><strong>Voygent</strong> <span className="sub">AI travel-planning agent</span></span>
           <span className="by">built by Neil Roberts</span>
+          <AdvisorSwitch on={advisor} onToggle={setAdvisor} />
           <ThemeSwitch />
         </header>
       )}
@@ -209,12 +215,12 @@ export function App() {
           {skin === "claude" ? (
             <ClaudeChatView
               items={items} folio={folio} onSend={send} onPick={onPick}
-              busy={busy} presets={presets} geoCity={geoCity}
+              busy={busy} presets={presets} geoCity={geoCity} advisor={advisor}
             />
           ) : (
             <>
               <ChatView messages={chatMessages} tools={tools} onSend={send} busy={busy} presets={presets} geoCity={geoCity} />
-              <FolioPanel folio={folio} />
+              <FolioPanel folio={folio} advisor={advisor} />
             </>
           )}
         </section>
@@ -226,7 +232,7 @@ export function App() {
             onToggleCollapse={() => { if (insTools.length > 0) setCollapsed((c) => !c); }}
             tools={insTools} turns={insTurns} summaries={insSummaries}
             savings={insSavings} overhead={insOverhead}
-            headExtra={skin === "claude" ? <ThemeSwitch /> : undefined}
+            headExtra={skin === "claude" ? <><AdvisorSwitch on={advisor} onToggle={setAdvisor} /><ThemeSwitch /></> : undefined}
           />
         </section>
       </div>

@@ -128,6 +128,11 @@ export function tripToFolio(tripId: string, raw: any): FolioData {
     area: h.location ?? h.area ?? undefined,
     nights: typeof h.nights === "number" ? h.nights : undefined,
     perNight: asPrice(h.pricePerNight),
+    // Advisor economics — pass through ONLY when the source carries real
+    // numbers (cpmaxx writes commission/commission_pct; serp has none).
+    commission: typeof h.commission === "number" && Number.isFinite(h.commission) ? h.commission : undefined,
+    commissionPct: typeof h.commissionPct === "number" ? h.commissionPct
+      : typeof h.commission_pct === "number" ? h.commission_pct : undefined,
   }));
 
   const days = projectDays(t.itinerary);

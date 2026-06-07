@@ -5,6 +5,8 @@ export interface FolioFlight {
 export interface FolioHotel {
   name: string; price?: string; stars?: number;
   area?: string; nights?: number; perNight?: string;
+  commission?: number;     // advisor commission USD (cpmaxx-sourced lodging only; absent elsewhere)
+  commissionPct?: number;  // advisor commission percentage (same sourcing rule)
 }
 export interface FolioActivity { time?: string; name: string; description?: string; url?: string }
 export interface FolioDining   { name: string; description?: string; cuisine?: string; url?: string }

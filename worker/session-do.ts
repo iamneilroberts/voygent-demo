@@ -101,7 +101,9 @@ const LIVE_TRIP_WORKFLOW =
   "HOTELS (live): use hotel_search_and_rank { destination, check_in, check_out, travelers:{ adults } } — NOT " +
   "hotel_search — it returns advisor commission data alongside prices. Only if it errors or returns no hotels, fall " +
   "back to hotel_search { source:'serp', ... }. Lock in the picked hotel with patch_trip updates { lodging: [ { name, " +
-  "checkIn, checkOut, price, notes } ] } using exact values from the result. " +
+  "checkIn, checkOut, price, commission, commissionPct, notes } ] } using exact values from the result — copy the " +
+  "result's commission and commission_pct verbatim into commission / commissionPct when present; OMIT both fields " +
+  "when the source has none (e.g. serp); NEVER estimate or invent commission. " +
   "ENRICHMENT (live, strict order): IMMEDIATELY after the hotel is locked in (promote_hotels_to_lodging or the lodging " +
   "patch succeeds), in the SAME turn, BEFORE writing any summary text, run L1-L4 — the trip is NOT complete without " +
   "them, and there is NO approval step: " +
