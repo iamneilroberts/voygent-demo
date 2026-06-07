@@ -94,6 +94,12 @@ html, body, #root { height: 100%; margin: 0; }
 .card-sub { display: block; font-weight: 400; font-size: var(--t-12); color: var(--muted); margin-top: 2px; }
 .fade-in { animation: fadeIn .4s ease both; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+.folio-day { padding: .35rem 0; border-top: 1px dashed var(--line); }
+.folio-day:first-of-type { border-top: none; }
+.folio-day-title { font-weight: 600; }
+.folio-day-act { margin-left: .75rem; }
+.folio-day-dining, .folio-day-stay { font-size: .85em; opacity: .75; margin-left: .75rem; }
+.folio-include { margin: .3rem 0; opacity: .85; }
 
 /* ---- inspector (inline CRT) ---- */
 .inspector { height: 100%; overflow-y: auto; padding: var(--s4) var(--s4) var(--s8); }
