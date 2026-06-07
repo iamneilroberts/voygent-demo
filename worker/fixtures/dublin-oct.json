@@ -527,7 +527,7 @@
       "area": "Dublin",
       "otaPrices": [
         {
-          "name": "Bluepillow.com",
+          "name": "Bluepillow.ca",
           "pricePerNight": 192,
           "isOfficial": false
         }
@@ -541,7 +541,7 @@
       "bookable": false,
       "summary": null,
       "status": "candidate",
-      "searchedAt": "2026-06-05T23:05:34.552Z",
+      "searchedAt": "2026-06-07T02:07:32.046Z",
       "query": {
         "destination": "Dublin",
         "check_in": "2026-10-12",
@@ -557,7 +557,7 @@
       "starRating": 3,
       "reviewScore": 4.4,
       "reviewScoreScale": 5,
-      "reviewCount": 3100,
+      "reviewCount": 3101,
       "pricePerNight": 128,
       "priceTotal": 893,
       "priceBasis": "both",
@@ -573,7 +573,7 @@
       "bookable": false,
       "summary": null,
       "status": "candidate",
-      "searchedAt": "2026-06-05T23:05:34.552Z",
+      "searchedAt": "2026-06-07T02:07:32.046Z",
       "query": {
         "destination": "Dublin",
         "check_in": "2026-10-12",
@@ -967,6 +967,373 @@
         "check_out": "2026-10-19",
         "adults": 2
       }
+    },
+    {
+      "id": "serp:16tyr78",
+      "source": "serp",
+      "offerId": null,
+      "name": "Dublin's Fair City Apartment - One-Bedroom Apartment",
+      "starRating": null,
+      "reviewScore": null,
+      "reviewScoreScale": null,
+      "reviewCount": null,
+      "pricePerNight": 98,
+      "priceTotal": 684,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Dublin",
+      "otaPrices": [
+        {
+          "name": "Bluepillow.ca",
+          "pricePerNight": 98,
+          "isOfficial": false
+        }
+      ],
+      "stayRef": "dublin-2026-10-12-2026-10-19",
+      "stay": {
+        "location": "Dublin",
+        "checkIn": "2026-10-12",
+        "checkOut": "2026-10-19"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-07T02:07:32.046Z",
+      "query": {
+        "destination": "Dublin",
+        "check_in": "2026-10-12",
+        "check_out": "2026-10-19",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:c4zlrv",
+      "source": "serp",
+      "offerId": null,
+      "name": "ThornCastle 2 - Tiny Twin Studio",
+      "starRating": null,
+      "reviewScore": null,
+      "reviewScoreScale": null,
+      "reviewCount": null,
+      "pricePerNight": 128,
+      "priceTotal": 893,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Dublin",
+      "otaPrices": [
+        {
+          "name": "thorncastledublin.com",
+          "pricePerNight": 128,
+          "isOfficial": true
+        }
+      ],
+      "stayRef": "dublin-2026-10-12-2026-10-19",
+      "stay": {
+        "location": "Dublin",
+        "checkIn": "2026-10-12",
+        "checkOut": "2026-10-19"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-07T02:07:32.046Z",
+      "query": {
+        "destination": "Dublin",
+        "check_in": "2026-10-12",
+        "check_out": "2026-10-19",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:1wis5l4",
+      "source": "serp",
+      "offerId": null,
+      "name": "Room to let shared, kitchen. Large bedroom en suite bathroom Max 2. Twin beds. Bills included.",
+      "starRating": null,
+      "reviewScore": null,
+      "reviewScoreScale": null,
+      "reviewCount": null,
+      "pricePerNight": 136,
+      "priceTotal": 953,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Dublin",
+      "otaPrices": [
+        {
+          "name": "e-domizil.de",
+          "pricePerNight": 136,
+          "isOfficial": true
+        }
+      ],
+      "stayRef": "dublin-2026-10-12-2026-10-19",
+      "stay": {
+        "location": "Dublin",
+        "checkIn": "2026-10-12",
+        "checkOut": "2026-10-19"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-07T02:07:32.046Z",
+      "query": {
+        "destination": "Dublin",
+        "check_in": "2026-10-12",
+        "check_out": "2026-10-19",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:1d6kb2",
+      "source": "serp",
+      "offerId": null,
+      "name": "Beckett Locke, North Docks",
+      "starRating": 4,
+      "reviewScore": 4.5,
+      "reviewScoreScale": 5,
+      "reviewCount": 1007,
+      "pricePerNight": 130,
+      "priceTotal": 913,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Dublin",
+      "stayRef": "dublin-2026-10-12-2026-10-19",
+      "stay": {
+        "location": "Dublin",
+        "checkIn": "2026-10-12",
+        "checkOut": "2026-10-19"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-07T02:07:32.046Z",
+      "query": {
+        "destination": "Dublin",
+        "check_in": "2026-10-12",
+        "check_out": "2026-10-19",
+        "adults": 2
+      }
+    },
+    {
+      "id": "serp:dbz8h0",
+      "source": "serp",
+      "offerId": null,
+      "name": "The Dean Docklands - Formerly The Mayson",
+      "starRating": 4,
+      "reviewScore": 4.3,
+      "reviewScoreScale": 5,
+      "reviewCount": 1007,
+      "pricePerNight": 150,
+      "priceTotal": 1049,
+      "priceBasis": "both",
+      "nights": 7,
+      "currency": "USD",
+      "area": "Dublin",
+      "stayRef": "dublin-2026-10-12-2026-10-19",
+      "stay": {
+        "location": "Dublin",
+        "checkIn": "2026-10-12",
+        "checkOut": "2026-10-19"
+      },
+      "bookable": false,
+      "summary": null,
+      "status": "candidate",
+      "searchedAt": "2026-06-07T02:07:32.046Z",
+      "query": {
+        "destination": "Dublin",
+        "check_in": "2026-10-12",
+        "check_out": "2026-10-19",
+        "adults": 2
+      }
+    }
+  ],
+  "excursions": [
+    {
+      "productCode": "5300MOHER",
+      "title": "Dublin to Cliffs of Moher, including Wild Atlantic Way and Galway",
+      "day": 1,
+      "free": false,
+      "priceFrom": 88.1,
+      "currency": "USD",
+      "durationMinutes": 780,
+      "rating": 4.875265,
+      "reviewCount": 24051,
+      "description": "Day trip from Dublin to Ireland’s remote and rugged west coast to see the Cliffs of Moher, the Burren and Galway City. Enjoy the unique benefit of a dedicated Tour Guide and a separate Driver for the ",
+      "bookingUrl": "https://www.viator.com/tours/Dublin/Cliffs-of-Moher-Tour-Including-Wild-Atlantic-Way-and-Galway-City-from-Dublin/d503-5300MOHER?pid=P00005400&mcid=58086&currency=USD&medium=api",
+      "coverImage": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-720x480/r/33/16/a5/95/caption.jpg"
+    },
+    {
+      "productCode": "8954P38",
+      "title": "St Patrick's Cathedral, Book of Kells and Dublin Castle Tour",
+      "day": 2,
+      "free": false,
+      "priceFrom": 139.79,
+      "currency": "USD",
+      "durationMinutes": 210,
+      "rating": 4.7740836,
+      "reviewCount": 1173,
+      "description": "Embark on a privileged journey through Dublin's historic center on this exclusive priority timed access tour. Gain entry to iconic landmarks, including St. Patrick's Cathedral, where you'll have ample",
+      "bookingUrl": "https://www.viator.com/tours/Dublin/St-Patricks-Cathedral-Book-of-Kells-and-Dublin-Castle-Tour/d503-8954P38?pid=P00005400&mcid=58086&currency=USD&medium=api",
+      "coverImage": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-720x480/13/eb/91/e7.jpg"
+    },
+    {
+      "productCode": "8954P7",
+      "title": "Dublin Jameson Distillery and Guinness Storehouse Guided Tour",
+      "day": 3,
+      "free": false,
+      "priceFrom": 162.1,
+      "currency": "USD",
+      "durationMinutes": 240,
+      "rating": 4.6476994,
+      "reviewCount": 2847,
+      "description": "On this tour you’ll experience the Guinness Storehouse the No 1 attraction in Ireland combined with the award winning Jameson Bow Street Whiskey Experience. This Irish Experience tour is a top attract",
+      "bookingUrl": "https://www.viator.com/tours/Dublin/Temple-Bar-Highlights-Tour-with-Guinness-and-Whiskey-Tasting-from-Dublin/d503-8954P7?pid=P00005400&mcid=58086&currency=USD&medium=api",
+      "coverImage": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-720x480/06/75/a4/22.jpg"
+    },
+    {
+      "productCode": "8954P3",
+      "title": "Dublin Book of Kells, Castle and Molly Malone Statue Guided Tour",
+      "day": 4,
+      "free": false,
+      "priceFrom": 92.8,
+      "currency": "USD",
+      "durationMinutes": 150,
+      "rating": 4.6511974,
+      "reviewCount": 4008,
+      "description": "Enjoy ease of access with online fast-track ticket entry to the Book of Kells. Discover one of the most important highlights of Irish heritage on this early access fully guided tour. You will explore ",
+      "bookingUrl": "https://www.viator.com/tours/Dublin/Early-Access-Book-of-Kells-Including-Exterior-Tour-of-Dublin-Castle/d503-8954P3?pid=P00005400&mcid=58086&currency=USD&medium=api",
+      "coverImage": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-720x480/13/e3/e3/a5.jpg"
+    },
+    {
+      "productCode": "7572P3",
+      "title": "Dublin to Cliffs of Moher, Burren, Wild Atlantic Way, Galway Tour",
+      "day": 5,
+      "free": false,
+      "priceFrom": 80.88,
+      "currency": "USD",
+      "durationMinutes": 750,
+      "rating": 4.8975377,
+      "reviewCount": 13849,
+      "description": "Discover the beauty of Ireland’s west on this unforgettable adventure! Begin with a 15-minute stop at The Galway Plaza for a quick breakfast break. The journey continues through Ennistymon and Lahinch",
+      "bookingUrl": "https://www.viator.com/tours/Dublin/Cliffs-of-Moher-The-Burren-and-Galway-Day-Trip-from-Dublin/d503-7572P3?pid=P00005400&mcid=58086&currency=USD&medium=api",
+      "coverImage": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-720x480/06/f2/37/f0.jpg"
+    },
+    {
+      "productCode": "33832P1",
+      "title": "Dublin to Glendalough, Wicklow and Kilkenny Full Day Guided Tour",
+      "day": 1,
+      "free": false,
+      "priceFrom": 46.99,
+      "currency": "USD",
+      "durationMinutes": 555,
+      "rating": 4.8981333,
+      "reviewCount": 5517,
+      "description": "Voted No. 1 Day Tour on Tripadvisor. Full Day Tour to Wicklow mountains, Glendalough and Kilkenny. Expert tour guides with separate coach driver. 5 star award winning luxury touring coaches with Free ",
+      "bookingUrl": "https://www.viator.com/tours/Dublin/Wicklow-mountains-Glendalough-and-Kilkenny-Day-Tour-from-Dublin/d503-33832P1?pid=P00005400&mcid=58086&currency=USD&medium=api",
+      "coverImage": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-720x480/06/7b/27/53.jpg"
+    }
+  ],
+  "dining": [
+    {
+      "id": "784311",
+      "name": "WILDE Restaurant",
+      "day": 1,
+      "cuisine": "International",
+      "rating": 4.8,
+      "reviewCount": 2013,
+      "priceLevel": "$$$$",
+      "description": "",
+      "url": "https://www.tripadvisor.com/Restaurant_Review-g186605-d784311-Reviews-WILDE_Restaurant-Dublin_County_Dublin.html?m=66827"
+    },
+    {
+      "id": "9460247",
+      "name": "Richmond Restaurant",
+      "day": 2,
+      "cuisine": "Irish",
+      "rating": 4.7,
+      "reviewCount": 411,
+      "priceLevel": "$$ - $$$",
+      "description": "",
+      "url": "https://www.tripadvisor.com/Restaurant_Review-g186605-d9460247-Reviews-Richmond_Restaurant-Dublin_County_Dublin.html?m=66827"
+    },
+    {
+      "id": "6403998",
+      "name": "Darkey Kelly's Bar & Restaurant",
+      "day": 3,
+      "cuisine": "Irish",
+      "rating": 4.7,
+      "reviewCount": 2314,
+      "priceLevel": "$$ - $$$",
+      "description": "",
+      "url": "https://www.tripadvisor.com/Restaurant_Review-g186605-d6403998-Reviews-Darkey_Kelly_s_Bar_Restaurant-Dublin_County_Dublin.html?m=66827"
+    },
+    {
+      "id": "1045605",
+      "name": "La Caverna Italian Restaurant",
+      "day": 4,
+      "cuisine": "Italian",
+      "rating": 4.4,
+      "reviewCount": 1467,
+      "priceLevel": "$$ - $$$",
+      "description": "",
+      "url": "https://www.tripadvisor.com/Restaurant_Review-g186605-d1045605-Reviews-La_Caverna_Italian_Restaurant-Dublin_County_Dublin.html?m=66827"
+    },
+    {
+      "id": "23452960",
+      "name": "FIRE Steakhouse and Bar",
+      "day": 5,
+      "cuisine": "Steakhouse",
+      "rating": 4.7,
+      "reviewCount": 2464,
+      "priceLevel": "$$$$",
+      "description": "",
+      "url": "https://www.tripadvisor.com/Restaurant_Review-g186605-d23452960-Reviews-FIRE_Steakhouse_and_Bar-Dublin_County_Dublin.html?m=66827"
+    },
+    {
+      "id": "1146791",
+      "name": "Dax Restaurant",
+      "day": 1,
+      "cuisine": "French",
+      "rating": 4.7,
+      "reviewCount": 1087,
+      "priceLevel": "$$$$",
+      "description": "",
+      "url": "https://www.tripadvisor.com/Restaurant_Review-g186605-d1146791-Reviews-Dax_Restaurant-Dublin_County_Dublin.html?m=66827"
+    }
+  ],
+  "itineraryDays": [
+    {
+      "day": 1,
+      "date": "2026-10-12",
+      "location": "Dublin",
+      "title": "Arrive Dublin"
+    },
+    {
+      "day": 2,
+      "date": "2026-10-13",
+      "location": "Dublin",
+      "title": "Dublin — Day 2"
+    },
+    {
+      "day": 3,
+      "date": "2026-10-14",
+      "location": "Dublin",
+      "title": "Dublin — Day 3"
+    },
+    {
+      "day": 4,
+      "date": "2026-10-15",
+      "location": "Dublin",
+      "title": "Dublin — Day 4"
+    },
+    {
+      "day": 5,
+      "date": "2026-10-16",
+      "location": "Dublin",
+      "title": "Dublin — Day 5"
     }
   ],
   "promotedFlightsById": {
@@ -1616,29 +1983,169 @@
       "anchor": "lodging-day-13",
       "proposalStatus": "proposed",
       "_candidateId": "serp:11z9x91"
+    },
+    "serp:16tyr78": {
+      "name": "Dublin's Fair City Apartment - One-Bedroom Apartment",
+      "location": "Dublin",
+      "checkIn": "2026-10-12",
+      "checkOut": "2026-10-19",
+      "dates": null,
+      "nights": 7,
+      "stars": null,
+      "total": 684,
+      "pricePerNight": 98,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-14",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:16tyr78"
+    },
+    "serp:c4zlrv": {
+      "name": "ThornCastle 2 - Tiny Twin Studio",
+      "location": "Dublin",
+      "checkIn": "2026-10-12",
+      "checkOut": "2026-10-19",
+      "dates": null,
+      "nights": 7,
+      "stars": null,
+      "total": 893,
+      "pricePerNight": 128,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-15",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:c4zlrv"
+    },
+    "serp:1wis5l4": {
+      "name": "Room to let shared, kitchen. Large bedroom en suite bathroom Max 2. Twin beds. Bills included.",
+      "location": "Dublin",
+      "checkIn": "2026-10-12",
+      "checkOut": "2026-10-19",
+      "dates": null,
+      "nights": 7,
+      "stars": null,
+      "total": 953,
+      "pricePerNight": 136,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-16",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:1wis5l4"
+    },
+    "serp:1d6kb2": {
+      "name": "Beckett Locke, North Docks",
+      "location": "Dublin",
+      "checkIn": "2026-10-12",
+      "checkOut": "2026-10-19",
+      "dates": null,
+      "nights": 7,
+      "stars": 4,
+      "total": 913,
+      "pricePerNight": 130,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-17",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:1d6kb2"
+    },
+    "serp:dbz8h0": {
+      "name": "The Dean Docklands - Formerly The Mayson",
+      "location": "Dublin",
+      "checkIn": "2026-10-12",
+      "checkOut": "2026-10-19",
+      "dates": null,
+      "nights": 7,
+      "stars": 4,
+      "total": 1049,
+      "pricePerNight": 150,
+      "roomType": null,
+      "notes": null,
+      "recommended": false,
+      "image": null,
+      "images": null,
+      "url": null,
+      "supplierUrl": null,
+      "quoteUrl": null,
+      "description": null,
+      "_tierDetail": null,
+      "_selectedTier": null,
+      "booking": null,
+      "commissionPct": null,
+      "commissionSource": "serp",
+      "anchor": "lodging-day-18",
+      "proposalStatus": "proposed",
+      "_candidateId": "serp:dbz8h0"
     }
   },
   "meta": {
     "flightSearch": {
       "rawTokensEst": 1067,
       "responseBytes": 4266,
-      "prodLatencyMs": 21232
+      "prodLatencyMs": 1101
     },
     "flightList": {
       "rawTokensEst": 2102,
       "responseBytes": 8419,
-      "prodLatencyMs": 708
+      "prodLatencyMs": 363
     },
     "hotelSearch": {
-      "rawTokensEst": 477,
-      "responseBytes": 1905,
-      "prodLatencyMs": 3231
+      "rawTokensEst": 470,
+      "responseBytes": 1879,
+      "prodLatencyMs": 465
     },
     "hotelList": {
-      "rawTokensEst": 2038,
-      "responseBytes": 8150,
-      "prodLatencyMs": 391
+      "rawTokensEst": 2838,
+      "responseBytes": 11349,
+      "prodLatencyMs": 346
     },
-    "capturedAt": "2026-06-06"
+    "capturedAt": "2026-06-07"
   }
 }

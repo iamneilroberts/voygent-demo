@@ -247,3 +247,32 @@ describe("enrichment positive writes (injected fixture)", () => {
     expect(r.lastPromoted().itinerary).toBeNull();
   });
 });
+
+describe("dublin-oct fixture enrichment (real captured data — D1)", () => {
+  it("the captured Dublin fixture carries excursion + dining candidates", () => {
+    expect((DUBLIN.excursions ?? []).length).toBeGreaterThan(0);
+    expect((DUBLIN.dining ?? []).length).toBeGreaterThan(0);
+    // every excursion productCode is a non-empty string (the load-bearing id)
+    for (const e of DUBLIN.excursions ?? []) expect(typeof e.productCode === "string" && e.productCode.length > 0).toBe(true);
+  });
+
+  it("apply_gap_tour_picks with a real Dublin productCode writes exactly one activity", async () => {
+    const r = new FixtureReplay("demo-x");
+    const { trip, h } = makeHelpers();
+    await r.handle("excursion_search", { source: "viator", trip_id: "demo-x", destination: "Dublin" }, h);
+    const ex = (DUBLIN.excursions ?? [])[0];
+    await r.handle("apply_gap_tour_picks", { tripId: "demo-x", picks: [{ day: ex.day, productCode: ex.productCode }] }, h);
+    const acts = (trip.itinerary ?? []).flatMap((d: any) => d.activities ?? []);
+    expect(acts).toHaveLength(1);
+    expect(acts[0].productCode).toBe(ex.productCode);
+    expect(acts[0].name).toBe(ex.title);
+  });
+
+  it("tripadvisor_search writes all captured Dublin dining rows into the itinerary", async () => {
+    const r = new FixtureReplay("demo-x");
+    const { trip, h } = makeHelpers();
+    await r.handle("tripadvisor_search", { trip_id: "demo-x", location: "Dublin", category: "restaurants" }, h);
+    const dining = (trip.itinerary ?? []).flatMap((d: any) => d.dining ?? []);
+    expect(dining.length).toBe((DUBLIN.dining ?? []).length);
+  });
+});
