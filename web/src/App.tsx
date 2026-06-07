@@ -9,6 +9,9 @@ import { ThemeSwitch } from "./ThemeSwitch";
 import { SkinSwitch } from "./SkinSwitch";
 import { AdvisorSwitch } from "./AdvisorSwitch";
 import { resolveInitialAdvisor, persistAdvisor } from "./lib/advisor";
+import { ModelSwitch } from "./ModelSwitch";
+import { resolveInitialSelector, persistSelector, routingBody, type SelectorMode } from "./lib/model";
+import { DEFAULT_SMART_MAP, type ModelId, type PhaseModelMap, type Phase } from "../../shared/models";
 import { engState } from "./lib/inspector-state";
 import { applyTheme, loadTheme } from "./lib/theme";
 import { resolveInitialSkin, applySkin, type SkinId } from "./lib/skin";
@@ -57,6 +60,13 @@ export function App() {
   // Advisor view: commission per item + trip total (real supplier data only).
   const [advisor, setAdvisor] = useState<boolean>(resolveInitialAdvisor);
   useEffect(() => { persistAdvisor(advisor); }, [advisor]);
+  // Model selector: mode (single id | "smart"), the editable smart map, and the
+  // enabled model set (from /presets — gates Opus). activePhase highlights the map.
+  const [modelMode, setModelMode] = useState<SelectorMode>(resolveInitialSelector);
+  useEffect(() => { persistSelector(modelMode); }, [modelMode]);
+  const [smartMap, setSmartMap] = useState<PhaseModelMap>({ ...DEFAULT_SMART_MAP });
+  const [enabledModels, setEnabledModels] = useState<ModelId[]>(["claude-haiku-4-5", "claude-sonnet-4-6"]);
+  const activePhase: Phase = folio && folio.hotels.length > 0 ? "enrichment" : "discovery";
   const replayAbort = useRef<AbortController | null>(null);
   useEffect(() => { persistMode(mode); }, [mode]);
 
@@ -99,8 +109,12 @@ export function App() {
 
   useEffect(() => {
     fetch(`${API_BASE}/presets`)
-      .then((r) => r.json() as Promise<{ presets?: Preset[]; geo?: { city?: string | null } }>)
-      .then((d) => { setPresets(d.presets ?? []); setGeoCity(d.geo?.city ?? null); })
+      .then((r) => r.json() as Promise<{ presets?: Preset[]; geo?: { city?: string | null }; enabledModels?: ModelId[]; smartMap?: PhaseModelMap }>)
+      .then((d) => {
+        setPresets(d.presets ?? []); setGeoCity(d.geo?.city ?? null);
+        if (d.enabledModels?.length) setEnabledModels(d.enabledModels);
+        if (d.smartMap) setSmartMap(d.smartMap);
+      })
       .catch(() => { /* welcome falls back to a generic greeting + text box */ });
   }, []);
 
@@ -181,7 +195,7 @@ export function App() {
     recorder?.recordUser(text);
     setBusy(true);
     try {
-      await streamChat(API_BASE, sessionId, text, (e) => { recorder?.recordEvent(e); applyEvent(e, claude); }, claude ? "boards" : undefined);
+      await streamChat(API_BASE, sessionId, text, (e) => { recorder?.recordEvent(e); applyEvent(e, claude); }, claude ? "boards" : undefined, routingBody(modelMode, smartMap));
     } catch (err) {
       showError((err as Error).message);
     } finally {
@@ -206,6 +220,7 @@ export function App() {
         <header>
           <span className="brand"><strong>Voygent</strong> <span className="sub">AI travel-planning agent</span></span>
           <span className="by">built by Neil Roberts</span>
+          <ModelSwitch mode={modelMode} enabled={enabledModels} onPick={setModelMode} />
           <AdvisorSwitch on={advisor} onToggle={setAdvisor} />
           <ThemeSwitch />
         </header>
@@ -232,7 +247,8 @@ export function App() {
             onToggleCollapse={() => { if (insTools.length > 0) setCollapsed((c) => !c); }}
             tools={insTools} turns={insTurns} summaries={insSummaries}
             savings={insSavings} overhead={insOverhead}
-            headExtra={skin === "claude" ? <><AdvisorSwitch on={advisor} onToggle={setAdvisor} /><ThemeSwitch /></> : undefined}
+            headExtra={skin === "claude" ? <><ModelSwitch mode={modelMode} enabled={enabledModels} onPick={setModelMode} /><AdvisorSwitch on={advisor} onToggle={setAdvisor} /><ThemeSwitch /></> : undefined}
+            routing={{ mode: modelMode, enabledModels, smartMap, activePhase, onMode: setModelMode, onSmartMap: setSmartMap }}
           />
         </section>
       </div>

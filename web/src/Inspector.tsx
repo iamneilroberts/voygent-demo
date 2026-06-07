@@ -2,6 +2,8 @@ import { useState, type ReactNode } from "react";
 import type { EngState } from "./lib/inspector-state";
 import { PLAN_TIERS } from "./inspector-data";
 import { costWeightedTokens, cacheHitRate } from "./lib/usage";
+import { MODEL_LABELS, PHASES, PHASE_LABELS, type ModelId, type PhaseModelMap, type Phase } from "../../shared/models";
+import type { SelectorMode } from "./lib/model";
 
 // Engineering stories moved out of the panel (task 6c) — the tab keeps live
 // stats; the narratives live on worker-served /info pages.
@@ -20,12 +22,14 @@ export interface InsTool {
 export interface InsTurn {
   type: "inspector"; kind: "turn"; exchangeId: string; turn: number;
   inputTokens: number; outputTokens: number; cacheReadTokens: number; cacheCreationTokens: number; costUsd: number;
+  model?: string;
 }
 export interface InsSummary {
   type: "inspector"; kind: "summary"; exchangeId: string;
   turns: number; toolCalls: number; exposedToolCount: number; fullToolCount: number;
   inputTokens: number; outputTokens: number; cacheReadTokens: number; cacheCreationTokens: number;
   costByModel: { haiku: number; sonnet: number; opus: number };
+  actualCostUsd?: number; actualCostByModel?: Record<string, number>;
 }
 export interface InsSavings {
   type: "inspector"; kind: "savings"; exchangeId: string;
@@ -66,12 +70,22 @@ function ToolRow({ t }: { t: InsTool }) {
   );
 }
 
+export interface ModelRoutingUi {
+  mode: SelectorMode;
+  enabledModels: ModelId[];
+  smartMap: PhaseModelMap;
+  activePhase: Phase;
+  onMode: (m: SelectorMode) => void;
+  onSmartMap: (map: PhaseModelMap) => void;
+}
+
 export function Inspector(
-  { state, onToggleCollapse, tools, turns, summaries, savings, overhead, headExtra }:
+  { state, onToggleCollapse, tools, turns, summaries, savings, overhead, headExtra, routing }:
   { state: EngState; onToggleCollapse: () => void; tools: InsTool[]; turns: InsTurn[]; summaries: InsSummary[]; savings: InsSavings[]; overhead: InsOverhead[];
     // Extra controls shown under the head when live — e.g. the palette switcher
     // relocated here in the claude skin (its home header isn't rendered there).
-    headExtra?: ReactNode },
+    headExtra?: ReactNode;
+    routing?: ModelRoutingUi },
 ) {
   const [showCost, setShowCost] = useState(false);
 
@@ -109,6 +123,12 @@ export function Inspector(
     (a, s) => ({ haiku: a.haiku + s.costByModel.haiku, sonnet: a.sonnet + s.costByModel.sonnet, opus: a.opus + s.costByModel.opus }),
     { haiku: 0, sonnet: 0, opus: 0 },
   );
+  // MEASURED routed spend (sum of per-turn cost at each turn's model) — distinct
+  // from the all-tier counterfactual above. Source of truth for "what this cost".
+  const actualCost = summaries.reduce((a, s) => a + (s.actualCostUsd ?? 0), 0);
+  const actualByModel: Record<string, number> = {};
+  for (const s of summaries) for (const [m, c] of Object.entries(s.actualCostByModel ?? {})) actualByModel[m] = (actualByModel[m] ?? 0) + c;
+  const routedModels = Object.keys(actualByModel).filter((m) => actualByModel[m] > 0);
   // Cost-weighted (reads 0.1x, writes 1.25x) — the raw in+cacheRead sum read
   // 5-10x pessimistic against the sub-window estimate once the moving cache
   // breakpoint landed. See lib/usage.ts.
@@ -137,6 +157,30 @@ export function Inspector(
         <button className="ins-collapse" onClick={onToggleCollapse} aria-label="Collapse inspector">▾</button>
       </div>
       {headExtra && <div className="ins-extra">{headExtra}</div>}
+
+      {routing && (
+        <section className="ins-region ins-routing">
+          <h3>Model routing</h3>
+          {routing.mode === "smart" ? (
+            <>
+              <p className="ins-note">Smart routing — a model per trip phase. Active phase: <b>{PHASE_LABELS[routing.activePhase]}</b>.</p>
+              {PHASES.map((ph) => (
+                <label key={ph} className={`ins-phase ${routing.activePhase === ph ? "active" : ""}`}>
+                  <span className="ins-phase-name">{PHASE_LABELS[ph]}{routing.activePhase === ph ? " ←" : ""}</span>
+                  <select
+                    value={routing.smartMap[ph]}
+                    onChange={(e) => routing.onSmartMap({ ...routing.smartMap, [ph]: e.target.value as ModelId })}
+                  >
+                    {routing.enabledModels.map((m) => <option key={m} value={m}>{MODEL_LABELS[m]}</option>)}
+                  </select>
+                </label>
+              ))}
+            </>
+          ) : (
+            <p className="ins-note">Single model: <b>{MODEL_LABELS[routing.mode as ModelId] ?? routing.mode}</b> drives every turn. Switch to <i>Smart</i> to route per phase.</p>
+          )}
+        </section>
+      )}
 
       <section className="ins-region">
         <h3>Live this session</h3>
@@ -173,7 +217,10 @@ export function Inspector(
           </button>
           {showCost && latest && (
             <div className="ins-cost-rows">
-              <div>This session, API-equivalent: <b>{usd(cost.haiku)}</b> haiku · <b>{usd(cost.sonnet)}</b> sonnet · <b>{usd(cost.opus)}</b> opus</div>
+              <div className="ins-actualcost">This session actually cost <b>{usd(actualCost)}</b> (routed{routedModels.length > 1
+                ? `: ${routedModels.map((m) => `${usd(actualByModel[m])} ${MODEL_LABELS[m as ModelId] ?? m}`).join(" + ")}` : ""})</div>
+              <div className="ins-note">Counterfactual — same usage priced as one tier: <b>{usd(cost.haiku)}</b> haiku · <b>{usd(cost.sonnet)}</b> sonnet · <b>{usd(cost.opus)}</b> opus</div>
+              {routedModels.length > 1 && <div className="ins-note">Routing splits models, so caches don't carry across the switch — cache writes are re-paid; the actual figure above already reflects that.</div>}
             </div>
           )}
           {proWindow != null && sessionTokens > 0 && (

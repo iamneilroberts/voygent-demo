@@ -133,6 +133,11 @@ button.ins-rail:hover { color: var(--ink); }
 .ins-tierline a, .ins-links a { color: var(--amber); }
 .ins-links { list-style: none; margin: var(--s2) 0 0; padding: 0; }
 .ins-links li { margin: 0 0 var(--s2); line-height: 1.5; font-size: var(--t-13); }
+.ins-routing .ins-phase { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 4px 0; font-size: var(--t-13); }
+.ins-routing .ins-phase.active .ins-phase-name { color: var(--phosphor); font-weight: 600; }
+.ins-routing select { background: var(--board-3); color: var(--ink); border: 1px solid var(--line); border-radius: 5px; font: 500 var(--t-12)/1 var(--mono); padding: 4px 6px; }
+.ins-actualcost { color: var(--phosphor); font-variant-numeric: tabular-nums; }
+.model-switch button[aria-pressed="true"] { color: var(--ink); border-color: var(--phosphor); }
 .ins-toggle { font: 500 var(--t-12)/1 var(--mono); padding: 3px 9px; border: 1px solid var(--line); border-radius: 5px; background: var(--board-3); color: var(--ink); cursor: pointer; }
 .ins-tiers { width: 100%; border-collapse: collapse; margin: var(--s2) 0; }
 .ins-tiers th, .ins-tiers td { text-align: left; padding: 4px 5px; border-bottom: 1px solid var(--line); font-size: var(--t-12); font-variant-numeric: tabular-nums; }
