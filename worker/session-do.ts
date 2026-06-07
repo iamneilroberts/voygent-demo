@@ -22,6 +22,18 @@ interface Env {
   BUDGET_DAILY_USD?: string;              // global daily spend cap (default 5)
 }
 
+// Public-surface denylist (Neil 2026-06-07): the catalog stays claude.ai-faithful
+// (~110 of ~120 tools, token economics unchanged) but destructive / outward-facing
+// tools are withheld — a visitor prompt must not be able to delete trips, email
+// clients, publish to subdomains, or mutate the advisor's CRM under the real MCP
+// user. The demo's workflows use none of these.
+const DENYLISTED_TOOLS = new Set([
+  "delete_trip", "delete_booking", "delete_trip_document", "delete_annotation_pii",
+  "publish_trip", "publish_folio", "publish_to_client", "share_folio",
+  "update_advisor_profile", "manage_clients", "manage_pipeline", "record_payment",
+  "report_issue", "update_issue",
+]);
+
 const DEFAULT_MODEL = "claude-haiku-4-5";  // cheap while we work; flip via LLM_MODEL secret
 const DEFAULT_DAILY_CAP_USD = 5;
 
@@ -347,7 +359,9 @@ export class SessionDO {
         // Sort by name: prompt caching is prefix-exact, so a stable order keeps
         // the tools-block cache key deterministic even if the upstream catalog
         // re-registers in a different order across deploys.
-        const tools = [...fullTools].sort((a, b) => a.name.localeCompare(b.name));
+        const tools = fullTools
+          .filter((t) => !DENYLISTED_TOOLS.has(t.name))
+          .sort((a, b) => a.name.localeCompare(b.name));
         exposedToolCount = tools.length;
         // One-shot enrichment nudge: when the hotel lands and enrichment hasn't
         // run yet this session, remind the model in the SAME turn. Deterministic
