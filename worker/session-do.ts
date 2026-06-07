@@ -88,17 +88,18 @@ const BOARDS_WORKFLOW_OVERRIDE =
 // Excursion selection boards are NOT built yet (deferred), so enrichment
 // categories auto-add even in boards mode.
 const ENRICHMENT_WORKFLOW =
-  "ENRICHMENT IS MANDATORY — the trip is NOT complete after flights and hotels. Immediately after promote_hotels_to_lodging succeeds, " +
-  "in the SAME turn and without waiting to be asked, complete ALL of steps 6-8 in order (no option cards for these — pick good ones yourself):\n" +
-  "6. EXCURSIONS & FREE THINGS — TWO tool calls, BOTH required. First: excursion_search { source:'viator', destination_name:<city>, date:<departure_date> }. " +
-  "Then choose 2-3 candidates — at least one free (free:true) and one paid — and call apply_gap_tour_picks " +
-  "{ tripId:<tripId>, picks:[ { day:<candidate's day>, productCode:<candidate's productCode> }, ... ] }. " +
-  "excursion_search alone saves NOTHING — picks only persist via apply_gap_tour_picks.\n" +
-  "7. DINING — call tripadvisor_search { query:'best restaurants in <city>', category:'restaurants' }. The returned picks save to the trip automatically; " +
-  "mention 2-3 of THEM by their exact names from the tool result, framed as local suggestions (editorial, not bookable).\n" +
-  "8. Then tell the traveler the folio now carries the day-by-day plan, dining picks, and what's-included notes.\n" +
-  "HARD DATA RULE: NEVER name a specific tour, activity, restaurant, price, or rating that did not come from a tool result in THIS conversation. " +
-  "If you have not called the tool yet, CALL IT — do not describe options from memory. Naming an un-returned item is a critical failure.";
+  "ENRICHMENT IS MANDATORY AND NON-INTERACTIVE — the trip is NOT complete after flights and hotels, and enrichment has NO approval step: " +
+  "you choose and apply yourself, then report what you added. Immediately after promote_hotels_to_lodging succeeds, in the SAME turn, run this " +
+  "exact tool sequence BEFORE writing any summary text:\n" +
+  "6a. excursion_search { source:'viator', destination_name:<city>, date:<departure_date> }\n" +
+  "6b. apply_gap_tour_picks { tripId:<tripId>, picks:[ { day:<candidate's day>, productCode:<candidate's productCode> }, ... ] } — choose 2-3 " +
+  "candidates from 6a's results, at least one free (free:true) and one paid. Do NOT present candidates and ask; do NOT skip this call — " +
+  "excursion_search alone saves NOTHING.\n" +
+  "7. tripadvisor_search { query:'best restaurants in <city>', category:'restaurants' } — the returned dining picks save automatically.\n" +
+  "8. ONLY AFTER 6b and 7 have both returned, write your message: summarize what you ADDED using exact names from the tool results, and note the " +
+  "folio now carries the day-by-day plan, dining picks, and what's-included notes.\n" +
+  "HARD DATA RULE: NEVER name a tour, activity, restaurant, price, or rating that did not come from a tool result in THIS conversation. " +
+  "If a tool has not been called yet, CALL IT — never describe options from memory. Naming an un-returned item is a critical failure.";
 
 function utcDate(): string { return new Date().toISOString().slice(0, 10); }
 interface BudgetRec { date: string; spent: number; }
