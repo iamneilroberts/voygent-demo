@@ -162,6 +162,7 @@
 :root[data-skin="claude"] .cl-welcome-h {
   font: 500 2rem/1.2 var(--cl-serif); letter-spacing: -.01em; margin: 0 0 10px; color: var(--cl-ink);
 }
+:root[data-skin="claude"] .cl-welcome-geo { margin: -6px 0 10px; color: var(--cl-muted); font-size: .8125rem; }
 :root[data-skin="claude"] .cl-welcome-sub { margin: 0 0 22px; color: var(--cl-muted); max-width: 52ch; font-size: .9375rem; }
 :root[data-skin="claude"] .cl-suggestions { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
 :root[data-skin="claude"] .cl-suggestion {

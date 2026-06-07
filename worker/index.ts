@@ -1,5 +1,6 @@
 export { SessionDO } from "./session-do";
 import { buildPresets } from "./presets";
+import { infoPageHtml } from "./info/pages";
 
 interface Env { SESSION: DurableObjectNamespace; DEMO_DISABLED?: string; }
 
@@ -16,6 +17,17 @@ export default {
   async fetch(req: Request, env: Env): Promise<Response> {
     const url = new URL(req.url);
     if (req.method === "OPTIONS") return new Response(null, { headers: cors() });
+    if (url.pathname.startsWith("/info/") && req.method === "GET") {
+      // Worker-served brag/info pages (standalone HTML, no SPA bundle). An
+      // unknown slug falls through to the SPA so deep links never hard-404.
+      const slug = url.pathname.slice("/info/".length).replace(/\/$/, "");
+      const html = infoPageHtml(slug);
+      if (html) {
+        return new Response(html, { headers: { ...cors(), "content-type": "text/html; charset=utf-8", "cache-control": "public, max-age=300" } });
+      }
+      // Unknown info slug → send them to the demo rather than a bare "ok".
+      return Response.redirect(new URL("/", url).toString(), 302);
+    }
     if (url.pathname === "/presets" && req.method === "GET") {
       // Featured trips for the first-run chips + IP-geo greeting (no permission prompt).
       return Response.json(buildPresets(req), { headers: cors() });

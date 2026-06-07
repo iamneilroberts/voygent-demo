@@ -120,7 +120,8 @@ function FolioArtifact({ folio, advisor }: { folio: FolioData; advisor: boolean 
 function Welcome({ presets, geoCity, onSend, busy }: { presets: Preset[]; geoCity: string | null; onSend: (m: string) => void; busy: boolean }) {
   return (
     <div className="cl-welcome">
-      <h1 className="cl-welcome-h"><span className="cl-spark" aria-hidden="true">✳</span> Where to next{geoCity ? `, ${geoCity}` : ""}?</h1>
+      <h1 className="cl-welcome-h"><span className="cl-spark" aria-hidden="true">✳</span> Where to next?</h1>
+      {geoCity && <p className="cl-welcome-geo">Looks like you might be traveling from {geoCity}.</p>}
       <p className="cl-welcome-sub">Voygent plans real trips with live flights and hotels — pick one to watch it work, or describe your own.</p>
       {presets.length > 0 && (
         <div className="cl-suggestions">
