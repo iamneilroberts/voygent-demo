@@ -87,7 +87,7 @@ export function Inspector(
     headExtra?: ReactNode;
     routing?: ModelRoutingUi },
 ) {
-  const [showCost, setShowCost] = useState(false);
+  const [showCost, setShowCost] = useState(true);  // cost shown by default (Neil 2026-06-07)
 
   // Quiet rail: idle (pre-trip) or manually collapsed → render a thin vertical
   // affordance instead of the full panel. Idle renders nothing interactive; the
