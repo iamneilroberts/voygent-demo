@@ -27,7 +27,9 @@ export function App() {
   const [geoCity, setGeoCity] = useState<string | null>(null);
   const sessionId = useRef(crypto.randomUUID()).current;
   const recordParam = (() => { try { return new URLSearchParams(window.location.search).get("record") === "1"; } catch { return false; } })();
-  const recorder = useRef(recordParam ? createRecorder("dublin-oct") : null).current;
+  // Recording is claude-skin only (the Recording type is locked to skin:"claude"), so
+  // ?record=1 is a no-op unless the claude skin is active — capture as ?skin=claude&record=1.
+  const recorder = useRef(recordParam && resolveInitialSkin() === "claude" ? createRecorder("dublin-oct") : null).current;
   const [collapsed, setCollapsed] = useState(false);
   const [skin, setSkin] = useState<SkinId>(resolveInitialSkin);
   const [insTools, setInsTools] = useState<InsTool[]>([]);
