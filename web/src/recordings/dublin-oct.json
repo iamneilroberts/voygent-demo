@@ -2,8 +2,1142 @@
   "skin": "claude",
   "trip": "dublin-oct",
   "frames": [
-    { "delayMs": 300, "kind": "user", "text": "Plan the Dublin in October trip for 2." },
-    { "delayMs": 600, "kind": "event", "event": { "type": "text", "delta": "Building your Dublin trip now…" } },
-    { "delayMs": 400, "kind": "turn-end" }
+    {
+      "delayMs": 700,
+      "kind": "user",
+      "text": "Plan the Dublin in October trip for 2 travelers."
+    },
+    {
+      "delayMs": 180,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "save_trip",
+        "phase": "start"
+      }
+    },
+    {
+      "delayMs": 240,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "save_trip",
+        "phase": "done",
+        "summary": "ok"
+      }
+    },
+    {
+      "delayMs": 180,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "flight_search",
+        "phase": "start"
+      }
+    },
+    {
+      "delayMs": 240,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "flight_search",
+        "phase": "done",
+        "summary": "ok · 7 candidates"
+      }
+    },
+    {
+      "delayMs": 480,
+      "kind": "event",
+      "event": {
+        "type": "board",
+        "kind": "flight",
+        "boardId": "0b19d205-4c70-485a-a80a-54fa939d8e69",
+        "tripId": "demo-3c51c44b",
+        "candidates": [
+          {
+            "id": "serp:70wngy",
+            "title": "MOB→DUB",
+            "price": "$3,426",
+            "meta": "United · 1 stop · Economy",
+            "summary": "MOB→DUB, United, 1 stop, $3,426"
+          },
+          {
+            "id": "serp:3lqsh0",
+            "title": "MOB→DUB",
+            "price": "$3,426",
+            "meta": "Delta · 1 stop · Economy",
+            "summary": "MOB→DUB, Delta, 1 stop, $3,426"
+          },
+          {
+            "id": "serp:thxolp",
+            "title": "MOB→DUB",
+            "price": "$3,426",
+            "meta": "American · 1 stop · Economy",
+            "summary": "MOB→DUB, American, 1 stop, $3,426"
+          },
+          {
+            "id": "serp:1w4jijl",
+            "title": "MOB→DUB",
+            "price": "$3,518",
+            "meta": "American · 2 stops · Economy",
+            "summary": "MOB→DUB, American, 2 stops, $3,518"
+          },
+          {
+            "id": "serp:tacag3",
+            "title": "MOB→DUB",
+            "price": "$4,398",
+            "meta": "American · 2 stops · Economy",
+            "summary": "MOB→DUB, American, 2 stops, $4,398"
+          },
+          {
+            "id": "serp:xm3k14",
+            "title": "MOB→DUB",
+            "price": "$3,516",
+            "meta": "American · 2 stops · Economy",
+            "summary": "MOB→DUB, American, 2 stops, $3,516"
+          },
+          {
+            "id": "serp:yby4vc",
+            "title": "MOB→DUB",
+            "price": "$4,396",
+            "meta": "American · 2 stops · Economy",
+            "summary": "MOB→DUB, American, 2 stops, $4,396"
+          }
+        ]
+      }
+    },
+    {
+      "delayMs": 160,
+      "kind": "event",
+      "event": {
+        "type": "folio",
+        "folio": {
+          "tripId": "demo-3c51c44b",
+          "title": "Dublin in October",
+          "flights": [],
+          "hotels": []
+        }
+      }
+    },
+    {
+      "delayMs": 220,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "Great"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " news — I've got 7 flight options pulled up for Mobile"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " → Dublin (Oct 12–19) for 2 travelers. The cards"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " are rendering in the folio now! \n\nA few stand"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "outs to consider: the **Delta** option at $3,426 "
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "total ($1,713/pp) is the fastest at just 10"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": ".5 hours, and the **American** at the same price point clocks in at under 11 hours — both"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " are 1-stop options at the best price. The United"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " option matches on price but takes a bit longer.\n\nWhich flight would you like to go"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " with?"
+      }
+    },
+    {
+      "delayMs": 120,
+      "kind": "event",
+      "event": {
+        "type": "turn-complete"
+      }
+    },
+    {
+      "delayMs": 500,
+      "kind": "turn-end"
+    },
+    {
+      "delayMs": 700,
+      "kind": "user",
+      "text": "I'll take the flight option serp:70wngy (MOB→DUB, United, 1 stop, $3,426)."
+    },
+    {
+      "delayMs": 180,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "patch_trip",
+        "phase": "start"
+      }
+    },
+    {
+      "delayMs": 240,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "patch_trip",
+        "phase": "done",
+        "summary": "ok · updated flights · 1 warning"
+      }
+    },
+    {
+      "delayMs": 160,
+      "kind": "event",
+      "event": {
+        "type": "folio",
+        "folio": {
+          "tripId": "demo-3c51c44b",
+          "title": "Dublin in October",
+          "flights": [],
+          "hotels": []
+        }
+      }
+    },
+    {
+      "delayMs": 180,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "promote_flights",
+        "phase": "start"
+      }
+    },
+    {
+      "delayMs": 240,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "promote_flights",
+        "phase": "done",
+        "summary": "ok"
+      }
+    },
+    {
+      "delayMs": 160,
+      "kind": "event",
+      "event": {
+        "type": "folio",
+        "folio": {
+          "tripId": "demo-3c51c44b",
+          "title": "Dublin in October",
+          "flights": [
+            {
+              "label": "MOB→DUB",
+              "price": "$3426",
+              "carrier": "United",
+              "route": "MOB→DUB",
+              "date": "2026-10-12",
+              "cabin": "Economy",
+              "stops": 1
+            }
+          ],
+          "hotels": []
+        }
+      }
+    },
+    {
+      "delayMs": 180,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "hotel_search",
+        "phase": "start"
+      }
+    },
+    {
+      "delayMs": 240,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "hotel_search",
+        "phase": "done",
+        "summary": "ok · 18 candidates"
+      }
+    },
+    {
+      "delayMs": 480,
+      "kind": "event",
+      "event": {
+        "type": "board",
+        "kind": "hotel",
+        "boardId": "c0d8a7f3-8f60-44ec-8b5c-5ac5ae64b57f",
+        "tripId": "demo-3c51c44b",
+        "candidates": [
+          {
+            "id": "serp:1n8v5x1",
+            "title": "Baggotrath House Apartments, Newbridge Ave, Dublin 4 - One-Bedroom Luxury Apartment",
+            "price": "$192/night",
+            "meta": "Dublin · 5 (16)",
+            "summary": "Baggotrath House Apartments, Newbridge Ave, Dublin 4 - One-Bedroom Luxury Apartment, Dublin, $192/night"
+          },
+          {
+            "id": "serp:q9rbc5",
+            "title": "House Dublin",
+            "price": "$128/night",
+            "meta": "Dublin · 3★ · 4.4 (3,101)",
+            "summary": "House Dublin, Dublin, $128/night"
+          },
+          {
+            "id": "serp:d1030t",
+            "title": "Beckett Locke, North Docks",
+            "price": "$137/night",
+            "meta": "Dublin · 4★ · 4.5 (1,007)",
+            "summary": "Beckett Locke, North Docks, Dublin, $137/night"
+          },
+          {
+            "id": "serp:17lbl11",
+            "title": "The Dean Docklands - Formerly The Mayson",
+            "price": "$159/night",
+            "meta": "Dublin · 4★ · 4.3 (1,007)",
+            "summary": "The Dean Docklands - Formerly The Mayson, Dublin, $159/night"
+          },
+          {
+            "id": "serp:j7sfg",
+            "title": "Zanzibar Locke, Ha'penny Bridge",
+            "price": "$187/night",
+            "meta": "Dublin · 4★ · 4.6 (866)",
+            "summary": "Zanzibar Locke, Ha'penny Bridge, Dublin, $187/night"
+          },
+          {
+            "id": "serp:1n3zcwm",
+            "title": "The Plaza Hotel",
+            "price": "$138/night",
+            "meta": "Dublin · 4★ · 3.8 (1,324)",
+            "summary": "The Plaza Hotel, Dublin, $138/night"
+          },
+          {
+            "id": "serp:19rdp1s",
+            "title": "Donnybrook Hall",
+            "price": "$146/night",
+            "meta": "Dublin · 4★ · 4.7 (176)",
+            "summary": "Donnybrook Hall, Dublin, $146/night"
+          },
+          {
+            "id": "serp:il1l58",
+            "title": "Beckett Locke - City Studio",
+            "price": "$158/night",
+            "meta": "Dublin · 4.95 (8)",
+            "summary": "Beckett Locke - City Studio, Dublin, $158/night"
+          },
+          {
+            "id": "serp:14kgjtv",
+            "title": "Charming studio in fabulous Dublin with WiFi access",
+            "price": "$97/night",
+            "meta": "Dublin · 3.1999998 (38)",
+            "summary": "Charming studio in fabulous Dublin with WiFi access, Dublin, $97/night"
+          },
+          {
+            "id": "serp:ai15jn",
+            "title": "Room to let shared, kitchen. Large bedroom en suite bathroom Max 2. Twin beds. Bills included.",
+            "price": "$119/night",
+            "meta": "Dublin",
+            "summary": "Room to let shared, kitchen. Large bedroom en suite bathroom Max 2. Twin beds. Bills included., Dublin, $119/night"
+          },
+          {
+            "id": "serp:6tubjc",
+            "title": "The Hive - Luxury Ensuite Room - Full Privacy as only room on the top floor! - Deluxe King Room",
+            "price": "$126/night",
+            "meta": "Dublin · 5 (16)",
+            "summary": "The Hive - Luxury Ensuite Room - Full Privacy as only room on the top floor! - Deluxe King Room, Dublin, $126/night"
+          },
+          {
+            "id": "serp:1sb2pb",
+            "title": "Beckett Locke - One-Bedroom Apartment",
+            "price": "$155/night",
+            "meta": "Dublin · 4.95 (8)",
+            "summary": "Beckett Locke - One-Bedroom Apartment, Dublin, $155/night"
+          },
+          {
+            "id": "serp:11z9x91",
+            "title": "Gogarty's Temple Bar Hostel",
+            "price": "$84/night",
+            "meta": "Dublin · 2★ · 4.3 (4,593)",
+            "summary": "Gogarty's Temple Bar Hostel, Dublin, $84/night"
+          },
+          {
+            "id": "serp:16tyr78",
+            "title": "Dublin's Fair City Apartment - One-Bedroom Apartment",
+            "price": "$98/night",
+            "meta": "Dublin",
+            "summary": "Dublin's Fair City Apartment - One-Bedroom Apartment, Dublin, $98/night"
+          },
+          {
+            "id": "serp:c4zlrv",
+            "title": "ThornCastle 2 - Tiny Twin Studio",
+            "price": "$128/night",
+            "meta": "Dublin",
+            "summary": "ThornCastle 2 - Tiny Twin Studio, Dublin, $128/night"
+          },
+          {
+            "id": "serp:1wis5l4",
+            "title": "Room to let shared, kitchen. Large bedroom en suite bathroom Max 2. Twin beds. Bills included.",
+            "price": "$136/night",
+            "meta": "Dublin",
+            "summary": "Room to let shared, kitchen. Large bedroom en suite bathroom Max 2. Twin beds. Bills included., Dublin, $136/night"
+          },
+          {
+            "id": "serp:1d6kb2",
+            "title": "Beckett Locke, North Docks",
+            "price": "$130/night",
+            "meta": "Dublin · 4★ · 4.5 (1,007)",
+            "summary": "Beckett Locke, North Docks, Dublin, $130/night"
+          },
+          {
+            "id": "serp:dbz8h0",
+            "title": "The Dean Docklands - Formerly The Mayson",
+            "price": "$150/night",
+            "meta": "Dublin · 4★ · 4.3 (1,007)",
+            "summary": "The Dean Docklands - Formerly The Mayson, Dublin, $150/night"
+          }
+        ]
+      }
+    },
+    {
+      "delayMs": 160,
+      "kind": "event",
+      "event": {
+        "type": "folio",
+        "folio": {
+          "tripId": "demo-3c51c44b",
+          "title": "Dublin in October",
+          "flights": [
+            {
+              "label": "MOB→DUB",
+              "price": "$3426",
+              "carrier": "United",
+              "route": "MOB→DUB",
+              "date": "2026-10-12",
+              "cabin": "Economy",
+              "stops": 1
+            }
+          ],
+          "hotels": []
+        }
+      }
+    },
+    {
+      "delayMs": 220,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "United"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " flight locked in — MOB→IAD→DUB, departing Oct"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " 12! ✈️\n\nNow for hotels — I've got a great"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " set of options for 7 nights in Dublin. Here are my top picks from"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " the cards:\n\n- **Zanzibar Locke, Ha'penny Bridge** (4★, 4.6 "
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "rating, $1,308 total) — right on the River Liffey near Temple"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " Bar, one of the best-reviewed proper hotels in the list"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": ". Fantastic location and style.\n- **Beckett Locke, North Docks** (4★, 4.5 rating, $961 total) — excellent"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " value at under $140/night, very well reviewed with 1,000"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "+ reviews. Modern, stylish, and a great base.\n- **Donnybrook Hall** (4★, 4.7 rating, $1,020 total) — the"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " highest-rated hotel on the list, quieter residential area, brilliant for a relax"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "ed stay.\n\nI'd personally lean toward **Zanzibar Locke**"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " for the unbeatable central location or **Beckett Locke** for the best value. Which one ("
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "or two) would you like to book?"
+      }
+    },
+    {
+      "delayMs": 120,
+      "kind": "event",
+      "event": {
+        "type": "turn-complete"
+      }
+    },
+    {
+      "delayMs": 500,
+      "kind": "turn-end"
+    },
+    {
+      "delayMs": 700,
+      "kind": "user",
+      "text": "I'll take the hotel option serp:1n8v5x1 (Baggotrath House Apartments, Newbridge Ave, Dublin 4 - One-Bedroom Luxury Apartment, Dublin, $192/night)."
+    },
+    {
+      "delayMs": 180,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "patch_trip",
+        "phase": "start"
+      }
+    },
+    {
+      "delayMs": 240,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "patch_trip",
+        "phase": "done",
+        "summary": "ok · updated hotels · 1 warning"
+      }
+    },
+    {
+      "delayMs": 160,
+      "kind": "event",
+      "event": {
+        "type": "folio",
+        "folio": {
+          "tripId": "demo-3c51c44b",
+          "title": "Dublin in October",
+          "flights": [
+            {
+              "label": "MOB→DUB",
+              "price": "$3426",
+              "carrier": "United",
+              "route": "MOB→DUB",
+              "date": "2026-10-12",
+              "cabin": "Economy",
+              "stops": 1
+            }
+          ],
+          "hotels": []
+        }
+      }
+    },
+    {
+      "delayMs": 180,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "promote_hotels_to_lodging",
+        "phase": "start"
+      }
+    },
+    {
+      "delayMs": 240,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "promote_hotels_to_lodging",
+        "phase": "done",
+        "summary": "ok"
+      }
+    },
+    {
+      "delayMs": 160,
+      "kind": "event",
+      "event": {
+        "type": "folio",
+        "folio": {
+          "tripId": "demo-3c51c44b",
+          "title": "Dublin in October",
+          "flights": [
+            {
+              "label": "MOB→DUB",
+              "price": "$3426",
+              "carrier": "United",
+              "route": "MOB→DUB",
+              "date": "2026-10-12",
+              "cabin": "Economy",
+              "stops": 1
+            }
+          ],
+          "hotels": [
+            {
+              "name": "Baggotrath House Apartments, Newbridge Ave, Dublin 4 - One-Bedroom Luxury Apartment",
+              "price": "$1343",
+              "area": "Dublin",
+              "nights": 7,
+              "perNight": "$192"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "delayMs": 180,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "excursion_search",
+        "phase": "start"
+      }
+    },
+    {
+      "delayMs": 240,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "excursion_search",
+        "phase": "done",
+        "summary": "ok · 10 candidates"
+      }
+    },
+    {
+      "delayMs": 180,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "apply_gap_tour_picks",
+        "phase": "start"
+      }
+    },
+    {
+      "delayMs": 240,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "apply_gap_tour_picks",
+        "phase": "done",
+        "summary": "ok"
+      }
+    },
+    {
+      "delayMs": 160,
+      "kind": "event",
+      "event": {
+        "type": "folio",
+        "folio": {
+          "tripId": "demo-3c51c44b",
+          "title": "Dublin in October",
+          "flights": [
+            {
+              "label": "MOB→DUB",
+              "price": "$3426",
+              "carrier": "United",
+              "route": "MOB→DUB",
+              "date": "2026-10-12",
+              "cabin": "Economy",
+              "stops": 1
+            }
+          ],
+          "hotels": [
+            {
+              "name": "Baggotrath House Apartments, Newbridge Ave, Dublin 4 - One-Bedroom Luxury Apartment",
+              "price": "$1343",
+              "area": "Dublin",
+              "nights": 7,
+              "perNight": "$192"
+            }
+          ],
+          "days": [
+            {
+              "date": "2026-10-12",
+              "title": "Arrive Dublin",
+              "location": "Dublin",
+              "activities": [
+                {
+                  "name": "St Stephen's Green",
+                  "description": "Dublin's beloved Victorian public park off Grafton Street — free, central, perfect for a stroll.",
+                  "url": "https://heritageireland.ie/visit/places-to-visit/st-stephens-green/"
+                }
+              ],
+              "dining": []
+            },
+            {
+              "date": "2026-10-13",
+              "title": "Dublin — Day 2",
+              "location": "Dublin",
+              "activities": [
+                {
+                  "name": "St Patrick's Cathedral, Book of Kells and Dublin Castle Tour",
+                  "description": "Embark on a privileged journey through Dublin's historic center on this exclusive priority timed access tour. Gain entry to iconic landmarks, including St. Patrick's Cathedral, where you'll have ample",
+                  "url": "https://www.viator.com/tours/Dublin/St-Patricks-Cathedral-Book-of-Kells-and-Dublin-Castle-Tour/d503-8954P38?pid=P00005400&mcid=58086&currency=USD&medium=api"
+                }
+              ],
+              "dining": []
+            },
+            {
+              "date": "2026-10-14",
+              "title": "Dublin — Day 3",
+              "location": "Dublin",
+              "activities": [
+                {
+                  "name": "Dublin Jameson Distillery and Guinness Storehouse Guided Tour",
+                  "description": "On this tour you’ll experience the Guinness Storehouse the No 1 attraction in Ireland combined with the award winning Jameson Bow Street Whiskey Experience. This Irish Experience tour is a top attract",
+                  "url": "https://www.viator.com/tours/Dublin/Temple-Bar-Highlights-Tour-with-Guinness-and-Whiskey-Tasting-from-Dublin/d503-8954P7?pid=P00005400&mcid=58086&currency=USD&medium=api"
+                }
+              ],
+              "dining": []
+            },
+            {
+              "date": "2026-10-16",
+              "title": "Dublin — Day 5",
+              "location": "Dublin",
+              "activities": [
+                {
+                  "name": "Dublin to Cliffs of Moher, Burren, Wild Atlantic Way, Galway Tour",
+                  "description": "Discover the beauty of Ireland’s west on this unforgettable adventure! Begin with a 15-minute stop at The Galway Plaza for a quick breakfast break. The journey continues through Ennistymon and Lahinch",
+                  "url": "https://www.viator.com/tours/Dublin/Cliffs-of-Moher-The-Burren-and-Galway-Day-Trip-from-Dublin/d503-7572P3?pid=P00005400&mcid=58086&currency=USD&medium=api"
+                }
+              ],
+              "dining": []
+            }
+          ],
+          "includes": [
+            {
+              "key": "whats-included",
+              "title": "What's included",
+              "body": "Round-trip flights, hand-picked hotels, and the day-by-day plan below — all booked and managed in one place."
+            },
+            {
+              "key": "good-to-know",
+              "title": "Good to know",
+              "body": "Activity and dining picks are suggestions you can swap anytime. Prices are live at time of search and confirmed before you book."
+            },
+            {
+              "key": "travel-tips",
+              "title": "Travel tips",
+              "body": "Bring layers for changeable weather, carry a contactless card for transit, and book popular excursions a few days ahead."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "delayMs": 180,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "tripadvisor_search",
+        "phase": "start"
+      }
+    },
+    {
+      "delayMs": 240,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "tripadvisor_search",
+        "phase": "done",
+        "summary": "ok · 6 candidates"
+      }
+    },
+    {
+      "delayMs": 160,
+      "kind": "event",
+      "event": {
+        "type": "folio",
+        "folio": {
+          "tripId": "demo-3c51c44b",
+          "title": "Dublin in October",
+          "flights": [
+            {
+              "label": "MOB→DUB",
+              "price": "$3426",
+              "carrier": "United",
+              "route": "MOB→DUB",
+              "date": "2026-10-12",
+              "cabin": "Economy",
+              "stops": 1
+            }
+          ],
+          "hotels": [
+            {
+              "name": "Baggotrath House Apartments, Newbridge Ave, Dublin 4 - One-Bedroom Luxury Apartment",
+              "price": "$1343",
+              "area": "Dublin",
+              "nights": 7,
+              "perNight": "$192"
+            }
+          ],
+          "days": [
+            {
+              "date": "2026-10-12",
+              "title": "Arrive Dublin",
+              "location": "Dublin",
+              "activities": [
+                {
+                  "name": "St Stephen's Green",
+                  "description": "Dublin's beloved Victorian public park off Grafton Street — free, central, perfect for a stroll.",
+                  "url": "https://heritageireland.ie/visit/places-to-visit/st-stephens-green/"
+                }
+              ],
+              "dining": [
+                {
+                  "name": "WILDE Restaurant",
+                  "cuisine": "International",
+                  "url": "https://www.tripadvisor.com/Restaurant_Review-g186605-d784311-Reviews-WILDE_Restaurant-Dublin_County_Dublin.html?m=66827"
+                },
+                {
+                  "name": "Dax Restaurant",
+                  "cuisine": "French",
+                  "url": "https://www.tripadvisor.com/Restaurant_Review-g186605-d1146791-Reviews-Dax_Restaurant-Dublin_County_Dublin.html?m=66827"
+                }
+              ]
+            },
+            {
+              "date": "2026-10-13",
+              "title": "Dublin — Day 2",
+              "location": "Dublin",
+              "activities": [
+                {
+                  "name": "St Patrick's Cathedral, Book of Kells and Dublin Castle Tour",
+                  "description": "Embark on a privileged journey through Dublin's historic center on this exclusive priority timed access tour. Gain entry to iconic landmarks, including St. Patrick's Cathedral, where you'll have ample",
+                  "url": "https://www.viator.com/tours/Dublin/St-Patricks-Cathedral-Book-of-Kells-and-Dublin-Castle-Tour/d503-8954P38?pid=P00005400&mcid=58086&currency=USD&medium=api"
+                }
+              ],
+              "dining": [
+                {
+                  "name": "Richmond Restaurant",
+                  "cuisine": "Irish",
+                  "url": "https://www.tripadvisor.com/Restaurant_Review-g186605-d9460247-Reviews-Richmond_Restaurant-Dublin_County_Dublin.html?m=66827"
+                }
+              ]
+            },
+            {
+              "date": "2026-10-14",
+              "title": "Dublin — Day 3",
+              "location": "Dublin",
+              "activities": [
+                {
+                  "name": "Dublin Jameson Distillery and Guinness Storehouse Guided Tour",
+                  "description": "On this tour you’ll experience the Guinness Storehouse the No 1 attraction in Ireland combined with the award winning Jameson Bow Street Whiskey Experience. This Irish Experience tour is a top attract",
+                  "url": "https://www.viator.com/tours/Dublin/Temple-Bar-Highlights-Tour-with-Guinness-and-Whiskey-Tasting-from-Dublin/d503-8954P7?pid=P00005400&mcid=58086&currency=USD&medium=api"
+                }
+              ],
+              "dining": [
+                {
+                  "name": "Darkey Kelly's Bar & Restaurant",
+                  "cuisine": "Irish",
+                  "url": "https://www.tripadvisor.com/Restaurant_Review-g186605-d6403998-Reviews-Darkey_Kelly_s_Bar_Restaurant-Dublin_County_Dublin.html?m=66827"
+                }
+              ]
+            },
+            {
+              "date": "2026-10-15",
+              "title": "Dublin — Day 4",
+              "location": "Dublin",
+              "activities": [],
+              "dining": [
+                {
+                  "name": "La Caverna Italian Restaurant",
+                  "cuisine": "Italian",
+                  "url": "https://www.tripadvisor.com/Restaurant_Review-g186605-d1045605-Reviews-La_Caverna_Italian_Restaurant-Dublin_County_Dublin.html?m=66827"
+                }
+              ]
+            },
+            {
+              "date": "2026-10-16",
+              "title": "Dublin — Day 5",
+              "location": "Dublin",
+              "activities": [
+                {
+                  "name": "Dublin to Cliffs of Moher, Burren, Wild Atlantic Way, Galway Tour",
+                  "description": "Discover the beauty of Ireland’s west on this unforgettable adventure! Begin with a 15-minute stop at The Galway Plaza for a quick breakfast break. The journey continues through Ennistymon and Lahinch",
+                  "url": "https://www.viator.com/tours/Dublin/Cliffs-of-Moher-The-Burren-and-Galway-Day-Trip-from-Dublin/d503-7572P3?pid=P00005400&mcid=58086&currency=USD&medium=api"
+                }
+              ],
+              "dining": [
+                {
+                  "name": "FIRE Steakhouse and Bar",
+                  "cuisine": "Steakhouse",
+                  "url": "https://www.tripadvisor.com/Restaurant_Review-g186605-d23452960-Reviews-FIRE_Steakhouse_and_Bar-Dublin_County_Dublin.html?m=66827"
+                }
+              ]
+            }
+          ],
+          "includes": [
+            {
+              "key": "whats-included",
+              "title": "What's included",
+              "body": "Round-trip flights, hand-picked hotels, and the day-by-day plan below — all booked and managed in one place."
+            },
+            {
+              "key": "good-to-know",
+              "title": "Good to know",
+              "body": "Activity and dining picks are suggestions you can swap anytime. Prices are live at time of search and confirmed before you book."
+            },
+            {
+              "key": "travel-tips",
+              "title": "Travel tips",
+              "body": "Bring layers for changeable weather, carry a contactless card for transit, and book popular excursions a few days ahead."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "delayMs": 220,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "Ba"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "ggotrath House is locked in — lovely"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " choice for a luxury Dublin base! 🏡 "
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "Here's what I've just added to your fo"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "lio:\n\n**Activities added:**\n- **St Stephen's Green** (Day 1, free) — a perfect first"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "-afternoon stroll through Dublin's iconic Victorian park\n- **St Patrick's Cathedral, Book of Kells &"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " Dublin Castle Tour** (Day 2, $139/pp) — priority access to Dublin"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "'s most celebrated historic landmarks\n- **Dublin Jameson Distillery & Guinness Storehouse Guided Tour** (Day 3, $162/pp) — the"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " ultimate Irish experience combining both iconic institutions\n- **Cliffs of Moher, Burren, Wild Atlantic Way &"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " Galway Tour** (Day 5, $81/pp) — the highest-rated day trip in Ireland, a must-do from Dublin\n\n**Dining picks"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " added to your folio:**\n- **WILDE Restaurant** — upscale international, 4.8 stars, one of Dublin's best\n- **Richmond"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " Restaurant** — beloved Irish cuisine, 4.7 stars, great value\n- **Darkey Kelly's Bar & Restaurant** — classic Irish pub"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " grub, 4.7 stars, 2,300+ reviews\n- **FIRE Steakhouse and Bar** — spectacular "
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "4.7-star steakhouse for a special evening\n- **Dax Restaurant** — refined French dining, 4.7 stars, a real"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " treat\n\nYour folio now has the full day-by-day plan, dining picks"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": ", and activity details. Dublin in October is going to be brilliant!"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " 🍀"
+      }
+    },
+    {
+      "delayMs": 120,
+      "kind": "event",
+      "event": {
+        "type": "turn-complete"
+      }
+    },
+    {
+      "delayMs": 500,
+      "kind": "turn-end"
+    }
   ]
 }
