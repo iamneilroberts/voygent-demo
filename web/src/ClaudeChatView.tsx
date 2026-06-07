@@ -15,7 +15,9 @@ import { BoardView } from "./BoardView";
 
 function FolioArtifact({ folio }: { folio: FolioData }) {
   // A title-only card (trip created, nothing promoted yet) is just noise inline.
-  if (folio.flights.length === 0 && folio.hotels.length === 0) return null;
+  const hasDays = !!folio.days && folio.days.length > 0;
+  const hasIncludes = !!folio.includes && folio.includes.length > 0;
+  if (folio.flights.length === 0 && folio.hotels.length === 0 && !hasDays && !hasIncludes) return null;
   return (
     <div className="cl-artifact" role="group" aria-label="Trip folio">
       <div className="cl-artifact-head">
@@ -48,6 +50,52 @@ function FolioArtifact({ folio }: { folio: FolioData }) {
                 </span>
               </span>
               <span className="cl-artifact-price">{h.price ?? ""}{h.perNight ? <span className="cl-artifact-sub">{h.perNight}/night</span> : null}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      {hasDays && (
+        <div className="cl-artifact-sec">
+          <h4>Day by day</h4>
+          {folio.days!.map((d, i) => (
+            <div key={i} className="cl-day">
+              <div className="cl-day-head">
+                <span className="cl-day-title">{d.title}</span>
+                {d.date && <span className="cl-day-date">{d.date}</span>}
+              </div>
+              {d.activities.length > 0 && (
+                <ul className="cl-day-list">
+                  {d.activities.map((a, j) => (
+                    <li key={j}>
+                      {a.url ? <a href={a.url} target="_blank" rel="noreferrer">{a.name}</a> : a.name}
+                      {a.description && <span className="cl-day-desc"> — {a.description}</span>}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {d.dining.length > 0 && (
+                <div className="cl-day-dining">
+                  <span className="cl-day-dining-label">Local picks:</span>{" "}
+                  {d.dining.map((m, j) => (
+                    <span key={j} className="cl-dining-item">
+                      {m.url ? <a href={m.url} target="_blank" rel="noreferrer">{m.name}</a> : m.name}
+                      {m.cuisine ? ` (${m.cuisine})` : ""}{j < d.dining.length - 1 ? ", " : ""}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {d.stay && <div className="cl-day-stay">Stay: {d.stay}</div>}
+            </div>
+          ))}
+        </div>
+      )}
+      {hasIncludes && (
+        <div className="cl-artifact-sec">
+          <h4>What&#39;s included &amp; good to know</h4>
+          {folio.includes!.map((inc) => (
+            <div key={inc.key} className="cl-include">
+              <span className="cl-include-title">{inc.title}</span>
+              <span className="cl-include-body">{inc.body}</span>
             </div>
           ))}
         </div>

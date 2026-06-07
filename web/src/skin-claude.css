@@ -215,3 +215,20 @@
 @media (prefers-reduced-motion: reduce) {
   :root[data-skin="claude"] .cl-thinking span { opacity: 1; transform: none; }
 }
+
+/* ---- day-by-day itinerary rows ---- */
+:root[data-skin="claude"] .cl-day { padding: .5rem 0; border-top: 1px solid var(--cl-line); }
+:root[data-skin="claude"] .cl-day:first-of-type { border-top: none; }
+:root[data-skin="claude"] .cl-day-head { display: flex; justify-content: space-between; align-items: baseline; gap: .5rem; }
+:root[data-skin="claude"] .cl-day-title { font-weight: 600; }
+:root[data-skin="claude"] .cl-day-date { font-size: .8em; opacity: .6; }
+:root[data-skin="claude"] .cl-day-list { margin: .25rem 0 .25rem 1rem; padding: 0; }
+:root[data-skin="claude"] .cl-day-desc { opacity: .7; }
+:root[data-skin="claude"] .cl-day-dining { font-size: .9em; margin-top: .15rem; }
+:root[data-skin="claude"] .cl-day-dining-label { opacity: .6; }
+:root[data-skin="claude"] .cl-day-stay { font-size: .85em; opacity: .7; margin-top: .15rem; }
+
+/* ---- includes / good-to-know items ---- */
+:root[data-skin="claude"] .cl-include { display: block; margin: .35rem 0; }
+:root[data-skin="claude"] .cl-include-title { font-weight: 600; margin-right: .4rem; }
+:root[data-skin="claude"] .cl-include-body { opacity: .8; }
