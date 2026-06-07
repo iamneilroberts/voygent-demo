@@ -63,7 +63,7 @@ export async function runAgentLoop(args: AgentLoopArgs): Promise<void> {
 
     if (pendingTools.length === 0) { emit({ type: "turn-complete" }); return; }
 
-    const results: { role: "user"; content: Array<{ type: "tool_result"; tool_use_id: string; content: string }> } = {
+    const results: import("../llm/provider").UserToolResult = {
       role: "user", content: [],
     };
     for (const t of pendingTools) {
@@ -90,7 +90,7 @@ export async function runAgentLoop(args: AgentLoopArgs): Promise<void> {
       }
     }
     const note = args.nudge?.(pendingTools.map((t) => ({ name: t.name, input: t.input })));
-    if (note) (results.content as Array<Record<string, unknown>>).push({ type: "text", text: note });
+    if (note) results.content.push({ type: "text", text: note });
     messages.push(results);
     totalToolCalls += pendingTools.length;
     if (totalToolCalls >= maxToolCalls) { emit({ type: "turn-complete" }); return; }

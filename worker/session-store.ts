@@ -15,6 +15,10 @@ export interface SessRecord {
   tripId: string;
   boardsMode: boolean;
   liveMode?: boolean;  // latched true when a search left the featured-trip catalog (real-Voygent pass-through)
+  // One-shot host-nudge flags (true = the nudge fired OR the behavior was
+  // observed). Session-scoped: persisted so a nudge can't re-fire after an
+  // exchange boundary or a DO eviction.
+  nudges?: { enrichment: boolean; flightList: boolean; hsr: boolean };
   replay: ReplaySnapshot;
 }
 
@@ -29,18 +33,29 @@ export function msgKey(i: number): string {
 // only a post-eviction rehydration sees the elision — a degraded-but-correct
 // fallback (the assistant's own summaries and candidate ids survive, and
 // staging by _candidateId reads server-side state, not the elided text).
-const MAX_MSG_CHARS = 90_000;
+// Measured in BYTES (TextEncoder), not chars — the DO cap is 131_072 bytes and
+// multibyte payloads (e.g. Japanese results on the Tokyo trip) can be ~3x their
+// char count. 100_000 leaves headroom for the storage envelope.
+const MAX_MSG_BYTES = 100_000;
 const ELIDED = "[tool result elided to fit session storage — call the tool again if its details are needed]";
 
+const msgBytes = (m: unknown): number => new TextEncoder().encode(JSON.stringify(m)).length;
+
 export function shrinkForStorage(m: ConversationMessage): ConversationMessage {
-  if (JSON.stringify(m).length <= MAX_MSG_CHARS) return m;
+  if (msgBytes(m) <= MAX_MSG_BYTES) return m;
   // Only a user tool_result bundle realistically exceeds the cap.
   if (m.role !== "user" || typeof m.content === "string") return m;
   const blocks = m.content.map((b) => ({ ...b }));
   const copy = { role: "user" as const, content: blocks };
-  const bySize = [...blocks].sort((a, b) => b.content.length - a.content.length);
-  for (const b of bySize) {
-    if (JSON.stringify(copy).length <= MAX_MSG_CHARS) break;
+  // Shrink ONLY tool_result blocks: the bundle may also carry harness-injected
+  // {type:"text"} nudge notes (no .content — sorting on it used to throw, which
+  // silently killed persistence for the whole session) and those must survive.
+  const shrinkable = blocks.filter(
+    (b): b is Extract<typeof b, { type: "tool_result" }> => b.type === "tool_result",
+  );
+  shrinkable.sort((a, b) => b.content.length - a.content.length);
+  for (const b of shrinkable) {
+    if (msgBytes(copy) <= MAX_MSG_BYTES) break;
     b.content = ELIDED;
   }
   return copy;

@@ -153,6 +153,10 @@ export class SessionDO {
   // no patch sanitizer, folio rendered from real read_trip data). Featured
   // trips stay replay-driven — they are the "gif"; live trips are faithful.
   private liveMode = false;
+  // One-shot host-nudge state (true = fired or behavior observed). Lives on
+  // the instance + SessRecord so a nudge can't re-fire across exchange
+  // boundaries or after a DO eviction.
+  private nudges = { enrichment: false, flightList: false, hsr: false };
   // Session-scoped so search→list dedupe survives across exchanges.
   private boardBuilder: BoardBuilder = createBoardBuilder();
   // How many of this.messages are already in durable storage (hydrated or persisted).
@@ -171,6 +175,7 @@ export class SessionDO {
       this.tripId = sess.tripId;
       this.boardsMode = sess.boardsMode;
       this.liveMode = sess.liveMode ?? false;
+      this.nudges = sess.nudges ?? { enrichment: false, flightList: false, hsr: false };
       this.replay = new FixtureReplay(this.tripId);
       this.replay.restore(sess.replay);
       const stored = await this.state.storage.list<ConversationMessage>({ prefix: MSG_PREFIX });
@@ -185,7 +190,7 @@ export class SessionDO {
   private async persistSession(): Promise<void> {
     try {
       const puts: Record<string, unknown> = {
-        sess: { tripId: this.tripId, boardsMode: this.boardsMode, liveMode: this.liveMode, replay: this.replay.snapshot() } satisfies SessRecord,
+        sess: { tripId: this.tripId, boardsMode: this.boardsMode, liveMode: this.liveMode, nudges: this.nudges, replay: this.replay.snapshot() } satisfies SessRecord,
       };
       for (let i = this.persistedMsgCount; i < this.messages.length; i++) {
         puts[msgKey(i)] = shrinkForStorage(this.messages[i]);
@@ -339,26 +344,24 @@ export class SessionDO {
         // conversation breakpoint in claude.ts) — cache reads bill at ~0.1x.
         const fullTools = await mcp.listTools();
         fullToolCount = fullTools.length;
-        const tools = fullTools;
+        // Sort by name: prompt caching is prefix-exact, so a stable order keeps
+        // the tools-block cache key deterministic even if the upstream catalog
+        // re-registers in a different order across deploys.
+        const tools = [...fullTools].sort((a, b) => a.name.localeCompare(b.name));
         exposedToolCount = tools.length;
         // One-shot enrichment nudge: when the hotel lands and enrichment hasn't
         // run yet this session, remind the model in the SAME turn. Deterministic
-        // backstop for the prompt's "same turn, before summary" rule.
-        let enrichmentSeen = false;
-        let enrichmentNudged = false;
-        let flightListSeen = false;
-        let flightListNudged = false;
-        let hsrSeen = false;
-        let hsrNudged = false;
+        // backstop for the prompt's "same turn, before summary" rule. One-shot
+        // state lives on this.nudges (persisted), not per-exchange locals.
         const nudge = (batch: Array<{ name: string; input: Record<string, unknown> }>): string | null => {
           const names = new Set(batch.map((b) => b.name));
-          if (names.has("apply_gap_tour_picks") || names.has("excursion_search")) enrichmentSeen = true;
-          if (names.has("flight_list")) flightListSeen = true;
-          if (names.has("hotel_search_and_rank")) hsrSeen = true;
+          if (names.has("apply_gap_tour_picks") || names.has("excursion_search")) this.nudges.enrichment = true;
+          if (names.has("flight_list")) this.nudges.flightList = true;
+          if (names.has("hotel_search_and_rank")) this.nudges.hsr = true;
           // Live hotels: hotel_search_and_rank carries commission data AND a
           // board-renderable shape; plain serp hotel_search renders no cards.
-          if (this.liveMode && names.has("hotel_search") && !hsrSeen && !hsrNudged) {
-            hsrNudged = true;
+          if (this.liveMode && names.has("hotel_search") && !this.nudges.hsr) {
+            this.nudges.hsr = true;
             return "[host reminder] This is a live trip: hotels come from hotel_search_and_rank { destination, check_in, "
               + "check_out, travelers:{ adults } } — call it now and present from ITS results (it carries advisor "
               + "commission and renders the traveler's option cards). hotel_search is only the fallback if it fails.";
@@ -366,8 +369,8 @@ export class SessionDO {
           // Live flights distill: raw flight_search results carry no candidate
           // ids, so the option cards can't render until flight_list runs. The
           // model reliably skips the buried conditional — remind it once.
-          if (this.liveMode && names.has("flight_search") && !flightListSeen && !flightListNudged) {
-            flightListNudged = true;
+          if (this.liveMode && names.has("flight_search") && !this.nudges.flightList) {
+            this.nudges.flightList = true;
             return "[host reminder] This is a live trip: now call flight_list { tripId, action:'list' } to distill the "
               + "flight candidates, and present from ITS results — the traveler's option cards only render from "
               + "flight_list. Do not stage or promote a flight before flight_list has returned its candidate ids.";
@@ -378,8 +381,8 @@ export class SessionDO {
             return updates && typeof updates === "object" && "lodging" in updates;
           });
           const hotelLanded = names.has("promote_hotels_to_lodging") || (this.liveMode && lodgingPatched);
-          if (enrichmentSeen || enrichmentNudged || !hotelLanded) return null;
-          enrichmentNudged = true;
+          if (this.nudges.enrichment || !hotelLanded) return null;
+          this.nudges.enrichment = true;
           return "[host reminder] The hotel is locked in but the trip has NO activities or dining yet. Before writing any "
             + "summary, run the enrichment sequence NOW in this same turn: featured trips → steps 6a-7; live trips → steps "
             + "L1-L4 (L1 itinerary scaffold first). This is mandatory and has no approval step.";

@@ -356,6 +356,13 @@ describe("matchesFixture (fixture-vs-live session latch)", () => {
     expect(r.matchesFixture("hotel_search_and_rank", { destination: "Lisbon, Portugal" })).toBe(false);
   });
 
+  it("folds diacritics — accented spellings stay featured (Cancún latch regression)", () => {
+    const r = new FixtureReplay("demo-x");
+    expect(r.matchesFixture("hotel_search", { location: "Cancún" })).toBe(true);
+    expect(r.matchesFixture("hotel_search_and_rank", { destination: "Cancún, Mexico" })).toBe(true);
+    expect(r.matchesFixture("flight_search", { origin: "ATL", destination: "Cancún" })).toBe(true);
+  });
+
   it("never latches live on non-search tools", () => {
     const r = new FixtureReplay("demo-x");
     expect(r.matchesFixture("patch_trip", {})).toBe(true);

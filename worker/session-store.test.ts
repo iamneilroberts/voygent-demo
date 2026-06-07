@@ -36,6 +36,34 @@ describe("shrinkForStorage", () => {
     expect((m.content as Array<{ content: string }>)[0].content.length).toBe(120_000);
   });
 
+  it("survives a harness-injected text block (nudge) in an oversize bundle", () => {
+    // Regression: sorting blocks on .content threw on {type:"text"} nudge
+    // blocks, and the catch in persistSession silently killed persistence
+    // for the whole session.
+    const m: ConversationMessage = {
+      role: "user",
+      content: [
+        { type: "tool_result", tool_use_id: "a", content: big(120_000) },
+        { type: "text", text: "[host reminder] run enrichment now" },
+      ],
+    };
+    const out = shrinkForStorage(m);
+    const blocks = out.content as Array<Record<string, string>>;
+    expect(blocks.find((b) => b.type === "tool_result")!.content).toContain("elided");
+    expect(blocks.find((b) => b.type === "text")!.text).toBe("[host reminder] run enrichment now");
+  });
+
+  it("caps by BYTES, not chars (multibyte payloads)", () => {
+    // 50k Japanese chars ≈ 150KB UTF-8 — over the DO's 128KiB value cap even
+    // though the char count is far below it.
+    const m: ConversationMessage = {
+      role: "user",
+      content: [{ type: "tool_result", tool_use_id: "a", content: "東京の宿泊".repeat(10_000) }],
+    };
+    const out = shrinkForStorage(m);
+    expect(new TextEncoder().encode(JSON.stringify(out)).length).toBeLessThanOrEqual(100_000);
+  });
+
   it("stops eliding once under the cap", () => {
     const m: ConversationMessage = {
       role: "user",

@@ -97,7 +97,12 @@ export function presetRoutes(): FixtureRoute[] {
 
 // Normalize a free-text place or code to a comparison token: uppercase alphanumerics.
 function norm(s: unknown): string {
-  return String(s ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  // NFD + strip combining marks BEFORE the [^A-Z0-9] filter: without it,
+  // "Cancún" normalized to "CANCN" (≠ fixture "CANCUN") and a featured trip
+  // wrongly latched the session live whenever the model spelled the accent.
+  return String(s ?? "")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase().replace(/[^A-Z0-9]/g, "");
 }
 
 // Does a search term refer to this route's destination? Accept the IATA code
