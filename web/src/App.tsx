@@ -3,7 +3,7 @@ import { streamChat } from "./sse-client";
 import { ChatView, type ChatMessage, type Preset } from "./ChatView";
 import { ClaudeChatView } from "./ClaudeChatView";
 import { FolioPanel } from "./FolioPanel";
-import type { FolioData, BoardCandidate } from "../../shared/events";
+import type { ServerEvent, FolioData, BoardCandidate } from "../../shared/events";
 import { Inspector, type InsTool, type InsTurn, type InsSummary, type InsSavings, type InsOverhead } from "./Inspector";
 import { ThemeSwitch } from "./ThemeSwitch";
 import { SkinSwitch } from "./SkinSwitch";
@@ -58,61 +58,65 @@ export function App() {
     });
   }
 
+  // Single per-event reducer over the existing setters. Called by BOTH the live
+  // stream callback and the replay player so they produce identical state.
+  function applyEvent(e: ServerEvent, claude: boolean) {
+    if (e.type === "text") setItems((m) => {
+      const c = [...m];
+      const last = c[c.length - 1];
+      // Append to the open assistant message; after an inline toolchip/board
+      // interrupted the stream, start a fresh prose block instead.
+      if (last && last.role === "assistant") c[c.length - 1] = { role: "assistant", text: last.text + e.delta };
+      else c.push({ role: "assistant", text: e.delta });
+      return c;
+    });
+    else if (e.type === "tool") {
+      if (e.phase === "start") {
+        setTools((t) => [...t, e.tool]);
+        if (claude) setItems((m) => [...m, { role: "toolchip", name: e.tool, status: "running" }]);
+      } else if (claude) {
+        setItems((m) => {
+          const c = [...m];
+          for (let i = c.length - 1; i >= 0; i--) {
+            const it = c[i];
+            if (it.role === "toolchip" && it.name === e.tool && it.status === "running") {
+              c[i] = { ...it, status: "done", summary: e.summary };
+              break;
+            }
+          }
+          return c;
+        });
+      }
+    }
+    else if (e.type === "board") setItems((m) => [...m, {
+      role: "board", boardId: e.boardId, kind: e.kind, tripId: e.tripId, candidates: e.candidates,
+    }]);
+    else if (e.type === "folio") {
+      setFolio(e.folio);
+      // Fallback resolution: the agent promoted (e.g. after a typed reply),
+      // so close out any still-open boards of the now-promoted kind.
+      setItems((m) => m.map((it) => (
+        it.role === "board" && !it.resolved && !it.resolvedId &&
+        ((it.kind === "flight" && e.folio.flights.length > 0) || (it.kind === "hotel" && e.folio.hotels.length > 0))
+          ? { ...it, resolved: true } : it
+      )));
+    }
+    else if (e.type === "error") showError(e.message);
+    else if (e.type === "inspector") {
+      if (e.kind === "tool") setInsTools((t) => [...t, e]);
+      else if (e.kind === "turn") setInsTurns((t) => [...t, e]);
+      else if (e.kind === "summary") setInsSummaries((s) => [...s, e]);
+      else if (e.kind === "savings") setInsSavings((s) => [...s, e]);
+      else if (e.kind === "overhead") setInsOverhead((o) => [...o, e]);
+    }
+  }
+
   async function send(text: string) {
     const claude = skin === "claude";
     setItems((m) => [...m, { role: "user", text }, { role: "assistant", text: "" }]);
     setBusy(true); setTools([]);
     try {
-      await streamChat(API_BASE, sessionId, text, (e) => {
-        if (e.type === "text") setItems((m) => {
-          const c = [...m];
-          const last = c[c.length - 1];
-          // Append to the open assistant message; after an inline toolchip/board
-          // interrupted the stream, start a fresh prose block instead.
-          if (last && last.role === "assistant") c[c.length - 1] = { role: "assistant", text: last.text + e.delta };
-          else c.push({ role: "assistant", text: e.delta });
-          return c;
-        });
-        else if (e.type === "tool") {
-          if (e.phase === "start") {
-            setTools((t) => [...t, e.tool]);
-            if (claude) setItems((m) => [...m, { role: "toolchip", name: e.tool, status: "running" }]);
-          } else if (claude) {
-            setItems((m) => {
-              const c = [...m];
-              for (let i = c.length - 1; i >= 0; i--) {
-                const it = c[i];
-                if (it.role === "toolchip" && it.name === e.tool && it.status === "running") {
-                  c[i] = { ...it, status: "done", summary: e.summary };
-                  break;
-                }
-              }
-              return c;
-            });
-          }
-        }
-        else if (e.type === "board") setItems((m) => [...m, {
-          role: "board", boardId: e.boardId, kind: e.kind, tripId: e.tripId, candidates: e.candidates,
-        }]);
-        else if (e.type === "folio") {
-          setFolio(e.folio);
-          // Fallback resolution: the agent promoted (e.g. after a typed reply),
-          // so close out any still-open boards of the now-promoted kind.
-          setItems((m) => m.map((it) => (
-            it.role === "board" && !it.resolved && !it.resolvedId &&
-            ((it.kind === "flight" && e.folio.flights.length > 0) || (it.kind === "hotel" && e.folio.hotels.length > 0))
-              ? { ...it, resolved: true } : it
-          )));
-        }
-        else if (e.type === "error") showError(e.message);
-        else if (e.type === "inspector") {
-          if (e.kind === "tool") setInsTools((t) => [...t, e]);
-          else if (e.kind === "turn") setInsTurns((t) => [...t, e]);
-          else if (e.kind === "summary") setInsSummaries((s) => [...s, e]);
-          else if (e.kind === "savings") setInsSavings((s) => [...s, e]);
-          else if (e.kind === "overhead") setInsOverhead((o) => [...o, e]);
-        }
-      }, claude ? "boards" : undefined);
+      await streamChat(API_BASE, sessionId, text, (e) => applyEvent(e, claude), claude ? "boards" : undefined);
     } catch (err) {
       showError((err as Error).message);
     } finally {
