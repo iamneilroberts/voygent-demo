@@ -28,7 +28,7 @@ const SESSION = `smoke-${Math.random().toString(36).slice(2, 10)}`;
 async function exchange(message) {
   const res = await fetch(`${BASE}/chat?session=${SESSION}`, {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json", ...(process.env.DEMO_TEST_TOKEN ? { "x-demo-test": process.env.DEMO_TEST_TOKEN } : {}) },
     body: JSON.stringify(BOARDS ? { message, mode: "boards" } : { message }),
   });
   if (!res.ok || !res.body) throw new Error(`POST /chat -> ${res.status}`);

@@ -22,6 +22,7 @@ interface Env {
   LLM_MODEL?: string;                     // default/fallback model; per-turn routing overrides per call
   BUDGET_DAILY_USD?: string;              // global daily spend cap (default 5)
   DEMO_OPUS_ENABLED?: string;             // when set, Opus is offered/accepted (abuse gate; default off)
+  DEMO_TEST_TOKEN?: string;               // test/smoke runs carrying this header skip the public ledger
 }
 
 // Public-surface denylist (Neil 2026-06-07): the catalog stays claude.ai-faithful
@@ -255,6 +256,8 @@ export class SessionDO {
   }
 
   private async handleChat(req: Request): Promise<Response> {
+    // Test/smoke runs (valid secret header) don't count against the public daily ledger.
+    const isTest = !!this.env.DEMO_TEST_TOKEN && req.headers.get("x-demo-test") === this.env.DEMO_TEST_TOKEN;
     const body = await req.json<{ message: string; mode?: string; model?: unknown; routing?: { discovery?: unknown; enrichment?: unknown } }>();
     const { message, mode } = body;
     const fallbackModel = (this.env.LLM_MODEL || DEFAULT_MODEL) as ModelId;
@@ -502,7 +505,7 @@ export class SessionDO {
         mux.close();
         // Record cost: log (visible via `wrangler tail`) + add to the daily ledger.
         console.log(`[cost] model=${model} trip=${this.tripId} in=${u.inputTokens} out=${u.outputTokens} cacheR=${u.cacheReadTokens} cacheW=${u.cacheCreationTokens} usd=${sessionCost.toFixed(4)}`);
-        if (sessionCost > 0) {
+        if (sessionCost > 0 && !isTest) {
           try { await this.budgetStub().fetch("https://do/__budget/add", { method: "POST", body: JSON.stringify({ usd: sessionCost }) }); }
           catch { /* ledger update is best-effort */ }
         }

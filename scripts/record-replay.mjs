@@ -60,7 +60,7 @@ async function exchange(message) {
   frames.push({ delayMs: DELAY.user, kind: "user", text: message });
   const res = await fetch(`${BASE}/chat?session=${encodeURIComponent(SESSION)}`, {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    headers: { "content-type": "application/json", ...(process.env.DEMO_TEST_TOKEN ? { "x-demo-test": process.env.DEMO_TEST_TOKEN } : {}) },
     body: JSON.stringify({ message, mode: "boards" }),
   });
   if (!res.ok || !res.body) throw new Error(`POST /chat -> ${res.status}`);

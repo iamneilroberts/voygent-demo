@@ -3,7 +3,14 @@ import { buildPresets } from "./presets";
 import { infoPageHtml } from "./info/pages";
 import { enabledModels, DEFAULT_SMART_MAP } from "../shared/models";
 
-interface Env { SESSION: DurableObjectNamespace; DEMO_DISABLED?: string; DEMO_OPUS_ENABLED?: string; }
+interface Env { SESSION: DurableObjectNamespace; DEMO_DISABLED?: string; DEMO_OPUS_ENABLED?: string; DEMO_TEST_TOKEN?: string; }
+
+// Test/smoke requests (carrying the secret header) bypass the public daily
+// budget so automated runs don't 503 real visitors. Returns false unless the
+// token is configured AND matches — never an open bypass.
+function isTestRequest(req: Request, env: Env): boolean {
+  return !!env.DEMO_TEST_TOKEN && req.headers.get("x-demo-test") === env.DEMO_TEST_TOKEN;
+}
 
 async function dailyBudgetExceeded(env: Env): Promise<boolean> {
   try {
@@ -48,7 +55,8 @@ export default {
         });
       }
       // Guardrail: pause automatically once the global daily spend cap is reached.
-      if (await dailyBudgetExceeded(env)) {
+      // Test/smoke runs (valid x-demo-test header) skip the cap.
+      if (!isTestRequest(req, env) && await dailyBudgetExceeded(env)) {
         return new Response("The Voygent demo has hit its daily limit. Check back tomorrow.", {
           status: 503,
           headers: { ...cors(), "content-type": "text/plain" },
