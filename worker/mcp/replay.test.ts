@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { FixtureReplay, type ReplayHelpers } from "./replay";
-import { FIXTURE_BY_ID, matchFlightFixture, matchHotelFixture } from "../fixtures/index";
+import { FIXTURE_BY_ID, matchFlightFixture, matchHotelFixture, type Fixture } from "../fixtures/index";
 
 const DUBLIN = FIXTURE_BY_ID["dublin-oct"];
 
@@ -155,5 +155,95 @@ describe("FixtureReplay measurement", () => {
       // promote may error (no valid candidate id), but the reset must have fired at entry
     }
     expect(r.lastMeasurement()).toBeNull();
+  });
+});
+
+// Minimal in-memory helpers: capture what patchTrip writes so we can assert the
+// fabrication guard wrote ONLY fixture-keyed objects.
+function makeHelpers() {
+  const trip: Record<string, any> = { meta: {}, flights: [], lodging: [], hotels: [], itinerary: [] };
+  return {
+    trip,
+    h: {
+      readTrip: async () => trip,
+      patchTrip: async (u: Record<string, unknown>) => { Object.assign(trip, u); },
+    } as ReplayHelpers,
+  };
+}
+
+describe("enrichment interception (fabrication guard)", () => {
+  it("excursion_search returns slim excursion candidates with real productCodes", async () => {
+    const r = new FixtureReplay("demo-x");
+    const out = JSON.parse(await r.handle("excursion_search",
+      { source: "viator", trip_id: "demo-x", destination: "Dublin" }, makeHelpers().h));
+    expect(out.status).toBe("ok");
+    if (out.count > 0) {
+      expect(typeof out.candidates[0].productCode).toBe("string");
+      expect(out.candidates[0]).not.toHaveProperty("coverImage"); // slim
+    }
+  });
+
+  it("apply_gap_tour_picks writes ONLY fixture-keyed activities; drops unknown productCodes", async () => {
+    const r = new FixtureReplay("demo-x");
+    const { trip, h } = makeHelpers();
+    await r.handle("excursion_search", { source: "viator", trip_id: "demo-x", destination: "Dublin" }, h);
+    const real = r.fixtureExcursionCodes();
+    const picks = [...real.slice(0, 1).map((code) => ({ day: 1, productCode: code })),
+                   { day: 1, productCode: "FAKE-INVENTED-CODE" }];
+    const out = JSON.parse(await r.handle("apply_gap_tour_picks", { tripId: "demo-x", picks }, h));
+    expect(out).toBeTruthy();
+    const allActs = (trip.itinerary ?? []).flatMap((d: any) => d.activities ?? []);
+    expect(allActs.find((a: any) => a.productCode === "FAKE-INVENTED-CODE")).toBeUndefined();
+    if (real.length > 0) expect(allActs.length).toBeGreaterThan(0);
+  });
+
+  it("tripadvisor_search writes only fixture dining into itinerary[].dining", async () => {
+    const r = new FixtureReplay("demo-x");
+    const { trip, h } = makeHelpers();
+    const out = JSON.parse(await r.handle("tripadvisor_search",
+      { trip_id: "demo-x", location: "Dublin", category: "restaurants" }, h));
+    expect(out.status).toBe("ok");
+    const allDining = (trip.itinerary ?? []).flatMap((d: any) => d.dining ?? []);
+    for (const d of allDining) expect(r.fixtureDiningIds().includes(d.id)).toBe(true);
+  });
+});
+
+const TEST_FIXTURE: Record<string, Fixture> = {
+  "test-dub": {
+    route: { id: "test-dub", label: "T", origin: "MOB", destination: "DUB", city: "Dublin", depart: "2026-10-12", ret: "2026-10-14", adults: 2 },
+    flights: [], hotels: [], promotedFlightsById: {}, promotedLodgingById: {},
+    itineraryDays: [{ day: 1, date: "2026-10-12", location: "Dublin", title: "Arrive Dublin" }],
+    excursions: [{ productCode: "VX1", title: "Kilmainham Gaol", day: 1, free: false, priceFrom: 26, currency: "USD", durationMinutes: 90, rating: 4.7, reviewCount: 1200, description: "Historic gaol.", bookingUrl: "https://v/1", coverImage: null }],
+    dining: [{ id: "TA1", name: "The Winding Stair", day: 1, cuisine: "Irish", rating: 4.5, reviewCount: 800, priceLevel: "$$ - $$$", description: "Riverside.", url: "https://t/1" }],
+  } as unknown as Fixture,
+};
+
+describe("enrichment positive writes (injected fixture)", () => {
+  it("apply_gap_tour_picks writes the fixture-keyed activity into itinerary[day].activities", async () => {
+    const r = new FixtureReplay("demo-x", TEST_FIXTURE);
+    const { trip, h } = makeHelpers();
+    await r.handle("excursion_search", { source: "viator", trip_id: "demo-x", destination: "Dublin" }, h);
+    await r.handle("apply_gap_tour_picks", { tripId: "demo-x", picks: [{ day: 1, productCode: "VX1" }] }, h);
+    const acts = (trip.itinerary ?? []).flatMap((d: any) => d.activities ?? []);
+    expect(acts).toHaveLength(1);
+    expect(acts[0]).toMatchObject({ name: "Kilmainham Gaol", productCode: "VX1", addedBy: "gap-recommender" });
+  });
+
+  it("tripadvisor_search writes the fixture dining into itinerary[day].dining", async () => {
+    const r = new FixtureReplay("demo-x", TEST_FIXTURE);
+    const { trip, h } = makeHelpers();
+    await r.handle("tripadvisor_search", { trip_id: "demo-x", location: "Dublin", category: "restaurants" }, h);
+    const dining = (trip.itinerary ?? []).flatMap((d: any) => d.dining ?? []);
+    expect(dining).toHaveLength(1);
+    expect(dining[0]).toMatchObject({ id: "TA1", name: "The Winding Stair" });
+  });
+
+  it("clears accumulated days when the enrichment route changes", async () => {
+    const r = new FixtureReplay("demo-x", TEST_FIXTURE);
+    const { h } = makeHelpers();
+    await r.handle("excursion_search", { source: "viator", trip_id: "demo-x", destination: "Dublin" }, h);
+    await r.handle("apply_gap_tour_picks", { tripId: "demo-x", picks: [{ day: 1, productCode: "VX1" }] }, h);
+    await r.handle("excursion_search", { source: "viator", trip_id: "demo-x", destination: "Nowhereville" }, h);
+    expect(r.lastPromoted().itinerary).toBeNull();
   });
 });

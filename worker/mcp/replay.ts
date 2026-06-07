@@ -16,6 +16,7 @@
 import {
   FIXTURE_BY_ID, matchFlightFixture, matchHotelFixture, presetRoutes,
   type FlightCandidate, type HotelCandidate,
+  type ExcursionCandidate, type DiningCandidate, type ItineraryDayScaffold,
 } from "../fixtures/index";
 import { estTokens } from "../inspector";
 
@@ -23,6 +24,7 @@ const INTERCEPTED = new Set([
   "flight_search", "hotel_search",
   "flight_list", "hotel_list",
   "promote_flights", "promote_hotels_to_lodging",
+  "excursion_search", "apply_gap_tour_picks", "tripadvisor_search",
 ]);
 
 export interface ReplayHelpers {
@@ -61,6 +63,33 @@ function slimHotel(c: HotelCandidate) {
   };
 }
 
+function slimExcursion(c: ExcursionCandidate) {
+  return {
+    productCode: c.productCode,
+    title: c.title,
+    free: !!c.free,
+    priceFrom: c.priceFrom ?? null,
+    currency: c.currency ?? "USD",
+    durationMinutes: c.durationMinutes ?? null,
+    rating: c.rating ?? null,
+    reviewCount: c.reviewCount ?? null,
+    description: c.description ?? null,
+    bookingUrl: c.bookingUrl ?? null,
+  };
+}
+
+function slimDining(c: DiningCandidate) {
+  return {
+    id: c.id,
+    name: c.name,
+    cuisine: c.cuisine ?? null,
+    rating: c.rating ?? null,
+    reviewCount: c.reviewCount ?? null,
+    priceLevel: c.priceLevel ?? null,
+    description: c.description ?? null,
+  };
+}
+
 // Neutral suggestion list for no-result notes — no mechanism wording (no
 // "captured", "demo", "fixture"), so the model can't parrot internals to the user.
 function suggestedTrips(): string {
@@ -83,23 +112,60 @@ export class FixtureReplay {
   private promotedFlights: unknown = null;
   private promotedLodging: Array<Record<string, unknown>> | null = null;
   private measurement: { tool: string; modelFacingTokens: number } | null = null;
+  private enrichRouteId: string | null = null;
+  // Itinerary the enrichment steps have built so far (day -> day object), seeded
+  // lazily from the fixture's day scaffold. Held in replay state (not re-read from
+  // staging) so it's deterministic and dodges KV eventual-consistency races —
+  // exactly like promotedFlights/promotedLodging.
+  private itineraryByDay: Map<number, Record<string, any>> = new Map();
 
-  constructor(private tripId: string) {}
+  // `fixtures` defaults to the real captured map; tests inject a small fixture
+  // to exercise positive fixture-keyed writes before D1 captures real data.
+  constructor(private tripId: string, private fixtures: Record<string, import("../fixtures/index").Fixture> = FIXTURE_BY_ID) {}
+
+  // Match a destination/location to one of this replay's fixtures (mirrors
+  // matchHotelFixture but over the injected map so tests can override).
+  private lookupHotelFixture(location: unknown): import("../fixtures/index").Fixture | null {
+    const m = matchHotelFixture(location);
+    if (m && this.fixtures[m.route.id]) return this.fixtures[m.route.id];
+    const norm = (s: unknown) => String(s ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+    const t = norm(location);
+    if (!t) return null;
+    for (const f of Object.values(this.fixtures)) {
+      const c = norm(f.route.destination), ci = norm(f.route.city);
+      if (t === c || (ci && (t === ci || t.includes(ci) || ci.includes(t)))) return f;
+    }
+    return null;
+  }
 
   lastMeasurement(): { tool: string; modelFacingTokens: number } | null { return this.measurement; }
 
   currentFixture(): import("../fixtures/index").Fixture | null {
     const id = this.flightRouteId ?? this.hotelRouteId;
-    return id ? FIXTURE_BY_ID[id] : null;
+    return id ? this.fixtures[id] : null;
   }
 
   isIntercepted(name: string): boolean {
     return INTERCEPTED.has(name);
   }
 
-  /** What promote_* has committed this session — overlaid onto the folio snapshot. */
-  lastPromoted(): { flights: unknown; lodging: Array<Record<string, unknown>> | null } {
-    return { flights: this.promotedFlights, lodging: this.promotedLodging };
+  /** What promote_* / enrichment has committed this session — overlaid onto the folio snapshot. */
+  lastPromoted(): { flights: unknown; lodging: Array<Record<string, unknown>> | null; itinerary: Record<string, any>[] | null } {
+    const itinerary = this.itineraryByDay.size
+      ? [...this.itineraryByDay.values()].sort((a, b) => (a.day ?? 0) - (b.day ?? 0))
+      : null;
+    return { flights: this.promotedFlights, lodging: this.promotedLodging, itinerary };
+  }
+
+  /** Test helper: productCodes available in the active enrichment fixture. */
+  fixtureExcursionCodes(): string[] {
+    const fx = this.enrichRouteId ? this.fixtures[this.enrichRouteId] : null;
+    return (fx?.excursions ?? []).map((e) => e.productCode);
+  }
+  /** Test helper: dining ids available in the active enrichment fixture. */
+  fixtureDiningIds(): string[] {
+    const fx = this.enrichRouteId ? this.fixtures[this.enrichRouteId] : null;
+    return (fx?.dining ?? []).map((d) => d.id);
   }
 
   async handle(name: string, args: Record<string, any>, h: ReplayHelpers): Promise<string> {
@@ -111,6 +177,9 @@ export class FixtureReplay {
       case "hotel_search": return this.hotelSearch(args);
       case "hotel_list": return this.hotelList(args);
       case "promote_hotels_to_lodging": return this.promoteHotels(h);
+      case "excursion_search": return this.excursionSearch(args);
+      case "apply_gap_tour_picks": return this.applyGapTourPicks(args, h);
+      case "tripadvisor_search": return this.tripadvisorSearch(args, h);
       default: return JSON.stringify({ status: "error", error: `not intercepted: ${name}` });
     }
   }
@@ -233,5 +302,120 @@ export class FixtureReplay {
     await h.patchTrip({ lodging: cards, hotels: [] });
     this.promotedLodging = cards;
     return JSON.stringify({ ok: true, promoted: cards.length, tripId: this.tripId, lodging: cards, ...(dropped.length ? { droppedUnknownCandidates: dropped } : {}) });
+  }
+
+  // Resolve the enrichment fixture from a destination/location arg, the same way
+  // hotelSearch does. Sets enrichRouteId so apply/dining steps can find it.
+  private resolveEnrichFixture(args: Record<string, any>): import("../fixtures/index").Fixture | null {
+    const loc = args.destination ?? args.location ?? args.destination_name ?? args.query;
+    const fixture = this.lookupHotelFixture(loc);
+    const nextId = fixture ? fixture.route.id : null;
+    // Clear accumulated days when the enrichment route changes (or resolves to
+    // none) so a later route in the same session can't mix into old day objects.
+    if (nextId !== this.enrichRouteId) this.itineraryByDay.clear();
+    this.enrichRouteId = nextId;
+    return fixture;
+  }
+
+  // Ensure the day object for `day` exists, seeded from the fixture scaffold.
+  private ensureDay(fixture: import("../fixtures/index").Fixture, day: number): Record<string, any> {
+    let d = this.itineraryByDay.get(day);
+    if (!d) {
+      const scaffold: ItineraryDayScaffold | undefined = (fixture.itineraryDays ?? []).find((s) => s.day === day);
+      d = {
+        day,
+        date: scaffold?.date ?? null,
+        location: scaffold?.location ?? fixture.route.city,
+        title: scaffold?.title ?? `Day ${day} — ${fixture.route.city}`,
+        activities: [],
+        dining: [],
+      };
+      this.itineraryByDay.set(day, d);
+    }
+    return d;
+  }
+
+  private excursionSearch(args: Record<string, any>): string {
+    const fixture = this.resolveEnrichFixture(args);
+    if (!fixture || !(fixture.excursions && fixture.excursions.length)) {
+      return JSON.stringify({
+        status: "ok", source: "viator", tripId: this.tripId, count: 0, candidates: [],
+        note: `No live activity results for ${args.destination ?? args.location ?? "?"}. Suggest one of these popular trips instead: ${suggestedTrips()}.`,
+      });
+    }
+    const candidates = fixture.excursions.map(slimExcursion);
+    const payload = JSON.stringify({
+      status: "ok", source: "viator", tripId: this.tripId, count: candidates.length, candidates,
+      _next: "Choose 2-3 (mix paid + free), then call apply_gap_tour_picks with {tripId, picks:[{day, productCode}, ...]}.",
+    });
+    this.measurement = { tool: "excursionSearch", modelFacingTokens: estTokens(payload) };
+    return payload;
+  }
+
+  private async applyGapTourPicks(args: Record<string, any>, h: ReplayHelpers): Promise<string> {
+    const fixture = this.enrichRouteId ? this.fixtures[this.enrichRouteId] : null;
+    if (!fixture || !(fixture.excursions && fixture.excursions.length)) {
+      return JSON.stringify({ status: "error", persisted: false, tripId: this.tripId, error: "No excursion candidates — call excursion_search first." });
+    }
+    const byCode = new Map(fixture.excursions.map((e) => [e.productCode, e]));
+    const picks: Array<{ day: number; productCode: string }> = Array.isArray(args.picks) ? args.picks : [];
+    const added: Array<{ day: number; productCode: string; name: string }> = [];
+    const failed: Array<{ productCode: string; reason: string }> = [];
+    for (const p of picks) {
+      const code = typeof p?.productCode === "string" ? p.productCode : "";
+      const ex = code ? byCode.get(code) : undefined;
+      // Fabrication guard: only fixture-keyed productCodes reach the itinerary.
+      if (!ex) { if (code) failed.push({ productCode: code, reason: "not a real candidate id" }); continue; }
+      const day = this.ensureDay(fixture, ex.day);
+      if ((day.activities as any[]).some((a) => a.productCode === code)) continue; // idempotent
+      (day.activities as any[]).push({
+        name: ex.title, provider: "Viator", source: "Viator", optional: true, addedBy: "gap-recommender",
+        productCode: ex.productCode,
+        duration: ex.durationMinutes != null ? `${ex.durationMinutes} min` : null,
+        priceFrom: ex.priceFrom ?? null, currency: ex.currency ?? "USD",
+        rating: ex.rating ?? null, reviewCount: ex.reviewCount ?? null,
+        description: ex.description ?? null, url: ex.bookingUrl ?? null, coverImage: ex.coverImage ?? null,
+        free: !!ex.free,
+      });
+      added.push({ day: ex.day, productCode: code, name: ex.title });
+    }
+    await this.writeItinerary(h);
+    return JSON.stringify({
+      status: added.length ? "ok" : "error", persisted: added.length > 0, tripId: this.tripId,
+      added, ...(failed.length ? { failedPicks: failed } : {}),
+    });
+  }
+
+  private async tripadvisorSearch(args: Record<string, any>, h: ReplayHelpers): Promise<string> {
+    const fixture = this.resolveEnrichFixture(args);
+    if (!fixture || !(fixture.dining && fixture.dining.length)) {
+      return JSON.stringify({ status: "ok", tripId: this.tripId, count: 0, candidates: [], note: `No dining results for ${args.location ?? "?"}.` });
+    }
+    const candidates = fixture.dining.map(slimDining);
+    // Editorial dining is fixture-curated, not model-authored: writing it here
+    // (search-doubles-as-apply) keeps it fabrication-safe by construction.
+    if (typeof args.trip_id === "string" || typeof args.tripId === "string") {
+      const byId = new Map((fixture.dining ?? []).map((d) => [d.id, d]));
+      for (const d of byId.values()) {
+        const day = this.ensureDay(fixture, d.day);
+        if ((day.dining as any[]).some((x) => x.id === d.id)) continue;
+        (day.dining as any[]).push({
+          id: d.id, name: d.name, cuisine: d.cuisine ?? null, rating: d.rating ?? null,
+          reviewCount: d.reviewCount ?? null, priceLevel: d.priceLevel ?? null,
+          description: d.description ?? null, url: d.url ?? null,
+        });
+      }
+      await this.writeItinerary(h);
+    }
+    const payload = JSON.stringify({ status: "ok", tripId: this.tripId, count: candidates.length, candidates,
+      _next: "These are editorial local picks (not bookable inventory) — present a few in chat; they appear in the day-by-day folio." });
+    this.measurement = { tool: "tripadvisorSearch", modelFacingTokens: estTokens(payload) };
+    return payload;
+  }
+
+  // Persist the full itinerary array (full-array write, per the demo's patch rule).
+  private async writeItinerary(h: ReplayHelpers): Promise<void> {
+    const itinerary = [...this.itineraryByDay.values()].sort((a, b) => (a.day ?? 0) - (b.day ?? 0));
+    await h.patchTrip({ itinerary });
   }
 }
