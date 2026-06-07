@@ -104,6 +104,18 @@ function stagedCandidateIds(flights: unknown): string[] {
     .filter(Boolean);
 }
 
+// Serializable snapshot of replay session state, so SessionDO can persist it
+// to durable storage and survive DO eviction mid-session. `measurement` is
+// per-call scratch and deliberately excluded.
+export interface ReplaySnapshot {
+  flightRouteId: string | null;
+  hotelRouteId: string | null;
+  enrichRouteId: string | null;
+  promotedFlights: unknown;
+  promotedLodging: Array<Record<string, unknown>> | null;
+  itinerary: Array<[number, Record<string, any>]>;
+}
+
 export class FixtureReplay {
   private flightRouteId: string | null = null;
   private hotelRouteId: string | null = null;
@@ -137,6 +149,26 @@ export class FixtureReplay {
       if (t === c || (ci && (t === ci || t.includes(ci) || ci.includes(t)))) return f;
     }
     return null;
+  }
+
+  snapshot(): ReplaySnapshot {
+    return {
+      flightRouteId: this.flightRouteId,
+      hotelRouteId: this.hotelRouteId,
+      enrichRouteId: this.enrichRouteId,
+      promotedFlights: this.promotedFlights,
+      promotedLodging: this.promotedLodging,
+      itinerary: [...this.itineraryByDay.entries()],
+    };
+  }
+
+  restore(snap: ReplaySnapshot): void {
+    this.flightRouteId = snap.flightRouteId;
+    this.hotelRouteId = snap.hotelRouteId;
+    this.enrichRouteId = snap.enrichRouteId;
+    this.promotedFlights = snap.promotedFlights;
+    this.promotedLodging = snap.promotedLodging;
+    this.itineraryByDay = new Map(snap.itinerary);
   }
 
   lastMeasurement(): { tool: string; modelFacingTokens: number } | null { return this.measurement; }

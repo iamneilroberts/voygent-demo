@@ -309,3 +309,35 @@ describe("tripadvisor_search writes dining WITHOUT a trip_id (real schema has no
     for (const d of dining) expect(r.fixtureDiningIds().includes(d.id)).toBe(true);
   });
 });
+
+describe("snapshot/restore (SessionDO persistence across DO eviction)", () => {
+  it("round-trips promoted state through a fresh instance", () => {
+    const a = new FixtureReplay("demo-x");
+    a.restore({
+      flightRouteId: "dublin-oct",
+      hotelRouteId: "dublin-oct",
+      enrichRouteId: "dublin-oct",
+      promotedFlights: [{ id: "f1" }],
+      promotedLodging: [{ name: "Hotel A" }],
+      itinerary: [[2, { day: 2, title: "Day two" }], [1, { day: 1, title: "Day one" }]],
+    });
+    const b = new FixtureReplay("demo-x");
+    b.restore(a.snapshot());
+    const p = b.lastPromoted();
+    expect(p.flights).toEqual([{ id: "f1" }]);
+    expect(p.lodging).toEqual([{ name: "Hotel A" }]);
+    // itinerary comes back day-sorted regardless of Map insertion order
+    expect(p.itinerary?.map((d) => d.day)).toEqual([1, 2]);
+    expect(b.fixtureExcursionCodes()).toEqual(a.fixtureExcursionCodes());
+  });
+
+  it("fresh instance snapshot is empty/null (no accidental state)", () => {
+    const r = new FixtureReplay("demo-y");
+    const s = r.snapshot();
+    expect(s.flightRouteId).toBeNull();
+    expect(s.promotedFlights).toBeNull();
+    expect(s.itinerary).toEqual([]);
+    const p = r.lastPromoted();
+    expect(p.itinerary).toBeNull();
+  });
+});

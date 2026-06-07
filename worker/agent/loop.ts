@@ -2,6 +2,7 @@ import type { LLMProvider, ToolSchema, ConversationMessage, TokenUsage } from ".
 import type { ServerEvent } from "../../shared/events";
 import { isTripMutating } from "./folio-sync";
 import { scrubArgs, scrubResultText } from "../inspector";
+import { summarizeToolResult } from "./tool-summary";
 
 export interface AgentLoopArgs {
   provider: LLMProvider;
@@ -67,7 +68,7 @@ export async function runAgentLoop(args: AgentLoopArgs): Promise<void> {
       try { content = await callTool(t.name, t.input); if (content.startsWith("ERROR:")) ok = false; }
       catch (e) { content = `ERROR: ${(e as Error).message}`; ok = false; }
       const latencyMs = Date.now() - t0;
-      emit({ type: "tool", tool: t.name, phase: "done", summary: content.slice(0, 120) });
+      emit({ type: "tool", tool: t.name, phase: "done", summary: summarizeToolResult(content) });
       if (ok && args.buildBoard) {
         const board = args.buildBoard(t.name, content);
         if (board) emit(board);

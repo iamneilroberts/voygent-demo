@@ -4,6 +4,7 @@ import { createBoardBuilder, type BoardBuilder } from "./agent/boards";
 import { tripToFolio } from "./agent/folio-sync";
 import { McpClient } from "./mcp/client";
 import { FixtureReplay, type ReplayHelpers } from "./mcp/replay";
+import { msgKey, shrinkForStorage, MSG_PREFIX, type SessRecord } from "./session-store";
 import { presetRoutes } from "./fixtures/index";
 import { ClaudeProvider } from "./llm/claude";
 import { estimateCostUsd } from "./llm/cost";
@@ -113,7 +114,46 @@ export class SessionDO {
   private boardsMode = false;
   // Session-scoped so search→list dedupe survives across exchanges.
   private boardBuilder: BoardBuilder = createBoardBuilder();
-  constructor(private state: DurableObjectState, private env: Env) {}
+  // How many of this.messages are already in durable storage (hydrated or persisted).
+  private persistedMsgCount = 0;
+  constructor(private state: DurableObjectState, private env: Env) {
+    // Without this, a DO eviction between turns (user idles reading results)
+    // wiped the conversation and minted a fresh tripId — the model would then
+    // re-create the trip and orphan the original (live failure, 2026-06-07).
+    state.blockConcurrencyWhile(() => this.hydrate());
+  }
+
+  private async hydrate(): Promise<void> {
+    try {
+      const sess = await this.state.storage.get<SessRecord>("sess");
+      if (!sess) return; // fresh session (or the reserved __budget__ instance)
+      this.tripId = sess.tripId;
+      this.boardsMode = sess.boardsMode;
+      this.replay = new FixtureReplay(this.tripId);
+      this.replay.restore(sess.replay);
+      const stored = await this.state.storage.list<ConversationMessage>({ prefix: MSG_PREFIX });
+      this.messages = [...stored.values()]; // zero-padded keys → list order = insertion order
+      this.persistedMsgCount = this.messages.length;
+    } catch (e) {
+      // A failed hydration degrades to the old fresh-session behavior rather than erroring the DO.
+      console.log(`[hydrate] failed, starting fresh: ${(e as Error).message}`);
+    }
+  }
+
+  private async persistSession(): Promise<void> {
+    try {
+      const puts: Record<string, unknown> = {
+        sess: { tripId: this.tripId, boardsMode: this.boardsMode, replay: this.replay.snapshot() } satisfies SessRecord,
+      };
+      for (let i = this.persistedMsgCount; i < this.messages.length; i++) {
+        puts[msgKey(i)] = shrinkForStorage(this.messages[i]);
+      }
+      await this.state.storage.put(puts);
+      this.persistedMsgCount = this.messages.length;
+    } catch (e) {
+      console.log(`[persist] failed (session continues in memory): ${(e as Error).message}`);
+    }
+  }
 
   // --- daily budget ledger (a single reserved DO instance, "__budget__") ---
   private capUsd(): number { return Number(this.env.BUDGET_DAILY_USD ?? DEFAULT_DAILY_CAP_USD); }
@@ -312,6 +352,7 @@ export class SessionDO {
           try { await this.budgetStub().fetch("https://do/__budget/add", { method: "POST", body: JSON.stringify({ usd: sessionCost }) }); }
           catch { /* ledger update is best-effort */ }
         }
+        await this.persistSession();
       }
     })();
 
