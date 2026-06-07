@@ -106,4 +106,21 @@ console.log(`enrichment tools called: ${calledEnrich.join(", ") || "NONE"}`);
 console.log(`elapsed: ${((Date.now() - t0) / 1000).toFixed(0)}s · session: ${SESSION}`);
 const pass = days.length >= 1 && acts >= 1 && dining.length >= 1;
 console.log(pass ? "PASS ✅" : "FAIL ❌ (expected ≥1 day with ≥1 activity and ≥1 dining pick)");
+
+// Self-cleanup: smoke trips persist under the real MCP user's prefix. If the
+// MCP URL is available (same env var the capture script uses), delete the trip.
+const cleanupUrl = process.env.SMOKE_CLEANUP_MCP_URL ?? process.env.VOYGENT_CAPTURE_MCP_URL;
+const tripId = f.tripId;
+if (cleanupUrl && tripId) {
+  try {
+    await fetch(cleanupUrl, {
+      method: "POST",
+      headers: { "content-type": "application/json", accept: "application/json, text/event-stream" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "delete_trip", arguments: { tripId, confirm: true } } }),
+    });
+    console.log(`cleaned up ${tripId}`);
+  } catch (e) { console.log(`cleanup failed (delete ${tripId} manually): ${e.message}`); }
+} else if (tripId) {
+  console.log(`NOTE: ${tripId} persists under the MCP user — set VOYGENT_CAPTURE_MCP_URL to auto-clean.`);
+}
 process.exit(pass ? 0 : 1);

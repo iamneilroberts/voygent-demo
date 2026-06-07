@@ -182,6 +182,19 @@ export class FixtureReplay {
     return INTERCEPTED.has(name);
   }
 
+  /** Would this search call be served by a featured-trip fixture? Drives the
+   *  fixture-vs-live session latch in SessionDO: featured trips stay replay-
+   *  driven (gif-fidelity); anything else passes through to real Voygent. */
+  matchesFixture(name: string, args: Record<string, any>): boolean {
+    if (name === "flight_search" || name === "flight_list") {
+      return !!matchFlightFixture(args.origin, args.destination);
+    }
+    if (name === "hotel_search" || name === "hotel_list" || name === "hotel_search_and_rank") {
+      return !!this.lookupHotelFixture(args.location ?? args.destination);
+    }
+    return true; // non-search tools never latch a session live by themselves
+  }
+
   /** What promote_* / enrichment has committed this session — overlaid onto the folio snapshot. */
   lastPromoted(): { flights: unknown; lodging: Array<Record<string, unknown>> | null; itinerary: Record<string, any>[] | null } {
     const itinerary = this.itineraryByDay.size

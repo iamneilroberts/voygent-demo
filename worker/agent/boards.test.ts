@@ -99,3 +99,50 @@ describe("createBoardBuilder", () => {
     expect(ev.candidates[0].price).toBe("$214/night");
   });
 });
+
+describe("hotel_search_and_rank (cpmaxx live) board mapping", () => {
+  const cpmaxxResult = JSON.stringify({
+    status: "success",
+    hotels: [
+      {
+        rank: 1, id: 537754, name: "Omni Cancun Villas", stars: 4,
+        area: "Boulevard Kukulcan KM 16.5 Cancun 77500, Zona Hotelera",
+        price_total: 8122.3, price_per_night: 1160,
+        commission: 2436.69, commission_pct: 30,
+        hotel_sheet_url: "https://cpmaxx.example/sheet/537754",
+      },
+      { rank: 2, id: "537755", name: "JW Marriott Cancun", stars: 5, price_per_night: 437 },
+    ],
+  });
+
+  it("maps {hotels:[...]} to a hotel board with commission + detail link", () => {
+    const build = createBoardBuilder();
+    const ev = build("hotel_search_and_rank", cpmaxxResult, "demo-t");
+    expect(ev).not.toBeNull();
+    expect(ev!.type).toBe("board");
+    const board = ev as Extract<NonNullable<typeof ev>, { type: "board" }>;
+    expect(board.kind).toBe("hotel");
+    expect(board.candidates).toHaveLength(2);
+    const [a, b] = board.candidates;
+    expect(a.id).toBe("537754");           // numeric id coerced to string
+    expect(a.title).toBe("Omni Cancun Villas");
+    expect(a.price).toBe("$1,160/night");
+    expect(a.detailUrl).toBe("https://cpmaxx.example/sheet/537754");
+    expect(a.commission).toBe(2436.69);
+    expect(a.commissionPct).toBe(30);
+    expect(a.meta).toContain("4★");
+    expect(a.meta).toContain("Boulevard Kukulcan");
+    expect(b.commission).toBeUndefined();  // absent fields stay absent
+  });
+
+  it("returns null when hotels array is empty", () => {
+    const build = createBoardBuilder();
+    expect(build("hotel_search_and_rank", JSON.stringify({ status: "success", hotels: [] }), "t")).toBeNull();
+  });
+
+  it("does not read {candidates:[...]} for the cpmaxx tool name", () => {
+    const build = createBoardBuilder();
+    const wrongShape = JSON.stringify({ candidates: [{ id: "x", name: "Hotel X" }] });
+    expect(build("hotel_search_and_rank", wrongShape, "t")).toBeNull();
+  });
+});

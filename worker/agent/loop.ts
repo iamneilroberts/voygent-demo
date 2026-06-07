@@ -15,6 +15,12 @@ export interface AgentLoopArgs {
   // Boards mode (claude skin): map a list-tool result to an inline chooser
   // `board` event, or null. Absent → no board events (default path unchanged).
   buildBoard?: (toolName: string, resultText: string) => ServerEvent | null;
+  // Deterministic workflow nudge: called once per tool batch with the batch's
+  // tool names; a returned string is appended as a text block AFTER the
+  // tool_result blocks (harness-injected reminder, like a host system note).
+  // Used to force same-turn enrichment after the hotel promote — prompt-only
+  // compliance proved flaky once the full 120-tool catalog landed.
+  nudge?: (batch: Array<{ name: string; input: Record<string, unknown> }>) => string | null;
   maxTurns?: number;
   maxToolCalls?: number;
   exchangeId?: string;
@@ -83,6 +89,8 @@ export async function runAgentLoop(args: AgentLoopArgs): Promise<void> {
         catch { /* folio refresh is best-effort; a failed refresh must never abort the turn */ }
       }
     }
+    const note = args.nudge?.(pendingTools.map((t) => ({ name: t.name, input: t.input })));
+    if (note) (results.content as Array<Record<string, unknown>>).push({ type: "text", text: note });
     messages.push(results);
     totalToolCalls += pendingTools.length;
     if (totalToolCalls >= maxToolCalls) { emit({ type: "turn-complete" }); return; }

@@ -15,6 +15,14 @@ export function summarizeToolResult(content: string): string {
   if (content.startsWith("ERROR:")) return clip(content, MAX);
   let parsed: unknown;
   try { parsed = JSON.parse(content); } catch { return clip(content, MAX); }
+  // Unwrap nested MCP envelopes from proxied tools ({content:[{type:"text",text:"<json>"}]}).
+  for (let hops = 0; hops < 3; hops++) {
+    const env = parsed as Record<string, any> | null;
+    const inner = env && !Array.isArray(env) && Array.isArray(env.content) && env.content[0]?.type === "text"
+      ? env.content[0].text : null;
+    if (typeof inner !== "string") break;
+    try { parsed = JSON.parse(inner); } catch { break; }
+  }
   if (Array.isArray(parsed)) return `${parsed.length} item${parsed.length === 1 ? "" : "s"}`;
   if (!parsed || typeof parsed !== "object") return clip(content, MAX);
   const o = parsed as Record<string, unknown>;

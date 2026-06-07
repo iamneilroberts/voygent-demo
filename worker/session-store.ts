@@ -14,6 +14,7 @@ import type { ReplaySnapshot } from "./mcp/replay";
 export interface SessRecord {
   tripId: string;
   boardsMode: boolean;
+  liveMode?: boolean;  // latched true when a search left the featured-trip catalog (real-Voygent pass-through)
   replay: ReplaySnapshot;
 }
 

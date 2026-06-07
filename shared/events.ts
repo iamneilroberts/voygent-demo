@@ -31,6 +31,9 @@ export interface BoardCandidate {
   price?: string;   // formatted: "$3,426" / "$214/night"
   meta?: string;    // "United · 1 stop · Economy" / "Temple Bar · 4★ · 8.9 (1,203)"
   summary: string;  // one-liner echoed back to the agent on selection
+  detailUrl?: string;      // supplier detail page (e.g. cpmaxx hotel sheet) — renders as a "details" link
+  commission?: number;     // advisor commission for the stay, USD (cpmaxx-sourced candidates only)
+  commissionPct?: number;  // advisor commission percentage (cpmaxx-sourced candidates only)
 }
 
 export type ServerEvent =

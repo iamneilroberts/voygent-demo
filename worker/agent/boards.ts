@@ -6,11 +6,10 @@
 // The builder is stateful (per exchange): search-then-list returns the same
 // candidate set, so identical consecutive boards are deduped by kind + id set.
 
-import { scrubAdvisor } from "../inspector";
 import type { ServerEvent, BoardCandidate } from "../../shared/events";
 
 const FLIGHT_TOOLS = new Set(["flight_search", "flight_list"]);
-const HOTEL_TOOLS = new Set(["hotel_search", "hotel_list"]);
+const HOTEL_TOOLS = new Set(["hotel_search", "hotel_list", "hotel_search_and_rank"]);
 
 function usd(n: number | null | undefined): string | undefined {
   return typeof n === "number" && Number.isFinite(n) ? `$${Math.round(n).toLocaleString("en-US")}` : undefined;
@@ -43,6 +42,25 @@ function hotelCandidate(c: Record<string, any>): BoardCandidate | null {
   return { id: c.id, title: c.name, price, meta, summary };
 }
 
+// cpmaxx hotel_search_and_rank shape ({hotels:[{id, name, stars, area, price_per_night,
+// price_total, commission, commission_pct, hotel_sheet_url, ...}]}) — live trips only.
+function cpmaxxHotelCandidate(c: Record<string, any>): BoardCandidate | null {
+  const id = c.id != null ? String(c.id) : "";
+  if (!id || typeof c.name !== "string" || !c.name) return null;
+  const stars = typeof c.stars === "number" ? `${c.stars}★` : null;
+  const area = typeof c.area === "string" && c.area ? c.area.split(",")[0].slice(0, 40) : null;
+  const meta = [area, stars].filter(Boolean).join(" · ") || undefined;
+  const perNight = usd(c.price_per_night);
+  const price = perNight ? `${perNight}/night` : usd(c.price_total);
+  const total = usd(c.price_total);
+  const summary = [c.name, price, total ? `${total} total` : null].filter(Boolean).join(", ");
+  const out: BoardCandidate = { id, title: c.name, price, meta, summary };
+  if (typeof c.hotel_sheet_url === "string" && c.hotel_sheet_url) out.detailUrl = c.hotel_sheet_url;
+  if (typeof c.commission === "number") out.commission = c.commission;
+  if (typeof c.commission_pct === "number") out.commissionPct = c.commission_pct;
+  return out;
+}
+
 export type BoardBuilder = (toolName: string, resultText: string, tripId: string) => ServerEvent | null;
 
 export function createBoardBuilder(): BoardBuilder {
@@ -55,12 +73,32 @@ export function createBoardBuilder(): BoardBuilder {
     let parsed: unknown;
     try { parsed = JSON.parse(resultText); } catch { return null; }
     if (!parsed || typeof parsed !== "object") return null;
-    const body = scrubAdvisor(parsed) as Record<string, any>;
-    if (body.action === "clear" || !Array.isArray(body.candidates) || body.candidates.length === 0) return null;
+    // Proxied tools (e.g. hotel_search_and_rank) double-wrap their result in a
+    // nested MCP envelope ({content:[{type:"text",text:"<json>"}]}) — unwrap to
+    // reach the real payload. (Upstream voygent-lite artifact; model copes, we
+    // unwrap for the UI.)
+    for (let hops = 0; hops < 3; hops++) {
+      const env = parsed as Record<string, any>;
+      const inner = Array.isArray(env.content) && env.content[0]?.type === "text" ? env.content[0].text : null;
+      if (typeof inner !== "string") break;
+      try { parsed = JSON.parse(inner); } catch { break; }
+      if (!parsed || typeof parsed !== "object") return null;
+    }
+    // No blanket scrubAdvisor here: the candidate mappers below copy ONLY named
+    // fields (explicit allowlist — that's the firewall), and the demo's boards
+    // are the ADVISOR view, where cpmaxx commission is deliberately surfaced
+    // (profitability toggle). The inspector trail still scrubs separately.
+    const body = parsed as Record<string, any>;
+    // hotel_search_and_rank returns {hotels:[...]} (cpmaxx shape); everything else {candidates:[...]}.
+    const isCpmaxx = toolName === "hotel_search_and_rank";
+    const rawList = isCpmaxx ? body.hotels : body.candidates;
+    if (body.action === "clear" || !Array.isArray(rawList) || rawList.length === 0) return null;
 
-    const candidates = body.candidates
+    const candidates = rawList
       .map((c: unknown) => (c && typeof c === "object"
-        ? (kind === "flight" ? flightCandidate(c as Record<string, any>) : hotelCandidate(c as Record<string, any>))
+        ? (kind === "flight" ? flightCandidate(c as Record<string, any>)
+          : isCpmaxx ? cpmaxxHotelCandidate(c as Record<string, any>)
+          : hotelCandidate(c as Record<string, any>))
         : null))
       .filter((c: BoardCandidate | null): c is BoardCandidate => c !== null);
     if (candidates.length === 0) return null;

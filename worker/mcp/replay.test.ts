@@ -341,3 +341,24 @@ describe("snapshot/restore (SessionDO persistence across DO eviction)", () => {
     expect(p.itinerary).toBeNull();
   });
 });
+
+describe("matchesFixture (fixture-vs-live session latch)", () => {
+  it("matches featured flight routes and rejects unknown ones", () => {
+    const r = new FixtureReplay("demo-x");
+    expect(r.matchesFixture("flight_search", { origin: "ATL", destination: "CUN" })).toBe(true);
+    expect(r.matchesFixture("flight_search", { origin: "BOS", destination: "LIS" })).toBe(false);
+  });
+
+  it("matches featured hotel destinations across arg spellings", () => {
+    const r = new FixtureReplay("demo-x");
+    expect(r.matchesFixture("hotel_search", { location: "Cancun" })).toBe(true);
+    expect(r.matchesFixture("hotel_search_and_rank", { destination: "Cancun, Mexico" })).toBe(true);
+    expect(r.matchesFixture("hotel_search_and_rank", { destination: "Lisbon, Portugal" })).toBe(false);
+  });
+
+  it("never latches live on non-search tools", () => {
+    const r = new FixtureReplay("demo-x");
+    expect(r.matchesFixture("patch_trip", {})).toBe(true);
+    expect(r.matchesFixture("excursion_search", { destination_name: "Lisbon" })).toBe(true);
+  });
+});
