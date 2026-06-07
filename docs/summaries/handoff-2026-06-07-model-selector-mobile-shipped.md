@@ -32,3 +32,10 @@
 - Deploy: `rm -rf dist-web && VITE_API_BASE="" npm run build:web && npx wrangler deploy`.
 - Mobile check (no API): `node /tmp/...` Playwright at 390px against `?mode=auto`; live: `?mode=live` + send a prompt.
 - Boards smoke: `node scripts/smoke-enriched-run.mjs --base <prod> --boards` (set `VOYGENT_CAPTURE_MCP_URL`).
+
+
+## Operational note (added end of session)
+- **Daily budget cap raised to $25** (`BUDGET_DAILY_USD` secret; was default $5). Today the $5 cap was exhausted by automated testing → `/chat` 503'd ("hit its daily limit"). Cap is read per-request from the secret; resets at 00:00 UTC.
+- **Test bypass shipped** (`de2e3c2`): a request with header `x-demo-test: <DEMO_TEST_TOKEN secret>` skips the daily cap AND skips adding to the public ledger. So smoke/record scripts no longer drain the public budget. The scripts auto-send it from `process.env.DEMO_TEST_TOKEN`. Token is in `~/dev/voygent-demo-demo-enrichment/.env` (now gitignored): `export DEMO_TEST_TOKEN=$(grep '^DEMO_TEST_TOKEN=' .env | cut -d= -f2-)` before running smoke/record.
+- **A 503 on `/chat` = budget cap or `DEMO_DISABLED`**, NOT a layout bug. Diagnose: `curl -X POST <prod>/chat -d '{"message":"hi"}'` and read the body.
+- Mobile layout is correct as deployed (verified live at 390px); the stale-looking phone screenshots were long-open tabs serving a pre-deploy bundle (HTML is `max-age=0, must-revalidate` — a reload pulls current).
