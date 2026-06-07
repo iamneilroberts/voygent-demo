@@ -34,7 +34,17 @@ export function App() {
   // ?record=1 is a no-op unless the claude skin is active — capture as ?skin=claude&record=1.
   const recorder = useRef(recordParam && resolveInitialSkin() === "claude" ? createRecorder("dublin-oct") : null).current;
   const [collapsed, setCollapsed] = useState(false);
-  const [skin, setSkin] = useState<SkinId>(resolveInitialSkin);
+  const [skin, setSkin] = useState<SkinId>(() => {
+    if (resolveInitialMode() === "auto") {
+      // Auto mode always plays in the claude skin. Set data-skin synchronously
+      // here (before the useEffect fires) so there is no board→claude flash on
+      // first paint. resolveInitialSkin() has no DOM side effects, so it is safe
+      // to bypass it in this branch.
+      applySkin("claude");
+      return "claude";
+    }
+    return resolveInitialSkin();
+  });
   const [insTools, setInsTools] = useState<InsTool[]>([]);
   const [insTurns, setInsTurns] = useState<InsTurn[]>([]);
   const [insSummaries, setInsSummaries] = useState<InsSummary[]>([]);

@@ -2,9 +2,11 @@
 // "live" is the normal interactive chat; "auto" plays a committed golden
 // recording ("▶ Watch the demo"). Resolution: ?mode= URL param (wins +
 // persists) → localStorage → default.
+// Default is "auto": first-time visitors land on the autoplay golden run.
+// Clicking "build your own" persists "live" so returning visitors stay live.
 export const MODE_IDS = ["live", "auto"] as const;
 export type ModeId = (typeof MODE_IDS)[number];
-export const DEFAULT_MODE: ModeId = "live";
+export const DEFAULT_MODE: ModeId = "auto";
 export const MODE_STORAGE_KEY = "voygent-demo-mode";
 
 export function normalizeMode(raw: string | null | undefined): ModeId {

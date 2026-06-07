@@ -11,4 +11,9 @@ describe("mode resolution", () => {
     expect(resolveMode("bogus", null)).toBe(DEFAULT_MODE);
     expect(normalizeMode("nope")).toBe(DEFAULT_MODE);
   });
+  it("defaults a fresh visitor (no param, no storage) to auto", () => {
+    expect(DEFAULT_MODE).toBe("auto");
+    expect(resolveMode(null, null)).toBe("auto");
+    expect(resolveMode(undefined, undefined)).toBe("auto");
+  });
 });
