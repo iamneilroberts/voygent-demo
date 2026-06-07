@@ -6,11 +6,20 @@ export interface FolioHotel {
   name: string; price?: string; stars?: number;
   area?: string; nights?: number; perNight?: string;
 }
+export interface FolioActivity { time?: string; name: string; description?: string; url?: string }
+export interface FolioDining   { name: string; description?: string; cuisine?: string; url?: string }
+export interface FolioDay {
+  date?: string; title: string; location?: string;
+  activities: FolioActivity[]; dining: FolioDining[]; stay?: string;
+}
+export interface FolioInclude { key: string; title: string; body: string }
 export interface FolioData {
   tripId: string;
   title: string;
   flights: FolioFlight[];
   hotels: FolioHotel[];
+  days?: FolioDay[];          // NEW — day-by-day (activities = excursions + free things; dining)
+  includes?: FolioInclude[];  // NEW — boilerplate "what's included / tips"
 }
 
 // One clickable option on an inline chooser board (claude-skin boards mode).

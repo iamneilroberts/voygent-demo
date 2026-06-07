@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { encodeSse, type ServerEvent } from "./events";
+import { encodeSse, type ServerEvent, type FolioData } from "./events";
 
 describe("encodeSse", () => {
   it("encodes a text event as one SSE frame", () => {
@@ -29,5 +29,23 @@ describe("encodeSse", () => {
     };
     const decoded = JSON.parse(encodeSse(ev).slice("data: ".length).trim());
     expect(decoded).toEqual(ev);
+  });
+});
+
+describe("FolioData enrichment shape", () => {
+  it("encodes a folio carrying days[] and includes[]", () => {
+    const folio: FolioData = {
+      tripId: "t1", title: "Dublin", flights: [], hotels: [],
+      days: [{
+        title: "Day 1 — Dublin", date: "2026-10-12", location: "Dublin",
+        activities: [{ name: "Kilmainham Gaol", description: "Historic tour", url: "https://x" }],
+        dining: [{ name: "The Winding Stair", cuisine: "Irish", description: "Riverside", url: "https://y" }],
+        stay: "Baggotrath House",
+      }],
+      includes: [{ key: "whats-included", title: "What's included", body: "Flights and hotels." }],
+    };
+    const line = encodeSse({ type: "folio", folio });
+    expect(line).toContain("Kilmainham");
+    expect(line).toContain("whats-included");
   });
 });
