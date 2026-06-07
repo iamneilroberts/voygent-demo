@@ -21,12 +21,13 @@ interface Env {
   BUDGET_DAILY_USD?: string;              // global daily spend cap (default 5)
 }
 
-// Cost guardrail: the demo only needs these ~9 tools. Sending the full ~79-tool
+// Cost guardrail: the demo only needs these ~12 tools. Sending the full ~79-tool
 // Voygent catalog every turn was the dominant cost; restrict to what's used.
 const DEMO_TOOLS = new Set([
   "save_trip", "read_trip", "patch_trip",
   "flight_search", "flight_list", "promote_flights",
   "hotel_search", "hotel_list", "promote_hotels_to_lodging",
+  "excursion_search", "apply_gap_tour_picks", "tripadvisor_search",
 ]);
 
 const DEFAULT_MODEL = "claude-haiku-4-5";  // cheap while we work; flip via LLM_MODEL secret
@@ -82,6 +83,21 @@ const BOARDS_WORKFLOW_OVERRIDE =
   "with patch_trip and call the matching promote tool. For hotels the traveler may pick one or more. " +
   "Never auto-select.";
 
+// Enrichment workflow (additive, all sessions): after flights+hotels, build out
+// the rest of the trip. Orthogonal to BOARDS_WORKFLOW_OVERRIDE — both are appended.
+// Excursion selection boards are NOT built yet (deferred), so enrichment
+// categories auto-add even in boards mode.
+const ENRICHMENT_WORKFLOW =
+  "AFTER flights and hotels are in the folio, enrich the trip (these categories do NOT use option cards — pick good ones yourself and add them):\n" +
+  "6. EXCURSIONS & FREE THINGS: call excursion_search with { source:'viator', trip_id:<tripId>, destination:<city>, date:<departure_date> }. " +
+  "From the candidates, choose 2-3 great ones — mix at least one free option (free:true) with a paid highlight — then call apply_gap_tour_picks with " +
+  "{ tripId:<tripId>, picks:[ { day:<n>, productCode:'<id>' }, ... ] } using each candidate's own day and productCode. They appear in the day-by-day folio.\n" +
+  "7. DINING (local picks): call tripadvisor_search with { trip_id:<tripId>, location:<city>, category:'restaurants' }. These are editorial local " +
+  "recommendations, NOT bookable inventory — mention a couple in chat as suggestions to consider; they appear under each day in the folio.\n" +
+  "8. Briefly tell the traveler the day-by-day plan now includes what's-included notes and travel tips — the folio carries the detail.\n" +
+  "DATA RULES (unchanged): use ONLY tool-returned data for bookable items (flights, hotels, excursions). Dining picks are clearly framed as suggestions. " +
+  "Never invent excursions, restaurants, prices, or ratings.";
+
 function utcDate(): string { return new Date().toISOString().slice(0, 10); }
 interface BudgetRec { date: string; spent: number; }
 
@@ -133,7 +149,9 @@ export class SessionDO {
 
     if (this.messages.length === 0) {
       this.boardsMode = mode === "boards";
-      const seed = SYSTEM_HINT + (this.boardsMode ? `\n\n${BOARDS_WORKFLOW_OVERRIDE}` : "");
+      const seed = SYSTEM_HINT
+        + (this.boardsMode ? `\n\n${BOARDS_WORKFLOW_OVERRIDE}` : "")
+        + `\n\n${ENRICHMENT_WORKFLOW}`;
       this.messages.push({ role: "user", content: `${seed}\n\nMy trip_id is ${this.tripId}.` });
     }
     this.messages.push({ role: "user", content: message });
@@ -181,6 +199,16 @@ export class SessionDO {
         : mcp.callTool(name, input);
 
     const callTool = async (name: string, input: Record<string, unknown>): Promise<string> => {
+      // Fabrication guard: strip enrichment-content keys from model-initiated patch_trip.
+      // Replay's own helpers.patchTrip calls mcp.callTool directly (bypassing this wrapper),
+      // so fixture-keyed enrichment writes are unaffected.
+      if (name === "patch_trip") {
+        const inAny = input as any;
+        const updates = inAny.updates ?? inAny;
+        if (updates && typeof updates === "object") {
+          for (const k of ["itinerary", "days", "activities", "dining", "includes"]) delete updates[k];
+        }
+      }
       // patch savings: incremental patch vs full-trip rewrite (baseline-gated, clamped ≥0).
       if (name === "patch_trip" && this.lastBaselineTripJson) {
         const updates = (input as any).updates ?? input;
@@ -237,6 +265,9 @@ export class SessionDO {
             const promoted = this.replay.lastPromoted();
             if (promoted.flights != null) data.flights = promoted.flights;
             if (promoted.lodging != null) data.lodging = promoted.lodging;
+            // ALWAYS replay-controlled — a live/model-written itinerary is dropped.
+            if (promoted.itinerary != null) data.itinerary = promoted.itinerary;
+            else delete data.itinerary;
             const folio = tripToFolio(this.tripId, { data });
             maxFolioTokens = Math.max(maxFolioTokens, estTokens(JSON.stringify(folio)));
             mux.send({ type: "folio", folio });
