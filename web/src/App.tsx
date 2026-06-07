@@ -11,6 +11,7 @@ import { AdvisorSwitch } from "./AdvisorSwitch";
 import { resolveInitialAdvisor, persistAdvisor } from "./lib/advisor";
 import { ModelSwitch } from "./ModelSwitch";
 import { resolveInitialSelector, persistSelector, routingBody, type SelectorMode } from "./lib/model";
+import { type MobileView, DEFAULT_MOBILE_VIEW } from "./lib/mobile-view";
 import { DEFAULT_SMART_MAP, type ModelId, type PhaseModelMap, type Phase } from "../../shared/models";
 import { engState } from "./lib/inspector-state";
 import { applyTheme, loadTheme } from "./lib/theme";
@@ -67,6 +68,8 @@ export function App() {
   const [smartMap, setSmartMap] = useState<PhaseModelMap>({ ...DEFAULT_SMART_MAP });
   const [enabledModels, setEnabledModels] = useState<ModelId[]>(["claude-haiku-4-5", "claude-sonnet-4-6"]);
   const activePhase: Phase = folio && folio.hotels.length > 0 ? "enrichment" : "discovery";
+  // Mobile-only: which surface is showing (chat base + folio/engineering overlays).
+  const [mobileView, setMobileView] = useState<MobileView>(DEFAULT_MOBILE_VIEW);
   const replayAbort = useRef<AbortController | null>(null);
   useEffect(() => { persistMode(mode); }, [mode]);
 
@@ -214,6 +217,18 @@ export function App() {
   const eng = engState(insTools.length, collapsed);
   const chatMessages = items.filter(isChatMessage) as ChatMessage[];
 
+  function toggleDemo() {
+    const next: ModeId = mode === "auto" ? "live" : "auto";
+    persistMode(next);
+    try {
+      const u = new URL(window.location.href);
+      u.searchParams.set("mode", next);
+      if (next === "auto") u.searchParams.set("skin", "claude");
+      window.location.href = u.toString();   // reload re-latches the session cleanly
+    } catch { /* no-op */ }
+  }
+  const demoLabel = mode === "auto" ? "● build your own" : "▶ watch the demo";
+
   return (
     <div className="app">
       {skin === "board" && (
@@ -225,12 +240,15 @@ export function App() {
           <ThemeSwitch />
         </header>
       )}
-      <div className="stage" data-eng={eng}>
+      <div className="stage" data-eng={eng} data-mview={skin === "claude" ? mobileView : "chat"}>
         <section className="product">
           {skin === "claude" ? (
             <ClaudeChatView
               items={items} folio={folio} onSend={send} onPick={onPick}
               busy={busy} presets={presets} geoCity={geoCity} advisor={advisor}
+              mobileView={mobileView} onMobileView={setMobileView}
+              onToggleDemo={toggleDemo} demoLabel={demoLabel}
+              engHasContent={insTools.length > 0}
             />
           ) : (
             <>
@@ -240,6 +258,9 @@ export function App() {
           )}
         </section>
         <section className="engineering" data-eng={eng}>
+          {skin === "claude" && (
+            <button type="button" className="mview-close" onClick={() => setMobileView("chat")} aria-label="Back to chat">✕ chat</button>
+          )}
           <Inspector
             state={eng}
             // Manual collapse only applies once live; toggling during the pre-trip idle rail is a
@@ -254,22 +275,7 @@ export function App() {
       </div>
       <footer className="meta">This interface was itself built by a coding agent.</footer>
       <SkinSwitch skin={skin} onPick={setSkin} />
-      <button
-        type="button"
-        className="watch-demo"
-        onClick={() => {
-          const next: ModeId = mode === "auto" ? "live" : "auto";
-          persistMode(next);
-          try {
-            const u = new URL(window.location.href);
-            u.searchParams.set("mode", next);
-            if (next === "auto") u.searchParams.set("skin", "claude");
-            window.location.href = u.toString();   // reload re-latches the session cleanly
-          } catch { /* no-op */ }
-        }}
-      >
-        {mode === "auto" ? "● build your own" : "▶ watch the demo"}
-      </button>
+      <button type="button" className="watch-demo" onClick={toggleDemo}>{demoLabel}</button>
     </div>
   );
 }

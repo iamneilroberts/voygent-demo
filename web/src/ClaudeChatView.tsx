@@ -7,6 +7,7 @@ import { ClaudeToolChip } from "./ClaudeToolChip";
 import { BoardView } from "./BoardView";
 import { commissionLabel, commissionTotal, fmtUsd } from "./lib/advisor";
 import { safeHttpUrl } from "./lib/url";
+import { type MobileView, toggleMobileView } from "./lib/mobile-view";
 
 // claude.ai-lookalike left pane. Deliberately close to claude.ai's layout
 // (centered column, user bubbles right, assistant prose on the page, inline
@@ -145,7 +146,7 @@ function Welcome({ presets, geoCity, onSend, busy }: { presets: Preset[]; geoCit
 }
 
 export function ClaudeChatView(
-  { items, folio, onSend, onPick, busy, presets, geoCity, advisor }:
+  { items, folio, onSend, onPick, busy, presets, geoCity, advisor, mobileView, onMobileView, onToggleDemo, demoLabel, engHasContent }:
   {
     items: TimelineItem[];
     folio: FolioData | null;
@@ -155,14 +156,29 @@ export function ClaudeChatView(
     presets: Preset[];
     geoCity: string | null;
     advisor: boolean;
+    mobileView: MobileView;
+    onMobileView: (v: MobileView) => void;
+    onToggleDemo: () => void;
+    demoLabel: string;
+    engHasContent: boolean;
   },
 ) {
   const [input, setInput] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const pinnedRef = useRef(true);   // is the user parked at the bottom of the chat?
   const firstRun = items.length === 0;
+  const folioHasContent = !!folio && (folio.flights.length > 0 || folio.hotels.length > 0 || !!folio.days?.length);
 
-  // Keep the newest content in view as the stream grows (claude.ai behavior).
-  useEffect(() => { endRef.current?.scrollIntoView({ block: "end" }); }, [items, folio, busy]);
+  // Auto-scroll ONLY on new chat content AND only when the user is already at the
+  // bottom — never on a folio-only update (that yank was the mobile "glitchy
+  // scrolling"). Track the pinned-to-bottom state from the scroll position.
+  function onScroll() {
+    const el = scrollRef.current;
+    if (!el) return;
+    pinnedRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
+  }
+  useEffect(() => { if (pinnedRef.current) endRef.current?.scrollIntoView({ block: "end" }); }, [items, busy]);
 
   const lastIdx = items.length - 1;
   return (
@@ -172,7 +188,7 @@ export function ClaudeChatView(
         <span className="cl-header-note">travel-planning agent</span>
       </header>
       <div className="cl-ribbon" role="note">Simulated claude.ai environment — this is a Voygent demo, not Anthropic's Claude</div>
-      <div className="cl-scroll">
+      <div className="cl-scroll" ref={scrollRef} onScroll={onScroll}>
         <div className="cl-col">
           {firstRun && <Welcome presets={presets} geoCity={geoCity} onSend={onSend} busy={busy} />}
           {items.map((it, i) => {
@@ -182,11 +198,31 @@ export function ClaudeChatView(
             if (it.text) return <div key={i} className="cl-prose"><Prose text={it.text} /></div>;
             return busy && i === lastIdx ? <div key={i} className="cl-thinking" aria-label="Thinking"><span /></div> : null;
           })}
-          {folio && <FolioArtifact folio={folio} advisor={advisor} />}
+          {folio && <div className="cl-folio-inline"><FolioArtifact folio={folio} advisor={advisor} /></div>}
           <div ref={endRef} />
         </div>
       </div>
+      {mobileView === "folio" && (
+        <div className="cl-sheet" role="dialog" aria-label="Trip folio">
+          <div className="cl-sheet-head">
+            <span>Trip folio</span>
+            <button type="button" className="cl-sheet-close" onClick={() => onMobileView("chat")} aria-label="Back to chat">✕ chat</button>
+          </div>
+          <div className="cl-sheet-body">
+            {folio ? <FolioArtifact folio={folio} advisor={advisor} /> : <p className="cl-day-desc">Your trip folio will build here as Voygent works.</p>}
+          </div>
+        </div>
+      )}
       <div className="cl-composer-wrap">
+        <div className="cl-pillbar" role="group" aria-label="Mobile views">
+          {folioHasContent && (
+            <button type="button" className={`cl-pill ${mobileView === "folio" ? "on" : ""}`} onClick={() => onMobileView(toggleMobileView(mobileView, "folio"))}>📄 Folio</button>
+          )}
+          {engHasContent && (
+            <button type="button" className={`cl-pill ${mobileView === "engineering" ? "on" : ""}`} onClick={() => onMobileView(toggleMobileView(mobileView, "engineering"))}>⚙ Engineering</button>
+          )}
+          <button type="button" className="cl-pill" onClick={onToggleDemo}>{demoLabel}</button>
+        </div>
         <form
           className="cl-composer"
           onSubmit={(e) => { e.preventDefault(); if (input.trim()) { onSend(input); setInput(""); } }}
