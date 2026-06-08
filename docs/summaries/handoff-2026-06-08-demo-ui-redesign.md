@@ -1,7 +1,9 @@
 # Session Handoff: Demo UI Redesign
 **Date:** 2026-06-08
 **Repo:** `voygent-demo` · **Branch:** `demo-ui-redesign` (worktree `../voygent-demo-demo-ui-redesign`, off `demo-enrichment`)
-**Status:** Implemented + browser-verified on the branch. **NOT deployed — Neil drives the deploy.**
+**Status:** ✅ **DEPLOYED to prod** (Worker `voygent-demo` @ https://voygent-demo.somotravel.workers.dev) as a SUPERSET merge `6f11dcb`.
+
+> ⚠️ **Deploy collision caught + fixed.** First deploy went out from `demo-ui-redesign` (based on `1812216`) — but `demo-enrichment` had advanced to `acef57b` (the **phase-machine** feature) since I branched. That first deploy regressed `/info/phase-machine` (302→`/`). Fixed forward: merged `demo-enrichment` into the branch (resolved 4 overlapping files — `shared/events.ts`, `App.tsx`, `Inspector.tsx`, `styles.css` — keeping BOTH the validation/summary-strip and the phase-machine trail), re-verified **222 tests green**, redeployed `6f11dcb`. `/info/phase-machine` is back to **200**; both features live. `demo-enrichment` fast-forwarded to `6f11dcb` (prod branch == deployed code). Lesson (again): shared Worker = last-deploy-wins; deploy a superset, not a stale branch.
 **Plan executed:** `docs/plans/2026-06-08-demo-ui-redesign-plan.md` (method: interface-design skill set).
 
 ## What shipped (5 commits on `demo-ui-redesign`)
