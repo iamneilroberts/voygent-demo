@@ -3,7 +3,7 @@ import { streamChat } from "./sse-client";
 import { ChatView, type ChatMessage, type Preset } from "./ChatView";
 import { ClaudeChatView } from "./ClaudeChatView";
 import { FolioPanel } from "./FolioPanel";
-import type { ServerEvent, FolioData, BoardCandidate } from "../../shared/events";
+import type { ServerEvent, FolioData, BoardCandidate, StatsResponse } from "../../shared/events";
 import { Inspector, type InsTool, type InsTurn, type InsSummary, type InsSavings, type InsOverhead } from "./Inspector";
 import { ThemeSwitch } from "./ThemeSwitch";
 import { SkinSwitch } from "./SkinSwitch";
@@ -56,6 +56,9 @@ export function App() {
   const [insSummaries, setInsSummaries] = useState<InsSummary[]>([]);
   const [insSavings, setInsSavings] = useState<InsSavings[]>([]);
   const [insOverhead, setInsOverhead] = useState<InsOverhead[]>([]);
+  // Cumulative cross-session stats (public aggregates) for the "Across all
+  // sessions" panel section. Fetched once on mount, like /presets.
+  const [stats, setStats] = useState<StatsResponse | null>(null);
 
   const [mode] = useState<ModeId>(resolveInitialMode);
   // Advisor view: commission per item + trip total (real supplier data only).
@@ -119,6 +122,13 @@ export function App() {
         if (d.smartMap) setSmartMap(d.smartMap);
       })
       .catch(() => { /* welcome falls back to a generic greeting + text box */ });
+  }, []);
+
+  useEffect(() => {
+    fetch(`${API_BASE}/stats`)
+      .then((r) => r.json() as Promise<StatsResponse>)
+      .then((s) => { if (s && typeof s.exchanges === "number") setStats(s); })
+      .catch(() => { /* section just stays hidden when stats are unavailable */ });
   }, []);
 
   function showError(msg: string) {
@@ -267,7 +277,7 @@ export function App() {
             // no-op so a stray click can't latch `collapsed` and suppress the first-tool reveal.
             onToggleCollapse={() => { if (insTools.length > 0) setCollapsed((c) => !c); }}
             tools={insTools} turns={insTurns} summaries={insSummaries}
-            savings={insSavings} overhead={insOverhead}
+            savings={insSavings} overhead={insOverhead} stats={stats}
             headExtra={skin === "claude" ? <><ModelSwitch mode={modelMode} enabled={enabledModels} onPick={setModelMode} /><AdvisorSwitch on={advisor} onToggle={setAdvisor} /><ThemeSwitch /></> : undefined}
             routing={{ mode: modelMode, enabledModels, smartMap, activePhase, onMode: setModelMode, onSmartMap: setSmartMap }}
           />

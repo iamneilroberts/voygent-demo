@@ -70,3 +70,16 @@ export type InspectorEvent =
 export function encodeSse(ev: ServerEvent): string {
   return `data: ${JSON.stringify(ev)}\n\n`;
 }
+
+// Public cumulative-stats shape returned by GET /stats and consumed by the
+// Inspector's "Across all sessions" section. Aggregates only — no per-exchange
+// rows are ever exposed. byModel is the measured routed spend split by tier.
+export interface StatsResponse {
+  sessions: number;
+  exchanges: number;
+  trips: number;
+  totalActualCostUsd: number;
+  totalSavedTokens: number;     // ESTIMATE — sum of emitted savings, labeled "estimated" in the UI
+  totalTokens: number;
+  byModel: { haiku: number; sonnet: number; opus: number };
+}

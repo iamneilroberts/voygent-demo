@@ -10,6 +10,7 @@ import { presetRoutes } from "./fixtures/index";
 import { ClaudeProvider } from "./llm/claude";
 import { estimateCostUsd } from "./llm/cost";
 import { withInspectorCost, sessionCostByModel, estTokens, utf8Bytes } from "./inspector";
+import { STATS_INSERT_SQL, statsRowFromSummary, type StatsSummary } from "./stats";
 import { encodeSse } from "../shared/events";
 import type { ConversationMessage, TokenUsage } from "./llm/provider";
 import type { ServerEvent } from "../shared/events";
@@ -23,6 +24,7 @@ interface Env {
   BUDGET_DAILY_USD?: string;              // global daily spend cap (default 5)
   DEMO_OPUS_ENABLED?: string;             // when set, Opus is offered/accepted (abuse gate; default off)
   DEMO_TEST_TOKEN?: string;               // test/smoke runs carrying this header skip the public ledger
+  STATS_DB?: D1Database;                  // optional: per-exchange engineering-stats history (no-op when unbound)
 }
 
 // Public-surface denylist (Neil 2026-06-07): the catalog stays claude.ai-faithful
@@ -258,6 +260,10 @@ export class SessionDO {
   private async handleChat(req: Request): Promise<Response> {
     // Test/smoke runs (valid secret header) don't count against the public daily ledger.
     const isTest = !!this.env.DEMO_TEST_TOKEN && req.headers.get("x-demo-test") === this.env.DEMO_TEST_TOKEN;
+    // Stats identity: the session id the worker addressed this DO by (forwarded in the query)
+    // + the wall-clock the exchange started, stamped into the stats row at finalize.
+    const sessionId = new URL(req.url).searchParams.get("session") ?? "anon";
+    const exchangeTs = Date.now();
     const body = await req.json<{ message: string; mode?: string; model?: unknown; routing?: { discovery?: unknown; enrichment?: unknown } }>();
     const { message, mode } = body;
     const fallbackModel = (this.env.LLM_MODEL || DEFAULT_MODEL) as ModelId;
@@ -297,6 +303,10 @@ export class SessionDO {
     let instrumentationBytes = 0;
     let instrumentationMs = 0;
     let maxFolioTokens = 0;
+    // Sum of every emitted savings event (patch + searchDistill + template) this
+    // exchange — the ESTIMATE persisted as saved_tokens. Read after the template
+    // savings is emitted in `finally`, so it includes the per-render figure.
+    let savedTokens = 0;
     this.lastBaselineTripJson = null;
 
     // Cost-aware emit: inject real $ into zero-cost turn events; tally inspector counters.
@@ -306,6 +316,7 @@ export class SessionDO {
       if (ev.type === "inspector") {
         if (ev.kind === "turn") turnCount++;
         else if (ev.kind === "tool") toolCallCount++;
+        else if (ev.kind === "savings") savedTokens += ev.tokensSaved;
         if (ev.kind !== "overhead" && ev.kind !== "summary") {
           instrumentationBytes += utf8Bytes(encodeSse(ev));
         }
@@ -492,23 +503,39 @@ export class SessionDO {
           instrumentationMs: instrumentationMs > 0 ? instrumentationMs : null,
           instrumentationBytes, addedModelTokens: 0,
         });
-        // Inspector summary — emitted while the stream is still open.
-        emit({
-          type: "inspector", kind: "summary", exchangeId,
+        // Inspector summary — emitted while the stream is still open. The same
+        // numbers feed the stats row (savedTokens now includes the template
+        // savings emitted just above).
+        const summary: StatsSummary = {
           turns: turnCount, toolCalls: toolCallCount, exposedToolCount, fullToolCount,
           inputTokens: u.inputTokens, outputTokens: u.outputTokens,
           cacheReadTokens: u.cacheReadTokens, cacheCreationTokens: u.cacheCreationTokens,
           costByModel: sessionCostByModel(u),          // counterfactual (all-tier)
           actualCostUsd: sessionCost,                  // measured routed spend
           actualCostByModel: { ...actualCostByModel },
-        });
-        mux.close();
-        // Record cost: log (visible via `wrangler tail`) + add to the daily ledger.
+        };
+        emit({ type: "inspector", kind: "summary", exchangeId, ...summary });
+        // Record cost: log (visible via `wrangler tail`).
         console.log(`[cost] model=${model} trip=${this.tripId} in=${u.inputTokens} out=${u.outputTokens} cacheR=${u.cacheReadTokens} cacheW=${u.cacheCreationTokens} usd=${sessionCost.toFixed(4)}`);
-        if (sessionCost > 0 && !isTest) {
-          try { await this.budgetStub().fetch("https://do/__budget/add", { method: "POST", body: JSON.stringify({ usd: sessionCost }) }); }
-          catch { /* ledger update is best-effort */ }
-        }
+        // Anchor the telemetry writes BEFORE mux.close() — a detached tail after
+        // close can be lost on DO eviction (Codex #2). Both are best-effort:
+        // allSettled never rejects, so a D1/ledger failure never aborts the turn.
+        // Stats writes skip test/smoke runs and no-op when STATS_DB is unbound.
+        await Promise.allSettled([
+          (this.env.STATS_DB && !isTest)
+            ? this.env.STATS_DB.prepare(STATS_INSERT_SQL)
+                .bind(...statsRowFromSummary(
+                  summary,
+                  { sessionId, exchangeId, tripId: this.tripId, boardsMode: this.boardsMode, liveMode: this.liveMode, routing: this.routing },
+                  savedTokens, exchangeTs,
+                ))
+                .run()
+            : Promise.resolve(),
+          (sessionCost > 0 && !isTest)
+            ? this.budgetStub().fetch("https://do/__budget/add", { method: "POST", body: JSON.stringify({ usd: sessionCost }) })
+            : Promise.resolve(),
+        ]);
+        mux.close();
         await this.persistSession();
       }
     })();

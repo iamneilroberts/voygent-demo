@@ -2,8 +2,9 @@ export { SessionDO } from "./session-do";
 import { buildPresets } from "./presets";
 import { infoPageHtml } from "./info/pages";
 import { enabledModels, DEFAULT_SMART_MAP } from "../shared/models";
+import { STATS_AGG_SQL, shapeStats, type StatsAggRow } from "./stats";
 
-interface Env { SESSION: DurableObjectNamespace; DEMO_DISABLED?: string; DEMO_OPUS_ENABLED?: string; DEMO_TEST_TOKEN?: string; }
+interface Env { SESSION: DurableObjectNamespace; DEMO_DISABLED?: string; DEMO_OPUS_ENABLED?: string; DEMO_TEST_TOKEN?: string; STATS_DB?: D1Database; }
 
 // Test/smoke requests (carrying the secret header) bypass the public daily
 // budget so automated runs don't 503 real visitors. Returns false unless the
@@ -45,6 +46,11 @@ export default {
         { headers: cors() },
       );
     }
+    if (url.pathname === "/stats" && req.method === "GET") {
+      // Public cumulative engineering-stats — aggregates only, no per-exchange
+      // rows. Edge-cached so D1 sees ~1 read/60s regardless of visitor volume.
+      return handleStats(req, env);
+    }
     if (url.pathname === "/chat" && req.method === "POST") {
       // Operational kill-switch for a public, money-spending endpoint: set the
       // DEMO_DISABLED secret to pause it instantly (no redeploy needed).
@@ -72,6 +78,33 @@ export default {
     return new Response("ok");
   },
 };
+
+// GET /stats — cumulative aggregates feeding the "Across all sessions" panel.
+// Edge-cached via the Cache API (a max-age header alone protects only browsers,
+// not scripted reads — Codex #4). Always 200 with a zero shape on error/unbound,
+// so the panel just hides the section rather than surfacing a 500.
+async function handleStats(req: Request, env: Env): Promise<Response> {
+  // `caches.default` is a Workers-runtime extension (not in the DOM CacheStorage type).
+  const cache = (caches as unknown as { default: Cache }).default;
+  // One shared cache entry keyed on the bare path (ignore query/headers).
+  const cacheKey = new Request(new URL("/stats", req.url).toString(), { method: "GET" });
+  const hit = await cache.match(cacheKey);
+  if (hit) return hit;
+
+  let shape = shapeStats(null);
+  try {
+    if (env.STATS_DB) {
+      const row = await env.STATS_DB.prepare(STATS_AGG_SQL).first<StatsAggRow>();
+      shape = shapeStats(row);
+    }
+  } catch { /* empty/zero shape on any D1 error or missing table */ }
+
+  const res = Response.json(shape, {
+    headers: { ...cors(), "cache-control": "public, max-age=60" },
+  });
+  try { await cache.put(cacheKey, res.clone()); } catch { /* cache write is best-effort */ }
+  return res;
+}
 
 function cors(): Record<string, string> {
   return {

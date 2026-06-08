@@ -18,6 +18,17 @@ class_name = "SessionDO"
 tag = "v1"
 new_sqlite_classes = ["SessionDO"]
 
+# Engineering-stats history (one row per completed exchange). Both the SessionDO
+# (writes) and the top-level worker (GET /stats reads) bind STATS_DB.
+# DEPLOY STEP 1 (before `wrangler deploy`): create the DB and paste its id here:
+#   wrangler d1 create voygent-demo-stats   →   copy database_id below
+#   wrangler d1 execute voygent-demo-stats --remote --file migrations/0001_session_stats.sql
+# Until then the binding is absent in dev/test and the feature is a silent no-op.
+[[d1_databases]]
+binding = "STATS_DB"
+database_name = "voygent-demo-stats"
+database_id = "REPLACE_WITH_wrangler_d1_create_OUTPUT"
+
 # NOTE: demo.voygent.ai is NOT attached here. The voygent.ai zone has a *.voygent.ai
 # wildcard routing every subdomain to the prod `voygent` Worker, which shadows a plain
 # custom-domain attachment and (observed 2026-06-05) regressed this Worker's workers.dev
