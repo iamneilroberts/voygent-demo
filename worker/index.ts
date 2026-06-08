@@ -42,7 +42,7 @@ export default {
       // Also advertise the enabled model set (Opus gate) + default smart map so the
       // client selector renders only acceptable models.
       return Response.json(
-        { ...buildPresets(req), enabledModels: enabledModels(!!env.DEMO_OPUS_ENABLED), smartMap: DEFAULT_SMART_MAP },
+        { ...buildPresets(req), enabledModels: enabledModels({ opus: !!env.DEMO_OPUS_ENABLED }), smartMap: DEFAULT_SMART_MAP },
         { headers: cors() },
       );
     }

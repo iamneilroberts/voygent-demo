@@ -270,7 +270,7 @@ export class SessionDO {
     const fallbackModel = (this.env.LLM_MODEL || DEFAULT_MODEL) as ModelId;
     const model = fallbackModel; // ClaudeProvider default + cost fallback; per-turn routing overrides per call
     // Server-coerce the visitor's model choice through the enabled allowlist (the real Opus gate).
-    const enabled = enabledModels(!!this.env.DEMO_OPUS_ENABLED);
+    const enabled = enabledModels({ opus: !!this.env.DEMO_OPUS_ENABLED });
     this.routing = buildRouting({ model: body.model, routing: body.routing }, enabled, fallbackModel);
     const mcp = new McpClient(this.env.VOYGENT_MCP_URL, this.env.VOYGENT_MCP_BEARER);
     const provider = new ClaudeProvider(this.env.ANTHROPIC_API_KEY, model);
