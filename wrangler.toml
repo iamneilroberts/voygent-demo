@@ -37,5 +37,7 @@ database_id = "20321ac2-3669-489e-b67c-5e5bd91d6f2e"
 
 # Secrets (set via `wrangler secret put`, NOT checked in):
 #   ANTHROPIC_API_KEY, VOYGENT_MCP_URL, VOYGENT_MCP_BEARER, and optional DEMO_DISABLED.
+#   DEEPSEEK_API_KEY (+ DEMO_DEEPSEEK_ENABLED=1 to go live), optional DEEPSEEK_BASE_URL.
+#   OLLAMA_BASE_URL / DEMO_OLLAMA_URL are local-dev only (a deployed Worker can't reach localhost).
 # Kept as secrets (not [vars]) so the MCP target can be flipped staging<->prod
 # with a single `wrangler secret put` and no redeploy.
