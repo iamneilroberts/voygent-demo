@@ -3,8 +3,11 @@
 **Date:** 2026-06-07 (late) · **Repo:** `~/dev/voygent-demo` · **Worktree:** `/home/neil/dev/voygent-demo-demo-enrichment` · **Branch:** `demo-enrichment` (prod runs this branch; deploy-from-main clobbers)
 **Supersedes:** `handoff-2026-06-07-model-selector-mobile-shipped.md`.
 
+## STATUS — BUILT + COMMITTED 2026-06-07, NOT DEPLOYED (commit `14a2c59`)
+The engineering-stats history feature is implemented per the spec below and committed on `demo-enrichment`. 167 tests pass (161 baseline + 6 new `worker/stats.test.ts`), `tsc --noEmit` + `VITE_API_BASE="" npm run build:web` both clean. **Remaining = the deploy** (creates a real prod D1 DB — Neil's call): run the **Deploy order** section below. `wrangler.toml` has the `[[d1_databases]]` block with a `database_id` PLACEHOLDER that step 1 fills in. Until deployed, `STATS_DB` is unbound and the whole feature is a silent no-op (`/stats` returns zeros, no writes).
+
 ## FIRST ACTION for the new session
-Implement the **engineering-stats history** feature. The design is fully specced AND Codex-reviewed (findings folded). Spec: **`docs/superpowers/specs/2026-06-07-stats-history-design.md`** — read it; it has the schema, write-path, `/stats`, UI, and the exact **deploy order**. Nothing is built yet (no D1, no code).
+~~Implement~~ DONE (see STATUS above). If picking this up: run the deploy order, then verify (`curl <prod>/stats`, build a trip, `SELECT COUNT(*)`). Design reference: **`docs/superpowers/specs/2026-06-07-stats-history-design.md`** — schema, write-path, `/stats`, UI, deploy order.
 
 ## Prod state (all SHIPPED + deployed this session)
 - Worker version **`756cd5b9`** @ branch HEAD **`4039544`** → https://voygent-demo.somotravel.workers.dev . Working tree clean. 161 tests pass, tsc clean.
