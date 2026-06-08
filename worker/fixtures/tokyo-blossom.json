@@ -1041,6 +1041,62 @@
       "description": "With years of experience and more than 5000 customers, we are the most prepared and fun company that can offer one of the best moments of travel here in Japan.\n\nMeet your driver/guide who comes with h",
       "bookingUrl": "https://www.viator.com/tours/Tokyo/Fast-Furious-Tokyo-D1-Experience/d334-485114P2?pid=P00005400&mcid=58086&currency=USD&medium=api",
       "coverImage": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-720x480/15/b7/9c/d6.jpg"
+    },
+    {
+      "productCode": "TA-320447",
+      "title": "Senso-ji Temple",
+      "day": 2,
+      "free": true,
+      "priceFrom": 0,
+      "currency": "USD",
+      "durationMinutes": null,
+      "rating": 4.4,
+      "reviewCount": 9850,
+      "description": "Tokyo's oldest temple, in Asakusa — the Kaminarimon gate and the Nakamise market lane, free to visit.",
+      "bookingUrl": "http://www.senso-ji.jp/",
+      "coverImage": null
+    },
+    {
+      "productCode": "TA-1373780",
+      "title": "Meiji Jingu Shrine",
+      "day": 3,
+      "free": true,
+      "priceFrom": 0,
+      "currency": "USD",
+      "durationMinutes": null,
+      "rating": 4.4,
+      "reviewCount": 8493,
+      "description": "A serene Shinto shrine in a forested 170-acre precinct beside Harajuku — free, and a calm contrast to the city.",
+      "bookingUrl": "https://www.meijijingu.or.jp/en/",
+      "coverImage": null
+    },
+    {
+      "productCode": "TA-4403399",
+      "title": "Shibuya Crossing",
+      "day": 3,
+      "free": true,
+      "priceFrom": 0,
+      "currency": "USD",
+      "durationMinutes": null,
+      "rating": 4.2,
+      "reviewCount": 7893,
+      "description": "The world's busiest pedestrian scramble — free to experience the wave of people surging from every direction.",
+      "bookingUrl": "https://www.tripadvisor.com/Attraction_Review-g1066456-d4403399-Reviews-Shibuya_Crossing-Shibuya_Tokyo_Tokyo_Prefecture_Kanto.html",
+      "coverImage": null
+    },
+    {
+      "productCode": "TA-320625",
+      "title": "Imperial Palace East Gardens",
+      "day": 4,
+      "free": true,
+      "priceFrom": 0,
+      "currency": "USD",
+      "durationMinutes": null,
+      "rating": 4.2,
+      "reviewCount": 2105,
+      "description": "The free public gardens on the old Edo Castle grounds — stone ramparts, moats, and seasonal blooms.",
+      "bookingUrl": "http://www.kunaicho.go.jp/event/higashigyoen/higashigyoen.html",
+      "coverImage": null
     }
   ],
   "dining": [

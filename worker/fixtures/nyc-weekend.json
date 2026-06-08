@@ -1455,6 +1455,62 @@
       "description": "Experience New York City from 70 stories up at the legendary Top of the Rock. This isn’t just a view; it’s a 360-degree panorama of the skyline that leaves every other vantage point in the dust.\n\nYour",
       "bookingUrl": "https://www.viator.com/tours/New-York-City/Top-of-the-Rock-Observation-Deck-New-York/d687-3784TOPROCK?pid=P00005400&mcid=58086&currency=USD&medium=api",
       "coverImage": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-720x480/16/56/58/bc.jpg"
+    },
+    {
+      "productCode": "TA-105127",
+      "title": "Central Park",
+      "day": 1,
+      "free": true,
+      "priceFrom": 0,
+      "currency": "USD",
+      "durationMinutes": null,
+      "rating": 4.7,
+      "reviewCount": 134452,
+      "description": "843 acres of free Manhattan parkland — the Mall, Bethesda Terrace, and the Bow Bridge, open dawn to late.",
+      "bookingUrl": "https://www.centralparknyc.org/",
+      "coverImage": null
+    },
+    {
+      "productCode": "TA-519474",
+      "title": "The High Line",
+      "day": 2,
+      "free": true,
+      "priceFrom": 0,
+      "currency": "USD",
+      "durationMinutes": null,
+      "rating": 4.5,
+      "reviewCount": 63414,
+      "description": "A free elevated park on a former rail line above the West Side — gardens, art, and Hudson River views.",
+      "bookingUrl": "https://www.thehighline.org/",
+      "coverImage": null
+    },
+    {
+      "productCode": "TA-102741",
+      "title": "Brooklyn Bridge",
+      "day": 3,
+      "free": true,
+      "priceFrom": 0,
+      "currency": "USD",
+      "durationMinutes": null,
+      "rating": 4.7,
+      "reviewCount": 26249,
+      "description": "Walk the free pedestrian promenade across the East River — one of the world's most famous bridges, best at sunrise.",
+      "bookingUrl": "http://www.nyc.gov/html/dot/html/bridges/bridges.shtml",
+      "coverImage": null
+    },
+    {
+      "productCode": "TA-143363",
+      "title": "Staten Island Ferry",
+      "day": 3,
+      "free": true,
+      "priceFrom": 0,
+      "currency": "USD",
+      "durationMinutes": null,
+      "rating": 4.6,
+      "reviewCount": 23165,
+      "description": "The free 25-minute ferry past the Statue of Liberty and the Lower Manhattan skyline — no ticket, runs around the clock.",
+      "bookingUrl": "http://www.nyc.gov/html/dot/html/ferrybus/statfery.shtml",
+      "coverImage": null
     }
   ],
   "dining": [

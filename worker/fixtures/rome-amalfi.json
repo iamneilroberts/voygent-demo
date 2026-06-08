@@ -1120,6 +1120,62 @@
       "description": "Explore the world's most visited monument in the most comfortable and complete way. Visit areas of the Colosseum not accessible by regular-ticket holders. Step on the exclusive Arena floor OR descend ",
       "bookingUrl": "https://www.viator.com/tours/Rome/Expert-Guided-Tour-of-Colosseum-Underground-Arena-and-Forum/d511-55341P7?pid=P00005400&mcid=58086&currency=USD&medium=api",
       "coverImage": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-720x480/0b/9b/6b/e9.jpg"
+    },
+    {
+      "productCode": "TA-190121",
+      "title": "Piazza Navona",
+      "day": 2,
+      "free": true,
+      "priceFrom": 0,
+      "currency": "USD",
+      "durationMinutes": null,
+      "rating": 4.5,
+      "reviewCount": 40156,
+      "description": "Rome's grand Baroque square — Bernini's Fountain of the Four Rivers, street artists, and cafés, free to wander.",
+      "bookingUrl": "https://www.turismoroma.it/it/node/1516",
+      "coverImage": null
+    },
+    {
+      "productCode": "TA-190131",
+      "title": "Trevi Fountain",
+      "day": 3,
+      "free": true,
+      "priceFrom": 0,
+      "currency": "USD",
+      "durationMinutes": null,
+      "rating": 4.4,
+      "reviewCount": 104548,
+      "description": "The monumental Baroque fountain — toss a coin to ensure a return to Rome; free and dazzling, especially after dark.",
+      "bookingUrl": "https://www.turismoroma.it/it/luoghi/fontana-di-trevi",
+      "coverImage": null
+    },
+    {
+      "productCode": "TA-197717",
+      "title": "Spanish Steps",
+      "day": 3,
+      "free": true,
+      "priceFrom": 0,
+      "currency": "USD",
+      "durationMinutes": null,
+      "rating": 3.9,
+      "reviewCount": 23241,
+      "description": "The sweeping 18th-century staircase from Piazza di Spagna up to Trinità dei Monti — a free, classic Rome perch.",
+      "bookingUrl": "https://www.turismoroma.it/it/luoghi/scalinata-di-trinit%C3%A0-dei-monti",
+      "coverImage": null
+    },
+    {
+      "productCode": "TA-190133",
+      "title": "Villa Borghese",
+      "day": 4,
+      "free": true,
+      "priceFrom": 0,
+      "currency": "USD",
+      "durationMinutes": null,
+      "rating": 4.5,
+      "reviewCount": 8179,
+      "description": "Rome's great landscaped park above the Spanish Steps — free to roam, with shaded paths, a lake, and city viewpoints (the gallery inside is ticketed).",
+      "bookingUrl": "https://www.tripadvisor.com/Attraction_Review-g187791-d190133-Reviews-Villa_Borghese-Rome_Lazio.html",
+      "coverImage": null
     }
   ],
   "dining": [

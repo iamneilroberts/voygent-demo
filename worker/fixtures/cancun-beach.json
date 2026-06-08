@@ -1008,6 +1008,48 @@
       "description": "Unlock the mysteries of the Mayans with this tour to Chichén Itzá, a magical cenote & Valladolid.\n\nStart this experience by visiting the charming Valladolid, a colonial town where we will make a panor",
       "bookingUrl": "https://www.viator.com/tours/Cancun/Chichen-Itza-Plus-with-Cenote-Swim-and-Lunch/d631-5885P231?pid=P00005400&mcid=58086&currency=USD&medium=api",
       "coverImage": "https://media-cdn.tripadvisor.com/media/attractions-splice-spp-720x480/12/3f/77/96.jpg"
+    },
+    {
+      "productCode": "TA-152700",
+      "title": "Playa Delfines",
+      "day": 2,
+      "free": true,
+      "priceFrom": 0,
+      "currency": "USD",
+      "durationMinutes": null,
+      "rating": 4.5,
+      "reviewCount": 5698,
+      "description": "Cancún's iconic free public beach on the hotel-zone cliffs — the giant CANCÚN letters and turquoise-water views, no entry fee.",
+      "bookingUrl": "https://www.tripadvisor.com/Attraction_Review-g150807-d152700-Reviews-Playa_Delfines-Cancun_Yucatan_Peninsula.html",
+      "coverImage": null
+    },
+    {
+      "productCode": "TA-152697",
+      "title": "Playa Langosta",
+      "day": 3,
+      "free": true,
+      "priceFrom": 0,
+      "currency": "USD",
+      "durationMinutes": null,
+      "rating": 4.3,
+      "reviewCount": 403,
+      "description": "A small, calm free beach near downtown — gentle water and a quieter alternative to the resort strip.",
+      "bookingUrl": "https://www.tripadvisor.com/Attraction_Review-g150807-d152697-Reviews-Playa_Langosta-Cancun_Yucatan_Peninsula.html",
+      "coverImage": null
+    },
+    {
+      "productCode": "TA-7715234",
+      "title": "El Parque de las Palapas",
+      "day": 4,
+      "free": true,
+      "priceFrom": 0,
+      "currency": "USD",
+      "durationMinutes": null,
+      "rating": 4.2,
+      "reviewCount": 628,
+      "description": "Downtown Cancún's lively free town square — evening food stalls, live music, and local crafts.",
+      "bookingUrl": "https://www.tripadvisor.com/Attraction_Review-g150807-d7715234-Reviews-El_Parque_de_las_Palapas-Cancun_Yucatan_Peninsula.html",
+      "coverImage": null
     }
   ],
   "dining": [
