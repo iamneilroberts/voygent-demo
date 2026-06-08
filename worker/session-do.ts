@@ -286,7 +286,8 @@ export class SessionDO {
     const provider = new ClaudeProvider(this.env.ANTHROPIC_API_KEY, model);
     const mux = new SseMultiplexer();
 
-    if (this.messages.length === 0) {
+    const isFirstTurn = this.messages.length === 0;
+    if (isFirstTurn) {
       this.boardsMode = mode === "boards";
       const seed = SYSTEM_HINT
         + (this.boardsMode ? `\n\n${BOARDS_WORKFLOW_OVERRIDE}\n\n${SEQUENCED_BOARDS_WORKFLOW}` : "")
@@ -294,7 +295,7 @@ export class SessionDO {
       this.messages.push({ role: "user", content: `${seed}\n\nMy trip_id is ${this.tripId}.` });
     }
     this.messages.push({ role: "user", content: message });
-    if (phaseMachine && isBeforeSummary(this.tripPhase)) {
+    if (phaseMachine && isFirstTurn && isBeforeSummary(this.tripPhase)) {
       this.messages.push({ role: "user", content: phaseDirective(this.tripPhase, buildPhaseCtx()) });
     }
 
