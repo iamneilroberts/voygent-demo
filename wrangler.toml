@@ -27,7 +27,7 @@ new_sqlite_classes = ["SessionDO"]
 [[d1_databases]]
 binding = "STATS_DB"
 database_name = "voygent-demo-stats"
-database_id = "REPLACE_WITH_wrangler_d1_create_OUTPUT"
+database_id = "20321ac2-3669-489e-b67c-5e5bd91d6f2e"
 
 # NOTE: demo.voygent.ai is NOT attached here. The voygent.ai zone has a *.voygent.ai
 # wildcard routing every subdomain to the prod `voygent` Worker, which shadows a plain
