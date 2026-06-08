@@ -3,8 +3,9 @@ import { buildPresets } from "./presets";
 import { infoPageHtml } from "./info/pages";
 import { enabledModels, DEFAULT_SMART_MAP } from "../shared/models";
 import { STATS_AGG_SQL, shapeStats, type StatsAggRow } from "./stats";
+import { deepseekEnabled } from "./llm/index";
 
-interface Env { SESSION: DurableObjectNamespace; DEMO_DISABLED?: string; DEMO_OPUS_ENABLED?: string; DEMO_TEST_TOKEN?: string; STATS_DB?: D1Database; }
+interface Env { SESSION: DurableObjectNamespace; DEMO_DISABLED?: string; DEMO_OPUS_ENABLED?: string; DEMO_TEST_TOKEN?: string; STATS_DB?: D1Database; DEEPSEEK_API_KEY?: string; DEMO_DEEPSEEK_ENABLED?: string; }
 
 // Test/smoke requests (carrying the secret header) bypass the public daily
 // budget so automated runs don't 503 real visitors. Returns false unless the
@@ -42,7 +43,7 @@ export default {
       // Also advertise the enabled model set (Opus gate) + default smart map so the
       // client selector renders only acceptable models.
       return Response.json(
-        { ...buildPresets(req), enabledModels: enabledModels(!!env.DEMO_OPUS_ENABLED), smartMap: DEFAULT_SMART_MAP },
+        { ...buildPresets(req), enabledModels: enabledModels({ opus: !!env.DEMO_OPUS_ENABLED, deepseek: deepseekEnabled(env) }), smartMap: DEFAULT_SMART_MAP },
         { headers: cors() },
       );
     }

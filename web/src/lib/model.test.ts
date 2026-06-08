@@ -31,3 +31,24 @@ describe("routingBody", () => {
     expect(routingBody("claude-sonnet-4-6", DEFAULT_SMART_MAP)).toEqual({ model: "claude-sonnet-4-6" });
   });
 });
+
+import { applyOptimize, modelsByProvider } from "./model";
+import { enabledModels } from "../../../shared/models";
+
+describe("applyOptimize", () => {
+  it("returns a routing whose models are all enabled", () => {
+    const enabled = enabledModels({ opus: false, deepseek: true });
+    const r = applyOptimize("cost", enabled);
+    const ids = r.mode === "single" ? [r.model] : Object.values(r.map);
+    for (const id of ids) expect(enabled).toContain(id);
+  });
+});
+
+describe("modelsByProvider", () => {
+  it("groups enabled + grayed models by provider with Ollama present but unavailable", () => {
+    const groups = modelsByProvider(enabledModels({ opus: false, deepseek: true }));
+    const ollama = groups.find((g) => g.provider === "ollama");
+    expect(ollama).toBeTruthy();
+    expect(ollama!.models.every((m) => !m.available)).toBe(true);
+  });
+});

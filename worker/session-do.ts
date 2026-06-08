@@ -7,9 +7,11 @@ import { FixtureReplay, type ReplayHelpers } from "./mcp/replay";
 import { msgKey, shrinkForStorage, MSG_PREFIX, type SessRecord } from "./session-store";
 import { type ModelId, type ModelRouting, DEFAULT_ROUTING, enabledModels, buildRouting, resolveRoutingModel } from "../shared/models";
 import { presetRoutes } from "./fixtures/index";
-import { ClaudeProvider } from "./llm/claude";
+import { DispatchProvider } from "./llm/dispatch";
 import { estimateCostUsd } from "./llm/cost";
 import { withInspectorCost, sessionCostByModel, estTokens, utf8Bytes } from "./inspector";
+import { storeOpsForTool } from "./storeops";
+import { providerFor, deepseekEnabled, ollamaEnabled } from "./llm/index";
 import { STATS_INSERT_SQL, statsRowFromSummary, type StatsSummary } from "./stats";
 import { encodeSse } from "../shared/events";
 import type { ConversationMessage, TokenUsage } from "./llm/provider";
@@ -25,6 +27,11 @@ interface Env {
   DEMO_OPUS_ENABLED?: string;             // when set, Opus is offered/accepted (abuse gate; default off)
   DEMO_TEST_TOKEN?: string;               // test/smoke runs carrying this header skip the public ledger
   STATS_DB?: D1Database;                  // optional: per-exchange engineering-stats history (no-op when unbound)
+  DEEPSEEK_API_KEY?: string;              // when set + DEMO_DEEPSEEK_ENABLED, DeepSeek is live
+  DEEPSEEK_BASE_URL?: string;             // default https://api.deepseek.com (host-allowlisted)
+  DEMO_DEEPSEEK_ENABLED?: string;         // dual gate with the key
+  OLLAMA_BASE_URL?: string;               // local-dev only; never set in the deployed Worker
+  DEMO_OLLAMA_URL?: string;               // alias gate for local Ollama (host-allowlisted)
 }
 
 // Public-surface denylist (Neil 2026-06-07): the catalog stays claude.ai-faithful
@@ -269,10 +276,10 @@ export class SessionDO {
     const fallbackModel = (this.env.LLM_MODEL || DEFAULT_MODEL) as ModelId;
     const model = fallbackModel; // ClaudeProvider default + cost fallback; per-turn routing overrides per call
     // Server-coerce the visitor's model choice through the enabled allowlist (the real Opus gate).
-    const enabled = enabledModels(!!this.env.DEMO_OPUS_ENABLED);
+    const enabled = enabledModels({ opus: !!this.env.DEMO_OPUS_ENABLED, deepseek: deepseekEnabled(this.env), ollama: ollamaEnabled(this.env) });
     this.routing = buildRouting({ model: body.model, routing: body.routing }, enabled, fallbackModel);
     const mcp = new McpClient(this.env.VOYGENT_MCP_URL, this.env.VOYGENT_MCP_BEARER);
-    const provider = new ClaudeProvider(this.env.ANTHROPIC_API_KEY, model);
+    const provider = new DispatchProvider((id) => providerFor(id, this.env), model);
     const mux = new SseMultiplexer();
 
     if (this.messages.length === 0) {
@@ -317,6 +324,13 @@ export class SessionDO {
         if (ev.kind === "turn") turnCount++;
         else if (ev.kind === "tool") toolCallCount++;
         else if (ev.kind === "savings") savedTokens += ev.tokensSaved;
+        // Derived store-ops projection: send DIRECTLY through mux (not emit) so it
+        // doesn't recurse and isn't taxed as instrumentationBytes — it's derived
+        // metadata, not model-facing cost.
+        if (ev.kind === "tool") {
+          const ops = storeOpsForTool(ev.name);
+          if (ops.length) mux.send({ type: "inspector", kind: "store", exchangeId, turn: ev.turn, tool: ev.name, ops });
+        }
         if (ev.kind !== "overhead" && ev.kind !== "summary") {
           instrumentationBytes += utf8Bytes(encodeSse(ev));
         }

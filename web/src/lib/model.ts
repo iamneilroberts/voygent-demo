@@ -45,3 +45,23 @@ export function selectorToRouting(mode: SelectorMode, map: PhaseModelMap): Model
 export function routingBody(mode: SelectorMode, map: PhaseModelMap): { model?: ModelId; routing?: PhaseModelMap } {
   return mode === "smart" ? { routing: map } : { model: mode };
 }
+
+import { OPTIMIZE_PRESETS, MODEL_REGISTRY, type OptimizeKey, type ModelEntry, type ProviderId } from "../../../shared/models";
+export type { OptimizeKey };
+
+export function applyOptimize(key: OptimizeKey, enabled: ModelId[]): ModelRouting {
+  return OPTIMIZE_PRESETS[key](enabled);
+}
+
+export interface ProviderGroup { provider: ProviderId; label: string; models: (ModelEntry & { enabledNow: boolean })[] }
+const PROVIDER_LABELS: Record<ProviderId, string> = { anthropic: "Anthropic (Claude)", deepseek: "DeepSeek", ollama: "Local (Ollama)" };
+
+/** All registry models grouped by provider, each flagged whether it's executable now. */
+export function modelsByProvider(enabled: ModelId[]): ProviderGroup[] {
+  const order: ProviderId[] = ["anthropic", "deepseek", "ollama"];
+  return order.map((provider) => ({
+    provider, label: PROVIDER_LABELS[provider],
+    models: MODEL_REGISTRY.filter((m) => m.provider === provider)
+      .map((m) => ({ ...m, enabledNow: (enabled as string[]).includes(m.id) })),
+  }));
+}

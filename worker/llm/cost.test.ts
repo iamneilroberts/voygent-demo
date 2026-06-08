@@ -19,3 +19,17 @@ describe("estimateCostUsd", () => {
     expect(estimateCostUsd("some-future-model", u)).toBeCloseTo(3, 5);
   });
 });
+
+describe("DeepSeek pricing", () => {
+  it("prices deepseek-chat with a cache-read discount and no write premium", () => {
+    // DeepSeek does automatic prefix caching: cacheCreationTokens is always 0 for it.
+    const c = estimateCostUsd("deepseek-chat", {
+      inputTokens: 1_000_000, outputTokens: 0, cacheCreationTokens: 0, cacheReadTokens: 0,
+    });
+    expect(c).toBeGreaterThan(0);
+    // A 1M cache-read costs strictly less than 1M fresh input.
+    const fresh = estimateCostUsd("deepseek-chat", { inputTokens: 1_000_000, outputTokens: 0, cacheCreationTokens: 0, cacheReadTokens: 0 });
+    const cached = estimateCostUsd("deepseek-chat", { inputTokens: 0, outputTokens: 0, cacheCreationTokens: 0, cacheReadTokens: 1_000_000 });
+    expect(cached).toBeLessThan(fresh);
+  });
+});

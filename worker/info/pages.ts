@@ -117,6 +117,66 @@ const PAGES: Record<string, InfoPage> = {
 <p><a class="cta" href="/">back to the live demo →</a></p>`,
   },
 
+  "data-stores": {
+    title: "KV, D1, and rewiring a SQL brain",
+    subtitle: "Four storage primitives, one hybrid model — and the unlearning a career relational DBA has to do at the edge.",
+    body: `
+<p>Voygent runs on Cloudflare's edge, where "the database" isn't one box — it's four primitives with sharply different shapes. The discipline is matching each piece of state to the primitive whose grain fits, not forcing everything into rows-and-joins out of habit.</p>
+
+<h2>The four primitives</h2>
+<ul>
+  <li><strong>Workers KV</strong> — a global, eventually-consistent key→value store. O(1) <code>get</code>/<code>put</code> by key, <code>list</code> by key prefix. No queries, no joins, ~60s global propagation. Voygent keeps each <em>trip blob</em> here under a caller-prefixed key.</li>
+  <li><strong>D1</strong> — SQLite at the edge: real SQL, transactions, indexes, and FTS5 full-text search. Voygent uses it as the <em>catalog/index</em> — the queryable spine (find trips, search content) that KV can't express.</li>
+  <li><strong>R2</strong> — object storage for binaries: rendered folio HTML, images, documents. Served by path, billed like S3, no egress fees.</li>
+  <li><strong>Durable Objects</strong> — a single-writer, strongly-consistent compute+storage cell. Serialized transactions against one logical owner. This demo's per-session state (conversation, replay snapshot, the daily-budget ledger) lives in a DO — exactly the workload KV's eventual consistency can't safely hold.</li>
+</ul>
+
+<h2>The hybrid model</h2>
+<p>A trip is written as a <strong>KV blob</strong> (cheap, global, read-heavy) <em>and</em> indexed as a <strong>D1 row</strong> (so "list this advisor's trips" or "search trip content" is a query, not a full-keyspace scan). R2 holds what the client downloads. DO holds the live, must-be-consistent session. Each store does the one thing it's shaped for.</p>
+
+<h2>The mindshift for a career SQL DBA</h2>
+<p>If your instinct is "third-normal-form, then JOIN," the edge will fight you. The rewiring:</p>
+<ul>
+  <li><strong>Key design <em>is</em> the schema.</strong> In KV there's no <code>WHERE</code> — only the key and its prefix. You design the key so the access you need is a <code>get</code> or a <code>list</code>, because nothing else exists.</li>
+  <li><strong>No cross-key joins.</strong> You denormalize on purpose: duplicate the fields a read needs into the blob, rather than joining at read time. Storage is cheap; an extra round trip at the edge is not.</li>
+  <li><strong>Eventual consistency is the default, not a bug.</strong> A KV write may not be globally visible for ~a minute. Anything that needs read-your-writes (a counter, a lock, a ledger) belongs in a DO or D1, not KV.</li>
+  <li><strong><code>list</code> is not <code>SELECT</code>.</strong> Prefix scans are paginated and ordered by key — so you encode sort order and grouping <em>into</em> the key (zero-padded indices, sortable timestamps), the way this demo pads <span class="mono">msg:00000</span> keys so a list returns them in order.</li>
+  <li><strong>Reach for D1 when you genuinely need a query.</strong> Full-text search, ad-hoc filters, aggregates — that's D1's FTS5 + SQL. The skill is knowing which reads justify the index and which are just a keyed blob fetch.</li>
+  <li><strong>Values have hard caps.</strong> A DO storage value caps at 128 KiB; a real tool-result bundle can exceed it, so the persisted copy elides the largest payloads to fit (a real lesson from <span class="mono">worker/session-store.ts</span>) while the in-memory copy stays whole.</li>
+</ul>
+<blockquote>The relational reflexes aren't wrong — they're scoped. You still get SQL where SQL earns its keep (D1). You just stop paying join cost for reads that a well-designed key answers for free.</blockquote>
+<span class="artifact">sources: CLAUDE.md (KV \`voygent-themed\`, D1 \`voygent-prod\`) · ADR hybrid-D1+KV direction · worker/session-store.ts (128 KiB cap + ordered msg: keys) · src/shared/kv-keys.ts (caller-prefixed keys)</span>
+<p><a class="cta" href="/">watch the data-store ops accrue live →</a></p>`,
+  },
+
+  "llm-options": {
+    title: "Choosing the model — and why the demo is LLM-agnostic",
+    subtitle: "Frontier, cheap, and local models behind one provider seam. The moat is the tools and the orchestration, not the model vendor.",
+    body: `
+<p>This demo drives a full agent loop, but the model behind it is swappable. Everything the agent does — the tool catalog, the trip state, the record/replay honesty layer — sits behind a single provider interface, so the driving LLM is a configuration choice, not a rewrite.</p>
+
+<h2>The seam</h2>
+<p>One TypeScript interface, <code>LLMProvider.stream(messages, tools, opts)</code>, yields a normalized event stream (text deltas, tool calls, token usage). Anthropic's Claude is one implementation; a <code>DeepSeekProvider</code> over the OpenAI-compatible API is another; an <code>OllamaProvider</code> for local models is a third. The agent loop consumes the normalized events and never knows which vendor produced them. Adding a provider is implementing one interface plus a pricing row.</p>
+
+<h2>Frontier vs cheap vs local</h2>
+<ul>
+  <li><strong>Frontier (Anthropic Claude).</strong> Strongest reasoning and tool-use reliability; the default for the demo's discovery phase. Anthropic-specific prompt-cache breakpoints make a long agent loop affordable — cache reads bill at ~0.1× fresh input.</li>
+  <li><strong>Cheap (DeepSeek).</strong> An OpenAI-compatible, very-low-cost model — the same family this project's own bulk-I/O tooling routes to. It does <em>automatic</em> prefix caching (no manual breakpoints) and reports cache hits directly. Great for the recipe-driven enrichment phase where the reasoning bar is lower. The "optimize for cost" preset routes here.</li>
+  <li><strong>Local (Ollama).</strong> A model on your own machine — zero per-token cost, full data residency, offline-capable. In this demo it is shown but <strong>grayed out</strong>: this UI is served from a Cloudflare edge Worker, which cannot reach a model listening on your <span class="mono">localhost</span>. The provider exists in code; it only lights up in a local-dev deployment where <span class="mono">OLLAMA_BASE_URL</span> is reachable.</li>
+</ul>
+
+<h2>Speed vs cost vs capability</h2>
+<p>The Tweaks panel exposes three presets. <strong>Speed</strong> favors the fastest small model; <strong>Cost</strong> routes to the cheapest enabled provider; <strong>Capability</strong> puts the strongest model on the reasoning-heavy phase. "Smart" routing can even split phases across vendors — frontier discovery, cheap enrichment — because the seam makes per-turn provider choice free.</p>
+
+<h2>Honesty survives the swap</h2>
+<p>For the featured trips, the replay layer intercepts <em>tool results</em>, not the model — so swapping providers can't let any model fabricate travel data. A weaker model that picks a nonexistent option id simply gets rejected. The model-agnostic seam and the fabrication guard are orthogonal, by design.</p>
+
+<h2>When local actually wins</h2>
+<p>Grayed here doesn't mean useless. Local models win when data must never leave the building (regulated/PII workloads), when token cost at scale dominates (high-volume batch classification), or when the deployment must run offline. The right architecture is the one that lets you make that call per-workload — which is exactly what the provider seam buys.</p>
+<span class="artifact">sources: worker/llm/provider.ts (the seam) · worker/llm/deepseek.ts · worker/llm/ollama.ts · ~/dev/llm-tools (the project's real cheap-router) · ADR-0004 (model-swappable host)</span>
+<p><a class="cta" href="/">tweak the model on a live trip →</a></p>`,
+  },
+
   "resume": {
     title: "Neil Roberts",
     subtitle: "Forward Deployed / Applied AI Engineer — this demo is the portfolio piece; here's the rest.",

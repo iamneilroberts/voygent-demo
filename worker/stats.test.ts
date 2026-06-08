@@ -80,7 +80,8 @@ describe("shapeStats", () => {
     expect(shapeStats(aggRow)).toEqual({
       sessions: 9, exchanges: 42, trips: 7,
       totalActualCostUsd: 1.23, totalSavedTokens: 99000, totalTokens: 500000,
-      byModel: { haiku: 0.4, sonnet: 0.7, opus: 0.13 },
+      // other = total - haiku - sonnet - opus = 1.23 - 1.23 ≈ 0 (closeTo absorbs float dust)
+      byModel: { haiku: 0.4, sonnet: 0.7, opus: 0.13, other: expect.closeTo(0, 6) },
     });
   });
 
@@ -88,10 +89,25 @@ describe("shapeStats", () => {
     const zero = {
       sessions: 0, exchanges: 0, trips: 0,
       totalActualCostUsd: 0, totalSavedTokens: 0, totalTokens: 0,
-      byModel: { haiku: 0, sonnet: 0, opus: 0 },
+      byModel: { haiku: 0, sonnet: 0, opus: 0, other: 0 },
     };
     expect(shapeStats(null)).toEqual(zero);
     expect(shapeStats(undefined)).toEqual(zero);
     expect(shapeStats({ exchanges: NaN, totalActualCostUsd: undefined } as unknown as StatsAggRow)).toEqual(zero);
+  });
+});
+
+describe("shapeStats other-bucket", () => {
+  it("derives byModel.other from total minus the Claude trio", () => {
+    const s = shapeStats({
+      sessions: 1, exchanges: 1, trips: 1,
+      totalActualCostUsd: 1.00, totalSavedTokens: 0, totalTokens: 0,
+      actualHaiku: 0.20, actualSonnet: 0.30, actualOpus: 0.00,
+    });
+    expect(s.byModel.other).toBeCloseTo(0.50, 6); // 1.00 - 0.20 - 0.30 - 0.00
+  });
+  it("never goes negative when rounding makes the trio exceed the total", () => {
+    const s = shapeStats({ totalActualCostUsd: 0.40, actualHaiku: 0.25, actualSonnet: 0.20, actualOpus: 0 });
+    expect(s.byModel.other).toBe(0);
   });
 });

@@ -5,6 +5,7 @@ import { costWeightedTokens, cacheHitRate } from "./lib/usage";
 import { MODEL_LABELS, PHASES, PHASE_LABELS, type ModelId, type PhaseModelMap, type Phase } from "../../shared/models";
 import type { SelectorMode } from "./lib/model";
 import type { StatsResponse } from "../../shared/events";
+import { StoreOpsWidget, type InsStore } from "./StoreOpsWidget";
 
 // Engineering stories moved out of the panel (task 6c) — the tab keeps live
 // stats; the narratives live on worker-served /info pages.
@@ -14,6 +15,8 @@ const INFO_LINKS: { slug: string; label: string; blurb: string }[] = [
   { slug: "bot-defeat", label: "The bot-defeat saga", blurb: "edge-native anti-bot, with falsifiable verdicts" },
   { slug: "record-replay", label: "Record/replay engineering", blurb: "real data, deterministically, fabrication made impossible" },
   { slug: "production-system", label: "The system behind the demo", blurb: "119 tools, the commission firewall, AI-evaluates-AI" },
+  { slug: "llm-options", label: "Choosing the model", blurb: "LLM-agnostic seam: frontier, cheap DeepSeek, local Ollama" },
+  { slug: "data-stores", label: "KV, D1, and a SQL brain", blurb: "the hybrid storage model and the relational-DBA unlearning" },
 ];
 
 export interface InsTool {
@@ -81,14 +84,16 @@ export interface ModelRoutingUi {
 }
 
 export function Inspector(
-  { state, onToggleCollapse, tools, turns, summaries, savings, overhead, headExtra, routing, stats }:
+  { state, onToggleCollapse, tools, turns, summaries, savings, overhead, headExtra, routing, stats, stores }:
   { state: EngState; onToggleCollapse: () => void; tools: InsTool[]; turns: InsTurn[]; summaries: InsSummary[]; savings: InsSavings[]; overhead: InsOverhead[];
     // Extra controls shown under the head when live — e.g. the palette switcher
     // relocated here in the claude skin (its home header isn't rendered there).
     headExtra?: ReactNode;
     routing?: ModelRoutingUi;
     // Cumulative cross-session aggregates (public). Section hidden when null/empty.
-    stats?: StatsResponse | null },
+    stats?: StatsResponse | null;
+    // Projected production KV/D1 ops for this session (Slice B). Empty until tools fire.
+    stores?: InsStore[] },
 ) {
   const [showCost, setShowCost] = useState(true);  // cost shown by default (Neil 2026-06-07)
 
@@ -258,6 +263,8 @@ export function Inspector(
         </div>
       </section>
 
+      <StoreOpsWidget stores={stores ?? []} />
+
       {stats && stats.exchanges > 0 && (() => {
         const split = (["haiku", "sonnet", "opus"] as const).filter((k) => stats.byModel[k] > 0);
         return (
@@ -271,6 +278,9 @@ export function Inspector(
                 Total inference cost <b>{usd(stats.totalActualCostUsd)}</b>
                 {split.length > 1 && (
                   <span className="ins-note"> — {split.map((k) => `${usd(stats.byModel[k])} ${k[0].toUpperCase()}${k.slice(1)}`).join(" + ")}</span>
+                )}
+                {stats.byModel.other > 0 && (
+                  <span className="ins-note"> · {usd(stats.byModel.other)} other</span>
                 )}
               </div>
             </div>
