@@ -41,6 +41,8 @@ const DELAY = {
   toolDone: 240,
   board: 480,         // let the option cards land
   folio: 160,
+  inspector: 10,      // side-channel Engineering events — near-instant so the panel
+                      //   "ticks" live alongside the chat without adding visible dead time
   other: 120,
   turnEnd: 500,
 };
@@ -50,7 +52,19 @@ function delayFor(ev, prevType) {
   if (ev.type === "tool") return ev.phase === "start" ? DELAY.toolStart : DELAY.toolDone;
   if (ev.type === "board") return DELAY.board;
   if (ev.type === "folio") return DELAY.folio;
+  if (ev.type === "inspector") return DELAY.inspector;
   return DELAY.other;
+}
+
+// Inspector "tool" events echo the full tool args + result; in autoplay nobody
+// expands a tool row, so cap the result string to keep the bundled recording lean
+// without losing the headline (name/latency/token) data the panel actually shows.
+const MAX_INSPECTOR_RESULT = 600;
+function trimInspector(ev) {
+  if (ev.kind === "tool" && typeof ev.result === "string" && ev.result.length > MAX_INSPECTOR_RESULT) {
+    return { ...ev, result: ev.result.slice(0, MAX_INSPECTOR_RESULT) + "…[trimmed for recording]" };
+  }
+  return ev;
 }
 
 const frames = [];
@@ -77,9 +91,15 @@ async function exchange(message) {
       if (!line) continue;
       let ev;
       try { ev = JSON.parse(line.slice(6)); } catch { continue; }
-      // Inspector events are a side channel — the autoplay reducer ignores them
-      // for board/folio but they bloat the recording; keep only what the UI shows.
-      if (ev.type === "inspector") continue;
+      // Inspector events are a side channel that drives the Engineering panel.
+      // Keep them (trimmed) so autoplay shows the live engineering flexes — but
+      // do NOT advance prevType, so the text-typewriter run detection stays intact
+      // across a side-channel event interleaved mid-stream.
+      if (ev.type === "inspector") {
+        frames.push({ delayMs: DELAY.inspector, kind: "event", event: trimInspector(ev) });
+        seen.push(ev);
+        continue;
+      }
       frames.push({ delayMs: delayFor(ev, prevType), kind: "event", event: ev });
       prevType = ev.type;
       seen.push(ev);
