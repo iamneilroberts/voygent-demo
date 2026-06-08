@@ -297,7 +297,7 @@ export function App() {
           />
         </section>
       </div>
-      <footer className="meta">This interface was itself built by a coding agent.</footer>
+      <footer className="meta">Built with coding-agent workflows; architecture, constraints, and review by Neil Roberts.</footer>
       <SkinSwitch skin={skin} onPick={setSkin} />
       <button type="button" className="watch-demo" onClick={toggleDemo}>{demoLabel}</button>
       <TweaksPanel

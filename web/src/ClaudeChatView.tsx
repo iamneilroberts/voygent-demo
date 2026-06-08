@@ -186,8 +186,9 @@ export function ClaudeChatView(
       <header className="cl-header">
         <span className="cl-wordmark"><span className="cl-spark" aria-hidden="true">✳</span> Voygent</span>
         <span className="cl-header-note">travel-planning agent</span>
+        <span className="cl-positioning">Live MCP orchestration · persisted trip state · model routing · cost/context telemetry</span>
       </header>
-      <div className="cl-ribbon" role="note">Simulated claude.ai environment — this is a Voygent demo, not Anthropic's Claude</div>
+      <div className="cl-ribbon" role="note">A Voygent demo in a Claude-style chat surface — not affiliated with Anthropic.</div>
       <div className="cl-scroll" ref={scrollRef} onScroll={onScroll}>
         <div className="cl-col">
           {firstRun && <Welcome presets={presets} geoCity={geoCity} onSend={onSend} busy={busy} />}
@@ -236,7 +237,7 @@ export function ClaudeChatView(
           />
           <button type="submit" className="cl-send" disabled={busy || !input.trim()} aria-label="Send message">↑</button>
         </form>
-        <div className="cl-disclaimer">Voygent demo — a look-alike of the claude.ai chat experience.</div>
+        <div className="cl-disclaimer">Voygent demo · a Claude-style chat surface, not affiliated with Anthropic.</div>
       </div>
     </main>
   );

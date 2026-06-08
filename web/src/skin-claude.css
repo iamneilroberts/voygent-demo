@@ -39,6 +39,12 @@
 :root[data-skin="claude"] .cl-wordmark { font: 600 1.0625rem/1 var(--cl-sans); color: var(--cl-ink); letter-spacing: -.01em; }
 :root[data-skin="claude"] .cl-spark { color: var(--cl-accent); margin-right: 2px; }
 :root[data-skin="claude"] .cl-header-note { color: var(--cl-muted); font-size: .8125rem; }
+/* First-screen positioning (#5): a subtle, non-landing-page signal that this is
+   an engineered MCP app, not just a chatbot. Right-aligned, muted, mono. */
+:root[data-skin="claude"] .cl-positioning {
+  margin-left: auto; color: var(--cl-muted); font: 500 .6875rem/1.35 var(--cl-mono);
+  letter-spacing: .01em; text-align: right; max-width: 46ch;
+}
 
 /* ---- persistent disambiguation ribbon ---- */
 :root[data-skin="claude"] .cl-ribbon {
@@ -217,6 +223,7 @@
   :root[data-skin="claude"] .cl-composer-wrap { padding: 6px 12px 8px; }
   :root[data-skin="claude"] .cl-msg-user { max-width: 88%; }
   :root[data-skin="claude"] .cl-welcome-h { font-size: 1.5rem; }
+  :root[data-skin="claude"] .cl-positioning { display: none; }
 }
 
 /* ---- reduced motion: theme.css already kills animations globally; give the
