@@ -195,3 +195,26 @@ button.ins-rail:hover { color: var(--ink); }
   }
   .engineering { max-height: 70vh; }
 }
+
+/* ---- Tweaks panel (model provider/preset picker) ---- */
+.tweaks-panel {
+  position: fixed; right: var(--s4, 16px); bottom: var(--s6, 24px); z-index: 50;
+  width: min(320px, calc(100vw - 32px));
+  background: var(--board-2); border: 1px solid var(--line); border-radius: 10px;
+  padding: var(--s4, 16px); box-shadow: 0 8px 32px rgba(0,0,0,.45);
+  font: 400 var(--t-12)/1.5 var(--mono); color: var(--ink, #efe7d6);
+}
+.tweaks-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--s3, 12px); }
+.tweaks-close { background: none; border: none; color: var(--muted-2); cursor: pointer; font-size: 1rem; }
+.tweaks-panel .lab { display: block; color: var(--muted-2); font-size: var(--t-12); margin-bottom: 4px; }
+.tweaks-panel .seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.tweaks-panel .seg button {
+  padding: 4px 10px; border: 1px solid var(--line); border-radius: 999px;
+  background: var(--board); color: var(--ink, #efe7d6); cursor: pointer; font: inherit;
+}
+.tweaks-panel .seg button[aria-pressed="true"] { border-color: var(--amber, #f5a623); color: var(--amber, #f5a623); }
+.tweaks-providers { margin-top: var(--s3, 12px); display: flex; flex-direction: column; gap: var(--s3, 12px); }
+.tweaks-group-head { color: var(--muted-2); font-size: var(--t-12); margin-bottom: 4px; }
+.tweaks-group.is-disabled { opacity: .5; }
+.tweaks-group.is-disabled button[disabled] { cursor: not-allowed; }
+.tweaks-note { font: 500 .75rem/1.5 ui-monospace, monospace; color: var(--muted); margin: 4px 0 0; }
