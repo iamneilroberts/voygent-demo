@@ -186,6 +186,19 @@ a { color: inherit; }
   --amber:#c2611c; --amber-hi:#9a4a12; --phosphor:#2f8f50; --red:#c0392b;
   --line:#e2dac8;
 }
+/* Light-mode (paper) terminal HARMONIZATION — Neil's correction #1.
+   The Engineering Inspector must still read as a telemetry terminal in light
+   mode: a notch DEEPER than the cream chat surface (claude skin: #faf9f5), with
+   the mono type + faint scanline + amber/green accents intact — NOT a pure-black
+   panel against white, and NOT identical to the chat (which makes it vanish).
+   Scoped to the inspector so the chat pane and other themes are untouched. */
+:root[data-theme="paper"] .engineering,
+:root[data-theme="paper"] .inspector.term {
+  --board:#e9e1cd;     /* light-terminal body — distinct from chat cream, still warm-light */
+  --board-2:#f1ead8;   /* raised cells (summary strip, panels) */
+  --board-3:#ded4bd;   /* hover / inset */
+  --line:#d4c9ad;      /* slightly stronger hairline so structure reads on the tint */
+}
 
 /* 5 · dusk — warm aubergine night + apricot accent (travel-at-dusk mood) */
 :root[data-theme="dusk"] {

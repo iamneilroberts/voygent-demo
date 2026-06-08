@@ -4,7 +4,7 @@ import { ChatView, type ChatMessage, type Preset } from "./ChatView";
 import { ClaudeChatView } from "./ClaudeChatView";
 import { FolioPanel } from "./FolioPanel";
 import type { ServerEvent, FolioData, BoardCandidate, StatsResponse } from "../../shared/events";
-import { Inspector, type InsTool, type InsTurn, type InsSummary, type InsSavings, type InsOverhead } from "./Inspector";
+import { Inspector, type InsTool, type InsTurn, type InsSummary, type InsSavings, type InsOverhead, type InsValidation } from "./Inspector";
 import { type InsStore } from "./StoreOpsWidget";
 import { ThemeSwitch } from "./ThemeSwitch";
 import { SkinSwitch } from "./SkinSwitch";
@@ -59,6 +59,7 @@ export function App() {
   const [insSavings, setInsSavings] = useState<InsSavings[]>([]);
   const [insOverhead, setInsOverhead] = useState<InsOverhead[]>([]);
   const [insStores, setInsStores] = useState<InsStore[]>([]);
+  const [insValidations, setInsValidations] = useState<InsValidation[]>([]);
   // Cumulative cross-session stats (public aggregates) for the "Across all
   // sessions" panel section. Fetched once on mount, like /presets.
   const [stats, setStats] = useState<StatsResponse | null>(null);
@@ -205,6 +206,7 @@ export function App() {
       else if (e.kind === "savings") setInsSavings((s) => [...s, e]);
       else if (e.kind === "overhead") setInsOverhead((o) => [...o, e]);
       else if (e.kind === "store") setInsStores((s) => [...s, e]);
+      else if (e.kind === "validation") setInsValidations((v) => [...v, e]);
     }
   }
 
@@ -289,7 +291,7 @@ export function App() {
             onToggleCollapse={() => { if (insTools.length > 0) setCollapsed((c) => !c); }}
             tools={insTools} turns={insTurns} summaries={insSummaries}
             savings={insSavings} overhead={insOverhead} stats={stats}
-            stores={insStores}
+            stores={insStores} validations={insValidations}
             headExtra={skin === "claude" ? <><ModelSwitch mode={modelMode} enabled={enabledModels} onPick={setModelMode} onTweaks={() => setTweaksOpen(true)} /><AdvisorSwitch on={advisor} onToggle={setAdvisor} /><ThemeSwitch /></> : undefined}
             routing={{ mode: modelMode, enabledModels, smartMap, activePhase, onMode: setModelMode, onSmartMap: setSmartMap }}
           />

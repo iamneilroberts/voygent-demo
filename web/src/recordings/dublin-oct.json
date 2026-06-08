@@ -2374,6 +2374,71 @@
       }
     },
     {
+      "delayMs": 140,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "validation",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "check": "arrival-date",
+        "label": "Arrival date resolved",
+        "status": "repaired",
+        "detail": "Outbound lands DUB Oct 13 07:20 (overnight via IAD) — day plan corrected from an Oct 12 arrival"
+      }
+    },
+    {
+      "delayMs": 120,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "validation",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "check": "no-activity-before-arrival",
+        "label": "No full-day activity before local arrival",
+        "status": "pass",
+        "detail": "Oct 12 is outbound travel; first Dublin activity is Oct 13 afternoon"
+      }
+    },
+    {
+      "delayMs": 120,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "validation",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "check": "hotel-nights",
+        "label": "Hotel nights match stay window",
+        "status": "pass",
+        "detail": "7 nights booked within the Oct 12–19 window"
+      }
+    },
+    {
+      "delayMs": 120,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "validation",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "check": "options-persisted",
+        "label": "Selected flight + hotel persisted",
+        "status": "pass",
+        "detail": "promote_flights + promote_hotels_to_lodging committed to trip state"
+      }
+    },
+    {
+      "delayMs": 120,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "validation",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "check": "folio-rebuilt",
+        "label": "Folio projection rebuilt from trip state",
+        "status": "pass",
+        "detail": "deterministic re-render after each promotion — model never wrote the document"
+      }
+    },
+    {
       "delayMs": 500,
       "kind": "turn-end"
     }

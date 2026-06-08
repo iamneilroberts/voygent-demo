@@ -45,6 +45,10 @@ export interface InsOverhead {
   instrumentationMs: number | null; instrumentationBytes: number; addedModelTokens: 0;
   folioReprojectMs?: number | null; note?: string;
 }
+export interface InsValidation {
+  type: "inspector"; kind: "validation"; exchangeId: string;
+  check: string; label: string; status: "pass" | "repaired" | "fail"; detail?: string;
+}
 
 const STAGES: { key: string; label: string; tools: string[] }[] = [
   { key: "create",  label: "Create",  tools: ["save_trip"] },
@@ -74,6 +78,30 @@ function ToolRow({ t }: { t: InsTool }) {
   );
 }
 
+// Trip-Integrity checks. Renders nothing until a validation event fires, so the
+// live (non-replay) path never shows an empty/implied-pass panel.
+function ValidationSection({ items }: { items: InsValidation[] }) {
+  if (items.length === 0) return null;
+  const glyph = (s: InsValidation["status"]) => (s === "fail" ? "✗" : s === "repaired" ? "↻" : "✓");
+  return (
+    <section className="ins-region ins-validation">
+      <h3>Trip integrity</h3>
+      <ul className="ins-checks">
+        {items.map((v, i) => (
+          <li key={i} className={`ins-check ins-check-${v.status}`}>
+            <span className="ins-check-glyph" aria-hidden="true">{glyph(v.status)}</span>
+            <span className="ins-check-main">
+              <span className="ins-check-label">{v.label}</span>
+              {v.detail && <span className="ins-check-detail">{v.detail}</span>}
+            </span>
+            {v.status === "repaired" && <span className="ins-check-tag">repaired</span>}
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
 export interface ModelRoutingUi {
   mode: SelectorMode;
   enabledModels: ModelId[];
@@ -84,7 +112,7 @@ export interface ModelRoutingUi {
 }
 
 export function Inspector(
-  { state, onToggleCollapse, tools, turns, summaries, savings, overhead, headExtra, routing, stats, stores }:
+  { state, onToggleCollapse, tools, turns, summaries, savings, overhead, headExtra, routing, stats, stores, validations }:
   { state: EngState; onToggleCollapse: () => void; tools: InsTool[]; turns: InsTurn[]; summaries: InsSummary[]; savings: InsSavings[]; overhead: InsOverhead[];
     // Extra controls shown under the head when live — e.g. the palette switcher
     // relocated here in the claude skin (its home header isn't rendered there).
@@ -93,7 +121,9 @@ export function Inspector(
     // Cumulative cross-session aggregates (public). Section hidden when null/empty.
     stats?: StatsResponse | null;
     // Projected production KV/D1 ops for this session (Slice B). Empty until tools fire.
-    stores?: InsStore[] },
+    stores?: InsStore[];
+    // Trip-integrity checks the system ran this session. Empty until a validation event fires.
+    validations?: InsValidation[] },
 ) {
   const [showCost, setShowCost] = useState(true);  // cost shown by default (Neil 2026-06-07)
 
@@ -158,6 +188,14 @@ export function Inspector(
   const savedHeadline = aggregateSum + perTurnTotal;
   const ov = overhead[overhead.length - 1];
 
+  // Summary-strip derivations (10-second read). "Persisted writes" = mutating
+  // store ops this session would commit (KV put/delete); reads/queries excluded.
+  const vals = validations ?? [];
+  const persistedWrites = (stores ?? []).flatMap((s) => s.ops).filter((o) => o.op === "put" || o.op === "delete").length;
+  const valTotal = vals.length;
+  const valOk = vals.filter((v) => v.status === "pass" || v.status === "repaired").length;
+  const valFail = vals.some((v) => v.status === "fail");
+
   return (
     <aside className="inspector term crt" role="complementary" aria-label="Engineering inspector">
       <div className="ins-head">
@@ -165,6 +203,38 @@ export function Inspector(
         <button className="ins-collapse" onClick={onToggleCollapse} aria-label="Collapse inspector">▾</button>
       </div>
       {headExtra && <div className="ins-extra">{headExtra}</div>}
+
+      {/* 10-second read: the whole system at a glance. Detail stays in the sections below. */}
+      <section className="ins-region ins-summary" aria-label="Run summary">
+        <div className="ins-strip">
+          <div className="ins-stat">
+            <span className="ins-stat-n">{latest ? latest.exposedToolCount : "—"}</span>
+            <span className="ins-stat-l">MCP tools exposed</span>
+          </div>
+          <div className="ins-stat">
+            <span className="ins-stat-n">{tools.length}</span>
+            <span className="ins-stat-l">tools used</span>
+          </div>
+          <div className="ins-stat">
+            <span className="ins-stat-n">{persistedWrites}</span>
+            <span className="ins-stat-l">persisted writes</span>
+          </div>
+          <div className="ins-stat">
+            <span className="ins-stat-n">≈{fmt(savedHeadline)}</span>
+            <span className="ins-stat-l">context kept out</span>
+          </div>
+          <div className="ins-stat">
+            <span className="ins-stat-n ins-stat-cost">{usd(actualCost)}</span>
+            <span className="ins-stat-l">observed cost</span>
+          </div>
+          {valTotal > 0 && (
+            <div className="ins-stat">
+              <span className={`ins-stat-n ${valFail ? "ins-stat-warn" : "ins-stat-ok"}`}>{valOk}/{valTotal}</span>
+              <span className="ins-stat-l">validation</span>
+            </div>
+          )}
+        </div>
+      </section>
 
       {routing && (
         <section className="ins-region ins-routing">
@@ -225,9 +295,9 @@ export function Inspector(
           </button>
           {showCost && latest && (
             <div className="ins-cost-rows">
-              <div className="ins-actualcost">This session actually cost <b>{usd(actualCost)}</b> (routed{routedModels.length > 1
-                ? `: ${routedModels.map((m) => `${usd(actualByModel[m])} ${MODEL_LABELS[m as ModelId] ?? m}`).join(" + ")}` : ""})</div>
-              <div className="ins-note">Counterfactual — same usage priced as one tier: <b>{usd(cost.haiku)}</b> haiku · <b>{usd(cost.sonnet)}</b> sonnet · <b>{usd(cost.opus)}</b> opus</div>
+              <div className="ins-actualcost">Observed routed cost <b>{usd(actualCost)}</b>{routedModels.length > 1
+                ? ` — ${routedModels.map((m) => `${usd(actualByModel[m])} ${MODEL_LABELS[m as ModelId] ?? m}`).join(" + ")}` : ""}</div>
+              <div className="ins-note">Counterfactual estimate — same usage priced as one tier: <b>{usd(cost.haiku)}</b> haiku · <b>{usd(cost.sonnet)}</b> sonnet · <b>{usd(cost.opus)}</b> opus</div>
               {routedModels.length > 1 && <div className="ins-note">Routing splits models, so caches don't carry across the switch — cache writes are re-paid; the actual figure above already reflects that.</div>}
             </div>
           )}
@@ -251,7 +321,7 @@ export function Inspector(
             )}
           </ul>
           {templateMax > 0 && (
-            <div className="ins-note">Folio render: ≈ {fmt(templateMax)} tokens the model never generated (deterministic template, counterfactual — not summed above).</div>
+            <div className="ins-note">Deterministic render estimate — ≈ {fmt(templateMax)} tokens the model never generated (folio is a server-side template render, counterfactual — not summed above).</div>
           )}
         </div>
 
@@ -262,6 +332,8 @@ export function Inspector(
           <div>Instrumentation CPU: <b>{!ov ? "—" : (ov.instrumentationMs != null ? `${ov.instrumentationMs} ms` : "below timer resolution")}</b></div>
         </div>
       </section>
+
+      <ValidationSection items={vals} />
 
       <StoreOpsWidget stores={stores ?? []} />
 

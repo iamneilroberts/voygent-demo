@@ -61,6 +61,11 @@ export type InspectorEvent =
       folioReprojectMs?: number | null; note?: string }
   | { type: "inspector"; kind: "store"; exchangeId: string; turn: number;
       tool: string; ops: import("../worker/storeops").StoreOp[] }
+  | { type: "inspector"; kind: "validation"; exchangeId: string;
+      // A Trip-Integrity check the system ran against the projected trip state.
+      // status: "pass" (held), "repaired" (a problem was caught and corrected —
+      // honest, not theatrical), "fail" (surfaced, unresolved).
+      check: string; label: string; status: "pass" | "repaired" | "fail"; detail?: string }
   | { type: "inspector"; kind: "summary"; exchangeId: string;
       turns: number; toolCalls: number; exposedToolCount: number; fullToolCount: number;
       inputTokens: number; outputTokens: number; cacheReadTokens: number; cacheCreationTokens: number;
