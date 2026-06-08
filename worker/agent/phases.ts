@@ -35,12 +35,16 @@ export function isActionPhase(p: TripPhase): boolean { return p !== "SUMMARY" &&
 export interface PhaseCtx { boardsMode: boolean; liveMode: boolean; }
 
 // Whether afterToolBatch should inject the current phase's directive after a tool
-// batch. In BOARDS mode the human-pick phases (FLIGHT_PICK/HOTEL_PICK) are interactive
-// wait states already owned by the seed's BOARDS_WORKFLOW_OVERRIDE — injecting a
-// per-phase directive there contradicts "present-and-wait" / "promote only on the
-// traveler's pick", so we suppress it and let the seed drive. EDITS is post-build (no
-// directive). Everything else (HOTEL_SEARCH, enrichment phases, SUMMARY, and pick
-// phases in AUTO mode where the model picks itself) still gets its directive.
+// batch. In BOARDS mode the human-pick phases (FLIGHT_PICK/HOTEL_PICK) are already
+// owned by the seed's BOARDS_WORKFLOW_OVERRIDE: FLIGHT_PICK is a present-and-wait
+// state, and HOTEL_PICK is the post-pick action (stage + promote the traveler's
+// choice). Injecting a per-phase directive at either conflicts with the seed —
+// e.g. after hotel_search advances HOTEL_SEARCH→HOTEL_PICK, the HOTEL_PICK action
+// directive would tell the model to promote before the traveler has picked — so we
+// suppress it there and let the seed drive the interactive hand-off. EDITS is
+// post-build (no directive). Everything else (HOTEL_SEARCH, enrichment phases,
+// SUMMARY, and pick phases in AUTO mode where the model picks itself) still gets its
+// directive.
 export function shouldInjectPhaseDirectiveAfterBatch(phase: TripPhase, ctx: PhaseCtx): boolean {
   if (phase === "EDITS") return false;
   if (ctx.boardsMode && (phase === "FLIGHT_PICK" || phase === "HOTEL_PICK")) return false;
