@@ -1,16 +1,20 @@
-import { MODEL_LABELS, type ModelId } from "../../shared/models";
+import { MODEL_LABELS, modelEntry, type ModelId } from "../../shared/models";
 import type { SelectorMode } from "./lib/model";
 
 // Global model selector — sits in the switch cluster (claude skin: Inspector
 // head; board skin: page header), beside Advisor/Theme. Renders only enabled
 // models (Opus appears only when the worker advertises it). "Smart" = per-phase
-// routing (the map is edited in the Inspector body).
+// routing (the map is edited in the Inspector body). The ⚙ opens the fuller
+// Tweaks panel (provider groups + optimize presets).
 export function ModelSwitch(
-  { mode, enabled, onPick }:
-  { mode: SelectorMode; enabled: ModelId[]; onPick: (m: SelectorMode) => void },
+  { mode, enabled, onPick, onTweaks }:
+  { mode: SelectorMode; enabled: ModelId[]; onPick: (m: SelectorMode) => void; onTweaks?: () => void },
 ) {
+  // MODEL_LABELS only carries the Claude trio; fall back to the registry label
+  // (then the raw id) so a non-Claude enabled model — e.g. DeepSeek — still reads.
+  const labelFor = (id: ModelId): string => MODEL_LABELS[id] ?? modelEntry(id)?.label ?? id;
   const options: { id: SelectorMode; label: string }[] = [
-    ...enabled.map((id) => ({ id: id as SelectorMode, label: MODEL_LABELS[id] })),
+    ...enabled.map((id) => ({ id: id as SelectorMode, label: labelFor(id) })),
     { id: "smart" as SelectorMode, label: "Smart" },
   ];
   return (
@@ -27,6 +31,9 @@ export function ModelSwitch(
           {o.label}
         </button>
       ))}
+      {onTweaks && (
+        <button type="button" className="model-tweaks" title="More model options" onClick={onTweaks} aria-label="Open model tweaks">⚙</button>
+      )}
     </div>
   );
 }

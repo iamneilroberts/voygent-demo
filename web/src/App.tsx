@@ -11,9 +11,10 @@ import { SkinSwitch } from "./SkinSwitch";
 import { AdvisorSwitch } from "./AdvisorSwitch";
 import { resolveInitialAdvisor, persistAdvisor } from "./lib/advisor";
 import { ModelSwitch } from "./ModelSwitch";
+import { TweaksPanel } from "./TweaksPanel";
 import { resolveInitialSelector, persistSelector, routingBody, type SelectorMode } from "./lib/model";
 import { type MobileView, DEFAULT_MOBILE_VIEW } from "./lib/mobile-view";
-import { DEFAULT_SMART_MAP, type ModelId, type PhaseModelMap, type Phase } from "../../shared/models";
+import { DEFAULT_SMART_MAP, type ModelId, type PhaseModelMap, type Phase, type ModelRouting } from "../../shared/models";
 import { engState } from "./lib/inspector-state";
 import { applyTheme, loadTheme } from "./lib/theme";
 import { resolveInitialSkin, applySkin, type SkinId } from "./lib/skin";
@@ -72,6 +73,13 @@ export function App() {
   useEffect(() => { persistSelector(modelMode); }, [modelMode]);
   const [smartMap, setSmartMap] = useState<PhaseModelMap>({ ...DEFAULT_SMART_MAP });
   const [enabledModels, setEnabledModels] = useState<ModelId[]>(["claude-haiku-4-5", "claude-sonnet-4-6"]);
+  // Tweaks panel (fuller provider/preset picker) open state + the routing applier
+  // that maps a chosen ModelRouting back onto modelMode + smartMap.
+  const [tweaksOpen, setTweaksOpen] = useState(false);
+  function applyRouting(r: ModelRouting) {
+    setSmartMap(r.map);
+    setModelMode(r.mode === "single" ? (r.model as SelectorMode) : "smart");
+  }
   const activePhase: Phase = folio && folio.hotels.length > 0 ? "enrichment" : "discovery";
   // Mobile-only: which surface is showing (chat base + folio/engineering overlays).
   const [mobileView, setMobileView] = useState<MobileView>(DEFAULT_MOBILE_VIEW);
@@ -248,7 +256,7 @@ export function App() {
         <header>
           <span className="brand"><strong>Voygent</strong> <span className="sub">AI travel-planning agent</span></span>
           <span className="by">built by Neil Roberts</span>
-          <ModelSwitch mode={modelMode} enabled={enabledModels} onPick={setModelMode} />
+          <ModelSwitch mode={modelMode} enabled={enabledModels} onPick={setModelMode} onTweaks={() => setTweaksOpen(true)} />
           <AdvisorSwitch on={advisor} onToggle={setAdvisor} />
           <ThemeSwitch />
         </header>
@@ -282,7 +290,7 @@ export function App() {
             tools={insTools} turns={insTurns} summaries={insSummaries}
             savings={insSavings} overhead={insOverhead} stats={stats}
             stores={insStores}
-            headExtra={skin === "claude" ? <><ModelSwitch mode={modelMode} enabled={enabledModels} onPick={setModelMode} /><AdvisorSwitch on={advisor} onToggle={setAdvisor} /><ThemeSwitch /></> : undefined}
+            headExtra={skin === "claude" ? <><ModelSwitch mode={modelMode} enabled={enabledModels} onPick={setModelMode} onTweaks={() => setTweaksOpen(true)} /><AdvisorSwitch on={advisor} onToggle={setAdvisor} /><ThemeSwitch /></> : undefined}
             routing={{ mode: modelMode, enabledModels, smartMap, activePhase, onMode: setModelMode, onSmartMap: setSmartMap }}
           />
         </section>
@@ -290,6 +298,10 @@ export function App() {
       <footer className="meta">This interface was itself built by a coding agent.</footer>
       <SkinSwitch skin={skin} onPick={setSkin} />
       <button type="button" className="watch-demo" onClick={toggleDemo}>{demoLabel}</button>
+      <TweaksPanel
+        open={tweaksOpen} onClose={() => setTweaksOpen(false)}
+        enabled={enabledModels} mode={modelMode} onMode={setModelMode} onRouting={applyRouting}
+      />
     </div>
   );
 }
