@@ -13,11 +13,14 @@ export interface ProviderEnv {
   DEMO_OLLAMA_URL?: string;
 }
 
+// Gates read only their own fields (not ANTHROPIC_API_KEY), so they accept any
+// env shape carrying them — the DO Env and the top-level worker Env both qualify
+// without an `as any` cast.
 /** DeepSeek is live only when BOTH the key and the flag are present (R8). */
-export function deepseekEnabled(env: ProviderEnv): boolean {
+export function deepseekEnabled(env: { DEEPSEEK_API_KEY?: string; DEMO_DEEPSEEK_ENABLED?: string }): boolean {
   return !!env.DEEPSEEK_API_KEY && !!env.DEMO_DEEPSEEK_ENABLED;
 }
-export function ollamaEnabled(env: ProviderEnv): boolean {
+export function ollamaEnabled(env: { OLLAMA_BASE_URL?: string; DEMO_OLLAMA_URL?: string }): boolean {
   return !!(env.OLLAMA_BASE_URL || env.DEMO_OLLAMA_URL);
 }
 
