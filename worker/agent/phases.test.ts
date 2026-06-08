@@ -46,3 +46,46 @@ describe("phaseDirective", () => {
     expect(phaseDirective("FLIGHT_PICK", { boardsMode: false, liveMode: false }).toLowerCase()).toContain("promote_flights");
   });
 });
+
+import { advancePhase } from "./phases";
+
+const ctx = { boardsMode: true, liveMode: false };
+const okPersisted = { status: "ok", persisted: true };
+const okStatus = { status: "ok" };
+
+describe("advancePhase", () => {
+  it("INTAKE: save_trip is a no-op, flight_search advances to FLIGHT_PICK", () => {
+    expect(advancePhase("INTAKE", "save_trip", {}, okStatus, ctx)).toBe("INTAKE");
+    expect(advancePhase("INTAKE", "flight_search", {}, okStatus, ctx)).toBe("FLIGHT_PICK");
+  });
+  it("FLIGHT_PICK -> HOTEL_SEARCH only on promote_flights", () => {
+    expect(advancePhase("FLIGHT_PICK", "patch_trip", {}, okStatus, ctx)).toBe("FLIGHT_PICK");
+    expect(advancePhase("FLIGHT_PICK", "promote_flights", {}, okStatus, ctx)).toBe("HOTEL_SEARCH");
+  });
+  it("HOTEL_SEARCH advances on hotel_search OR hotel_search_and_rank", () => {
+    expect(advancePhase("HOTEL_SEARCH", "hotel_search", {}, okStatus, ctx)).toBe("HOTEL_PICK");
+    expect(advancePhase("HOTEL_SEARCH", "hotel_search_and_rank", {}, okStatus, ctx)).toBe("HOTEL_PICK");
+  });
+  it("HOTEL_PICK -> ENRICH_EXCURSIONS on promote, or on live lodging patch", () => {
+    expect(advancePhase("HOTEL_PICK", "promote_hotels_to_lodging", {}, okStatus, ctx)).toBe("ENRICH_EXCURSIONS");
+    expect(advancePhase("HOTEL_PICK", "patch_trip", { updates: { lodging: [{ name: "X" }] } }, okStatus, { ...ctx, liveMode: true })).toBe("ENRICH_EXCURSIONS");
+    expect(advancePhase("HOTEL_PICK", "patch_trip", { updates: { hotels: [{}] } }, okStatus, { ...ctx, liveMode: true })).toBe("HOTEL_PICK");
+  });
+  it("ENRICH_EXCURSIONS -> APPLY_PICKS -> ENRICH_DINING -> SUMMARY", () => {
+    expect(advancePhase("ENRICH_EXCURSIONS", "excursion_search", {}, okStatus, ctx)).toBe("APPLY_PICKS");
+    expect(advancePhase("APPLY_PICKS", "apply_gap_tour_picks", {}, okPersisted, ctx)).toBe("ENRICH_DINING");
+    expect(advancePhase("ENRICH_DINING", "tripadvisor_search", {}, okStatus, ctx)).toBe("SUMMARY");
+  });
+  it("APPLY_PICKS stays put when the result is not persisted", () => {
+    expect(advancePhase("APPLY_PICKS", "apply_gap_tour_picks", {}, { status: "error", persisted: false }, ctx)).toBe("APPLY_PICKS");
+  });
+  it("a failed/error result never advances", () => {
+    expect(advancePhase("INTAKE", "flight_search", {}, { status: "error" }, ctx)).toBe("INTAKE");
+    expect(advancePhase("INTAKE", "flight_search", {}, null, ctx)).toBe("INTAKE"); // unparseable result
+  });
+  it("EDITS re-enters the right phase by observed tool", () => {
+    expect(advancePhase("EDITS", "hotel_search", {}, okStatus, ctx)).toBe("HOTEL_PICK");
+    expect(advancePhase("EDITS", "excursion_search", {}, okStatus, ctx)).toBe("APPLY_PICKS");
+    expect(advancePhase("EDITS", "read_trip", {}, okStatus, ctx)).toBe("EDITS"); // non-build tool: stay
+  });
+});

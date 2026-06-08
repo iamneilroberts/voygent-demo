@@ -76,3 +76,67 @@ export function phaseDirective(phase: TripPhase, ctx: PhaseCtx): string {
         + "activity, etc.) using the appropriate tools, then briefly confirm what changed. Use ONLY tool-returned names.";
   }
 }
+
+// --- result-shape helpers (defensive; tool results are untrusted strings/objects) ---
+function isOk(resultJson: any): boolean {
+  if (resultJson == null) return false;                 // unparseable result → treat as not-ok
+  if (typeof resultJson !== "object") return false;
+  if (resultJson.status === "error" || resultJson.ok === false) return false;
+  return true;
+}
+function isPersisted(resultJson: any): boolean {
+  return isOk(resultJson) && resultJson.persisted !== false; // apply_gap_tour_picks sets persisted:true on success
+}
+function inputHasLodging(input: any): boolean {
+  const updates = input?.updates ?? input;
+  return !!updates && typeof updates === "object" && Array.isArray(updates.lodging) && updates.lodging.length > 0;
+}
+
+// Re-enter the relevant build phase from an observed tool during EDITS.
+function reEnterFromEdit(toolName: string): TripPhase {
+  switch (toolName) {
+    case "flight_search": return "FLIGHT_PICK";
+    case "hotel_search": case "hotel_search_and_rank": return "HOTEL_PICK";
+    case "excursion_search": return "APPLY_PICKS";
+    case "tripadvisor_search": return "SUMMARY";
+    default: return "EDITS";
+  }
+}
+
+/**
+ * Pure transition: given the current phase and an OBSERVED tool call (name, input,
+ * parsed result), return the next phase. Advance only on a successful result that
+ * matches the phase's expected tool; otherwise return the SAME phase (the caller
+ * owns retry caps + the structural auto-continuation). `resultJson` is the parsed
+ * tool result, or null if it didn't parse as JSON. `ctx` is the same `PhaseCtx`
+ * used by phaseDirective (only `liveMode` is read here).
+ */
+export function advancePhase(
+  phase: TripPhase, toolName: string, input: any, resultJson: any, ctx: PhaseCtx,
+): TripPhase {
+  if (phase !== "APPLY_PICKS" && !isOk(resultJson)) return phase;
+  switch (phase) {
+    case "INTAKE":
+      return toolName === "flight_search" ? "FLIGHT_PICK" : phase;
+    case "FLIGHT_PICK":
+      return toolName === "promote_flights" ? "HOTEL_SEARCH" : phase;
+    case "HOTEL_SEARCH":
+      return (toolName === "hotel_search" || toolName === "hotel_search_and_rank") ? "HOTEL_PICK" : phase;
+    case "HOTEL_PICK":
+      if (toolName === "promote_hotels_to_lodging") return "ENRICH_EXCURSIONS";
+      if (ctx.liveMode && toolName === "patch_trip" && inputHasLodging(input)) return "ENRICH_EXCURSIONS";
+      return phase;
+    case "ENRICH_EXCURSIONS":
+      return toolName === "excursion_search" ? "APPLY_PICKS" : phase;
+    case "APPLY_PICKS":
+      return (toolName === "apply_gap_tour_picks" && isPersisted(resultJson)) ? "ENRICH_DINING" : phase;
+    case "ENRICH_DINING":
+      return toolName === "tripadvisor_search" ? "SUMMARY" : phase;
+    case "SUMMARY":
+      return phase; // SUMMARY -> EDITS is driven by session-do once the summary message is emitted
+    case "EDITS":
+      return reEnterFromEdit(toolName);
+    default:
+      return phase;
+  }
+}
