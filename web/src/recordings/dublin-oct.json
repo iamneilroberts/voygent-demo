@@ -2034,7 +2034,27 @@
           "days": [
             {
               "date": "2026-10-12",
+              "title": "Depart Mobile (MOB)",
+              "location": "In transit",
+              "activities": [],
+              "dining": []
+            },
+            {
+              "date": "2026-10-13",
               "title": "Arrive Dublin",
+              "location": "Dublin",
+              "activities": [
+                {
+                  "name": "Phoenix Park",
+                  "description": "One of Europe's largest enclosed city parks — free to roam, with wild fallow deer and miles of trails. An easy first afternoon after a morning landing.",
+                  "url": "http://www.phoenixpark.ie"
+                }
+              ],
+              "dining": []
+            },
+            {
+              "date": "2026-10-14",
+              "title": "Dublin — Day 2",
               "location": "Dublin",
               "activities": [
                 {
@@ -2046,20 +2066,7 @@
               "dining": []
             },
             {
-              "date": "2026-10-13",
-              "title": "Dublin — Day 2",
-              "location": "Dublin",
-              "activities": [
-                {
-                  "name": "Phoenix Park",
-                  "description": "One of Europe's largest enclosed city parks — free to roam, with wild fallow deer and miles of trails.",
-                  "url": "http://www.phoenixpark.ie"
-                }
-              ],
-              "dining": []
-            },
-            {
-              "date": "2026-10-14",
+              "date": "2026-10-15",
               "title": "Dublin — Day 3",
               "location": "Dublin",
               "activities": [
@@ -2192,13 +2199,20 @@
           "days": [
             {
               "date": "2026-10-12",
+              "title": "Depart Mobile (MOB)",
+              "location": "In transit",
+              "activities": [],
+              "dining": []
+            },
+            {
+              "date": "2026-10-13",
               "title": "Arrive Dublin",
               "location": "Dublin",
               "activities": [
                 {
-                  "name": "Dublin to Glendalough, Wicklow and Kilkenny Full Day Guided Tour",
-                  "description": "Voted No. 1 Day Tour on Tripadvisor. Full Day Tour to Wicklow mountains, Glendalough and Kilkenny. Expert tour guides with separate coach driver. 5 star award winning luxury touring coaches with Free",
-                  "url": "https://www.viator.com/tours/Dublin/Wicklow-mountains-Glendalough-and-Kilkenny-Day-Tour-from-Dublin/d503-33832P1?pid=P00005400&mcid=58086&currency=USD&medium=api"
+                  "name": "Phoenix Park",
+                  "description": "One of Europe's largest enclosed city parks — free to roam, with wild fallow deer and miles of trails. An easy first afternoon after a morning landing.",
+                  "url": "http://www.phoenixpark.ie"
                 }
               ],
               "dining": [
@@ -2215,14 +2229,14 @@
               ]
             },
             {
-              "date": "2026-10-13",
+              "date": "2026-10-14",
               "title": "Dublin — Day 2",
               "location": "Dublin",
               "activities": [
                 {
-                  "name": "Phoenix Park",
-                  "description": "One of Europe's largest enclosed city parks — free to roam, with wild fallow deer and miles of trails.",
-                  "url": "http://www.phoenixpark.ie"
+                  "name": "Dublin to Glendalough, Wicklow and Kilkenny Full Day Guided Tour",
+                  "description": "Voted No. 1 Day Tour on Tripadvisor. Full Day Tour to Wicklow mountains, Glendalough and Kilkenny. Expert tour guides with separate coach driver. 5 star award winning luxury touring coaches with Free",
+                  "url": "https://www.viator.com/tours/Dublin/Wicklow-mountains-Glendalough-and-Kilkenny-Day-Tour-from-Dublin/d503-33832P1?pid=P00005400&mcid=58086&currency=USD&medium=api"
                 }
               ],
               "dining": [
@@ -2234,7 +2248,7 @@
               ]
             },
             {
-              "date": "2026-10-14",
+              "date": "2026-10-15",
               "title": "Dublin — Day 3",
               "location": "Dublin",
               "activities": [
@@ -2253,7 +2267,7 @@
               ]
             },
             {
-              "date": "2026-10-15",
+              "date": "2026-10-16",
               "title": "Dublin — Day 4",
               "location": "Dublin",
               "activities": [],
@@ -2266,7 +2280,7 @@
               ]
             },
             {
-              "date": "2026-10-16",
+              "date": "2026-10-17",
               "title": "Dublin — Day 5",
               "location": "Dublin",
               "activities": [],
