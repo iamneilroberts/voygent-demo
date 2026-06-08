@@ -4,7 +4,7 @@ import { infoPageHtml } from "./info/pages";
 import { enabledModels, DEFAULT_SMART_MAP } from "../shared/models";
 import { STATS_AGG_SQL, shapeStats, type StatsAggRow } from "./stats";
 
-interface Env { SESSION: DurableObjectNamespace; DEMO_DISABLED?: string; DEMO_OPUS_ENABLED?: string; DEMO_TEST_TOKEN?: string; STATS_DB?: D1Database; }
+interface Env { SESSION: DurableObjectNamespace; DEMO_DISABLED?: string; DEMO_OPUS_ENABLED?: string; DEMO_TEST_TOKEN?: string; DEMO_PHASE_MACHINE?: string; STATS_DB?: D1Database; }
 
 // Test/smoke requests (carrying the secret header) bypass the public daily
 // budget so automated runs don't 503 real visitors. Returns false unless the
