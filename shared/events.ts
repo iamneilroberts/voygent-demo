@@ -67,7 +67,11 @@ export type InspectorEvent =
       // costByModel = COUNTERFACTUAL (what the aggregate usage would cost priced entirely as each tier).
       // actualCostUsd = MEASURED routed spend (sum of per-turn cost at that turn's model).
       costByModel: { haiku: number; sonnet: number; opus: number };
-      actualCostUsd: number; actualCostByModel?: Record<string, number> };
+      actualCostUsd: number; actualCostByModel?: Record<string, number> }
+  // Phase-machine theater event: emitted each time the build phase advances.
+  // Task 7 will render this in the inspector panel; added here (Task 5) so
+  // session-do.ts can emit it without a tsc error.
+  | { type: "inspector"; kind: "phase"; exchangeId: string; phase: string; via: string };
 
 export function encodeSse(ev: ServerEvent): string {
   return `data: ${JSON.stringify(ev)}\n\n`;

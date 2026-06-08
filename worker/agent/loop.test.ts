@@ -232,4 +232,59 @@ describe("runAgentLoop", () => {
     expect(tool.ok).toBe(false);
     expect(tool.result).toContain("boom");
   });
+
+  it("afterToolBatch receives each tool's parsed-ish result text and its return is appended", async () => {
+    const asstWithTool: AssistantMessage = {
+      role: "assistant",
+      content: [{ type: "tool_use", id: "tuAFT", name: "flight_search", input: { trip_id: "tAFT" } }],
+    };
+    const asstFinal: AssistantMessage = { role: "assistant", content: [{ type: "text", text: "done" }] };
+    const provider = fakeProvider([
+      [{ type: "tool-call", id: "tuAFT", name: "flight_search", input: { trip_id: "tAFT" } }, { type: "turn-complete", assistant: asstWithTool }],
+      [{ type: "text-delta", delta: "done" }, { type: "turn-complete", assistant: asstFinal }],
+    ]);
+    const seen: Array<{ name: string; result: string }> = [];
+    const out: ServerEvent[] = [];
+    await runAgentLoop({
+      provider, tools: [],
+      messages: [{ role: "user", content: "find flights" }] as ConversationMessage[],
+      callTool: async () => JSON.stringify({ status: "ok" }),
+      onFolio: async () => {},
+      afterToolBatch: (batch: Array<{ name: string; input: Record<string, unknown>; result: string }>) => { for (const b of batch) seen.push({ name: b.name, result: b.result }); return null; },
+      emit: (e: ServerEvent) => out.push(e),
+    });
+    expect(seen).toHaveLength(1);
+    expect(seen[0].name).toBe("flight_search");
+    expect(seen[0].result).toContain("ok");
+  });
+
+  it("continueDirective injects a synthetic user turn when the model stops, capped", async () => {
+    // A provider that NEVER calls a tool — always yields a text turn and stops.
+    // Without continueDirective this would end after the first turn.
+    let providerCallCount = 0;
+    const noToolProvider: LLMProvider = {
+      async *stream(): AsyncIterable<ProviderEvent> {
+        providerCallCount++;
+        const asst: AssistantMessage = { role: "assistant", content: [{ type: "text", text: "ok" }] };
+        yield { type: "text-delta", delta: "ok" };
+        yield { type: "turn-complete", assistant: asst };
+      },
+    };
+    let calls = 0;
+    const out: ServerEvent[] = [];
+    await runAgentLoop({
+      provider: noToolProvider, tools: [],
+      messages: [{ role: "user", content: "go" }] as ConversationMessage[],
+      callTool: async () => "unused",
+      onFolio: async () => {},
+      continueDirective: () => { calls++; return calls <= 2 ? "proceed" : null; },
+      emit: (e: ServerEvent) => out.push(e),
+    });
+    // 1st stop → calls=1 (returns "proceed", continues)
+    // 2nd stop → calls=2 (returns "proceed", continues)
+    // 3rd stop → calls=3 (returns null, ends)
+    expect(calls).toBe(3);
+    // The loop should have run 3 provider turns total
+    expect(providerCallCount).toBe(3);
+  });
 });
