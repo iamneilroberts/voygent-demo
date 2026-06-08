@@ -7,11 +7,11 @@ import { FixtureReplay, type ReplayHelpers } from "./mcp/replay";
 import { msgKey, shrinkForStorage, MSG_PREFIX, type SessRecord } from "./session-store";
 import { type ModelId, type ModelRouting, DEFAULT_ROUTING, enabledModels, buildRouting, resolveRoutingModel } from "../shared/models";
 import { presetRoutes } from "./fixtures/index";
-import { ClaudeProvider } from "./llm/claude";
+import { DispatchProvider } from "./llm/dispatch";
 import { estimateCostUsd } from "./llm/cost";
 import { withInspectorCost, sessionCostByModel, estTokens, utf8Bytes } from "./inspector";
 import { storeOpsForTool } from "./storeops";
-import { deepseekEnabled, ollamaEnabled } from "./llm/index";
+import { providerFor, deepseekEnabled, ollamaEnabled } from "./llm/index";
 import { STATS_INSERT_SQL, statsRowFromSummary, type StatsSummary } from "./stats";
 import { encodeSse } from "../shared/events";
 import type { ConversationMessage, TokenUsage } from "./llm/provider";
@@ -279,7 +279,7 @@ export class SessionDO {
     const enabled = enabledModels({ opus: !!this.env.DEMO_OPUS_ENABLED, deepseek: deepseekEnabled(this.env), ollama: ollamaEnabled(this.env) });
     this.routing = buildRouting({ model: body.model, routing: body.routing }, enabled, fallbackModel);
     const mcp = new McpClient(this.env.VOYGENT_MCP_URL, this.env.VOYGENT_MCP_BEARER);
-    const provider = new ClaudeProvider(this.env.ANTHROPIC_API_KEY, model);
+    const provider = new DispatchProvider((id) => providerFor(id, this.env), model);
     const mux = new SseMultiplexer();
 
     if (this.messages.length === 0) {
