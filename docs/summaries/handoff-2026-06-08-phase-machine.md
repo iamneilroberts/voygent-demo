@@ -3,8 +3,8 @@
 **Date:** 2026-06-08 · **Repo:** `~/dev/voygent-demo` · **Worktree:** `/home/neil/dev/voygent-demo-demo-enrichment` · **Branch:** `phase-machine` (off `demo-enrichment`)
 **Supersedes the build half of:** `handoff-2026-06-08-phase-machine-ready-to-build.md` (that plan is now implemented).
 
-## TL;DR
-The server-side trip-build **phase machine** is fully implemented, two-stage-reviewed, Codex-reviewed, and **acceptance-passed 10/10** on local haiku Dublin boards runs. It is **committed on branch `phase-machine` but NOT merged and NOT deployed.** It ships **dormant** behind `DEMO_PHASE_MACHINE` (flag off → behavior byte-identical to today). **Remaining work is Task 10 only: merge → deploy dormant → canary → flip the flag — paused for the human before the prod flag-flip.**
+## TL;DR — SHIPPED + LIVE (2026-06-08)
+The server-side trip-build **phase machine** is implemented, two-stage-reviewed, Codex-reviewed, acceptance-passed **10/10** local + **3/3** prod canary, **merged to `demo-enrichment` (`16827fc`), deployed, and the `DEMO_PHASE_MACHINE` flag is LIVE in prod** (Worker `voygent-demo` version `11577554`). The merge superset (phase-machine + the concurrently-landed llm-tweaks/store-ops work) is **221 tests green**. **Instant rollback: `npx wrangler secret delete DEMO_PHASE_MACHINE`** (reverts to the legacy path, no redeploy). v1 limit stands: keep the behavior FEATURED-only mentally — directives aren't liveMode-aware (the seed's LIVE_TRIP_WORKFLOW still covers live trips).
 
 ## What's done (Tasks 0–9 of the plan)
 - 11 commits on `phase-machine` (merge-base `9d9030a`). `npx tsc --noEmit` clean; **190 vitest tests pass** (167 baseline + 23 new).
