@@ -5,6 +5,7 @@ import { ClaudeChatView } from "./ClaudeChatView";
 import { FolioPanel } from "./FolioPanel";
 import type { ServerEvent, FolioData, BoardCandidate, StatsResponse } from "../../shared/events";
 import { Inspector, type InsTool, type InsTurn, type InsSummary, type InsSavings, type InsOverhead } from "./Inspector";
+import { type InsStore } from "./StoreOpsWidget";
 import { ThemeSwitch } from "./ThemeSwitch";
 import { SkinSwitch } from "./SkinSwitch";
 import { AdvisorSwitch } from "./AdvisorSwitch";
@@ -56,6 +57,7 @@ export function App() {
   const [insSummaries, setInsSummaries] = useState<InsSummary[]>([]);
   const [insSavings, setInsSavings] = useState<InsSavings[]>([]);
   const [insOverhead, setInsOverhead] = useState<InsOverhead[]>([]);
+  const [insStores, setInsStores] = useState<InsStore[]>([]);
   // Cumulative cross-session stats (public aggregates) for the "Across all
   // sessions" panel section. Fetched once on mount, like /presets.
   const [stats, setStats] = useState<StatsResponse | null>(null);
@@ -194,6 +196,7 @@ export function App() {
       else if (e.kind === "summary") setInsSummaries((s) => [...s, e]);
       else if (e.kind === "savings") setInsSavings((s) => [...s, e]);
       else if (e.kind === "overhead") setInsOverhead((o) => [...o, e]);
+      else if (e.kind === "store") setInsStores((s) => [...s, e]);
     }
   }
 
@@ -278,6 +281,7 @@ export function App() {
             onToggleCollapse={() => { if (insTools.length > 0) setCollapsed((c) => !c); }}
             tools={insTools} turns={insTurns} summaries={insSummaries}
             savings={insSavings} overhead={insOverhead} stats={stats}
+            stores={insStores}
             headExtra={skin === "claude" ? <><ModelSwitch mode={modelMode} enabled={enabledModels} onPick={setModelMode} /><AdvisorSwitch on={advisor} onToggle={setAdvisor} /><ThemeSwitch /></> : undefined}
             routing={{ mode: modelMode, enabledModels, smartMap, activePhase, onMode: setModelMode, onSmartMap: setSmartMap }}
           />

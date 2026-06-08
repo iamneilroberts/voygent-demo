@@ -5,6 +5,7 @@ import { costWeightedTokens, cacheHitRate } from "./lib/usage";
 import { MODEL_LABELS, PHASES, PHASE_LABELS, type ModelId, type PhaseModelMap, type Phase } from "../../shared/models";
 import type { SelectorMode } from "./lib/model";
 import type { StatsResponse } from "../../shared/events";
+import { StoreOpsWidget, type InsStore } from "./StoreOpsWidget";
 
 // Engineering stories moved out of the panel (task 6c) — the tab keeps live
 // stats; the narratives live on worker-served /info pages.
@@ -83,14 +84,16 @@ export interface ModelRoutingUi {
 }
 
 export function Inspector(
-  { state, onToggleCollapse, tools, turns, summaries, savings, overhead, headExtra, routing, stats }:
+  { state, onToggleCollapse, tools, turns, summaries, savings, overhead, headExtra, routing, stats, stores }:
   { state: EngState; onToggleCollapse: () => void; tools: InsTool[]; turns: InsTurn[]; summaries: InsSummary[]; savings: InsSavings[]; overhead: InsOverhead[];
     // Extra controls shown under the head when live — e.g. the palette switcher
     // relocated here in the claude skin (its home header isn't rendered there).
     headExtra?: ReactNode;
     routing?: ModelRoutingUi;
     // Cumulative cross-session aggregates (public). Section hidden when null/empty.
-    stats?: StatsResponse | null },
+    stats?: StatsResponse | null;
+    // Projected production KV/D1 ops for this session (Slice B). Empty until tools fire.
+    stores?: InsStore[] },
 ) {
   const [showCost, setShowCost] = useState(true);  // cost shown by default (Neil 2026-06-07)
 
@@ -259,6 +262,8 @@ export function Inspector(
           <div>Instrumentation CPU: <b>{!ov ? "—" : (ov.instrumentationMs != null ? `${ov.instrumentationMs} ms` : "below timer resolution")}</b></div>
         </div>
       </section>
+
+      <StoreOpsWidget stores={stores ?? []} />
 
       {stats && stats.exchanges > 0 && (() => {
         const split = (["haiku", "sonnet", "opus"] as const).filter((k) => stats.byModel[k] > 0);
