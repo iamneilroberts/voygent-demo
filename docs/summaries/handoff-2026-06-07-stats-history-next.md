@@ -3,11 +3,16 @@
 **Date:** 2026-06-07 (late) · **Repo:** `~/dev/voygent-demo` · **Worktree:** `/home/neil/dev/voygent-demo-demo-enrichment` · **Branch:** `demo-enrichment` (prod runs this branch; deploy-from-main clobbers)
 **Supersedes:** `handoff-2026-06-07-model-selector-mobile-shipped.md`.
 
-## STATUS — BUILT + COMMITTED 2026-06-07, NOT DEPLOYED (commit `14a2c59`)
-The engineering-stats history feature is implemented per the spec below and committed on `demo-enrichment`. 167 tests pass (161 baseline + 6 new `worker/stats.test.ts`), `tsc --noEmit` + `VITE_API_BASE="" npm run build:web` both clean. **Remaining = the deploy** (creates a real prod D1 DB — Neil's call): run the **Deploy order** section below. `wrangler.toml` has the `[[d1_databases]]` block with a `database_id` PLACEHOLDER that step 1 fills in. Until deployed, `STATS_DB` is unbound and the whole feature is a silent no-op (`/stats` returns zeros, no writes).
+## STATUS — SHIPPED + DEPLOYED 2026-06-07 ✅ (commits `14a2c59` feat + wrangler-id)
+Engineering-stats history is built, committed on `demo-enrichment`, and **deployed to prod**.
+- Worker `voygent-demo` version **`5063ccb8-851d-4dc0-ade6-d4a96767d1f3`** → https://voygent-demo.somotravel.workers.dev
+- D1 **`voygent-demo-stats`** id `20321ac2-3669-489e-b67c-5e5bd91d6f2e` (binding `STATS_DB`); migration 0001 applied `--remote` (table `session_stats`).
+- **`GET /stats` LIVE** — edge-cached 60s, CORS, zero-shape when empty (verified: `{"sessions":0,...}` + `cf-cache-status: HIT`).
+- **E2E verified**: one real (non-test) /chat exchange wrote a row with matching `exchange_id`/`actual_cost_usd`/`routing_mode`; the aggregate query returned it; then the probe row was DELETED → table clean at 0 rows.
+- 167 tests pass (161 baseline + 6 new), `tsc` + `build:web` clean.
+- **GOTCHA:** test-token/smoke runs are **excluded** from stats writes by design — to see a row you must do a real (money-spending) `/chat`.
 
-## FIRST ACTION for the new session
-~~Implement~~ DONE (see STATUS above). If picking this up: run the deploy order, then verify (`curl <prod>/stats`, build a trip, `SELECT COUNT(*)`). Design reference: **`docs/superpowers/specs/2026-06-07-stats-history-design.md`** — schema, write-path, `/stats`, UI, deploy order.
+Nothing left to do here. Design reference: `docs/superpowers/specs/2026-06-07-stats-history-design.md`.
 
 ## Prod state (all SHIPPED + deployed this session)
 - Worker version **`756cd5b9`** @ branch HEAD **`4039544`** → https://voygent-demo.somotravel.workers.dev . Working tree clean. 161 tests pass, tsc clean.
