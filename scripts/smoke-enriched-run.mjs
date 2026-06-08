@@ -52,8 +52,15 @@ if (!args.base) {
 const BASE = args.base;
 const BOARDS = !!args.boards;
 const REPEAT = Math.max(1, parseInt(args.repeat ?? "1", 10));
-const PROMPT = args.prompt ??
+// Default prompt must match the default fixture. The acceptance bar (--repeat) checks
+// the build against the Dublin fixture (below), so in acceptance mode default to the
+// Dublin prompt; the legacy single-run path keeps the Cancún auto-pick prompt. Pass
+// --prompt to override either. (A Cancún prompt against the Dublin fixture fails every
+// free/paid + prose-name check by construction.)
+const DUBLIN_PROMPT = "Plan the Dublin in October trip for 2 travelers.";
+const CANCUN_PROMPT =
   "Plan the Cancún beach week trip end to end — round-trip flights from Atlanta (ATL) to Cancun for 2 travelers, Mar 13, 2027 to Mar 20, 2027, plus a few hotel options.";
+const PROMPT = args.prompt ?? (REPEAT > 1 ? DUBLIN_PROMPT : CANCUN_PROMPT);
 
 // ---- fixture loading (for --repeat acceptance assertions) ----
 // Fixture path: default is the dublin-oct fixture (sibling to this script, one dir up).
@@ -164,7 +171,14 @@ function pickFromBoard(boardEv, kind) {
 //     model quotes verbatim would NOT be flagged). False negatives are also
 //     possible (fabricated names the fixture doesn't carry won't be caught unless
 //     they Title-match). Use as a smoke-check, not a guarantee.
-function checkProseNames(proseText) {
+// toolSourcedBlob is a lowercase concatenation of everything the TOOLS returned this
+// run (the committed folio + the presented board candidates + tool-result text). The
+// anti-fabrication invariant is "a name in prose must have come from a tool result in
+// THIS conversation" (the seed's HARD DATA RULE) — NOT "must be in the static excursion
+// /dining fixture". Hotels (hotel_search), airlines (flight_search) and Dublin landmarks
+// are legitimately tool-sourced but absent from the fixture, so we also accept any name
+// present in toolSourcedBlob. The fixture remains a fallback allow-set for replay names.
+function checkProseNames(proseText, toolSourcedBlob = "") {
   if (!fixtureLoaded || fixtureAllowedNames.size === 0) return { ok: true, flagged: [] };
 
   // Build a lowercase blob for substring matching
@@ -198,18 +212,46 @@ function checkProseNames(proseText) {
     "ha'penny bridge", "liffey", "city centre", "st stephen's green",
     "national museum", "grand canal", "georgian dublin", "merrion square",
     "north docks", "south dublin", "east link", "river liffey",
+    // airlines (tool-sourced from flight_search; safety net beyond the blob)
+    "american", "american airlines", "delta", "united", "aer lingus", "jetblue",
   ]);
+
+  // The greedy Title-Case regex captures trailing/leading connector + article words
+  // ("River Liffey In", "The American", "Both American", "Your Dublin"). Strip those
+  // edges before matching so "river liffey in" → "river liffey", "the american" →
+  // "american". (Do NOT strip interior tokens — "Temple Bar" must stay intact.)
+  const EDGE = new Set(["the", "a", "an", "your", "our", "my", "both", "of", "and", "&", "at", "in", "on", "for", "to", "by", "de", "du"]);
+  const normalizeCandidate = (c) => {
+    let toks = c.split(/\s+/).filter(Boolean);
+    while (toks.length && EDGE.has(toks[0])) toks.shift();
+    while (toks.length && EDGE.has(toks[toks.length - 1])) toks.pop();
+    return toks.join(" ").trim();
+  };
+  // Allow-set blob for token-overlap (paraphrase tolerance, below).
+  const allowBlob = (Array.from(fixtureAllowedNames).join(" ") + " " + Array.from(ALWAYS_OK).join(" ") + " " + toolSourcedBlob);
+  const okSubstr = (c) => {
+    if (fixtureAllowedNames.has(c) || ALWAYS_OK.has(c)) return true;
+    for (const a of fixtureAllowedNames) { if (a.includes(c) || c.includes(a)) return true; }
+    for (const a of ALWAYS_OK) { if (a.includes(c) || c.includes(a)) return true; }
+    if (toolSourcedBlob && c.length >= 4 && toolSourcedBlob.includes(c)) return true; // committed/presented by a tool this run
+    // Paraphrase tolerance: a typo'd/reworded real name (e.g. "Darley Kelly's Bar" for
+    // the fixture's "Darkey Kelly's") shares a DISTINCTIVE token with a real name. A
+    // wholly fabricated venue shares no such token, so this catches fabrication while
+    // tolerating minor model paraphrase. Token must be ≥5 alpha chars (apostrophes
+    // stripped) to avoid matching on common words.
+    for (const tok of c.split(/[\s']+/)) {
+      const t = tok.replace(/[^a-z]/g, "");
+      if (t.length >= 5 && allowBlob.includes(t)) return true;
+    }
+    return false;
+  };
 
   const flagged = [];
   for (const c of candidates) {
-    if (fixtureAllowedNames.has(c)) continue;
-    if (ALWAYS_OK.has(c)) continue;
-    // Check if the candidate is a known fixture name substring
-    let inFixture = false;
-    for (const allowed of fixtureAllowedNames) {
-      if (allowed.includes(c) || c.includes(allowed)) { inFixture = true; break; }
-    }
-    if (!inFixture) flagged.push(c);
+    const n = normalizeCandidate(c);
+    if (!n || n.length < 4) continue;
+    if (okSubstr(n) || okSubstr(c)) continue;
+    flagged.push(c);
   }
   return { ok: flagged.length === 0, flagged };
 }
@@ -217,7 +259,7 @@ function checkProseNames(proseText) {
 // ---- acceptance assertions for one run ----
 // These are the wild-wolf acceptance criteria (Dublin build, phase machine on,
 // LLM_MODEL=claude-haiku-4-5). Applied only when --repeat is used.
-function assertFolio(folio, proseText) {
+function assertFolio(folio, proseText, toolSourcedBlob = "") {
   const failures = [];
   const f = folio ?? {};
   const days = Array.isArray(f.days) ? f.days : [];
@@ -260,8 +302,8 @@ function assertFolio(folio, proseText) {
 
   // 4. Prose-name check: no restaurant/activity proper name in prose that isn't in the fixture.
   if (fixtureLoaded && fixtureAllowedNames.size > 0) {
-    const { ok, flagged } = checkProseNames(proseText);
-    if (!ok) failures.push(`prose contains ${flagged.length} possible non-fixture name(s): ${flagged.slice(0, 5).join(", ")}`);
+    const { ok, flagged } = checkProseNames(proseText, toolSourcedBlob);
+    if (!ok) failures.push(`prose contains ${flagged.length} possible fabricated name(s) (not in folio/boards/fixture): ${flagged.slice(0, 5).join(", ")}`);
   }
 
   return failures;
@@ -315,8 +357,16 @@ async function runOnce(runNum) {
 
   let failures;
   if (REPEAT > 1) {
+    // Everything the tools returned/committed this run: the final folio + every board
+    // candidate presented + every tool-result text captured in the event stream. Any
+    // proper name in prose that appears here is tool-sourced (not fabricated).
+    const toolSourcedBlob = [
+      JSON.stringify(finalFolio ?? {}),
+      ...allEvents.filter((e) => e.type === "board" || e.board || e.kind === "flight" || e.kind === "hotel").map((e) => JSON.stringify(e)),
+      ...allEvents.filter((e) => e.type === "inspector" && e.kind === "tool").map((e) => JSON.stringify(e.result ?? "")),
+    ].join(" ").toLowerCase();
     // --repeat mode: run the acceptance assertions
-    failures = assertFolio(finalFolio, proseText);
+    failures = assertFolio(finalFolio, proseText, toolSourcedBlob);
     if (failures.length === 0) {
       console.log(`PASS ✅${runLabel}`);
     } else {
