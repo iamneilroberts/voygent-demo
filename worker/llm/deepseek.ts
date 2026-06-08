@@ -67,6 +67,7 @@ export async function* parseOpenAiStream(body: ReadableStream<Uint8Array>): Asyn
   };
 
   let finished = false;
+  let streamDone = false;
   for (;;) {
     const { value, done } = await reader.read();
     if (done) break;
@@ -77,7 +78,9 @@ export async function* parseOpenAiStream(body: ReadableStream<Uint8Array>): Asyn
       const line = frame.split("\n").find((l) => l.startsWith("data:"));
       if (!line) continue;
       const payload = line.slice(5).trim();
-      if (payload === "[DONE]") continue;
+      // [DONE] is OpenAI's terminal sentinel — stop reading rather than wait for the
+      // socket to close (don't block to the abort timeout if upstream lingers).
+      if (payload === "[DONE]") { streamDone = true; break; }
       const ev = JSON.parse(payload);
       if (ev.usage) {
         usage.inputTokens = ev.usage.prompt_cache_miss_tokens ?? ev.usage.prompt_tokens ?? 0;
@@ -106,6 +109,7 @@ export async function* parseOpenAiStream(body: ReadableStream<Uint8Array>): Asyn
         for (const b of assistant.content) if (b.type === "tool_use") yield { type: "tool-call", id: b.id, name: b.name, input: b.input };
       }
     }
+    if (streamDone) break;
   }
   if (!finished) { for (const e of finalize()) yield e; for (const b of assistant.content) if (b.type === "tool_use") yield { type: "tool-call", id: b.id, name: b.name, input: b.input }; }
   if (sawUsage) yield { type: "usage", usage };

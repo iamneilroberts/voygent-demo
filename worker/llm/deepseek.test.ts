@@ -30,6 +30,20 @@ describe("parseOpenAiStream", () => {
     expect(evs[evs.length - 1].type).toBe("turn-complete");
   });
 
+  it("stops at [DONE] and ignores any frames after it", async () => {
+    const frames = [
+      `data: ${JSON.stringify({ choices: [{ delta: { content: "Hi" }, finish_reason: "stop" }] })}\n\n`,
+      `data: ${JSON.stringify({ choices: [], usage: { prompt_tokens: 10, completion_tokens: 5, prompt_cache_miss_tokens: 10, prompt_cache_hit_tokens: 0 } })}\n\n`,
+      `data: [DONE]\n\n`,
+      `data: ${JSON.stringify({ choices: [{ delta: { content: "AFTER" } }] })}\n\n`, // must be ignored
+    ];
+    const evs: ProviderEvent[] = [];
+    for await (const e of parseOpenAiStream(sse(frames))) evs.push(e);
+    const text = evs.filter((e) => e.type === "text-delta").map((e) => (e as any).delta).join("");
+    expect(text).toBe("Hi");                              // "AFTER" is never emitted
+    expect(evs[evs.length - 1].type).toBe("turn-complete");
+  });
+
   it("throws on invalid final tool-call JSON (never silently {})", async () => {
     const frames = [
       `data: ${JSON.stringify({ choices: [{ delta: { tool_calls: [{ index: 0, id: "c1", function: { name: "x", arguments: "{bad" } }] } }] })}\n\n`,

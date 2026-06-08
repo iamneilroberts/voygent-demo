@@ -25,13 +25,18 @@ export function ollamaEnabled(env: { OLLAMA_BASE_URL?: string; DEMO_OLLAMA_URL?:
 }
 
 // R8: never let a configurable base URL become a Worker-side fetch proxy. Allow
-// only https (or http for localhost dev) and a known host suffix.
-function safeBaseUrl(raw: string | undefined, fallback: string, allowHosts: string[]): string {
+// only https, plus http ONLY for a localhost the caller explicitly allowlists.
+// localhost is NOT a blanket carve-out — DeepSeek passes ["deepseek.com"], so a
+// DEEPSEEK_BASE_URL=http://localhost:… is rejected and falls back to the real API
+// (closes the SSRF hole where any caller's base URL could point at localhost).
+// Exported for the security unit test.
+export function safeBaseUrl(raw: string | undefined, fallback: string, allowHosts: string[]): string {
   if (!raw) return fallback;
   try {
     const u = new URL(raw);
-    const okScheme = u.protocol === "https:" || (u.protocol === "http:" && (u.hostname === "localhost" || u.hostname === "127.0.0.1"));
-    const okHost = allowHosts.some((h) => u.hostname === h || u.hostname.endsWith(`.${h}`)) || u.hostname === "localhost" || u.hostname === "127.0.0.1";
+    const isLocal = u.hostname === "localhost" || u.hostname === "127.0.0.1";
+    const okHost = allowHosts.some((h) => u.hostname === h || u.hostname.endsWith(`.${h}`));
+    const okScheme = u.protocol === "https:" || (u.protocol === "http:" && isLocal && okHost);
     if (okScheme && okHost) return u.origin;
   } catch { /* fall through */ }
   return fallback;
