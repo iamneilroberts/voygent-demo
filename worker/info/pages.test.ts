@@ -15,6 +15,13 @@ describe("infoPageHtml", () => {
     expect(html!).toContain("LLMProvider");
     expect(html!).toContain("Ollama");
   });
+  it("renders the phase-machine page describing the state machine + cheap-model unlock", () => {
+    const html = infoPageHtml("phase-machine");
+    expect(html).not.toBeNull();
+    expect(html!).toContain("advancePhase");
+    expect(html!).toContain("DEMO_PHASE_MACHINE");
+    expect(html!).toContain("Haiku");
+  });
   it("returns null for an unknown slug", () => {
     expect(infoPageHtml("nope")).toBeNull();
   });
