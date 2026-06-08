@@ -144,7 +144,9 @@ button.ins-rail:hover { color: var(--ink); }
 .ins-tiers th { color: var(--muted); font-weight: 500; }
 .ins-note { color: var(--muted-2); font-size: var(--t-12); }
 .ins-sources summary { cursor: pointer; color: var(--muted); font-size: var(--t-12); }
-.ins-saved h4, .ins-overhead h4 { font-size: var(--t-12); color: var(--muted); margin: var(--s4) 0 var(--s1); text-transform: uppercase; letter-spacing: .06em; }
+.ins-saved h4, .ins-overhead h4, .ins-workflow h4 { font-size: var(--t-12); color: var(--muted); margin: var(--s4) 0 var(--s1); text-transform: uppercase; letter-spacing: .06em; }
+.ins-phase-trail { margin: var(--s1) 0; line-height: 1.7; }
+.ins-phase-step { color: var(--phosphor); font-size: var(--t-12); font-variant-numeric: tabular-nums; }
 .ins-saved-total { color: var(--phosphor); font-weight: 600; font-variant-numeric: tabular-nums; }
 .ins-saved ul { margin: var(--s1) 0; padding-left: 16px; } .ins-saved li { margin: 3px 0; }
 .ins-card { border-top: 1px solid var(--line); }

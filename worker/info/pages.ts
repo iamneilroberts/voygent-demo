@@ -177,6 +177,35 @@ const PAGES: Record<string, InfoPage> = {
 <p><a class="cta" href="/">tweak the model on a live trip →</a></p>`,
   },
 
+  "phase-machine": {
+    title: "Keeping the model on track",
+    subtitle: "A server-side phase machine drives the build and hands the model one small instruction at a time — which is exactly what lets a cheaper model do the job reliably.",
+    body: `
+<p>An open-ended agent loop asks a lot of the model: hold the whole multi-step plan in its head, decide what's next, and never drift. A frontier model mostly manages it. A cheaper, smaller model mostly doesn't — it <strong>stops early</strong> (declares a trip "done" before enrichment), <strong>presents instead of acting</strong> (asks "shall I add restaurants?" instead of calling the tool), or <strong>narrates from memory</strong> (names a plausible-sounding restaurant no tool ever returned). Those aren't reasoning failures — the small model is smart enough for each step. They're <em>discipline</em> failures across a long sequence.</p>
+
+<h2>Move the sequencing into the server</h2>
+<p>The phase machine takes the trip build off the model's shoulders. A pure, unit-tested reducer (<span class="mono">worker/agent/phases.ts</span>) owns a small state machine — <code>INTAKE → FLIGHT_PICK → HOTEL_SEARCH → HOTEL_PICK → ENRICH_EXCURSIONS → APPLY_PICKS → ENRICH_DINING → SUMMARY</code> — and the worker, not the model, decides what happens next. Before each turn the model is handed <strong>one</strong> small directive: the current phase's instruction, and nothing else.</p>
+
+<h2>Advance by observation, never by trust</h2>
+<p>The machine only moves forward when it <em>observes</em> the right tool actually succeed. <code>advancePhase(phase, toolName, input, result)</code> watches the real tool-result stream: a successful <code>flight_search</code> moves <code>INTAKE → FLIGHT_PICK</code>; a successful <code>promote_hotels_to_lodging</code> moves <code>HOTEL_PICK → ENRICH_EXCURSIONS</code>. A failed or unrelated call doesn't advance. The model can't talk its way forward — it has to <em>do</em> the thing.</p>
+
+<h2>If it stops mid-build, re-prompt it</h2>
+<p>When the model ends its turn without a tool call — the classic "I'll stop here" — a capped auto-continuation re-issues the current phase's directive and keeps going. The build can't quietly wedge half-finished. And there's an escape hatch: after a few re-prompts the machine forces the <code>SUMMARY</code> step, so a trip always gets a clean closing message rather than trailing off. (In the board-pick phases it does the opposite on purpose: a stop there is the model <em>correctly</em> waiting for you, so it doesn't auto-continue.)</p>
+
+<h2>Why this is the cheap-model unlock</h2>
+<p>Reliability now comes from the <em>structure</em>, not from the model's stamina — so you can run the whole build on a much cheaper model. The acceptance bar for this work: with <span class="stat">Claude Haiku</span> driving, <strong>10 out of 10</strong> scripted Dublin builds produced a complete folio — 3+ day-by-day days, at least one free and one paid activity, 4+ dining picks, and <span class="stat">zero fabricated names</span>. Before the phase machine, Haiku routinely stalled before enrichment. Same model; the difference is who holds the plan.</p>
+
+<h2>It pairs with model routing</h2>
+<p>That dovetails with the <a href="/info/llm-options">model-agnostic provider seam</a>: once the structure carries correctness, you can route the reasoning-light phases to the cheapest capable model and reserve a stronger model only for the parts that need it — or run the entire build on the cheap model and let the harness keep it honest. The phase machine is what makes "offload to a cheaper model" a safe default instead of a gamble.</p>
+
+<h2>Shipped the careful way</h2>
+<p>The whole machine is gated behind a single environment flag (<code>DEMO_PHASE_MACHINE</code>). Flag off, the behavior is byte-identical to the previous open-loop path; flag on, the worker drives. It shipped dormant, was canaried on production, and rolls back instantly by deleting one secret — no redeploy. You can watch it step live in this demo's Engineering panel: the <strong>"Workflow engine"</strong> trail shows each phase the server advanced through as your trip is built.</p>
+
+<blockquote>The general lesson for agent products: don't ask a cheap model to be disciplined for twenty turns — make the discipline a property of the system, and let the model do the one small thing in front of it. The same orchestration discipline is what would let the production MCP make cheaper <em>host</em> models viable, too.</blockquote>
+<span class="artifact">sources: worker/agent/phases.ts (TripPhase reducer + per-phase directives) · worker/agent/loop.ts (afterToolBatch + capped continueDirective) · worker/session-do.ts (flag-gated wiring) · scripts/smoke-enriched-run.mjs (10/10 haiku acceptance) · docs/summaries/handoff-2026-06-08-phase-machine.md</span>
+<p><a class="cta" href="/">watch the workflow engine step live →</a></p>`,
+  },
+
   "resume": {
     title: "Neil Roberts",
     subtitle: "Forward Deployed / Applied AI Engineer — this demo is the portfolio piece; here's the rest.",

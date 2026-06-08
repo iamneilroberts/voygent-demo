@@ -60,6 +60,7 @@ export function App() {
   const [insOverhead, setInsOverhead] = useState<InsOverhead[]>([]);
   const [insStores, setInsStores] = useState<InsStore[]>([]);
   const [insValidations, setInsValidations] = useState<InsValidation[]>([]);
+  const [insPhases, setInsPhases] = useState<{ phase: string; via: string }[]>([]);
   // Cumulative cross-session stats (public aggregates) for the "Across all
   // sessions" panel section. Fetched once on mount, like /presets.
   const [stats, setStats] = useState<StatsResponse | null>(null);
@@ -207,6 +208,7 @@ export function App() {
       else if (e.kind === "overhead") setInsOverhead((o) => [...o, e]);
       else if (e.kind === "store") setInsStores((s) => [...s, e]);
       else if (e.kind === "validation") setInsValidations((v) => [...v, e]);
+      else if (e.kind === "phase") setInsPhases((p) => [...p, { phase: e.phase, via: e.via }]);
     }
   }
 
@@ -291,7 +293,7 @@ export function App() {
             onToggleCollapse={() => { if (insTools.length > 0) setCollapsed((c) => !c); }}
             tools={insTools} turns={insTurns} summaries={insSummaries}
             savings={insSavings} overhead={insOverhead} stats={stats}
-            stores={insStores} validations={insValidations}
+            stores={insStores} validations={insValidations} phases={insPhases}
             headExtra={skin === "claude" ? <><ModelSwitch mode={modelMode} enabled={enabledModels} onPick={setModelMode} onTweaks={() => setTweaksOpen(true)} /><AdvisorSwitch on={advisor} onToggle={setAdvisor} /><ThemeSwitch /></> : undefined}
             routing={{ mode: modelMode, enabledModels, smartMap, activePhase, onMode: setModelMode, onSmartMap: setSmartMap }}
           />

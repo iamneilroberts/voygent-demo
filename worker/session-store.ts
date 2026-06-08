@@ -11,6 +11,7 @@
 import type { ConversationMessage } from "./llm/provider";
 import type { ReplaySnapshot } from "./mcp/replay";
 import type { ModelRouting } from "../shared/models";
+import type { TripPhase } from "./agent/phases";
 
 export interface SessRecord {
   tripId: string;
@@ -26,6 +27,7 @@ export interface SessRecord {
   // Re-derived from replay state on hydrate to survive mid-stream DO death.
   hotelsPromoted?: boolean;
   replay: ReplaySnapshot;
+  tripPhase?: TripPhase;   // current build-machine phase (phase-machine mode only; undefined otherwise)
 }
 
 export const MSG_PREFIX = "msg:";

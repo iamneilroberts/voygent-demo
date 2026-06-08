@@ -5,7 +5,7 @@ import { enabledModels, DEFAULT_SMART_MAP } from "../shared/models";
 import { STATS_AGG_SQL, shapeStats, type StatsAggRow } from "./stats";
 import { deepseekEnabled } from "./llm/index";
 
-interface Env { SESSION: DurableObjectNamespace; DEMO_DISABLED?: string; DEMO_OPUS_ENABLED?: string; DEMO_TEST_TOKEN?: string; STATS_DB?: D1Database; DEEPSEEK_API_KEY?: string; DEMO_DEEPSEEK_ENABLED?: string; }
+interface Env { SESSION: DurableObjectNamespace; DEMO_DISABLED?: string; DEMO_OPUS_ENABLED?: string; DEMO_TEST_TOKEN?: string; DEMO_PHASE_MACHINE?: string; STATS_DB?: D1Database; DEEPSEEK_API_KEY?: string; DEMO_DEEPSEEK_ENABLED?: string; }
 
 // Test/smoke requests (carrying the secret header) bypass the public daily
 // budget so automated runs don't 503 real visitors. Returns false unless the

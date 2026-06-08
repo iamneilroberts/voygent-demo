@@ -1,5 +1,6 @@
 import { SseMultiplexer } from "./agent/sse";
 import { runAgentLoop } from "./agent/loop";
+import { INITIAL_PHASE, advancePhase, phaseDirective, shouldInjectPhaseDirectiveAfterBatch, isBeforeSummary, type TripPhase, type PhaseCtx } from "./agent/phases";
 import { createBoardBuilder, type BoardBuilder } from "./agent/boards";
 import { tripToFolio } from "./agent/folio-sync";
 import { McpClient } from "./mcp/client";
@@ -26,6 +27,7 @@ interface Env {
   BUDGET_DAILY_USD?: string;              // global daily spend cap (default 5)
   DEMO_OPUS_ENABLED?: string;             // when set, Opus is offered/accepted (abuse gate; default off)
   DEMO_TEST_TOKEN?: string;               // test/smoke runs carrying this header skip the public ledger
+  DEMO_PHASE_MACHINE?: string;           // when set, SessionDO drives the deterministic build phase machine
   STATS_DB?: D1Database;                  // optional: per-exchange engineering-stats history (no-op when unbound)
   DEEPSEEK_API_KEY?: string;              // when set + DEMO_DEEPSEEK_ENABLED, DeepSeek is live
   DEEPSEEK_BASE_URL?: string;             // default https://api.deepseek.com (host-allowlisted)
@@ -186,6 +188,8 @@ export class SessionDO {
   // Visitor's model routing (server-coerced) + outcome-based phase milestone.
   private routing: ModelRouting = DEFAULT_ROUTING;
   private hotelsPromoted = false;
+  // Build-phase machine state (phase-machine mode only; harmlessly idle otherwise).
+  private tripPhase: TripPhase = INITIAL_PHASE;
   // Session-scoped so search→list dedupe survives across exchanges.
   private boardBuilder: BoardBuilder = createBoardBuilder();
   // How many of this.messages are already in durable storage (hydrated or persisted).
@@ -206,6 +210,7 @@ export class SessionDO {
       this.liveMode = sess.liveMode ?? false;
       this.nudges = sess.nudges ?? { enrichment: false, flightList: false, hsr: false };
       this.routing = sess.routing ?? DEFAULT_ROUTING;
+      this.tripPhase = sess.tripPhase ?? INITIAL_PHASE;
       this.replay = new FixtureReplay(this.tripId);
       this.replay.restore(sess.replay);
       // Re-derive the milestone from replay state so a mid-stream DO death (lodging
@@ -224,7 +229,7 @@ export class SessionDO {
   private async persistSession(): Promise<void> {
     try {
       const puts: Record<string, unknown> = {
-        sess: { tripId: this.tripId, boardsMode: this.boardsMode, liveMode: this.liveMode, nudges: this.nudges, routing: this.routing, hotelsPromoted: this.hotelsPromoted, replay: this.replay.snapshot() } satisfies SessRecord,
+        sess: { tripId: this.tripId, boardsMode: this.boardsMode, liveMode: this.liveMode, nudges: this.nudges, routing: this.routing, hotelsPromoted: this.hotelsPromoted, tripPhase: this.tripPhase, replay: this.replay.snapshot() } satisfies SessRecord,
       };
       for (let i = this.persistedMsgCount; i < this.messages.length; i++) {
         puts[msgKey(i)] = shrinkForStorage(this.messages[i]);
@@ -278,11 +283,18 @@ export class SessionDO {
     // Server-coerce the visitor's model choice through the enabled allowlist (the real Opus gate).
     const enabled = enabledModels({ opus: !!this.env.DEMO_OPUS_ENABLED, deepseek: deepseekEnabled(this.env), ollama: ollamaEnabled(this.env) });
     this.routing = buildRouting({ model: body.model, routing: body.routing }, enabled, fallbackModel);
+    const phaseMachine = !!this.env.DEMO_PHASE_MACHINE;
+    // ctx is just the two mode flags. They change DURING an exchange (liveMode
+    // latches mid-run when a search leaves the featured catalog), so build it fresh
+    // on each read rather than snapshotting. Directives carry no trip facts — the
+    // model fills <destination city>/<departure_date> from the conversation.
+    const buildPhaseCtx = (): PhaseCtx => ({ boardsMode: this.boardsMode, liveMode: this.liveMode });
     const mcp = new McpClient(this.env.VOYGENT_MCP_URL, this.env.VOYGENT_MCP_BEARER);
     const provider = new DispatchProvider((id) => providerFor(id, this.env), model);
     const mux = new SseMultiplexer();
 
-    if (this.messages.length === 0) {
+    const isFirstTurn = this.messages.length === 0;
+    if (isFirstTurn) {
       this.boardsMode = mode === "boards";
       const seed = SYSTEM_HINT
         + (this.boardsMode ? `\n\n${BOARDS_WORKFLOW_OVERRIDE}\n\n${SEQUENCED_BOARDS_WORKFLOW}` : "")
@@ -290,6 +302,9 @@ export class SessionDO {
       this.messages.push({ role: "user", content: `${seed}\n\nMy trip_id is ${this.tripId}.` });
     }
     this.messages.push({ role: "user", content: message });
+    if (phaseMachine && isFirstTurn && isBeforeSummary(this.tripPhase)) {
+      this.messages.push({ role: "user", content: phaseDirective(this.tripPhase, buildPhaseCtx()) });
+    }
 
     // Per-session cost telemetry (server-side only — never sent to the client).
     // sessionCost = MEASURED actual routed spend (per-turn model). Distinct from
@@ -467,9 +482,44 @@ export class SessionDO {
             + "summary, run the enrichment sequence NOW in this same turn: featured trips → steps 6a-7; live trips → steps "
             + "L1-L4 (L1 itinerary scaffold first). This is mandatory and has no approval step.";
         };
+        let continuations = 0;
+        const MAX_CONTINUATIONS = 4;
         await runAgentLoop({
           provider, tools, messages: this.messages, exchangeId,
-          callTool, nudge, nextModel,
+          callTool, nextModel,
+          nudge: phaseMachine ? undefined : nudge,
+          afterToolBatch: phaseMachine ? (batch) => {
+            for (const b of batch) {
+              let parsed: any = null;
+              try { parsed = JSON.parse(b.result); } catch { /* non-JSON tool result */ }
+              const next = advancePhase(this.tripPhase, b.name, b.input, parsed, buildPhaseCtx());
+              if (next !== this.tripPhase) {
+                this.tripPhase = next;
+                emit({ type: "inspector", kind: "phase", exchangeId, phase: next, via: b.name });
+              }
+            }
+            // Hand the model the CURRENT phase's directive after every tool batch —
+            // including SUMMARY, so the model writes the closing message right after the
+            // dining result. EDITS = post-build, no directive.
+            return shouldInjectPhaseDirectiveAfterBatch(this.tripPhase, buildPhaseCtx())
+              ? phaseDirective(this.tripPhase, buildPhaseCtx())
+              : null;
+          } : undefined,
+          continueDirective: phaseMachine ? () => {
+            // The model stopped with no tool calls.
+            // 1) Boards present-and-wait: a stop at a boards pick phase IS the model
+            //    correctly waiting for the human — do NOT auto-continue.
+            if (this.boardsMode && (this.tripPhase === "FLIGHT_PICK" || this.tripPhase === "HOTEL_PICK")) return null;
+            // 2) At SUMMARY the model just wrote the closing message → advance to EDITS and end.
+            if (this.tripPhase === "SUMMARY") { this.tripPhase = "EDITS"; return null; }
+            // 3) Post-build (EDITS) → end the turn.
+            if (!isBeforeSummary(this.tripPhase)) return null;
+            // 4) Stopped mid-build: re-prompt with the current directive, capped. On the
+            //    cap, force the SUMMARY directive so the trip always gets a closing message.
+            if (continuations >= MAX_CONTINUATIONS) { this.tripPhase = "SUMMARY"; return phaseDirective("SUMMARY", buildPhaseCtx()); }
+            continuations++;
+            return phaseDirective(this.tripPhase, buildPhaseCtx());
+          } : undefined,
           buildBoard: this.boardsMode
             ? (name, resultText) => this.boardBuilder(name, resultText, this.tripId)
             : undefined,

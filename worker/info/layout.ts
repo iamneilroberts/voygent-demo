@@ -13,6 +13,7 @@ export const INFO_NAV: InfoPageMeta[] = [
   { slug: "production-system", title: "The system behind the demo",         nav: "the system" },
   { slug: "data-stores",       title: "KV, D1, and a SQL brain",            nav: "data stores" },
   { slug: "llm-options",       title: "Choosing the model",                 nav: "llm options" },
+  { slug: "phase-machine",     title: "Keeping the model on track",         nav: "phase machine" },
   { slug: "resume",            title: "Neil Roberts — resume",              nav: "resume" },
 ];
 

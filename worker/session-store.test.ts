@@ -1,6 +1,14 @@
 import { describe, it, expect } from "vitest";
 import { msgKey, shrinkForStorage } from "./session-store";
+import type { SessRecord } from "./session-store";
 import type { ConversationMessage } from "./llm/provider";
+
+describe("SessRecord", () => {
+  it("SessRecord carries an optional tripPhase", () => {
+    const rec: SessRecord = { tripId: "t", boardsMode: false, liveMode: false, replay: {} as any, tripPhase: "ENRICH_DINING" };
+    expect(rec.tripPhase).toBe("ENRICH_DINING");
+  });
+});
 
 describe("msgKey", () => {
   it("zero-pads so lexicographic list order = insertion order", () => {

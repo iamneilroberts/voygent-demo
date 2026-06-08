@@ -25,6 +25,15 @@ export interface AgentLoopArgs {
   // Used to force same-turn enrichment after the hotel promote — prompt-only
   // compliance proved flaky once the full 120-tool catalog landed.
   nudge?: (batch: Array<{ name: string; input: Record<string, unknown> }>) => string | null;
+  // Phase-machine seam (additive; absent → unchanged behavior). Called once per
+  // tool batch with each tool's parsed result text. Its return (if any) is
+  // appended to the tool_result message exactly like `nudge`. Used to advance the
+  // phase reducer and inject the next phase's directive.
+  afterToolBatch?: (batch: Array<{ name: string; input: Record<string, unknown>; result: string }>) => string | null;
+  // Phase-machine seam: called when the model produced NO tool calls (would end the
+  // turn). Return a directive string to inject as a synthetic user turn and CONTINUE
+  // the loop; return null to end the turn as usual. The implementer owns the cap.
+  continueDirective?: () => string | null;
   maxTurns?: number;
   maxToolCalls?: number;
   exchangeId?: string;
@@ -68,11 +77,21 @@ export async function runAgentLoop(args: AgentLoopArgs): Promise<void> {
       ...(turnModel ? { model: turnModel } : {}),
     });
 
-    if (pendingTools.length === 0) { emit({ type: "turn-complete" }); return; }
+    if (pendingTools.length === 0) {
+      const cont = args.continueDirective?.();
+      if (cont) {
+        // Structural auto-continuation: re-prompt with the current phase directive
+        // and keep looping (the model stopped mid-build). The hook owns the cap.
+        messages.push({ role: "user", content: cont });
+        continue;
+      }
+      emit({ type: "turn-complete" }); return;
+    }
 
     const results: import("../llm/provider").UserToolResult = {
       role: "user", content: [],
     };
+    const resultTexts: string[] = [];
     for (const t of pendingTools) {
       emit({ type: "tool", tool: t.name, phase: "start" });
       const t0 = Date.now();
@@ -91,12 +110,16 @@ export async function runAgentLoop(args: AgentLoopArgs): Promise<void> {
         args: scrubArgs(t.input), result: scrubResultText(content), latencyMs, ok,
       });
       results.content.push({ type: "tool_result", tool_use_id: t.id, content });
+      resultTexts.push(content);
       if (isTripMutating(t.name, t.input)) {
         try { await onFolio(t.name, t.input); }
         catch { /* folio refresh is best-effort; a failed refresh must never abort the turn */ }
       }
     }
-    const note = args.nudge?.(pendingTools.map((t) => ({ name: t.name, input: t.input })));
+    const batchWithResults = pendingTools.map((t, i) => ({ name: t.name, input: t.input, result: resultTexts[i] }));
+    const note = args.afterToolBatch
+      ? args.afterToolBatch(batchWithResults)
+      : args.nudge?.(pendingTools.map((t) => ({ name: t.name, input: t.input })));
     if (note) results.content.push({ type: "text", text: note });
     messages.push(results);
     totalToolCalls += pendingTools.length;

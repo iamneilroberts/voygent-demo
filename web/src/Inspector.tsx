@@ -113,7 +113,7 @@ export interface ModelRoutingUi {
 }
 
 export function Inspector(
-  { state, onToggleCollapse, tools, turns, summaries, savings, overhead, headExtra, routing, stats, stores, validations }:
+  { state, onToggleCollapse, tools, turns, summaries, savings, overhead, headExtra, routing, stats, stores, validations, phases }:
   { state: EngState; onToggleCollapse: () => void; tools: InsTool[]; turns: InsTurn[]; summaries: InsSummary[]; savings: InsSavings[]; overhead: InsOverhead[];
     // Extra controls shown under the head when live — e.g. the palette switcher
     // relocated here in the claude skin (its home header isn't rendered there).
@@ -124,7 +124,11 @@ export function Inspector(
     // Projected production KV/D1 ops for this session (Slice B). Empty until tools fire.
     stores?: InsStore[];
     // Trip-integrity checks the system ran this session. Empty until a validation event fires.
-    validations?: InsValidation[] },
+    validations?: InsValidation[];
+    // Phase-machine trail: emitted when the server-side phase machine is active (flag-on).
+    // Each entry is one phase transition. Absent when the flag is off — the block simply
+    // doesn't render (guarded by phases?.length).
+    phases?: { phase: string; via: string }[] },
 ) {
   const [showCost, setShowCost] = useState(true);  // cost shown by default (Neil 2026-06-07)
 
@@ -336,6 +340,18 @@ export function Inspector(
           {ov && <div>Inspector client payload: <b>{(ov.instrumentationBytes / 1024).toFixed(1)} KB</b></div>}
           <div>Instrumentation CPU: <b>{!ov ? "—" : (ov.instrumentationMs != null ? `${ov.instrumentationMs} ms` : "below timer resolution")}</b></div>
         </div>
+
+        {phases && phases.length > 0 && (
+          <div className="ins-workflow">
+            <h4>Workflow engine</h4>
+            <div className="ins-phase-trail">
+              {phases.map((p, i) => (
+                <span key={i} className="ins-phase-step">{p.phase}{i < phases.length - 1 ? " → " : ""}</span>
+              ))}
+            </div>
+            <p className="ins-note">The server-side phase machine drives each step; the model executes one instruction at a time.</p>
+          </div>
+        )}
       </section>
 
       <ValidationSection items={vals} />
