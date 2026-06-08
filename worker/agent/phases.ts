@@ -34,6 +34,26 @@ export function isActionPhase(p: TripPhase): boolean { return p !== "SUMMARY" &&
 // keeps the reducer + directive fully pure. (Also used as the advancePhase ctx.)
 export interface PhaseCtx { boardsMode: boolean; liveMode: boolean; }
 
+// Whether afterToolBatch should inject the current phase's directive after a tool
+// batch. In BOARDS mode the human-pick phases (FLIGHT_PICK/HOTEL_PICK) are interactive
+// wait states already owned by the seed's BOARDS_WORKFLOW_OVERRIDE — injecting a
+// per-phase directive there contradicts "present-and-wait" / "promote only on the
+// traveler's pick", so we suppress it and let the seed drive. EDITS is post-build (no
+// directive). Everything else (HOTEL_SEARCH, enrichment phases, SUMMARY, and pick
+// phases in AUTO mode where the model picks itself) still gets its directive.
+export function shouldInjectPhaseDirectiveAfterBatch(phase: TripPhase, ctx: PhaseCtx): boolean {
+  if (phase === "EDITS") return false;
+  if (ctx.boardsMode && (phase === "FLIGHT_PICK" || phase === "HOTEL_PICK")) return false;
+  return true;
+}
+
+// KNOWN v1 LIMITATION (HIGH #1, 2026-06-08 external review): these directives are
+// tuned for FEATURED (replay) trips and do NOT branch on ctx.liveMode. For live
+// (off-menu) trips the real MCP chain differs (viator needs a resolved destination_id;
+// dining does not auto-save), so the per-phase directives can under-drive a live build.
+// The seed's LIVE_TRIP_WORKFLOW still covers live trips; until these directives are
+// made liveMode-aware, keep DEMO_PHASE_MACHINE OFF for live traffic. Featured-trip
+// acceptance (the Task 9 bar) is unaffected.
 // One small instruction per phase. Kept terse: the model also still has the global
 // seed (vocabulary, fabrication, tone). v1 is code-only; a future v2 can override
 // these from KV (_prompts/demo-phases/<phase>).

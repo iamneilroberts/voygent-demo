@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   TRIP_PHASES, INITIAL_PHASE, phaseIndex, isBeforeSummary, isActionPhase,
-  phaseDirective, type TripPhase,
+  phaseDirective, shouldInjectPhaseDirectiveAfterBatch, type TripPhase,
 } from "./phases";
 
 describe("trip phase ordering", () => {
@@ -87,5 +87,32 @@ describe("advancePhase", () => {
     expect(advancePhase("EDITS", "hotel_search", {}, okStatus, ctx)).toBe("HOTEL_PICK");
     expect(advancePhase("EDITS", "excursion_search", {}, okStatus, ctx)).toBe("APPLY_PICKS");
     expect(advancePhase("EDITS", "read_trip", {}, okStatus, ctx)).toBe("EDITS"); // non-build tool: stay
+  });
+});
+
+describe("shouldInjectPhaseDirectiveAfterBatch", () => {
+  const boards = { boardsMode: true, liveMode: false };
+  const auto = { boardsMode: false, liveMode: false };
+  it("suppresses the directive at boards pick phases (seed owns the interactive flow)", () => {
+    expect(shouldInjectPhaseDirectiveAfterBatch("FLIGHT_PICK", boards)).toBe(false);
+    expect(shouldInjectPhaseDirectiveAfterBatch("HOTEL_PICK", boards)).toBe(false);
+  });
+  it("still injects at pick phases in AUTO mode (model picks itself)", () => {
+    expect(shouldInjectPhaseDirectiveAfterBatch("FLIGHT_PICK", auto)).toBe(true);
+    expect(shouldInjectPhaseDirectiveAfterBatch("HOTEL_PICK", auto)).toBe(true);
+  });
+  it("always injects at HOTEL_SEARCH and the enrichment phases (both modes)", () => {
+    for (const p of ["HOTEL_SEARCH", "ENRICH_EXCURSIONS", "APPLY_PICKS", "ENRICH_DINING", "SUMMARY"] as const) {
+      expect(shouldInjectPhaseDirectiveAfterBatch(p, boards)).toBe(true);
+      expect(shouldInjectPhaseDirectiveAfterBatch(p, auto)).toBe(true);
+    }
+  });
+  it("INTAKE injects in both modes (not a pick phase)", () => {
+    expect(shouldInjectPhaseDirectiveAfterBatch("INTAKE", boards)).toBe(true);
+    expect(shouldInjectPhaseDirectiveAfterBatch("INTAKE", auto)).toBe(true);
+  });
+  it("never injects at EDITS (post-build)", () => {
+    expect(shouldInjectPhaseDirectiveAfterBatch("EDITS", boards)).toBe(false);
+    expect(shouldInjectPhaseDirectiveAfterBatch("EDITS", auto)).toBe(false);
   });
 });

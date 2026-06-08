@@ -1,6 +1,6 @@
 import { SseMultiplexer } from "./agent/sse";
 import { runAgentLoop } from "./agent/loop";
-import { INITIAL_PHASE, advancePhase, phaseDirective, isBeforeSummary, type TripPhase, type PhaseCtx } from "./agent/phases";
+import { INITIAL_PHASE, advancePhase, phaseDirective, shouldInjectPhaseDirectiveAfterBatch, isBeforeSummary, type TripPhase, type PhaseCtx } from "./agent/phases";
 import { createBoardBuilder, type BoardBuilder } from "./agent/boards";
 import { tripToFolio } from "./agent/folio-sync";
 import { McpClient } from "./mcp/client";
@@ -487,7 +487,9 @@ export class SessionDO {
             // Hand the model the CURRENT phase's directive after every tool batch —
             // including SUMMARY, so the model writes the closing message right after the
             // dining result. EDITS = post-build, no directive.
-            return this.tripPhase === "EDITS" ? null : phaseDirective(this.tripPhase, buildPhaseCtx());
+            return shouldInjectPhaseDirectiveAfterBatch(this.tripPhase, buildPhaseCtx())
+              ? phaseDirective(this.tripPhase, buildPhaseCtx())
+              : null;
           } : undefined,
           continueDirective: phaseMachine ? () => {
             // The model stopped with no tool calls.
