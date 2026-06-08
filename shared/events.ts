@@ -59,6 +59,8 @@ export type InspectorEvent =
   | { type: "inspector"; kind: "overhead"; exchangeId: string;
       instrumentationMs: number | null; instrumentationBytes: number; addedModelTokens: 0;
       folioReprojectMs?: number | null; note?: string }
+  | { type: "inspector"; kind: "store"; exchangeId: string; turn: number;
+      tool: string; ops: import("../worker/storeops").StoreOp[] }
   | { type: "inspector"; kind: "summary"; exchangeId: string;
       turns: number; toolCalls: number; exposedToolCount: number; fullToolCount: number;
       inputTokens: number; outputTokens: number; cacheReadTokens: number; cacheCreationTokens: number;
