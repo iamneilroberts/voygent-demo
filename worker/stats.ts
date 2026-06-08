@@ -112,13 +112,17 @@ export function statsRowFromSummary(
 // Coerce a raw aggregate row (possibly null/undefined/NaN sums) to the public shape.
 export function shapeStats(row: Partial<StatsAggRow> | null | undefined): StatsResponse {
   const n = (v: unknown): number => (typeof v === "number" && Number.isFinite(v) ? v : 0);
+  const haiku = n(row?.actualHaiku), sonnet = n(row?.actualSonnet), opus = n(row?.actualOpus);
+  const total = n(row?.totalActualCostUsd);
   return {
     sessions: n(row?.sessions),
     exchanges: n(row?.exchanges),
     trips: n(row?.trips),
-    totalActualCostUsd: n(row?.totalActualCostUsd),
+    totalActualCostUsd: total,
     totalSavedTokens: n(row?.totalSavedTokens),
     totalTokens: n(row?.totalTokens),
-    byModel: { haiku: n(row?.actualHaiku), sonnet: n(row?.actualSonnet), opus: n(row?.actualOpus) },
+    // 'other' = total routed spend minus the Claude trio (captures DeepSeek/non-Claude,
+    // which actual_cost_usd already sums but the tier columns don't). NO D1 migration.
+    byModel: { haiku, sonnet, opus, other: Math.max(0, total - haiku - sonnet - opus) },
   };
 }

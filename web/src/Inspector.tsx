@@ -279,6 +279,9 @@ export function Inspector(
                 {split.length > 1 && (
                   <span className="ins-note"> — {split.map((k) => `${usd(stats.byModel[k])} ${k[0].toUpperCase()}${k.slice(1)}`).join(" + ")}</span>
                 )}
+                {stats.byModel.other > 0 && (
+                  <span className="ins-note"> · {usd(stats.byModel.other)} other</span>
+                )}
               </div>
             </div>
           </section>

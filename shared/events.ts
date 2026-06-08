@@ -83,5 +83,5 @@ export interface StatsResponse {
   totalActualCostUsd: number;
   totalSavedTokens: number;     // ESTIMATE — sum of emitted savings, labeled "estimated" in the UI
   totalTokens: number;
-  byModel: { haiku: number; sonnet: number; opus: number };
+  byModel: { haiku: number; sonnet: number; opus: number; other: number };  // 'other' = non-Claude routed spend
 }
