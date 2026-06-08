@@ -6,6 +6,7 @@ import { MODEL_LABELS, PHASES, PHASE_LABELS, type ModelId, type PhaseModelMap, t
 import type { SelectorMode } from "./lib/model";
 import type { StatsResponse } from "../../shared/events";
 import { StoreOpsWidget, type InsStore } from "./StoreOpsWidget";
+import { storeOpsForTool } from "../../worker/storeops";
 
 // Engineering stories moved out of the panel (task 6c) — the tab keeps live
 // stats; the narratives live on worker-served /info pages.
@@ -189,9 +190,13 @@ export function Inspector(
   const ov = overhead[overhead.length - 1];
 
   // Summary-strip derivations (10-second read). "Persisted writes" = mutating
-  // store ops this session would commit (KV put/delete); reads/queries excluded.
+  // store ops this session commits (KV put/delete; reads/queries excluded),
+  // projected from the fired tools via the SAME production mapping the store-ops
+  // widget uses — so it's correct whether or not the recording carries store events.
   const vals = validations ?? [];
-  const persistedWrites = (stores ?? []).flatMap((s) => s.ops).filter((o) => o.op === "put" || o.op === "delete").length;
+  const persistedWrites = tools.reduce(
+    (n, t) => n + storeOpsForTool(t.name).filter((o) => o.op === "put" || o.op === "delete").length, 0,
+  );
   const valTotal = vals.length;
   const valOk = vals.filter((v) => v.status === "pass" || v.status === "repaired").length;
   const valFail = vals.some((v) => v.status === "fail");
