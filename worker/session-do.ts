@@ -10,6 +10,7 @@ import { presetRoutes } from "./fixtures/index";
 import { ClaudeProvider } from "./llm/claude";
 import { estimateCostUsd } from "./llm/cost";
 import { withInspectorCost, sessionCostByModel, estTokens, utf8Bytes } from "./inspector";
+import { storeOpsForTool } from "./storeops";
 import { STATS_INSERT_SQL, statsRowFromSummary, type StatsSummary } from "./stats";
 import { encodeSse } from "../shared/events";
 import type { ConversationMessage, TokenUsage } from "./llm/provider";
@@ -317,6 +318,13 @@ export class SessionDO {
         if (ev.kind === "turn") turnCount++;
         else if (ev.kind === "tool") toolCallCount++;
         else if (ev.kind === "savings") savedTokens += ev.tokensSaved;
+        // Derived store-ops projection: send DIRECTLY through mux (not emit) so it
+        // doesn't recurse and isn't taxed as instrumentationBytes — it's derived
+        // metadata, not model-facing cost.
+        if (ev.kind === "tool") {
+          const ops = storeOpsForTool(ev.name);
+          if (ops.length) mux.send({ type: "inspector", kind: "store", exchangeId, turn: ev.turn, tool: ev.name, ops });
+        }
         if (ev.kind !== "overhead" && ev.kind !== "summary") {
           instrumentationBytes += utf8Bytes(encodeSse(ev));
         }
