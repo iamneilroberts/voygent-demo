@@ -6,22 +6,14 @@ when the work ships or is abandoned.
 
 ## Active
 
-### demo-subagent-deepdives
-- **Started:** 2026-06-09 10:11
-- **Branch:** `demo-subagent-deepdives`
-- **Worktree:** `/home/neil/dev/voygent-demo-demo-subagent-deepdives`
-- **Base:** `main`
-- **Description:** Add /info deep-dive pages — a "coming soon" Subagents-for-drudge-work page (leads with the real voygent-mailagent email/offers agent) + a Trip-integrity page (ADR-0006); extend context-economics with the intent-routed schema finding; wire new topics into Inspector INFO_LINKS (+ phase-machine) and INFO_NAV.
-- **Working on:** DONE pending review — implemented + committed (`ac994ca`); tsc clean, 279/279 tests pass, web bundle builds. Two new /info pages (subagents, trip-integrity) + context-economics extension + Inspector/INFO_NAV wiring. Not deployed (Neil's call).
-- **Last update:** 2026-06-09 10:22
-- **Don't touch:** `worker/info/pages.ts`, `worker/info/layout.ts`, `web/src/Inspector.tsx` (additive edits — new /info content + nav wiring)
-- **Status:** active
+(none)
 
 ## Coordination
 
 Cross-cutting constraints active across sessions. Format:
 `<YYYY-MM-DD HH:MM> — <slug>: <constraint>. <expires when or unblock condition>.`
 
+- 2026-06-09 11:58 — demo-subagent-deepdives → all sessions: ✅ **SUPERSET DEPLOY shipped on top of faithful Plan A.** `origin/main` advanced to `6fe655b` and Worker `voygent-demo` redeployed (web bundle `index-DELqCcei.js`). This is a **rebase-not-clobber** deploy: branch was rebased onto your `09fa8cc` first, so it ⊇ everything you shipped (FAITHFUL code + secrets untouched — I changed **no secrets/vars**; `FAITHFUL`/`FAITHFUL_PUBLIC_OK` remain set). Changes are **/info content + Inspector/INFO_NAV wiring only** — new `/info/subagents` (coming-soon) + `/info/trip-integrity`, context-economics additions, and 3 new engineering-view deep-dive links. No touch to the agent loop, MCP, session DO, or replay. Live-verified all `/info/*`=200. If you deploy next, you already have my work (it's in `origin/main`).
 - 2026-06-09 15:10 — faithful-plan-a → all sessions: **Plan A (faithful thin-client keystone) DEPLOYED to prod** (Worker `voygent-demo` version `6e6c5668`, 100%) + `origin/main` updated to `8113e9e`. Deploy is **FLAG-OFF** (`FAITHFUL` unset) so prod behavior is byte-identical to before; new code (MCP `initialize()`, `FAITHFUL`-gated seed/tool-path/loop, `SessRecord.faithful`) is dormant. **No secrets/vars changed.** Note: the 08:45 note below is **STALE** — `APP_ORIGIN` is `https://demo.voygent.ai` (not workers.dev) and has been since `b0c9fc4`; verified live (`demo.voygent.ai`=200, `workers.dev`=404, Origin guard correct→401/wrong→403). ⚠️ **Do NOT set `FAITHFUL`/`FAITHFUL_PUBLIC_OK` secrets** — real supplier tool-call spend is NOT metered yet (see `docs/superpowers/plans/2026-06-09-faithful-plan-a-keystone.md` "Flag-enablement gate"). Rollback if ever needed: redeploy prior version, or just leave the flag unset (it already is).
 - 2026-06-09 15:40 — faithful-plan-a → all sessions: **UPDATE — budget gate WAIVED by Neil for current scale; public live faithful APPROVED.** Neil accepts unmetered real-supplier spend at the planned (low) scale — alerts/limits are set and access-token holders are welcome to use it freely. The supplier-key isolation concern (demo shares prod SerpAPI/TripAdvisor/Viator keys — confirmed in voygent-lite, those keys are global-shared) is deferred to **issue iamneilroberts/voygent-lite#179**, to revisit only if driving more public traffic. So `FAITHFUL`/`FAITHFUL_PUBLIC_OK` are now **OK to set** — but enable in this order: (1) set `FAITHFUL=1` and run the Task 6 smoke (admin/`x-demo-test` only — public still gated), verify the live MCP returns `instructions`, the model drives `manage_trip_goal`, the friendly failure chip works, and the folio renders from real `read_trip`; (2) only then set `FAITHFUL_PUBLIC_OK=1` to turn on public live faithful. Not yet enabled as of this note.
 - 2026-06-09 16:05 — faithful-plan-a → all sessions: ✅ **ENABLED + SMOKE-VERIFIED in prod. Public live faithful is ON.** Set secrets `FAITHFUL=1` and `FAITHFUL_PUBLIC_OK=1` on Worker `voygent-demo` (both confirmed in `wrangler secret list`). Live smoke via a real passcode against `demo.voygent.ai` with an OFF-MENU trip (Reykjavik, BOS→KEF) confirmed all Plan A behaviors: the model drives `manage_trip_goal` (live-instructions core — the old path never called it), real `flight_search` returned genuine Icelandair fares ($1,167/pp, real flight numbers/seats), real folio rendered, the friendly degradation chip ("trying another…") fired on a transient and recovered, and the live checklist present-and-wait worked. `DEMO_PHASE_MACHINE` is still set but faithful forces it off by design. **Rollback:** `wrangler secret delete FAITHFUL_PUBLIC_OK` (public → flag-off) or also delete `FAITHFUL` (admin/test → flag-off too).
@@ -34,6 +26,14 @@ Cross-cutting constraints active across sessions. Format:
 - 2026-06-06 18:30 — demo-enrichment: A parallel session (slug `demo-enrichment`, branch TBD) is building the **content-enrichment pipeline** (excursions/free-things/dining/includes/day-by-day: new DEMO_TOOLS + replay fixtures + SYSTEM_HINT additions + a richer folio DATA shape) and **record/replay** for an automated showcase mode. **Seam with `claude-skin`:** we both touch `worker/session-do.ts`, `worker/mcp/replay.ts`, `shared/events.ts`, `web/src/App.tsx`. Proposed split — `claude-skin` OWNS: skin shell, flight/hotel board presentation + the `board` SSE event + `worker/agent/boards.ts` + the boards-mode prompt override. `demo-enrichment` OWNS: enrichment tools/fixtures/prompt, the folio DATA-shape extension (you render it in `.cl-artifact`/FolioPanel — I just add fields), record/replay, the auto-vs-interactive MODE axis (orthogonal to your skin axis). Keep changes ADDITIVE (separate constants/files); excursion *selection* board (a `kind:"excursion"` extension to your `board` event) is DEFERRED — let's coordinate before either of us adds it. Golden recording is captured AFTER both merge. Unblocks when the spec lands + we confirm the file-merge plan.
 
 ## Done
+
+### demo-subagent-deepdives
+- **Started:** 2026-06-09 10:11
+- **Closed:** 2026-06-09 11:58
+- **Branch:** `demo-subagent-deepdives`
+- **Base:** `main`
+- **Outcome:** SHIPPED to prod. Rebased onto `origin/main` (faithful Plan A `09fa8cc`), FF-merged to `main` (`6fe655b`), pushed, deployed Worker `voygent-demo` (superset). New `/info/subagents` (coming-soon, real voygent-mailagent offers agent) + `/info/trip-integrity` (ADR-0006); context-economics gained the verify-then-remove consolidation wave + ADR-0007 schema finding; Inspector INFO_LINKS added trip-integrity + phase-machine (was missing) + subagents w/ "soon" chip; INFO_NAV updated. Live-verified: all `/info/*`=200 on demo.voygent.ai; deployed bundle `index-DELqCcei.js` carries the new links. tsc clean, 279/279 tests pass.
+- **Status:** done
 
 ### faithful-plan-a
 - **Started:** 2026-06-09 09:21
