@@ -4,7 +4,7 @@ import { createCode, listCodes, revokeCode, usageForCode } from "./codes";
 import { usdToMicros } from "./money";
 import { ADMIN_HTML } from "./admin-page";
 
-interface AdminEnv {
+export interface AdminEnv {
   CODE_HASH_KEY: string;
   APP_ORIGIN: string;
   ADMIN_TOKEN?: string;
@@ -15,7 +15,7 @@ interface AdminEnv {
  * edge). As defense-in-depth / local fallback we also accept a Bearer ADMIN_TOKEN.
  * If neither an Access JWT nor a correct token is present, 401.
  */
-function adminAuthed(req: Request, env: AdminEnv): boolean {
+export function adminAuthed(req: Request, env: AdminEnv): boolean {
   if (req.headers.get("cf-access-jwt-assertion")) return true; // Access already vouched
   const tok = env.ADMIN_TOKEN;
   if (!tok) return false;

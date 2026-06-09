@@ -23,7 +23,7 @@ function esc(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
-export function renderInfoPage(meta: { title: string; subtitle?: string }, bodyHtml: string, activeSlug: string): string {
+export function renderInfoPage(meta: { title: string; subtitle?: string }, bodyHtml: string, activeSlug: string, editorHtml = ""): string {
   const navLinks = INFO_NAV
     .map((p) => p.slug === activeSlug
       ? `<span class="here">${esc(p.nav)}</span>`
@@ -74,14 +74,15 @@ export function renderInfoPage(meta: { title: string; subtitle?: string }, bodyH
     <span class="sub">demo · engineering notes</span>
   </header>
   <nav class="crumbs"><a href="/">← back to the demo</a> · ${navLinks}</nav>
-  <h1>${esc(meta.title)}</h1>
-  ${meta.subtitle ? `<p class="subtitle">${esc(meta.subtitle)}</p>` : ""}
-  ${bodyHtml}
+  <h1 id="info-title">${esc(meta.title)}</h1>
+  <p class="subtitle" id="info-subtitle">${meta.subtitle ? esc(meta.subtitle) : ""}</p>
+  <div id="info-body">${bodyHtml}</div>
   <footer class="info">
     <div>${navLinks}</div>
     <div class="built">Voygent demo — designed, built, and operated by <a href="/info/resume">Neil Roberts</a> · <a href="/">watch it plan a real trip live →</a></div>
   </footer>
 </div>
+${editorHtml}
 </body>
 </html>`;
 }

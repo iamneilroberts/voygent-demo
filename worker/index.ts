@@ -1,6 +1,7 @@
 export { SessionDO } from "./session-do";
 import { buildPresets } from "./presets";
-import { infoPageHtml } from "./info/pages";
+import { getPageData, mergeOverride, renderInfo, isKnownSlug } from "./info/pages";
+import { getOverride, putOverride, deleteOverride } from "./info/overrides";
 import { enabledModels, DEFAULT_SMART_MAP } from "../shared/models";
 import { STATS_AGG_SQL, shapeStats, type StatsAggRow } from "./stats";
 import { deepseekEnabled } from "./llm/index";
@@ -8,7 +9,7 @@ import { D1Db, type Db } from "./access/db";
 import { lookupByCode, admit, admissionReason } from "./access/codes";
 import { issueCookie, verifyCookie, newSid } from "./access/session";
 import { guardMutation, getCookieHeader, json, text } from "./access/http";
-import { handleAdmin } from "./access/admin";
+import { handleAdmin, adminAuthed } from "./access/admin";
 
 interface Env {
   SESSION: DurableObjectNamespace;
@@ -60,13 +61,41 @@ export default {
 
     // --- Public, no-auth endpoints ---
     if (req.method === "OPTIONS") return new Response(null, { headers: cors() });
+    // In-place editor: admin-only save/revert of a deep-dive page's override.
+    // Editing is client-gated in the browser (a stored ADMIN_TOKEN) but the
+    // server is the real boundary — every mutation re-checks adminAuthed.
+    {
+      const m = url.pathname.match(/^\/info\/([^/]+)\/(save|revert)$/);
+      if (m && req.method === "POST") {
+        const bad = guardMutation(req, env.APP_ORIGIN); if (bad) return bad;
+        if (!adminAuthed(req, env)) return text("unauthorized", 401);
+        const slug = decodeURIComponent(m[1]);
+        if (!isKnownSlug(slug)) return text("unknown page", 404);
+        if (m[2] === "revert") {
+          await deleteOverride(db, slug);
+          return json({ ok: true });
+        }
+        let b: { title?: string; subtitle?: string; body?: string };
+        try { b = await req.json<{ title?: string; subtitle?: string; body?: string }>(); }
+        catch { return text("bad json", 400); }
+        await putOverride(db, slug, {
+          title: b.title ?? "", subtitle: b.subtitle ?? "", body: b.body ?? "",
+        }, Date.now());
+        return json({ ok: true });
+      }
+    }
     if (url.pathname.startsWith("/info/") && req.method === "GET") {
       // Worker-served brag/info pages (standalone HTML, no SPA bundle). An
       // unknown slug falls through to the SPA so deep links never hard-404.
+      // Content is the source seed (pages.ts) with any D1 override layered on;
+      // the admin editor chrome is injected (inert without a stored key).
       const slug = url.pathname.slice("/info/".length).replace(/\/$/, "");
-      const html = infoPageHtml(slug);
-      if (html) {
-        return new Response(html, { headers: { ...cors(), "content-type": "text/html; charset=utf-8", "cache-control": "public, max-age=300" } });
+      const def = getPageData(slug);
+      if (def) {
+        const ov = await getOverride(db, slug);
+        const html = renderInfo(slug, mergeOverride(def, ov), { withEditor: true, edited: !!ov });
+        // no-store so a just-saved edit shows immediately (was public max-age=300).
+        return new Response(html, { headers: { ...cors(), "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } });
       }
       // Unknown info slug → send them to the demo rather than a bare "ok".
       return Response.redirect(new URL("/", url).toString(), 302);
