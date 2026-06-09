@@ -6,16 +6,7 @@ when the work ships or is abandoned.
 
 ## Active
 
-### reel-p1
-- **Started:** 2026-06-09 12:13
-- **Branch:** `reel-p1`
-- **Worktree:** `/home/neil/dev/voygent-demo-reel-p1`
-- **Base:** `main` (38b2f27)
-- **Description:** Reel replay P1 — intro modal, semantic pacing + 1×/2× control, spotlight highlight callouts, end CTA + live greeting, reel registry/rotation. Client-only, claude-skin. Plan: docs/superpowers/plans/2026-06-09-reel-p1-chrome.md
-- **Working on:** SHIPPED — reel-p1 rebased onto main + ff-merged + DEPLOYED to prod (`origin/main` = `e0721bb`, Worker `voygent-demo`, bundle `index-bZ0k90qw.js`). Superset of prod (origin/main ⊆ reel-p1; info-content + faithful untouched, no secret/worker-behavior change beyond the client reel). Awaiting Neil passcode for visual smoke + one narrative-order tune (savings callout currently fires before the flight board).
-- **Last update:** 2026-06-09 12:44
-- **Don't touch:** `web/src/App.tsx`, `web/src/ClaudeChatView.tsx`, `web/src/lib/recording.ts`, `web/src/skin-claude.css`, and new `web/src/lib/pacing.ts` / `highlights.ts` / `web/src/recordings/registry.ts` + highlight track / `web/src/Reel*.tsx` — reel P1 in flight (client-only; no worker/MCP/secret touch)
-- **Status:** active
+(none)
 
 ## Coordination
 
@@ -37,6 +28,14 @@ Cross-cutting constraints active across sessions. Format:
 - 2026-06-06 18:30 — demo-enrichment: A parallel session (slug `demo-enrichment`, branch TBD) is building the **content-enrichment pipeline** (excursions/free-things/dining/includes/day-by-day: new DEMO_TOOLS + replay fixtures + SYSTEM_HINT additions + a richer folio DATA shape) and **record/replay** for an automated showcase mode. **Seam with `claude-skin`:** we both touch `worker/session-do.ts`, `worker/mcp/replay.ts`, `shared/events.ts`, `web/src/App.tsx`. Proposed split — `claude-skin` OWNS: skin shell, flight/hotel board presentation + the `board` SSE event + `worker/agent/boards.ts` + the boards-mode prompt override. `demo-enrichment` OWNS: enrichment tools/fixtures/prompt, the folio DATA-shape extension (you render it in `.cl-artifact`/FolioPanel — I just add fields), record/replay, the auto-vs-interactive MODE axis (orthogonal to your skin axis). Keep changes ADDITIVE (separate constants/files); excursion *selection* board (a `kind:"excursion"` extension to your `board` event) is DEFERRED — let's coordinate before either of us adds it. Golden recording is captured AFTER both merge. Unblocks when the spec lands + we confirm the file-merge plan.
 
 ## Done
+
+### reel-p1
+- **Started:** 2026-06-09 12:13
+- **Closed:** 2026-06-09 13:08
+- **Branch:** `reel-p1` (merged to main; ref retained for user to delete)
+- **Base:** `main` (38b2f27, which already contained origin info-content)
+- **Outcome:** SHIPPED to prod. Reel P1 = intro modal (Direction A) + semantic pacing (`web/src/lib/pacing.ts`) with a 1×/2× viewer toggle (default 2×) + spotlight highlight callouts (Treatment 1, auto-resume, sidecar track `web/src/recordings/dublin-oct.highlights.json` resolving against the real recording) + end bookend → live mode post-reel greeting + reel registry/rotation (`web/src/recordings/registry.ts`, round-robin, `?reel=` override). Client-only, claude-skin; worker/MCP/faithful untouched. Built subagent-driven (11 commits, all TDD), Codex-reviewed plan, 331 tests green. Merged via rebase+ff onto reconciled main, deployed (`origin/main` = `aa3d8df`, bundle `index-bZ0k90qw.js`), then a narrative-order tune so callouts lead with real-fares→context-saved(patch)→cost→self-correction. **Pending:** Neil's visual smoke on `demo.voygent.ai` (passcode in `.env`); browser-automation smoke couldn't run here (no Chrome debug port). P2–P4 (screenplay format, simulated advisor/client surfaces, multi-act content) remain future sub-projects.
+- **Status:** done
 
 ### info-content-portback
 - **Started:** 2026-06-09 ~11:30
