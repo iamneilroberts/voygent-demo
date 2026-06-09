@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reel — Inspector polish + stat-anchored callouts</title>
+<style>
+  :root{
+    --board:#0c0a07; --board-2:#14110c; --board-3:#1d1810; --ink:#efe7d6; --muted:#9a907c; --muted-2:#6f6757;
+    --amber:#f5a623; --amber-hi:#ffcf6b; --phosphor:#79d98a; --red:#f0746a; --line:#26201a;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,monospace; --sans:"Space Grotesk",system-ui,sans-serif;
+    --cl-surface:#fff; --cl-line:#e8e6dd; --cl-ink:#1f1e1c; --cl-muted:#6b6a64; --cl-accent:#c96442;
+    --cl-sans:ui-sans-serif,system-ui,sans-serif;
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:#ece9e1;color:#1f1e1c;font-family:var(--sans);padding:26px 16px 80px;font-size:15px}
+  .page{max-width:1000px;margin:0 auto}
+  h1{font:600 25px/1.1 var(--sans);margin:0 0 4px}
+  .sub{color:#6b6a64;max-width:64ch;margin:0 0 8px}
+  .kick{font:600 11px/1 var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--cl-accent);margin:32px 0 10px}
+  .note{color:#6b6a64;font-size:13px;max-width:74ch;margin:10px 0 0}.note b{color:#1f1e1c}
+
+  /* amber engineering panel */
+  .panel{background:var(--board);color:var(--ink);font-family:var(--mono);border:1px solid #d9d5c9;border-radius:10px;
+    overflow:hidden;box-shadow:0 12px 36px #0000001a;max-width:460px}
+  .phead{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--line)}
+  .phead strong{font:600 14px/1 var(--sans);color:var(--ink)} .phead .pmark{color:var(--amber)}
+  .pcollapse{color:var(--muted);background:none;border:none;cursor:pointer}
+
+  /* OLD: 3 stacked switch rows */
+  .oldrow{display:flex;align-items:center;gap:8px;padding:8px 14px;border-bottom:1px solid var(--line);font:500 12px/1 var(--mono)}
+  .oldrow .lbl{color:var(--muted);width:46px}
+  .pill{border:1px solid var(--line);color:var(--muted);border-radius:999px;padding:6px 11px;font:500 12px/1 var(--mono)}
+  .pill.on{border-color:var(--amber);color:var(--ink)}
+  .pill.sm{padding:5px 9px}
+
+  /* NEW: single compact control line */
+  .ctl{display:flex;align-items:center;gap:6px;flex-wrap:wrap;padding:8px 14px;border-bottom:1px solid var(--line);
+    font:500 12px/1 var(--mono);color:var(--muted)}
+  .ctl .grp{display:inline-flex;align-items:center;gap:5px}
+  .ctl .k{color:var(--muted-2);text-transform:uppercase;letter-spacing:.08em;font-size:10px}
+  .ctl a{color:var(--muted);text-decoration:none;cursor:pointer}
+  .ctl a.on{color:var(--ink)} .ctl a.on.amber{color:var(--amber)}
+  .ctl .sep{color:var(--line)}
+  .ctl .sw{width:11px;height:11px;border-radius:50%;display:inline-block;border:1px solid #0004}
+  .gear{margin-left:auto;color:var(--muted);cursor:pointer}
+
+  /* stat strip */
+  .strip{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-bottom:1px solid var(--line)}
+  .stat{background:var(--board);padding:11px 13px}
+  .stat .n{font:700 19px/1 var(--mono);color:var(--ink);font-variant-numeric:tabular-nums}
+  .stat .n.cost{color:var(--phosphor)} .stat .n.am{color:var(--amber)}
+  .stat .l{display:block;font:500 9.5px/1.3 var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-top:5px}
+  .stat .sub{display:block;font:500 10px/1 var(--mono);color:var(--muted-2);margin-top:3px}
+  .stat.spot{box-shadow:inset 0 0 0 2px var(--amber-hi); position:relative; z-index:3}
+  .stat.spot .n{color:var(--amber-hi)}
+
+  .body{padding:11px 14px;color:var(--muted);font-size:12px}
+
+  /* callout hovering a stat */
+  .stage{position:relative}
+  .callout{position:absolute;background:var(--cl-surface);border:1px solid var(--cl-line);border-radius:11px;width:250px;
+    padding:12px 14px;box-shadow:0 18px 44px #00000038;z-index:5}
+  .callout .ey{font:600 10px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--cl-accent)}
+  .callout h4{font:600 13.5px/1.25 var(--cl-sans);margin:7px 0 5px;color:var(--cl-ink)}
+  .callout p{font-size:12px;line-height:1.5;color:var(--cl-muted);margin:0}
+  .callout .bar{display:flex;align-items:center;gap:8px;margin-top:10px;font:500 11px/1 var(--mono);color:var(--cl-muted)}
+  .callout .prog{flex:1;height:3px;border-radius:2px;background:var(--cl-line);overflow:hidden}
+  .callout .prog i{display:block;height:100%;width:48%;background:var(--cl-accent)}
+  .callout .cont{color:var(--cl-accent);font-weight:600;cursor:pointer}
+  /* connector arrow */
+  .callout::after{content:"";position:absolute;left:-7px;top:26px;width:12px;height:12px;background:#fff;
+    border-left:1px solid var(--cl-line);border-bottom:1px solid var(--cl-line);transform:rotate(45deg)}
+  .twocol{display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Engineering Inspector — top polish + stat-anchored callouts</h1>
+  <p class="sub">Three asks: (1) collapse the switch rows to one line so telemetry shows without scrolling,
+     (2) callouts spotlight the actual stat they describe and hover beside it, (3) split cumulative tool
+     <b>calls</b> from <b>distinct tools</b>.</p>
+
+  <div class="kick">Before · 3 stacked switch rows push telemetry down</div>
+  <div class="panel">
+    <div class="phead"><strong><span class="pmark">▌</span> Engineering Inspector</strong><button class="pcollapse">▾</button></div>
+    <div class="oldrow"><span class="lbl">model</span><span class="pill sm">Haiku</span><span class="pill sm">Sonnet</span><span class="pill sm">DeepSeek</span><span class="pill sm on">Smart</span><span class="pill sm">⚙</span></div>
+    <div class="oldrow"><span class="lbl">view</span><span class="pill sm on">traveler</span><span class="pill sm">advisor</span></div>
+    <div class="oldrow"><span class="lbl">theme</span><span class="pill sm on">amber</span><span class="pill sm">phosphor</span><span class="pill sm">sodium</span><span class="pill sm">dusk</span></div>
+    <div class="body">…stat strip is below the fold here…</div>
+  </div>
+
+  <div class="kick">After · one control line, telemetry up top, calls vs tools split</div>
+  <div class="twocol">
+    <div class="stage">
+      <div class="panel" style="max-width:470px">
+        <div class="phead"><strong><span class="pmark">▌</span> Engineering Inspector</strong><button class="pcollapse">▾</button></div>
+        <div class="ctl">
+          <span class="grp"><span class="k">model</span> <a>Haiku</a> <a>Sonnet</a> <a class="on amber">Smart</a></span>
+          <span class="sep">·</span>
+          <span class="grp"><span class="k">view</span> <a class="on">traveler</a> <a>advisor</a></span>
+          <span class="sep">·</span>
+          <span class="grp"><span class="k">theme</span>
+            <span class="sw" style="background:#f5a623"></span><span class="sw" style="background:#3fb950"></span><span class="sw" style="background:#ff8c42"></span><span class="sw" style="background:#ff9e64"></span>
+          </span>
+          <span class="gear">⚙</span>
+        </div>
+        <div class="strip">
+          <div class="stat"><span class="n">106</span><span class="l">MCP tools exposed</span></div>
+          <div class="stat"><span class="n">6</span><span class="l">distinct tools</span><span class="sub">17 calls</span></div>
+          <div class="stat"><span class="n">10</span><span class="l">persisted writes</span></div>
+          <div class="stat spot"><span class="n">≈2.4k</span><span class="l">context kept out</span></div>
+          <div class="stat"><span class="n cost">$0.58</span><span class="l">observed cost</span></div>
+          <div class="stat"><span class="n" style="color:var(--phosphor)">5/5</span><span class="l">validation</span></div>
+        </div>
+        <div class="body">model routing · live trail …</div>
+      </div>
+      <!-- callout hovers beside the spotlighted "context kept out" stat -->
+      <div class="callout" style="left:300px;top:150px">
+        <div class="ey">Context saved</div>
+        <h4>It patches the trip instead of rewriting it</h4>
+        <p>Each change is a small incremental patch to the saved trip, not a full rewrite. Keeps every turn cheap.</p>
+        <div class="bar"><span class="prog"><i></i></span><span class="cont">Continue ▶</span></div>
+      </div>
+    </div>
+  </div>
+  <p class="note"><b>Control line —</b> <code>model: Haiku Sonnet Smart · view: traveler advisor · theme: ●●●● · ⚙</code>
+     as muted mono links (active = bright/amber). Tweaks gear right-aligned. Saves two rows so the stat strip
+     sits at the top.</p>
+  <p class="note"><b>Stat split —</b> "distinct tools" (the big number) with "N calls" as a subline. So 6 tools / 17 calls
+     reads honestly instead of one ambiguous "17 tools used".</p>
+  <p class="note"><b>Anchored callout —</b> the board/eng callouts now spotlight their exact stat (amber ring on
+     "context kept out") and the card hovers beside it with a connector. "Real fares" still anchors to the flight
+     board in the chat. This needs the callout overlay to render at app level (over both panes) and position to
+     the target stat's location.</p>
+
+  <p class="note" style="margin-top:28px">Reply in the terminal: good? tweaks to the control-line order/labels,
+     the stat-split wording, or the callout placement?</p>
+</div>
+</body>
+</html>
