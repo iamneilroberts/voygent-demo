@@ -3,6 +3,13 @@ main = "worker/index.ts"
 compatibility_date = "2024-05-12"
 compatibility_flags = ["nodejs_compat"]
 
+# demo.voygent.ai (the [[routes]] below) is the SOLE canonical origin. The workers.dev
+# subdomain is intentionally retired: APP_ORIGIN is single-valued, so POSTs from
+# voygent-demo.somotravel.workers.dev would 403 anyway — a GET-only host that can't auth
+# is just confusing. To temporarily restore it, flip this to true and redeploy.
+# (Must stay a TOP-LEVEL key — above the first [table] header — or TOML binds it to a table.)
+workers_dev = false
+
 # Serve the built React SPA from the same Worker as the /chat API (single origin,
 # no CORS, one deploy). The Worker handles POST /chat; everything else falls back
 # to the SPA's index.html. Build the SPA first: VITE_API_BASE= npm run build:web
@@ -29,11 +36,16 @@ binding = "STATS_DB"
 database_name = "voygent-demo-stats"
 database_id = "20321ac2-3669-489e-b67c-5e5bd91d6f2e"
 
-# NOTE: demo.voygent.ai is NOT attached here. The voygent.ai zone has a *.voygent.ai
-# wildcard routing every subdomain to the prod `voygent` Worker, which shadows a plain
-# custom-domain attachment and (observed 2026-06-05) regressed this Worker's workers.dev
-# route. Until that wildcard is coordinated, this Worker is served at
-# voygent-demo.somotravel.workers.dev.
+# demo.voygent.ai is served by a MORE-SPECIFIC route than the *.voygent.ai wildcard
+# (which points every other subdomain at the prod `voygent` Worker). Most-specific-wins —
+# the same mechanism staging.voygent.ai / staging-test.voygent.ai already use safely in this
+# zone. We use a plain route PATTERN, not custom_domain=true: the 2026-06-05 regression that
+# knocked out the workers.dev route was a custom_domain attachment, which this avoids.
+# (workers_dev is retired — set at the top of this file.)
+# Runbook: ~/dev/voygent-lite/docs/runbooks/2026-06-09-demo-voygent-ai-domain-and-admin-access.md
+[[routes]]
+pattern = "demo.voygent.ai/*"
+zone_name = "voygent.ai"
 
 # Secrets (set via `wrangler secret put`, NOT checked in):
 #   ANTHROPIC_API_KEY, VOYGENT_MCP_URL, VOYGENT_MCP_BEARER, and optional DEMO_DISABLED.
@@ -51,7 +63,9 @@ database_name = "voygent-demo"
 database_id = "7825123d-3e56-423b-b2da-c5add703b252"
 
 [vars]
-# The exact origin the SPA is served from. Used by the Origin/CSRF guard.
-# Local dev (wrangler dev): http://localhost:8787. Prod: the deployed workers.dev origin
-# (demo.voygent.ai is shadowed by the *.voygent.ai wildcard — see note above).
-APP_ORIGIN = "https://voygent-demo.somotravel.workers.dev"
+# The exact origin the SPA is served from. Used by the Origin/CSRF guard — POSTs whose
+# Origin != APP_ORIGIN are 403'd, so this MUST equal the canonical live host.
+# Local dev (wrangler dev): http://localhost:8787. Prod: demo.voygent.ai (the route above).
+# NOTE: this is single-valued — hand out demo.voygent.ai/#code=... invite links.
+# (workers.dev is retired — see the workers_dev note at the top of this file.)
+APP_ORIGIN = "https://demo.voygent.ai"
