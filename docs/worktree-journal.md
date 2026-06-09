@@ -23,6 +23,15 @@ Cross-cutting constraints active across sessions. Format:
 
 ## Done
 
+### faithful-plan-a
+- **Started:** 2026-06-09 09:21
+- **Closed:** 2026-06-09 10:01
+- **Branch:** `faithful-plan-a` — deleted (FF-merged, fully in `main`)
+- **Base:** `main` (`37caf25`)
+- **Description:** Plan A (faithful thin-client keystone) — `FAITHFUL` flag: live MCP `initialize.instructions` as operating core, real tool calls bypassing replay, demo orchestration off, graceful degradation. Flag-OFF byte-identical to prod.
+- **Outcome:** SHIPPED to `main` (FF → `8cb582a`), **NOT deployed** (additive + flag-off = byte-identical; prod unchanged until `wrangler deploy` + flag set). 6 commits; per-task spec+quality reviews + Codex external review (10 findings incorporated) + final whole-branch review. 276 tests green, tsc clean. ⚠️ **Do NOT set `FAITHFUL_PUBLIC_OK=1` in prod** until real supplier tool-call spend is metered (per-code D1 ledger + daily cap currently meter LLM tokens only — see plan "Flag-enablement gate"). Lone `FAITHFUL=1` only affects test/admin (`x-demo-test`) runs. Pending manual step: Task 6 live smoke under a test code on a preview env (verify live `instructions`, model drives `manage_trip_goal`, friendly failure chip, real folio).
+- **Status:** done
+
 ### demo-enrichment
 - **Started:** 2026-06-06 19:05
 - **Closed:** 2026-06-09 07:41
