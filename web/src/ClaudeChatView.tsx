@@ -125,12 +125,14 @@ function FolioArtifact({ folio, advisor }: { folio: FolioData; advisor: boolean 
   );
 }
 
-function Welcome({ presets, geoCity, onSend, busy }: { presets: Preset[]; geoCity: string | null; onSend: (m: string) => void; busy: boolean }) {
+function Welcome({ presets, geoCity, onSend, busy, postReel }: { presets: Preset[]; geoCity: string | null; onSend: (m: string) => void; busy: boolean; postReel?: boolean }) {
   return (
     <div className="cl-welcome">
-      <h1 className="cl-welcome-h"><span className="cl-spark" aria-hidden="true">✳</span> Where to next?</h1>
+      <h1 className="cl-welcome-h"><span className="cl-spark" aria-hidden="true">✳</span> {postReel ? "Your turn to plan" : "Where to next?"}</h1>
       {geoCity && <p className="cl-welcome-geo">Looks like you might be traveling from {geoCity}.</p>}
-      <p className="cl-welcome-sub">Voygent plans real trips with live flights and hotels — pick one to watch it work, or describe your own.</p>
+      <p className="cl-welcome-sub">{postReel
+        ? "You're driving now. Tell me where you'd like to go and roughly when, and I'll pull real flights and hotels and build it the way you just watched. A rough idea is plenty; I'll ask if I need anything else."
+        : "Voygent plans real trips with live flights and hotels. Pick one to watch it work, or describe your own."}</p>
       {presets.length > 0 && (
         <div className="cl-suggestions">
           {presets.map((p) => (
@@ -146,7 +148,7 @@ function Welcome({ presets, geoCity, onSend, busy }: { presets: Preset[]; geoCit
 }
 
 export function ClaudeChatView(
-  { items, folio, onSend, onPick, busy, presets, geoCity, advisor, mobileView, onMobileView, onToggleDemo, demoLabel, engHasContent }:
+  { items, folio, onSend, onPick, busy, presets, geoCity, advisor, mobileView, onMobileView, onToggleDemo, demoLabel, engHasContent, postReel }:
   {
     items: TimelineItem[];
     folio: FolioData | null;
@@ -161,6 +163,7 @@ export function ClaudeChatView(
     onToggleDemo: () => void;
     demoLabel: string;
     engHasContent: boolean;
+    postReel?: boolean;
   },
 ) {
   const [input, setInput] = useState("");
@@ -191,7 +194,10 @@ export function ClaudeChatView(
       <div className="cl-ribbon" role="note">A Voygent demo in a Claude-style chat surface — not affiliated with Anthropic.</div>
       <div className="cl-scroll" ref={scrollRef} onScroll={onScroll}>
         <div className="cl-col">
-          {firstRun && <Welcome presets={presets} geoCity={geoCity} onSend={onSend} busy={busy} />}
+          {firstRun && postReel && (
+            <div className="cl-reel-greet" role="status">Live · you&#39;re driving now · real model, real supplier data</div>
+          )}
+          {firstRun && <Welcome presets={presets} geoCity={geoCity} onSend={onSend} busy={busy} postReel={postReel} />}
           {items.map((it, i) => {
             if (it.role === "toolchip") return <ClaudeToolChip key={i} item={it} />;
             if (it.role === "board") return <BoardView key={it.boardId} board={it} busy={busy} advisor={advisor} onPick={onPick} />;
