@@ -29,6 +29,12 @@ Cross-cutting constraints active across sessions. Format:
 
 ## Done
 
+### reel-polish
+- **Started/Closed:** 2026-06-09 13:38 / 13:51
+- **Branch:** `reel-polish` (merged to main; ref retained for user to delete)
+- **Base:** `main` (165f7d0)
+- **Outcome:** SHIPPED to prod (`origin/main` = `86484ff`, bundle `index-6iu-IPTx.js`). Three Engineering-Inspector / reel-callout polish items from Neil's live smoke: (1) compacted model/view/theme switches into a single wrapping control line so the stat strip shows without scrolling; (2) **anchored callouts** — reel highlight callouts now spotlight the exact stat/board they describe (fixed-overlay box-shadow spotlight that dims everything but the target, card hovers beside it) via `data-stat` hooks on Inspector cards + `data-reel-target` on boards + a `target` key on each highlight (schema `anchor`→`target`); (3) split the ambiguous "tools used" into "distinct tools" (headline) + "N calls" (subline). Client-only, 331 tests green. **Pending:** Neil's visual confirm of the anchored-callout placement/spotlight (couldn't verify headlessly — no browser).
+
 ### reel-p1
 - **Started:** 2026-06-09 12:13
 - **Closed:** 2026-06-09 13:08
