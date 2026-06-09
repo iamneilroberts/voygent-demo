@@ -37,7 +37,7 @@ recording with no recording-format change**. Deferred to later sub-projects (own
 
 ## Components
 
-P1 is four client-only components. They share the reel player and the claude-skin chrome; none touch the worker.
+P1 is five client-only components (C1–C5). They share the reel player and the claude-skin chrome; none touch the worker.
 
 ### C1 — Intro modal (Direction A: calm centered card)
 
@@ -49,9 +49,8 @@ into the demo"). Centered card over a dimmed chat backdrop:
   (`mode.ts` → "live"), no playback.
 - Dismiss/choice may be remembered for the session (soft; not required).
 
-**Soft default (Neil confirms at wire time):** whether the intro modal is also the **first-visit landing**
-(stronger marketing funnel) or only appears when reel mode is entered. Recommended: show on reel-mode entry;
-leave the current public default (faithful live) unchanged unless Neil opts the intro in as the landing.
+**Landing (confirmed 2026-06-09):** the intro modal is **reel-entry-only** — it appears when reel mode is
+entered, NOT on first visit. The public default landing stays **faithful live** (unchanged).
 
 Mockup: `https://demo.voygent.ai/mockups/reel-intro` (Direction A).
 
@@ -92,6 +91,21 @@ attributes the overlay queries.
 
 Mockup: `https://demo.voygent.ai/mockups/reel-callouts` (Treatment 1).
 
+### C5 — Reel registry + rotation (multi-reel ready)
+
+Neil plans to build **several reels** that each highlight a different aspect of Voygent and **rotate** which
+one is offered. P1 makes the player **registry-driven** instead of importing one hardcoded recording:
+- `web/src/recordings/registry.ts` — a list of reel entries: `{ id, title, blurb, recording, highlights }`
+  (each pairs a recording JSON with its sidecar highlight track + display metadata).
+- A **rotation selector** picks which reel is active when reel mode is entered: round-robin across visits
+  (persisted counter in `mode.ts`/localStorage) by default, with `?reel=<id>` to force a specific one for
+  sharing/QA. (Round-robin chosen over random so QA/demos are reproducible; swappable.)
+- The intro card (C1), player (C2/C3), and end bookend (C4) all read from the **selected reel entry**, not a
+  global import. `App.tsx`'s `dublinRecording` import is replaced by `selectReel()`.
+
+**P1 ships with the single existing Dublin reel** registered. **Authoring additional reels is incremental
+content follow-on** (each = one capture/author pass + a registry entry + a highlight track), not blocked by P1.
+
 ### C4 — End CTA (bookend) + live-mode greeting
 
 On reel completion (`replayChat` resolves), show an **end bookend card** (claude-skin modal mirroring C1):
@@ -118,7 +132,7 @@ Avoid em-dashes (or use sparingly) and the over-polished "authored-by-AI" cadenc
 ## Architecture / data flow
 
 ```
-mode=auto (reel)
+mode=auto (reel) ─► C5 selectReel() (round-robin, or ?reel=<id>) ─► { recording, highlights, meta }
   └─ C1 intro modal ──[Watch]──► begin playback        ──[Plan your own]──► mode=live (no playback)
                                    │
         replayChat(recording, { applyEvent, pushUser, setBusy }, { pacing, speed, highlights, signal })
@@ -152,14 +166,15 @@ No worker / MCP / faithful changes.
   a **sidecar highlight track** (no recording-format change). Moments: recovery · context-saved · cost · real-supplier-data-on-promotion.
 - End = **bookend card** (honest recap of current reel) → **live mode** + **crafted static greeting** + ribbon flip.
 - Copy: **no em-dashes / plain cadence** across all crafted strings.
+- Intro is **reel-entry-only**; faithful-live stays the public default landing.
+- Player is **registry-driven** with **round-robin rotation** (`?reel=<id>` override); P1 ships one Dublin reel,
+  more reels are incremental content follow-on.
 - All P1 work is **client-only, claude-skin native**; worker/MCP/faithful untouched.
 
-## Soft defaults (Neil confirms during spec review or at wire time)
+## Soft defaults (set at wire/calibration time, not guessed in the plan)
 
-- Whether the intro modal is also the **first-visit landing** vs only on reel-mode entry (recommended: reel-entry
-  only; keep faithful-live as the public default).
 - Exact pacing constants (msPerChar, dwell floors, dead-air cap) — set in a short calibration pass against the
-  real recording, not guessed in the plan.
+  real recording.
 
 ## Out of scope (P1)
 
