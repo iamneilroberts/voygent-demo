@@ -1,5 +1,7 @@
-import { useEffect, useRef, useState } from "react";
-import { streamChat } from "./sse-client";
+import { useEffect, useState } from "react";
+import { streamChat, UnauthorizedError } from "./sse-client";
+import { Gate } from "./Gate";
+import { readCodeFromHash, authenticate, hasSession } from "./lib/gate";
 import { ChatView, type ChatMessage, type Preset } from "./ChatView";
 import { ClaudeChatView } from "./ClaudeChatView";
 import { FolioPanel } from "./FolioPanel";
@@ -24,7 +26,8 @@ export function App() {
   const [busy, setBusy] = useState(false);
   const [presets, setPresets] = useState<Preset[]>([]);
   const [geoCity, setGeoCity] = useState<string | null>(null);
-  const sessionId = useRef(crypto.randomUUID()).current;
+  const [authed, setAuthed] = useState<boolean | null>(null); // null = checking
+  const [pendingCode, setPendingCode] = useState("");
   const [collapsed, setCollapsed] = useState(false);
   const [skin, setSkin] = useState<SkinId>(resolveInitialSkin);
   const [insTools, setInsTools] = useState<InsTool[]>([]);
@@ -45,6 +48,15 @@ export function App() {
       .catch(() => { /* welcome falls back to a generic greeting + text box */ });
   }, []);
 
+  useEffect(() => {
+    const code = readCodeFromHash(window.location, window.history);
+    (async () => {
+      if (code && (await authenticate(API_BASE, code))) { setAuthed(true); return; }
+      if (code) setPendingCode(code);
+      setAuthed(await hasSession(API_BASE));
+    })();
+  }, []);
+
   function showError(msg: string) {
     setItems((m) => {
       const c = [...m];
@@ -63,7 +75,7 @@ export function App() {
     setItems((m) => [...m, { role: "user", text }, { role: "assistant", text: "" }]);
     setBusy(true); setTools([]);
     try {
-      await streamChat(API_BASE, sessionId, text, (e) => {
+      await streamChat(API_BASE, text, (e) => {
         if (e.type === "text") setItems((m) => {
           const c = [...m];
           const last = c[c.length - 1];
@@ -114,6 +126,7 @@ export function App() {
         }
       }, claude ? "boards" : undefined);
     } catch (err) {
+      if (err instanceof UnauthorizedError) { setAuthed(false); return; }
       showError((err as Error).message);
     } finally {
       setBusy(false);
@@ -129,6 +142,13 @@ export function App() {
 
   const eng = engState(insTools.length, collapsed);
   const chatMessages = items.filter(isChatMessage) as ChatMessage[];
+
+  if (authed === null) return <div style={{ margin: "12vh auto", textAlign: "center", color: "#888" }}>Loading…</div>;
+  if (!authed) return <Gate initialCode={pendingCode} onSubmit={async (c) => {
+    const ok = await authenticate(API_BASE, c);
+    if (ok) setAuthed(true);
+    return ok;
+  }} />;
 
   return (
     <div className="app">
