@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { issueCookie, verifyCookie, newSid, COOKIE_NAME } from "./session";
+import { issueCookie, verifyCookie, newSid, COOKIE_NAME, COOKIE_NAME_INSECURE } from "./session";
 
 const RING = '{"1":"signing-key-one"}';
 
@@ -34,5 +34,21 @@ describe("session cookie", () => {
     const s = new Set(Array.from({ length: 100 }, () => newSid()));
     expect(s.size).toBe(100);
     expect(newSid()).toMatch(/^[0-9a-f]{32}$/);
+  });
+
+  it("drops the __Host- prefix when not Secure (dev) and still verifies", async () => {
+    const setCookie = await issueCookie({ sid: "s1", codeId: "c1" }, RING, 43200, false);
+    expect(setCookie).toContain(`${COOKIE_NAME_INSECURE}=`);
+    expect(setCookie).not.toContain("__Host-");
+    expect(setCookie).not.toContain("Secure");
+    const value = setCookie.split(";")[0].split("=").slice(1).join("=");
+    const claims = await verifyCookie(`${COOKIE_NAME_INSECURE}=${value}`, RING);
+    expect(claims).toEqual({ sid: "s1", codeId: "c1" });
+  });
+
+  it("rejects a token with an empty sid", async () => {
+    const setCookie = await issueCookie({ sid: "", codeId: "c1" }, RING, 43200, true);
+    const value = setCookie.split(";")[0].split("=").slice(1).join("=");
+    expect(await verifyCookie(`${COOKIE_NAME}=${value}`, RING)).toBeNull();
   });
 });
