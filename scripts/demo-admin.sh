@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 # voygent-demo admin CLI — mint / list / revoke / usage for passcodes.
 #
-# The browser admin console (GET /admin) needs Cloudflare Access, which can't be
-# applied to a *.workers.dev host. Until the demo has a custom domain, manage codes
-# with this script (it talks to the same JSON API the console would).
+# Talks to the same JSON API the browser console (/admin) uses. Handy from the
+# terminal; the browser console at https://demo.voygent.ai/admin (Cloudflare Access)
+# is the GUI equivalent.
 #
 # Token resolution (first hit wins):
 #   1. $VOYGENT_DEMO_ADMIN_TOKEN
 #   2. VOYGENT_DEMO_ADMIN_TOKEN= line in $VOYGENT_LITE_ENV (default ~/dev/voygent-lite/.env)
-# Origin override: $DEMO_ORIGIN (default https://voygent-demo.somotravel.workers.dev)
+# Origin override: $DEMO_ORIGIN (default https://demo.voygent.ai)
 #
 # Usage:
 #   scripts/demo-admin.sh mint <id> <label> <dailyUsd> <totalUsd> [view] [expiresAtISO]
@@ -17,7 +17,7 @@
 #   scripts/demo-admin.sh usage <id> [sinceISO]
 set -euo pipefail
 
-ORIGIN="${DEMO_ORIGIN:-https://voygent-demo.somotravel.workers.dev}"
+ORIGIN="${DEMO_ORIGIN:-https://demo.voygent.ai}"
 
 resolve_token() {
   if [ -n "${VOYGENT_DEMO_ADMIN_TOKEN:-}" ]; then printf '%s' "$VOYGENT_DEMO_ADMIN_TOKEN"; return; fi
