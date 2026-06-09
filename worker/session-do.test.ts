@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildFaithfulSeed } from "./session-do";
+import { buildFaithfulSeed, faithfulGates } from "./session-do";
 
 describe("buildFaithfulSeed", () => {
   const CORE = "LIVE OPERATING CORE: drive manage_trip_goal.";
@@ -20,5 +20,38 @@ describe("buildFaithfulSeed", () => {
   it("adds the board-presentation note only in boards mode", () => {
     expect(buildFaithfulSeed(CORE, { boardsMode: true })).toContain("option cards render");
     expect(buildFaithfulSeed(CORE, { boardsMode: false })).not.toContain("option cards render");
+  });
+});
+
+describe("faithfulGates", () => {
+  it("faithful=true → all-real, demo machinery off", () => {
+    const g = faithfulGates(true, false);
+    expect(g.bypassReplay).toBe(true);
+    expect(g.sanitizeModelPatch).toBe(false);
+    expect(g.overlayReplayInFolio).toBe(false);
+    expect(g.measureSearchDistill).toBe(false);
+    expect(g.suppressOrchestration).toBe(true);
+    expect(g.promoteLodgingFromPatch).toBe(true);
+  });
+  it("flag-off, featured (liveMode=false) → today's replay behavior", () => {
+    const g = faithfulGates(false, false);
+    expect(g.bypassReplay).toBe(false);
+    expect(g.sanitizeModelPatch).toBe(true);
+    expect(g.overlayReplayInFolio).toBe(true);
+    expect(g.measureSearchDistill).toBe(true);
+    expect(g.suppressOrchestration).toBe(false);
+    expect(g.promoteLodgingFromPatch).toBe(false);
+  });
+  it("flag-off, live (liveMode=true) → real calls + no overlay, but distill still measured & orchestration on", () => {
+    const g = faithfulGates(false, true);
+    expect(g.bypassReplay).toBe(true);
+    expect(g.sanitizeModelPatch).toBe(false);
+    expect(g.overlayReplayInFolio).toBe(false);
+    expect(g.measureSearchDistill).toBe(true);   // liveMode (not faithful) keeps today's measurement
+    expect(g.suppressOrchestration).toBe(false); // nudge stays on for live trips
+    expect(g.promoteLodgingFromPatch).toBe(true);
+  });
+  it("faithful=true → liveMode is a don't-care (irrelevant when faithful)", () => {
+    expect(faithfulGates(true, true)).toEqual(faithfulGates(true, false));
   });
 });

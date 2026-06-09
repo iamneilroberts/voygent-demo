@@ -140,6 +140,29 @@ export function buildFaithfulSeed(instructions: string | null, opts: { boardsMod
   return opts.boardsMode ? `${base}\n\n${FAITHFUL_BOARDS_NOTE}` : base;
 }
 
+// Pure decision table for the faithful tool path (Decision A6 / Codex review #7). Centralizes
+// every faithful-vs-default branch so CI proves the gating. `liveMode` is read at CALL time
+// (it latches mid-exchange), so call this at each site rather than caching the result.
+export interface FaithfulGates {
+  bypassReplay: boolean;          // call the real MCP directly (no FixtureReplay interception)
+  sanitizeModelPatch: boolean;    // strip enrichment keys from a model-issued patch_trip
+  overlayReplayInFolio: boolean;  // overlay replay-promoted flights/lodging/itinerary in onFolio
+  measureSearchDistill: boolean;  // emit the replay-fixture searchDistill savings event
+  suppressOrchestration: boolean; // turn off nudge + phase machine (model drives the build itself)
+  promoteLodgingFromPatch: boolean; // count a lodging patch_trip as the hotel-lock milestone (real trips)
+}
+export function faithfulGates(faithful: boolean, liveMode: boolean): FaithfulGates {
+  const real = faithful || liveMode;
+  return {
+    bypassReplay: real,
+    sanitizeModelPatch: !real,        // today: !liveMode; faithful also skips
+    overlayReplayInFolio: !real,      // today: !liveMode; faithful also skips
+    measureSearchDistill: !faithful,  // liveMode still measures intercepted tools (unchanged)
+    suppressOrchestration: faithful,
+    promoteLodgingFromPatch: real,
+  };
+}
+
 // Live-trip workflow (additive, all sessions): when the traveler's destination
 // is NOT one of the featured trips, the session passes through to real Voygent
 // tools (full catalog, no replay). The model needs the real schemas + the real
@@ -426,7 +449,7 @@ export class SessionDO {
     };
     const SEARCH_TOOLS = new Set(["flight_search", "hotel_search", "hotel_search_and_rank"]);
     const baseCallTool = (name: string, input: Record<string, unknown>): Promise<string> => {
-      if (this.liveMode) return mcp.callTool(name, input); // faithful pass-through, no interception
+      if (faithfulGates(faithful, this.liveMode).bypassReplay) return mcp.callTool(name, input); // real pass-through, no interception
       const intercepted = this.replay.isIntercepted(name) || name === "hotel_search_and_rank";
       if (!intercepted) return mcp.callTool(name, input);
       if (SEARCH_TOOLS.has(name) && !this.replay.matchesFixture(name, input as Record<string, any>)) {
@@ -442,7 +465,7 @@ export class SessionDO {
       // Fabrication guard: strip enrichment-content keys from model-initiated patch_trip.
       // Replay's own helpers.patchTrip calls mcp.callTool directly (bypassing this wrapper),
       // so fixture-keyed enrichment writes are unaffected.
-      if (name === "patch_trip" && !this.liveMode) {
+      if (name === "patch_trip" && faithfulGates(faithful, this.liveMode).sanitizeModelPatch) {
         const inAny = input as any;
         const updates = inAny.updates ?? inAny;
         if (updates && typeof updates === "object") {
@@ -463,7 +486,7 @@ export class SessionDO {
       // hotel lock actually SUCCEEDED with lodging — never on intent alone.
       if (!this.hotelsPromoted && !out.startsWith("ERROR")) {
         if (name === "promote_hotels_to_lodging") this.hotelsPromoted = true;
-        else if (this.liveMode && name === "patch_trip") {
+        else if (faithfulGates(faithful, this.liveMode).promoteLodgingFromPatch && name === "patch_trip") {
           const updates = (input as any).updates ?? input;
           const lodging = updates && typeof updates === "object" ? (updates as any).lodging : undefined;
           if (Array.isArray(lodging) && lodging.length) this.hotelsPromoted = true;
@@ -475,7 +498,7 @@ export class SessionDO {
         }
       }
       // searchDistill: prod response size (fixture meta) vs the slim payload the model saw.
-      if (this.replay.isIntercepted(name)) {
+      if (faithfulGates(faithful, this.liveMode).measureSearchDistill && this.replay.isIntercepted(name)) {
         const m = this.replay.lastMeasurement();
         const fx = this.replay.currentFixture();
         const metaKey = m?.tool as ("flightSearch" | "flightList" | "hotelSearch" | "hotelList" | undefined);
@@ -550,7 +573,7 @@ export class SessionDO {
         await runAgentLoop({
           provider, tools, messages: this.messages, exchangeId,
           callTool, nextModel,
-          nudge: phaseMachine ? undefined : nudge,
+          nudge: (phaseMachine || faithfulGates(faithful, this.liveMode).suppressOrchestration) ? undefined : nudge,
           afterToolBatch: phaseMachine ? (batch) => {
             for (const b of batch) {
               let parsed: any = null;
@@ -592,7 +615,7 @@ export class SessionDO {
             try { parsed = JSON.parse(raw); } catch { /* tolerate */ }
             const data = (parsed && typeof parsed === "object" && parsed.data) ? parsed.data : (parsed ?? {});
             this.lastBaselineTripJson = JSON.stringify(data); // pre-overlay baseline for patch savings
-            if (!this.liveMode) {
+            if (faithfulGates(faithful, this.liveMode).overlayReplayInFolio) {
               const promoted = this.replay.lastPromoted();
               if (promoted.flights != null) data.flights = promoted.flights;
               if (promoted.lodging != null) data.lodging = promoted.lodging;
