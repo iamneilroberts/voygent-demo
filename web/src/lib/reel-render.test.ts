@@ -1,0 +1,39 @@
+import { describe, it, expect } from "vitest";
+import { actorClass, actorLabel, pickedActor, editForActivity } from "./reel-render";
+import type { ReelEditMarker } from "./interaction";
+
+describe("actorClass / actorLabel", () => {
+  it("maps actors to scoped classes and human labels", () => {
+    expect(actorClass("advisor")).toBe("cl-actor-advisor");
+    expect(actorClass("client")).toBe("cl-actor-client");
+    expect(actorLabel("advisor")).toBe("Advisor");
+    expect(actorLabel("client")).toBe("Client");
+    expect(actorLabel("agent")).toBe("Agent");
+  });
+});
+
+describe("pickedActor", () => {
+  const selected = { "b-flight": { candidateId: "serp:70wngy", actor: "client" as const } };
+  it("returns the actor when this candidate is the reel-selected one", () => {
+    expect(pickedActor(selected, "b-flight", "serp:70wngy")).toBe("client");
+  });
+  it("returns null for a non-selected candidate or unknown board", () => {
+    expect(pickedActor(selected, "b-flight", "serp:other")).toBeNull();
+    expect(pickedActor(selected, "b-hotel", "serp:70wngy")).toBeNull();
+    expect(pickedActor({}, "b-flight", "serp:70wngy")).toBeNull();
+  });
+});
+
+describe("editForActivity", () => {
+  const edits: ReelEditMarker[] = [
+    { path: "days[1].activities[0]", was: "Free morning", now: "Cliffs of Moher", tag: "Advisor edited", actor: "advisor", reconciled: false },
+  ];
+  it("matches an edit to its exact day/activity indices", () => {
+    expect(editForActivity(edits, 1, 0)?.now).toBe("Cliffs of Moher");
+  });
+  it("returns undefined when no edit targets that activity", () => {
+    expect(editForActivity(edits, 1, 1)).toBeUndefined();
+    expect(editForActivity(edits, 0, 0)).toBeUndefined();
+    expect(editForActivity([], 1, 0)).toBeUndefined();
+  });
+});
