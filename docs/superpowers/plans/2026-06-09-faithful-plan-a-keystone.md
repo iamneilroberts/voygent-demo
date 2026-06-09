@@ -881,7 +881,21 @@ Append a one-paragraph "Flag-enablement gate" note to this plan: the budget-acco
 
 **Known soft spots for review to probe:**
 - Decision A2: should `progressToken` be in Plan A (handoff lists it) rather than Plan C (spec's plan shape)? Plan A follows the spec's shape.
-- The friendly-summary path covers `!ok` (throw / `ERROR:` prefix). A tool returning a JSON `{error: "..."}` body **without** the `ERROR:` prefix keeps `ok === true` and would still surface `error: …` via `summarizeToolResult`. Detecting that would mean marking such results not-ok, which changes model-facing semantics — left out of Plan A deliberately; flag if review wants it.
+- The friendly-summary path covers `!ok` (throw / `ERROR:` prefix) **and** (closed during code review) a JSON `{error: "..."}` body that didn't trip the `ERROR:` prefix — `visitorToolSummary` detects the latter via `hasJsonError(content)` **only when `friendlyOnFail` is true**, so the `ok` flag (used by boards/inspector) is untouched and flag-off stays byte-identical. Nested-envelope `{content:[{text:"<json with error>"}]}` bodies are not unwrapped for this check (rare; matches `summarizeToolResult`'s own top-level `o.error` surface) — flag if review wants deeper detection.
 - Decision A4 latch: a session that started flag-off and then has `FAITHFUL` enabled keeps running flag-off until it ends (and vice-versa). Intended (no hybrid state), but means enabling the flag only affects *new* sessions — call this out when enabling.
 - Whether the live voygent MCP returns `instructions` at all (faithful seed falls back to `FAITHFUL_FALLBACK_CORE` if not — verify in Task 6 smoke) and whether it requires the `Mcp-Session-Id` on `tools/call` (Task 1 tolerates both).
-- Per-request `initialize()` adds one handshake round-trip per faithful request — acceptable; gate to first-turn-only if latency matters.
+- Per-request `initialize()` adds one handshake round-trip per faithful request — acceptable; now gated to first-turn-only (`faithful && isFirstTurn`) since the instructions are only consumed in the first-turn seed.
+
+---
+
+## Flag-enablement gate (recorded 2026-06-09, Task 6)
+
+**Budget-accounting finding — CONFIRMED by reading the live code:** neither the per-code D1 ledger nor the global daily cap meters real supplier/MCP tool-call spend; **both count LLM tokens only.**
+- `sessionCost` (`worker/session-do.ts`) is accumulated solely in the `onUsage` callback as `estimateCostUsd(model, turn)` over `TokenUsage` — no tool-call term. `estimateCostUsd` (`worker/llm/cost.ts`) is purely token-based (4 token dimensions × per-million rates).
+- Per-code `reconcile()` (`worker/access/codes.ts`) sets `actualMicros = Math.round(sessionCost * 1_000_000)` — LLM cost only; the `spend_events` row has no tool-call column.
+- Admission reserves a flat `DEFAULT_EST_MICROS = 250_000` ($0.25) per exchange (`worker/index.ts`), not tool-call-aware; reconcile replaces it with the (LLM-only) actual, so the reserve does not durably cover supplier spend.
+- The global daily cap (`__budget__` DO, `BUDGET_DAILY_USD`) is fed the same LLM-only `sessionCost`, so it bounds total **token** spend but is **blind to supplier spend** too.
+
+**Gate decision (owner: Neil):** ship Plan A **flag-off**. `FAITHFUL=1` alone enables faithful mode for **test/admin runs only** (the `x-demo-test` path, which skips the public ledger) — safe to exercise now. **Do NOT set `FAITHFUL_PUBLIC_OK=1`** (the public switch) until ONE of these lands: (a) a per-tool-call cost estimate is wired into `sessionCost`/admission so the ledger and daily cap meter real supplier spend, or (b) a hard per-code faithful round/tool-call cap, or (c) supplier-side spend limits. Until then, public faithful traffic has no real-spend backstop.
+
+**Remaining manual step (not done here — needs a non-prod preview + coordination with the auth-tokens session):** the Task 6 Step 2 live smoke under a test code — set `FAITHFUL=1` in a preview env, run one real build with the `x-demo-test` header, and confirm: the seed's first message is the live `initialize.instructions` (falls back to `FAITHFUL_FALLBACK_CORE` only if the MCP omits them), the model drives `manage_trip_goal` itself (no nudge/phase directive), a forced tool failure shows the friendly chat summary while the inspector shows the real error, and the folio renders from real `read_trip` data.
