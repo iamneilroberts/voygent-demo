@@ -32,6 +32,35 @@ export interface HotelCandidate {
   stay?: { location?: string; checkIn?: string; checkOut?: string } | null;
 }
 
+export interface ExcursionCandidate {
+  productCode: string;        // real Viator product code — the load-bearing id
+  title: string;
+  day: number;                // 1-based itinerary day this belongs to
+  free: boolean;              // true = "free thing to do" (priceFrom null/0)
+  priceFrom: number | null;
+  currency?: string | null;
+  durationMinutes?: number | null;
+  rating?: number | null;
+  reviewCount?: number | null;
+  description?: string | null;
+  bookingUrl?: string | null;
+  coverImage?: string | null;
+}
+export interface DiningCandidate {
+  id: string;                 // real TripAdvisor location id
+  name: string;
+  day: number;                // 1-based itinerary day
+  cuisine?: string | null;
+  rating?: number | null;
+  reviewCount?: number | null;
+  priceLevel?: string | null; // "$$ - $$$"
+  description?: string | null;
+  url?: string | null;
+}
+export interface ItineraryDayScaffold {
+  day: number; date: string; location: string; title: string;
+}
+
 export interface Fixture {
   route: FixtureRoute;
   flights: FlightCandidate[];
@@ -42,6 +71,9 @@ export interface Fixture {
   // Real promoted lodging cards per hotel-candidate id, as prod's
   // promote_hotels_to_lodging produced them.
   promotedLodgingById: Record<string, Record<string, unknown>>;
+  excursions?: ExcursionCandidate[];
+  dining?: DiningCandidate[];
+  itineraryDays?: ItineraryDayScaffold[];
   meta?: {
     flightSearch?: { rawTokensEst: number; responseBytes: number; prodLatencyMs: number };
     flightList?: { rawTokensEst: number; responseBytes: number; prodLatencyMs: number };
@@ -65,7 +97,12 @@ export function presetRoutes(): FixtureRoute[] {
 
 // Normalize a free-text place or code to a comparison token: uppercase alphanumerics.
 function norm(s: unknown): string {
-  return String(s ?? "").toUpperCase().replace(/[^A-Z0-9]/g, "");
+  // NFD + strip combining marks BEFORE the [^A-Z0-9] filter: without it,
+  // "Cancún" normalized to "CANCN" (≠ fixture "CANCUN") and a featured trip
+  // wrongly latched the session live whenever the model spelled the accent.
+  return String(s ?? "")
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase().replace(/[^A-Z0-9]/g, "");
 }
 
 // Does a search term refer to this route's destination? Accept the IATA code

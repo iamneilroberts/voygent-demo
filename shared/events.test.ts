@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { encodeSse, type ServerEvent } from "./events";
+import { encodeSse, type ServerEvent, type FolioData } from "./events";
 
 describe("encodeSse", () => {
   it("encodes a text event as one SSE frame", () => {
@@ -26,8 +26,27 @@ describe("encodeSse", () => {
       turns: 3, toolCalls: 6, exposedToolCount: 9, fullToolCount: 79,
       inputTokens: 1200, outputTokens: 300, cacheReadTokens: 980, cacheCreationTokens: 0,
       costByModel: { haiku: 0.0026, sonnet: 0.013, opus: 0.065 },
+      actualCostUsd: 0.0091, actualCostByModel: { "claude-sonnet-4-6": 0.008, "claude-haiku-4-5": 0.0011 },
     };
     const decoded = JSON.parse(encodeSse(ev).slice("data: ".length).trim());
     expect(decoded).toEqual(ev);
+  });
+});
+
+describe("FolioData enrichment shape", () => {
+  it("encodes a folio carrying days[] and includes[]", () => {
+    const folio: FolioData = {
+      tripId: "t1", title: "Dublin", flights: [], hotels: [],
+      days: [{
+        title: "Day 1 — Dublin", date: "2026-10-12", location: "Dublin",
+        activities: [{ name: "Kilmainham Gaol", description: "Historic tour", url: "https://x" }],
+        dining: [{ name: "The Winding Stair", cuisine: "Irish", description: "Riverside", url: "https://y" }],
+        stay: "Baggotrath House",
+      }],
+      includes: [{ key: "whats-included", title: "What's included", body: "Flights and hotels." }],
+    };
+    const line = encodeSse({ type: "folio", folio });
+    expect(line).toContain("Kilmainham");
+    expect(line).toContain("whats-included");
   });
 });

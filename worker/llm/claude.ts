@@ -74,10 +74,14 @@ export async function* parseAnthropicStream(body: ReadableStream<Uint8Array>): A
 
 const EPHEMERAL = { type: "ephemeral" as const };
 
-// Cache the two stable, expensive prefixes so the agent loop's later turns read
-// them at ~0.1x instead of re-billing full price every turn:
+// Cache the expensive prefixes so the agent loop's later turns read them at
+// ~0.1x instead of re-billing full price every turn:
 //  1. the tools block (cache_control on the last tool caches the whole array)
 //  2. the first user message (our long, static SYSTEM_HINT)
+//  3. a MOVING breakpoint on the final message of each request, so the whole
+//     growing conversation is cached for the next provider call (3 breakpoints
+//     total — under the API's limit of 4). Without #3, every agent-loop turn
+//     re-billed the full conversation as fresh input.
 function withToolCache(tools: ToolSchema[]): unknown[] {
   return tools.map((t, i) => ({
     name: t.name, description: t.description, input_schema: t.input_schema,
@@ -85,9 +89,18 @@ function withToolCache(tools: ToolSchema[]): unknown[] {
   }));
 }
 function withMessageCache(messages: ConversationMessage[]): unknown[] {
+  const last = messages.length - 1;
   return messages.map((m, i) => {
     if (i === 0 && m.role === "user" && typeof m.content === "string") {
       return { role: "user", content: [{ type: "text", text: m.content, cache_control: EPHEMERAL }] };
+    }
+    if (i === last && i > 0) {
+      // moving breakpoint: tag the final content block so the whole prefix caches
+      if (typeof m.content === "string") {
+        return { role: m.role, content: [{ type: "text", text: m.content, cache_control: EPHEMERAL }] };
+      }
+      const blocks = m.content.map((b, j) => (j === m.content.length - 1 ? { ...b, cache_control: EPHEMERAL } : b));
+      return { ...m, content: blocks };
     }
     return m;
   });
@@ -95,7 +108,7 @@ function withMessageCache(messages: ConversationMessage[]): unknown[] {
 
 export class ClaudeProvider implements LLMProvider {
   constructor(private apiKey: string, private model = "claude-sonnet-4-6") {}
-  async *stream(messages: ConversationMessage[], tools: ToolSchema[]): AsyncIterable<ProviderEvent> {
+  async *stream(messages: ConversationMessage[], tools: ToolSchema[], opts?: { model?: string }): AsyncIterable<ProviderEvent> {
     const res = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -104,7 +117,7 @@ export class ClaudeProvider implements LLMProvider {
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        model: this.model, max_tokens: 4096, stream: true,
+        model: opts?.model ?? this.model, max_tokens: 4096, stream: true,
         tools: withToolCache(tools),
         messages: withMessageCache(messages),
       }),

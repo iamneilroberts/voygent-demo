@@ -1,0 +1,2446 @@
+{
+  "skin": "claude",
+  "trip": "dublin-oct",
+  "frames": [
+    {
+      "delayMs": 700,
+      "kind": "user",
+      "text": "Plan the Dublin in October trip for 2."
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "turn",
+        "exchangeId": "4584fbbd-5ae9-439a-b02b-ea522f05bc70",
+        "turn": 0,
+        "inputTokens": 3,
+        "outputTokens": 164,
+        "cacheReadTokens": 0,
+        "cacheCreationTokens": 61779,
+        "costUsd": 0.23414025,
+        "model": "claude-sonnet-4-6"
+      }
+    },
+    {
+      "delayMs": 180,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "save_trip",
+        "phase": "start"
+      }
+    },
+    {
+      "delayMs": 240,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "save_trip",
+        "phase": "done",
+        "summary": "ok"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "tool",
+        "exchangeId": "4584fbbd-5ae9-439a-b02b-ea522f05bc70",
+        "turn": 0,
+        "name": "save_trip",
+        "args": {
+          "tripId": "demo-e8ff44e6",
+          "data": {
+            "meta": {
+              "title": "Dublin in October",
+              "destination": "Dublin, Ireland",
+              "dates": "2026-10-12 to 2026-10-19",
+              "origin": "Mobile, AL (MOB)",
+              "travelers": 2
+            },
+            "flights": [],
+            "lodging": []
+          }
+        },
+        "result": "{\"status\":\"ok\",\"persisted\":true,\"tripId\":\"demo-e8ff44e6\",\"message\":\"Saved 'demo-e8ff44e6'.\"}",
+        "latencyMs": 1368,
+        "ok": true
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "turn",
+        "exchangeId": "4584fbbd-5ae9-439a-b02b-ea522f05bc70",
+        "turn": 1,
+        "inputTokens": 1,
+        "outputTokens": 182,
+        "cacheReadTokens": 61779,
+        "cacheCreationTokens": 195,
+        "costUsd": 0.021997950000000002,
+        "model": "claude-sonnet-4-6"
+      }
+    },
+    {
+      "delayMs": 180,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "flight_search",
+        "phase": "start"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "savings",
+        "exchangeId": "4584fbbd-5ae9-439a-b02b-ea522f05bc70",
+        "mechanism": "searchDistill",
+        "tokensSaved": 731,
+        "basis": "chars/4",
+        "scope": "aggregate",
+        "detail": "prod flightSearch returned ~1067 tok → model saw ~336 tok"
+      }
+    },
+    {
+      "delayMs": 240,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "flight_search",
+        "phase": "done",
+        "summary": "ok · 7 candidates"
+      }
+    },
+    {
+      "delayMs": 480,
+      "kind": "event",
+      "event": {
+        "type": "board",
+        "kind": "flight",
+        "boardId": "bdd6b8db-93da-44e3-a86e-30d9a54b9911",
+        "tripId": "demo-e8ff44e6",
+        "candidates": [
+          {
+            "id": "serp:70wngy",
+            "title": "MOB→DUB",
+            "price": "$3,426",
+            "meta": "United · 1 stop · Economy",
+            "summary": "MOB→DUB, United, 1 stop, $3,426"
+          },
+          {
+            "id": "serp:3lqsh0",
+            "title": "MOB→DUB",
+            "price": "$3,426",
+            "meta": "Delta · 1 stop · Economy",
+            "summary": "MOB→DUB, Delta, 1 stop, $3,426"
+          },
+          {
+            "id": "serp:thxolp",
+            "title": "MOB→DUB",
+            "price": "$3,426",
+            "meta": "American · 1 stop · Economy",
+            "summary": "MOB→DUB, American, 1 stop, $3,426"
+          },
+          {
+            "id": "serp:1w4jijl",
+            "title": "MOB→DUB",
+            "price": "$3,518",
+            "meta": "American · 2 stops · Economy",
+            "summary": "MOB→DUB, American, 2 stops, $3,518"
+          },
+          {
+            "id": "serp:tacag3",
+            "title": "MOB→DUB",
+            "price": "$4,398",
+            "meta": "American · 2 stops · Economy",
+            "summary": "MOB→DUB, American, 2 stops, $4,398"
+          },
+          {
+            "id": "serp:xm3k14",
+            "title": "MOB→DUB",
+            "price": "$3,516",
+            "meta": "American · 2 stops · Economy",
+            "summary": "MOB→DUB, American, 2 stops, $3,516"
+          },
+          {
+            "id": "serp:yby4vc",
+            "title": "MOB→DUB",
+            "price": "$4,396",
+            "meta": "American · 2 stops · Economy",
+            "summary": "MOB→DUB, American, 2 stops, $4,396"
+          }
+        ]
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "tool",
+        "exchangeId": "4584fbbd-5ae9-439a-b02b-ea522f05bc70",
+        "turn": 1,
+        "name": "flight_search",
+        "args": {
+          "source": "serp",
+          "trip_id": "demo-e8ff44e6",
+          "origin": "MOB",
+          "destination": "DUB",
+          "departure_date": "2026-10-12",
+          "return_date": "2026-10-19",
+          "adults": 2
+        },
+        "result": "{\"status\":\"ok\",\"source\":\"serp\",\"tripId\":\"demo-e8ff44e6\",\"count\":7,\"candidates\":[{\"id\":\"serp:70wngy\",\"route\":\"MOB→DUB\",\"airline\":\"United\",\"price\":3426,\"currency\":\"USD\",\"pricePerPerson\":1713,\"stops\":1,\"cabin\":\"Economy\",\"durationMinutes\":747},{\"id\":\"serp:3lqsh0\",\"route\":\"MOB→DUB\",\"airline\":\"Delta\",\"price\":3426,\"currency\":\"USD\",\"pricePerPerson\":1713,\"stops\":1,\"cabin\":\"Economy\",\"durationMinutes\":630},{\"id\":\"serp:thxolp\",\"route\":\"MOB→DUB\",\"airline\":\"American\",\"price\":3426,\"currency\":\"USD\",\"pricePerPerson\":1713,\"stops\":1,\"cabin\":\"Economy\",\"durationMinutes\":653},{\"id\":\"serp:1w4jijl\",\"route\":\"MOB→DUB\",…[trimmed for recording]",
+        "latencyMs": 0,
+        "ok": true
+      }
+    },
+    {
+      "delayMs": 160,
+      "kind": "event",
+      "event": {
+        "type": "folio",
+        "folio": {
+          "tripId": "demo-e8ff44e6",
+          "title": "Dublin in October",
+          "flights": [],
+          "hotels": []
+        }
+      }
+    },
+    {
+      "delayMs": 220,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "Great"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " news — I've got 7 flight options for MOB → Dublin"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " and back, for 2 travelers. The cards"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " should be rendering right beside this message! "
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "✈️\n\nThree standout choices at the same base"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " price (~$3,426 total / $1,713 pp):\n\n- **Delta**"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " – 1 stop, just **10h 30m** — the fastest"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " of the bunch\n- **American** – 1 stop, 10h 53m — solid runner"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "-up\n- **United** – 1 stop, 12h 27m — same price, a bit longer"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "\n\nWhich flight would you like? Go ahead and pick one and I'll lock it in and"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " start hunting for Dublin hotels!"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "turn",
+        "exchangeId": "4584fbbd-5ae9-439a-b02b-ea522f05bc70",
+        "turn": 2,
+        "inputTokens": 1,
+        "outputTokens": 163,
+        "cacheReadTokens": 61974,
+        "cacheCreationTokens": 666,
+        "costUsd": 0.0235377,
+        "model": "claude-sonnet-4-6"
+      }
+    },
+    {
+      "delayMs": 120,
+      "kind": "event",
+      "event": {
+        "type": "turn-complete"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "savings",
+        "exchangeId": "4584fbbd-5ae9-439a-b02b-ea522f05bc70",
+        "mechanism": "template",
+        "tokensSaved": 20,
+        "basis": "chars/4",
+        "scope": "perRender",
+        "detail": "deterministic render payload (chars÷4) the model never had to generate — not a model-measured count"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "overhead",
+        "exchangeId": "4584fbbd-5ae9-439a-b02b-ea522f05bc70",
+        "instrumentationMs": null,
+        "instrumentationBytes": 3631,
+        "addedModelTokens": 0
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "summary",
+        "exchangeId": "4584fbbd-5ae9-439a-b02b-ea522f05bc70",
+        "turns": 3,
+        "toolCalls": 2,
+        "exposedToolCount": 106,
+        "fullToolCount": 120,
+        "inputTokens": 5,
+        "outputTokens": 509,
+        "cacheReadTokens": 123753,
+        "cacheCreationTokens": 62640,
+        "costByModel": {
+          "haiku": 0.0932253,
+          "sonnet": 0.27967590000000003,
+          "opus": 1.3983795
+        },
+        "actualCostUsd": 0.2796759,
+        "actualCostByModel": {
+          "claude-sonnet-4-6": 0.2796759
+        }
+      }
+    },
+    {
+      "delayMs": 500,
+      "kind": "turn-end"
+    },
+    {
+      "delayMs": 700,
+      "kind": "user",
+      "text": "I'll take the flight option serp:70wngy (MOB→DUB, United, 1 stop, $3,426)."
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "turn",
+        "exchangeId": "c8b2b72e-22e7-4f5f-a349-90725d91794f",
+        "turn": 0,
+        "inputTokens": 3,
+        "outputTokens": 98,
+        "cacheReadTokens": 62640,
+        "cacheCreationTokens": 197,
+        "costUsd": 0.02100975,
+        "model": "claude-sonnet-4-6"
+      }
+    },
+    {
+      "delayMs": 180,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "patch_trip",
+        "phase": "start"
+      }
+    },
+    {
+      "delayMs": 240,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "patch_trip",
+        "phase": "done",
+        "summary": "ok · updated flights · 1 warning"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "tool",
+        "exchangeId": "c8b2b72e-22e7-4f5f-a349-90725d91794f",
+        "turn": 0,
+        "name": "patch_trip",
+        "args": {
+          "tripId": "demo-e8ff44e6",
+          "updates": {
+            "flights": [
+              {
+                "_candidateId": "serp:70wngy"
+              }
+            ]
+          }
+        },
+        "result": "{\"status\":\"ok\",\"persisted\":true,\"tripId\":\"demo-e8ff44e6\",\"updatedFields\":[\"flights\"],\"consistencyWarnings\":[{\"type\":\"staged-flights-pending-promotion\",\"message\":\"trip.flights is an Array with 1 flight_list-staged entry (carrying _candidateId); call promote_flights(tripId) to assemble the {outbound, return} object with per-segment detail.\",\"locations\":[\"flights[]\"]}]}",
+        "latencyMs": 617,
+        "ok": true
+      }
+    },
+    {
+      "delayMs": 160,
+      "kind": "event",
+      "event": {
+        "type": "folio",
+        "folio": {
+          "tripId": "demo-e8ff44e6",
+          "title": "Dublin in October",
+          "flights": [],
+          "hotels": []
+        }
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "turn",
+        "exchangeId": "c8b2b72e-22e7-4f5f-a349-90725d91794f",
+        "turn": 1,
+        "inputTokens": 1,
+        "outputTokens": 61,
+        "cacheReadTokens": 62837,
+        "cacheCreationTokens": 218,
+        "costUsd": 0.0205866,
+        "model": "claude-sonnet-4-6"
+      }
+    },
+    {
+      "delayMs": 180,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "promote_flights",
+        "phase": "start"
+      }
+    },
+    {
+      "delayMs": 240,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "promote_flights",
+        "phase": "done",
+        "summary": "ok"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "tool",
+        "exchangeId": "c8b2b72e-22e7-4f5f-a349-90725d91794f",
+        "turn": 1,
+        "name": "promote_flights",
+        "args": {
+          "tripId": "demo-e8ff44e6"
+        },
+        "result": "{\"ok\":true,\"mode\":\"promoted\",\"tripId\":\"demo-e8ff44e6\",\"flights\":{\"outbound\":{\"date\":\"2026-10-12\",\"route\":\"MOB→DUB\",\"airline\":\"United\",\"cabin\":\"Economy\",\"totalPrice\":3426,\"confirmation\":null,\"multiDay\":false,\"segments\":[{\"flight\":\"UnitedUA 4314\",\"airline\":\"United\",\"route\":\"MOB→IAD\",\"date\":\"2026-10-12\",\"depart\":\"2026-10-12 12:53\",\"arrive\":\"2026-10-12 16:15\",\"layover\":null},{\"flight\":\"UnitedUA 310\",\"airline\":\"United\",\"route\":\"IAD→DUB\",\"date\":\"2026-10-12\",\"depart\":\"2026-10-12 19:05\",\"arrive\":\"2026-10-13 07:20\",\"layover\":\"2h 50m\"}],\"description\":null,\"notes\":null,\"_candidateId\":\"serp:70wngy\"},\"retu…[trimmed for recording]",
+        "latencyMs": 821,
+        "ok": true
+      }
+    },
+    {
+      "delayMs": 160,
+      "kind": "event",
+      "event": {
+        "type": "folio",
+        "folio": {
+          "tripId": "demo-e8ff44e6",
+          "title": "Dublin in October",
+          "flights": [
+            {
+              "label": "MOB→DUB",
+              "price": "$3426",
+              "carrier": "United",
+              "route": "MOB→DUB",
+              "date": "2026-10-12",
+              "cabin": "Economy",
+              "stops": 1
+            }
+          ],
+          "hotels": []
+        }
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "turn",
+        "exchangeId": "c8b2b72e-22e7-4f5f-a349-90725d91794f",
+        "turn": 2,
+        "inputTokens": 1,
+        "outputTokens": 164,
+        "cacheReadTokens": 63055,
+        "cacheCreationTokens": 305,
+        "costUsd": 0.02252325,
+        "model": "claude-sonnet-4-6"
+      }
+    },
+    {
+      "delayMs": 180,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "hotel_search",
+        "phase": "start"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "savings",
+        "exchangeId": "c8b2b72e-22e7-4f5f-a349-90725d91794f",
+        "mechanism": "searchDistill",
+        "tokensSaved": 0,
+        "basis": "chars/4",
+        "scope": "aggregate",
+        "detail": "prod hotelSearch returned ~470 tok → model saw ~921 tok"
+      }
+    },
+    {
+      "delayMs": 240,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "hotel_search",
+        "phase": "done",
+        "summary": "ok · 18 candidates"
+      }
+    },
+    {
+      "delayMs": 480,
+      "kind": "event",
+      "event": {
+        "type": "board",
+        "kind": "hotel",
+        "boardId": "8fa68a7b-f01c-4546-afce-8412d444523a",
+        "tripId": "demo-e8ff44e6",
+        "candidates": [
+          {
+            "id": "serp:1n8v5x1",
+            "title": "Baggotrath House Apartments, Newbridge Ave, Dublin 4 - One-Bedroom Luxury Apartment",
+            "price": "$192/night",
+            "meta": "Dublin · 5 (16)",
+            "summary": "Baggotrath House Apartments, Newbridge Ave, Dublin 4 - One-Bedroom Luxury Apartment, Dublin, $192/night"
+          },
+          {
+            "id": "serp:q9rbc5",
+            "title": "House Dublin",
+            "price": "$128/night",
+            "meta": "Dublin · 3★ · 4.4 (3,101)",
+            "summary": "House Dublin, Dublin, $128/night"
+          },
+          {
+            "id": "serp:d1030t",
+            "title": "Beckett Locke, North Docks",
+            "price": "$137/night",
+            "meta": "Dublin · 4★ · 4.5 (1,007)",
+            "summary": "Beckett Locke, North Docks, Dublin, $137/night"
+          },
+          {
+            "id": "serp:17lbl11",
+            "title": "The Dean Docklands - Formerly The Mayson",
+            "price": "$159/night",
+            "meta": "Dublin · 4★ · 4.3 (1,007)",
+            "summary": "The Dean Docklands - Formerly The Mayson, Dublin, $159/night"
+          },
+          {
+            "id": "serp:j7sfg",
+            "title": "Zanzibar Locke, Ha'penny Bridge",
+            "price": "$187/night",
+            "meta": "Dublin · 4★ · 4.6 (866)",
+            "summary": "Zanzibar Locke, Ha'penny Bridge, Dublin, $187/night"
+          },
+          {
+            "id": "serp:1n3zcwm",
+            "title": "The Plaza Hotel",
+            "price": "$138/night",
+            "meta": "Dublin · 4★ · 3.8 (1,324)",
+            "summary": "The Plaza Hotel, Dublin, $138/night"
+          },
+          {
+            "id": "serp:19rdp1s",
+            "title": "Donnybrook Hall",
+            "price": "$146/night",
+            "meta": "Dublin · 4★ · 4.7 (176)",
+            "summary": "Donnybrook Hall, Dublin, $146/night"
+          },
+          {
+            "id": "serp:il1l58",
+            "title": "Beckett Locke - City Studio",
+            "price": "$158/night",
+            "meta": "Dublin · 4.95 (8)",
+            "summary": "Beckett Locke - City Studio, Dublin, $158/night"
+          },
+          {
+            "id": "serp:14kgjtv",
+            "title": "Charming studio in fabulous Dublin with WiFi access",
+            "price": "$97/night",
+            "meta": "Dublin · 3.1999998 (38)",
+            "summary": "Charming studio in fabulous Dublin with WiFi access, Dublin, $97/night"
+          },
+          {
+            "id": "serp:ai15jn",
+            "title": "Room to let shared, kitchen. Large bedroom en suite bathroom Max 2. Twin beds. Bills included.",
+            "price": "$119/night",
+            "meta": "Dublin",
+            "summary": "Room to let shared, kitchen. Large bedroom en suite bathroom Max 2. Twin beds. Bills included., Dublin, $119/night"
+          },
+          {
+            "id": "serp:6tubjc",
+            "title": "The Hive - Luxury Ensuite Room - Full Privacy as only room on the top floor! - Deluxe King Room",
+            "price": "$126/night",
+            "meta": "Dublin · 5 (16)",
+            "summary": "The Hive - Luxury Ensuite Room - Full Privacy as only room on the top floor! - Deluxe King Room, Dublin, $126/night"
+          },
+          {
+            "id": "serp:1sb2pb",
+            "title": "Beckett Locke - One-Bedroom Apartment",
+            "price": "$155/night",
+            "meta": "Dublin · 4.95 (8)",
+            "summary": "Beckett Locke - One-Bedroom Apartment, Dublin, $155/night"
+          },
+          {
+            "id": "serp:11z9x91",
+            "title": "Gogarty's Temple Bar Hostel",
+            "price": "$84/night",
+            "meta": "Dublin · 2★ · 4.3 (4,593)",
+            "summary": "Gogarty's Temple Bar Hostel, Dublin, $84/night"
+          },
+          {
+            "id": "serp:16tyr78",
+            "title": "Dublin's Fair City Apartment - One-Bedroom Apartment",
+            "price": "$98/night",
+            "meta": "Dublin",
+            "summary": "Dublin's Fair City Apartment - One-Bedroom Apartment, Dublin, $98/night"
+          },
+          {
+            "id": "serp:c4zlrv",
+            "title": "ThornCastle 2 - Tiny Twin Studio",
+            "price": "$128/night",
+            "meta": "Dublin",
+            "summary": "ThornCastle 2 - Tiny Twin Studio, Dublin, $128/night"
+          },
+          {
+            "id": "serp:1wis5l4",
+            "title": "Room to let shared, kitchen. Large bedroom en suite bathroom Max 2. Twin beds. Bills included.",
+            "price": "$136/night",
+            "meta": "Dublin",
+            "summary": "Room to let shared, kitchen. Large bedroom en suite bathroom Max 2. Twin beds. Bills included., Dublin, $136/night"
+          },
+          {
+            "id": "serp:1d6kb2",
+            "title": "Beckett Locke, North Docks",
+            "price": "$130/night",
+            "meta": "Dublin · 4★ · 4.5 (1,007)",
+            "summary": "Beckett Locke, North Docks, Dublin, $130/night"
+          },
+          {
+            "id": "serp:dbz8h0",
+            "title": "The Dean Docklands - Formerly The Mayson",
+            "price": "$150/night",
+            "meta": "Dublin · 4★ · 4.3 (1,007)",
+            "summary": "The Dean Docklands - Formerly The Mayson, Dublin, $150/night"
+          }
+        ]
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "tool",
+        "exchangeId": "c8b2b72e-22e7-4f5f-a349-90725d91794f",
+        "turn": 2,
+        "name": "hotel_search",
+        "args": {
+          "source": "serp",
+          "trip_id": "demo-e8ff44e6",
+          "location": "Dublin, Ireland",
+          "check_in": "2026-10-13",
+          "check_out": "2026-10-19",
+          "adults": 2
+        },
+        "result": "{\"status\":\"ok\",\"source\":\"serp\",\"tripId\":\"demo-e8ff44e6\",\"count\":18,\"candidates\":[{\"id\":\"serp:1n8v5x1\",\"name\":\"Baggotrath House Apartments, Newbridge Ave, Dublin 4 - One-Bedroom Luxury Apartment\",\"area\":\"Dublin\",\"pricePerNight\":192,\"priceTotal\":1343,\"nights\":7,\"starRating\":null,\"reviewScore\":5,\"reviewCount\":16},{\"id\":\"serp:q9rbc5\",\"name\":\"House Dublin\",\"area\":\"Dublin\",\"pricePerNight\":128,\"priceTotal\":893,\"nights\":7,\"starRating\":3,\"reviewScore\":4.4,\"reviewCount\":3101},{\"id\":\"serp:d1030t\",\"name\":\"Beckett Locke, North Docks\",\"area\":\"Dublin\",\"pricePerNight\":137,\"priceTotal\":961,\"nights\":7,\"starRati…[trimmed for recording]",
+        "latencyMs": 0,
+        "ok": true
+      }
+    },
+    {
+      "delayMs": 160,
+      "kind": "event",
+      "event": {
+        "type": "folio",
+        "folio": {
+          "tripId": "demo-e8ff44e6",
+          "title": "Dublin in October",
+          "flights": [
+            {
+              "label": "MOB→DUB",
+              "price": "$3426",
+              "carrier": "United",
+              "route": "MOB→DUB",
+              "date": "2026-10-12",
+              "cabin": "Economy",
+              "stops": 1
+            }
+          ],
+          "hotels": []
+        }
+      }
+    },
+    {
+      "delayMs": 220,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "United"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " flight is locked in — MOB→IA"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "D→DUB, departing October 12. Now"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " let's find you the perfect Dublin hotel! "
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "🏨\n\nHere are my top picks from what came back:\n\n-"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " **Zanzibar Locke, Ha'penny Bridge** – My top pick. Right on the River"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " Liffey, 4 stars, outstanding 4.6 rating with nearly"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " 900 reviews. A gorgeous, design-forward spot in the heart of the"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " city. ~$1,308 total.\n- **Beckett Locke,"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " North Docks** – A close second. Also 4 stars, 4.5 rating, over 1,000 reviews,"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " and slightly more budget-friendly at ~$961 total. Great modern"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " vibe near the Docklands.\n- **Donnybrook Hall** – A quiet"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "er, residential-feel option with an impressive 4.7 rating (though"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " fewer reviews). Good value at ~$1,020 total.\n\nThe option cards are right there for"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " the full details — which one (or"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " ones) would you like for your Dublin stay?"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "turn",
+        "exchangeId": "c8b2b72e-22e7-4f5f-a349-90725d91794f",
+        "turn": 3,
+        "inputTokens": 1,
+        "outputTokens": 255,
+        "cacheReadTokens": 63360,
+        "cacheCreationTokens": 1479,
+        "costUsd": 0.02838225,
+        "model": "claude-sonnet-4-6"
+      }
+    },
+    {
+      "delayMs": 120,
+      "kind": "event",
+      "event": {
+        "type": "turn-complete"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "savings",
+        "exchangeId": "c8b2b72e-22e7-4f5f-a349-90725d91794f",
+        "mechanism": "template",
+        "tokensSaved": 50,
+        "basis": "chars/4",
+        "scope": "perRender",
+        "detail": "deterministic render payload (chars÷4) the model never had to generate — not a model-measured count"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "overhead",
+        "exchangeId": "c8b2b72e-22e7-4f5f-a349-90725d91794f",
+        "instrumentationMs": null,
+        "instrumentationBytes": 7483,
+        "addedModelTokens": 0
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "summary",
+        "exchangeId": "c8b2b72e-22e7-4f5f-a349-90725d91794f",
+        "turns": 4,
+        "toolCalls": 3,
+        "exposedToolCount": 106,
+        "fullToolCount": 120,
+        "inputTokens": 6,
+        "outputTokens": 578,
+        "cacheReadTokens": 251892,
+        "cacheCreationTokens": 2199,
+        "costByModel": {
+          "haiku": 0.030833950000000002,
+          "sonnet": 0.09250185,
+          "opus": 0.46250925
+        },
+        "actualCostUsd": 0.09250185,
+        "actualCostByModel": {
+          "claude-sonnet-4-6": 0.09250185
+        }
+      }
+    },
+    {
+      "delayMs": 500,
+      "kind": "turn-end"
+    },
+    {
+      "delayMs": 700,
+      "kind": "user",
+      "text": "I'll take the hotel option serp:1n8v5x1 (Baggotrath House Apartments, Newbridge Ave, Dublin 4 - One-Bedroom Luxury Apartment, Dublin, $192/night)."
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "turn",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "turn": 0,
+        "inputTokens": 3,
+        "outputTokens": 100,
+        "cacheReadTokens": 64839,
+        "cacheCreationTokens": 309,
+        "costUsd": 0.022119450000000002,
+        "model": "claude-sonnet-4-6"
+      }
+    },
+    {
+      "delayMs": 180,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "patch_trip",
+        "phase": "start"
+      }
+    },
+    {
+      "delayMs": 240,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "patch_trip",
+        "phase": "done",
+        "summary": "ok · updated hotels · 1 warning"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "tool",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "turn": 0,
+        "name": "patch_trip",
+        "args": {
+          "tripId": "demo-e8ff44e6",
+          "updates": {
+            "hotels": [
+              {
+                "_candidateId": "serp:1n8v5x1"
+              }
+            ]
+          }
+        },
+        "result": "{\"status\":\"ok\",\"persisted\":true,\"tripId\":\"demo-e8ff44e6\",\"updatedFields\":[\"hotels\"],\"consistencyWarnings\":[{\"type\":\"staged-hotels-pending-promotion\",\"message\":\"trip.hotels[] has 1 staged entry that the rendered template does not display — call promote_hotels_to_lodging(tripId) to move them into trip.lodging[].\",\"locations\":[\"hotels[]\"]}]}",
+        "latencyMs": 582,
+        "ok": true
+      }
+    },
+    {
+      "delayMs": 160,
+      "kind": "event",
+      "event": {
+        "type": "folio",
+        "folio": {
+          "tripId": "demo-e8ff44e6",
+          "title": "Dublin in October",
+          "flights": [
+            {
+              "label": "MOB→DUB",
+              "price": "$3426",
+              "carrier": "United",
+              "route": "MOB→DUB",
+              "date": "2026-10-12",
+              "cabin": "Economy",
+              "stops": 1
+            }
+          ],
+          "hotels": []
+        }
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "turn",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "turn": 1,
+        "inputTokens": 1,
+        "outputTokens": 66,
+        "cacheReadTokens": 65148,
+        "cacheCreationTokens": 214,
+        "costUsd": 0.0213399,
+        "model": "claude-sonnet-4-6"
+      }
+    },
+    {
+      "delayMs": 180,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "promote_hotels_to_lodging",
+        "phase": "start"
+      }
+    },
+    {
+      "delayMs": 240,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "promote_hotels_to_lodging",
+        "phase": "done",
+        "summary": "ok"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "tool",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "turn": 1,
+        "name": "promote_hotels_to_lodging",
+        "args": {
+          "tripId": "demo-e8ff44e6"
+        },
+        "result": "{\"ok\":true,\"promoted\":1,\"tripId\":\"demo-e8ff44e6\",\"lodging\":[{\"name\":\"Baggotrath House Apartments, Newbridge Ave, Dublin 4 - One-Bedroom Luxury Apartment\",\"location\":\"Dublin\",\"checkIn\":\"2026-10-12\",\"checkOut\":\"2026-10-19\",\"dates\":null,\"nights\":7,\"stars\":null,\"total\":1343,\"pricePerNight\":192,\"roomType\":null,\"notes\":null,\"recommended\":false,\"image\":null,\"images\":null,\"url\":null,\"supplierUrl\":null,\"quoteUrl\":null,\"description\":null,\"_tierDetail\":null,\"_selectedTier\":null,\"booking\":null,\"anchor\":\"lodging-day-1\",\"proposalStatus\":\"proposed\",\"_candidateId\":\"serp:1n8v5x1\"}]}",
+        "latencyMs": 765,
+        "ok": true
+      }
+    },
+    {
+      "delayMs": 160,
+      "kind": "event",
+      "event": {
+        "type": "folio",
+        "folio": {
+          "tripId": "demo-e8ff44e6",
+          "title": "Dublin in October",
+          "flights": [
+            {
+              "label": "MOB→DUB",
+              "price": "$3426",
+              "carrier": "United",
+              "route": "MOB→DUB",
+              "date": "2026-10-12",
+              "cabin": "Economy",
+              "stops": 1
+            }
+          ],
+          "hotels": [
+            {
+              "name": "Baggotrath House Apartments, Newbridge Ave, Dublin 4 - One-Bedroom Luxury Apartment",
+              "price": "$1343",
+              "area": "Dublin",
+              "nights": 7,
+              "perNight": "$192"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "delayMs": 220,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "You"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "'re right — let me build out the itinerary and activities now"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "."
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "turn",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "turn": 2,
+        "inputTokens": 3,
+        "outputTokens": 268,
+        "cacheReadTokens": 0,
+        "cacheCreationTokens": 67188,
+        "costUsd": 0.085328,
+        "model": "claude-haiku-4-5"
+      }
+    },
+    {
+      "delayMs": 180,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "patch_trip",
+        "phase": "start"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "savings",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "mechanism": "patch",
+        "tokensSaved": 341,
+        "basis": "chars/4",
+        "scope": "aggregate",
+        "detail": "incremental patch vs full-trip rewrite"
+      }
+    },
+    {
+      "delayMs": 240,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "patch_trip",
+        "phase": "done",
+        "summary": "ok"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "tool",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "turn": 2,
+        "name": "patch_trip",
+        "args": {
+          "tripId": "demo-e8ff44e6",
+          "updates": {}
+        },
+        "result": "{\"status\":\"ok\",\"persisted\":true,\"tripId\":\"demo-e8ff44e6\",\"updatedFields\":[],\"consistencyWarnings\":[]}",
+        "latencyMs": 589,
+        "ok": true
+      }
+    },
+    {
+      "delayMs": 160,
+      "kind": "event",
+      "event": {
+        "type": "folio",
+        "folio": {
+          "tripId": "demo-e8ff44e6",
+          "title": "Dublin in October",
+          "flights": [
+            {
+              "label": "MOB→DUB",
+              "price": "$3426",
+              "carrier": "United",
+              "route": "MOB→DUB",
+              "date": "2026-10-12",
+              "cabin": "Economy",
+              "stops": 1
+            }
+          ],
+          "hotels": [
+            {
+              "name": "Baggotrath House Apartments, Newbridge Ave, Dublin 4 - One-Bedroom Luxury Apartment",
+              "price": "$1343",
+              "area": "Dublin",
+              "nights": 7,
+              "perNight": "$192"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "turn",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "turn": 3,
+        "inputTokens": 5,
+        "outputTokens": 61,
+        "cacheReadTokens": 67188,
+        "cacheCreationTokens": 139,
+        "costUsd": 0.00720255,
+        "model": "claude-haiku-4-5"
+      }
+    },
+    {
+      "delayMs": 180,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "read_trip",
+        "phase": "start"
+      }
+    },
+    {
+      "delayMs": 240,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "read_trip",
+        "phase": "done",
+        "summary": "ok"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "tool",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "turn": 3,
+        "name": "read_trip",
+        "args": {
+          "tripId": "demo-e8ff44e6"
+        },
+        "result": "{\"status\":\"ok\",\"tripId\":\"demo-e8ff44e6\",\"data\":{\"meta\":{\"title\":\"Dublin in October\",\"destination\":\"Dublin, Ireland\",\"dates\":\"2026-10-12 to 2026-10-19\",\"origin\":\"Mobile, AL (MOB)\",\"travelers\":2,\"lastModified\":\"2026-06-08T01:03:04.052Z\",\"lastUpdated\":\"2026-06-08T01:03:04.052Z\"},\"flights\":{\"outbound\":{\"date\":\"2026-10-12\",\"route\":\"MOB→DUB\",\"airline\":\"United\",\"cabin\":\"Economy\",\"totalPrice\":3426,\"confirmation\":null,\"multiDay\":false,\"segments\":[{\"flight\":\"UnitedUA 4314\",\"airline\":\"United\",\"route\":\"MOB→IAD\",\"date\":\"2026-10-12\",\"depart\":\"2026-10-12 12:53\",\"arrive\":\"2026-10-12 16:15\",\"layover\":null},{\"f…[trimmed for recording]",
+        "latencyMs": 235,
+        "ok": true
+      }
+    },
+    {
+      "delayMs": 220,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "Now"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " I'll create the day-by-day itinerary scaffold (L1):"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "turn",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "turn": 4,
+        "inputTokens": 5,
+        "outputTokens": 270,
+        "cacheReadTokens": 67327,
+        "cacheCreationTokens": 586,
+        "costUsd": 0.0088202,
+        "model": "claude-haiku-4-5"
+      }
+    },
+    {
+      "delayMs": 180,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "patch_trip",
+        "phase": "start"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "savings",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "mechanism": "patch",
+        "tokensSaved": 341,
+        "basis": "chars/4",
+        "scope": "aggregate",
+        "detail": "incremental patch vs full-trip rewrite"
+      }
+    },
+    {
+      "delayMs": 240,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "patch_trip",
+        "phase": "done",
+        "summary": "ok"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "tool",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "turn": 4,
+        "name": "patch_trip",
+        "args": {
+          "tripId": "demo-e8ff44e6",
+          "updates": {}
+        },
+        "result": "{\"status\":\"ok\",\"persisted\":true,\"tripId\":\"demo-e8ff44e6\",\"updatedFields\":[],\"consistencyWarnings\":[]}",
+        "latencyMs": 617,
+        "ok": true
+      }
+    },
+    {
+      "delayMs": 160,
+      "kind": "event",
+      "event": {
+        "type": "folio",
+        "folio": {
+          "tripId": "demo-e8ff44e6",
+          "title": "Dublin in October",
+          "flights": [
+            {
+              "label": "MOB→DUB",
+              "price": "$3426",
+              "carrier": "United",
+              "route": "MOB→DUB",
+              "date": "2026-10-12",
+              "cabin": "Economy",
+              "stops": 1
+            }
+          ],
+          "hotels": [
+            {
+              "name": "Baggotrath House Apartments, Newbridge Ave, Dublin 4 - One-Bedroom Luxury Apartment",
+              "price": "$1343",
+              "area": "Dublin",
+              "nights": 7,
+              "perNight": "$192"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "delayMs": 220,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "Let"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " me build the itinerary properly with all days:"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "turn",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "turn": 5,
+        "inputTokens": 4,
+        "outputTokens": 353,
+        "cacheReadTokens": 67913,
+        "cacheCreationTokens": 144,
+        "costUsd": 0.0087403,
+        "model": "claude-haiku-4-5"
+      }
+    },
+    {
+      "delayMs": 180,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "patch_trip",
+        "phase": "start"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "savings",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "mechanism": "patch",
+        "tokensSaved": 341,
+        "basis": "chars/4",
+        "scope": "aggregate",
+        "detail": "incremental patch vs full-trip rewrite"
+      }
+    },
+    {
+      "delayMs": 240,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "patch_trip",
+        "phase": "done",
+        "summary": "ok"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "tool",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "turn": 5,
+        "name": "patch_trip",
+        "args": {
+          "tripId": "demo-e8ff44e6",
+          "updates": {}
+        },
+        "result": "{\"status\":\"ok\",\"persisted\":true,\"tripId\":\"demo-e8ff44e6\",\"updatedFields\":[],\"consistencyWarnings\":[]}",
+        "latencyMs": 621,
+        "ok": true
+      }
+    },
+    {
+      "delayMs": 160,
+      "kind": "event",
+      "event": {
+        "type": "folio",
+        "folio": {
+          "tripId": "demo-e8ff44e6",
+          "title": "Dublin in October",
+          "flights": [
+            {
+              "label": "MOB→DUB",
+              "price": "$3426",
+              "carrier": "United",
+              "route": "MOB→DUB",
+              "date": "2026-10-12",
+              "cabin": "Economy",
+              "stops": 1
+            }
+          ],
+          "hotels": [
+            {
+              "name": "Baggotrath House Apartments, Newbridge Ave, Dublin 4 - One-Bedroom Luxury Apartment",
+              "price": "$1343",
+              "area": "Dublin",
+              "nights": 7,
+              "perNight": "$192"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "delayMs": 220,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "Let"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " me try with the full itinerary array (L1):"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "turn",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "turn": 6,
+        "inputTokens": 3,
+        "outputTokens": 266,
+        "cacheReadTokens": 68057,
+        "cacheCreationTokens": 138,
+        "costUsd": 0.008311200000000001,
+        "model": "claude-haiku-4-5"
+      }
+    },
+    {
+      "delayMs": 180,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "patch_trip",
+        "phase": "start"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "savings",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "mechanism": "patch",
+        "tokensSaved": 341,
+        "basis": "chars/4",
+        "scope": "aggregate",
+        "detail": "incremental patch vs full-trip rewrite"
+      }
+    },
+    {
+      "delayMs": 240,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "patch_trip",
+        "phase": "done",
+        "summary": "ok"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "tool",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "turn": 6,
+        "name": "patch_trip",
+        "args": {
+          "tripId": "demo-e8ff44e6",
+          "updates": {}
+        },
+        "result": "{\"status\":\"ok\",\"persisted\":true,\"tripId\":\"demo-e8ff44e6\",\"updatedFields\":[],\"consistencyWarnings\":[]}",
+        "latencyMs": 592,
+        "ok": true
+      }
+    },
+    {
+      "delayMs": 160,
+      "kind": "event",
+      "event": {
+        "type": "folio",
+        "folio": {
+          "tripId": "demo-e8ff44e6",
+          "title": "Dublin in October",
+          "flights": [
+            {
+              "label": "MOB→DUB",
+              "price": "$3426",
+              "carrier": "United",
+              "route": "MOB→DUB",
+              "date": "2026-10-12",
+              "cabin": "Economy",
+              "stops": 1
+            }
+          ],
+          "hotels": [
+            {
+              "name": "Baggotrath House Apartments, Newbridge Ave, Dublin 4 - One-Bedroom Luxury Apartment",
+              "price": "$1343",
+              "area": "Dublin",
+              "nights": 7,
+              "perNight": "$192"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "delayMs": 220,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "Let"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " me start fresh with the itinerary structure. The arrival is October"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " 13 (morning), departure October 19. That's 6 full"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " days plus a travel day:"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "turn",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "turn": 7,
+        "inputTokens": 2,
+        "outputTokens": 376,
+        "cacheReadTokens": 68195,
+        "cacheCreationTokens": 140,
+        "costUsd": 0.0088765,
+        "model": "claude-haiku-4-5"
+      }
+    },
+    {
+      "delayMs": 180,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "patch_trip",
+        "phase": "start"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "savings",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "mechanism": "patch",
+        "tokensSaved": 341,
+        "basis": "chars/4",
+        "scope": "aggregate",
+        "detail": "incremental patch vs full-trip rewrite"
+      }
+    },
+    {
+      "delayMs": 240,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "patch_trip",
+        "phase": "done",
+        "summary": "ok"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "tool",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "turn": 7,
+        "name": "patch_trip",
+        "args": {
+          "tripId": "demo-e8ff44e6",
+          "updates": {}
+        },
+        "result": "{\"status\":\"ok\",\"persisted\":true,\"tripId\":\"demo-e8ff44e6\",\"updatedFields\":[],\"consistencyWarnings\":[]}",
+        "latencyMs": 601,
+        "ok": true
+      }
+    },
+    {
+      "delayMs": 160,
+      "kind": "event",
+      "event": {
+        "type": "folio",
+        "folio": {
+          "tripId": "demo-e8ff44e6",
+          "title": "Dublin in October",
+          "flights": [
+            {
+              "label": "MOB→DUB",
+              "price": "$3426",
+              "carrier": "United",
+              "route": "MOB→DUB",
+              "date": "2026-10-12",
+              "cabin": "Economy",
+              "stops": 1
+            }
+          ],
+          "hotels": [
+            {
+              "name": "Baggotrath House Apartments, Newbridge Ave, Dublin 4 - One-Bedroom Luxury Apartment",
+              "price": "$1343",
+              "area": "Dublin",
+              "nights": 7,
+              "perNight": "$192"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "delayMs": 220,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "Let"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " me proceed with the destination resolution and activity search (L2):"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "turn",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "turn": 8,
+        "inputTokens": 1,
+        "outputTokens": 68,
+        "cacheReadTokens": 68335,
+        "cacheCreationTokens": 164,
+        "costUsd": 0.0073795,
+        "model": "claude-haiku-4-5"
+      }
+    },
+    {
+      "delayMs": 180,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "resolve_destination",
+        "phase": "start"
+      }
+    },
+    {
+      "delayMs": 240,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "resolve_destination",
+        "phase": "done",
+        "summary": "resolved"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "tool",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "turn": 8,
+        "name": "resolve_destination",
+        "args": {
+          "query": "Dublin"
+        },
+        "result": "{\"status\":\"resolved\",\"canonical\":\"Dublin\",\"lat\":0,\"lng\":0,\"viator\":{\"destinationId\":\"503\",\"destinationName\":\"Dublin\",\"resolvedAt\":\"2026-06-07T02:11:06.368Z\"},\"resolvedFrom\":\"viator_freetext\",\"createdAt\":\"2026-06-07T02:11:06.481Z\"}",
+        "latencyMs": 353,
+        "ok": true
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "turn",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "turn": 9,
+        "inputTokens": 0,
+        "outputTokens": 116,
+        "cacheReadTokens": 68499,
+        "cacheCreationTokens": 207,
+        "costUsd": 0.007688650000000001,
+        "model": "claude-haiku-4-5"
+      }
+    },
+    {
+      "delayMs": 180,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "excursion_search",
+        "phase": "start"
+      }
+    },
+    {
+      "delayMs": 240,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "excursion_search",
+        "phase": "done",
+        "summary": "ok · 10 candidates"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "tool",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "turn": 9,
+        "name": "excursion_search",
+        "args": {
+          "source": "viator",
+          "destination_id": "503",
+          "destination_name": "Dublin",
+          "date": "2026-10-12"
+        },
+        "result": "{\"status\":\"ok\",\"source\":\"viator\",\"tripId\":\"demo-e8ff44e6\",\"count\":10,\"candidates\":[{\"productCode\":\"5300MOHER\",\"title\":\"Dublin to Cliffs of Moher, including Wild Atlantic Way and Galway\",\"day\":1,\"free\":false,\"priceFrom\":88.1,\"currency\":\"USD\",\"durationMinutes\":780,\"rating\":4.875265,\"reviewCount\":24051,\"description\":\"Day trip from Dublin to Ireland’s remote and rugged west coast to see the Cliffs of Moher, the Burren and Galway City. Enjoy the unique benefit of a dedicated Tour Guide and a separate Driver for the \",\"bookingUrl\":\"https://www.viator.com/tours/Dublin/Cliffs-of-Moher-Tour-Including-W…[trimmed for recording]",
+        "latencyMs": 0,
+        "ok": true
+      }
+    },
+    {
+      "delayMs": 220,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "Perfect"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " — now I'll apply 2-3 tour picks (L"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "3), mixing free and paid:"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "turn",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "turn": 10,
+        "inputTokens": 0,
+        "outputTokens": 157,
+        "cacheReadTokens": 68706,
+        "cacheCreationTokens": 1778,
+        "costUsd": 0.0098781,
+        "model": "claude-haiku-4-5"
+      }
+    },
+    {
+      "delayMs": 180,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "apply_gap_tour_picks",
+        "phase": "start"
+      }
+    },
+    {
+      "delayMs": 240,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "apply_gap_tour_picks",
+        "phase": "done",
+        "summary": "ok"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "tool",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "turn": 10,
+        "name": "apply_gap_tour_picks",
+        "args": {
+          "tripId": "demo-e8ff44e6",
+          "picks": [
+            {
+              "day": 1,
+              "productCode": "33832P1"
+            },
+            {
+              "day": 2,
+              "productCode": "TA-189068"
+            },
+            {
+              "day": 3,
+              "productCode": "8954P7"
+            }
+          ]
+        },
+        "result": "{\"status\":\"ok\",\"persisted\":true,\"tripId\":\"demo-e8ff44e6\",\"added\":[{\"day\":1,\"productCode\":\"33832P1\",\"name\":\"Dublin to Glendalough, Wicklow and Kilkenny Full Day Guided Tour\"},{\"day\":2,\"productCode\":\"TA-189068\",\"name\":\"Phoenix Park\"},{\"day\":3,\"productCode\":\"8954P7\",\"name\":\"Dublin Jameson Distillery and Guinness Storehouse Guided Tour\"}]}",
+        "latencyMs": 668,
+        "ok": true
+      }
+    },
+    {
+      "delayMs": 160,
+      "kind": "event",
+      "event": {
+        "type": "folio",
+        "folio": {
+          "tripId": "demo-e8ff44e6",
+          "title": "Dublin in October",
+          "flights": [
+            {
+              "label": "MOB→DUB",
+              "price": "$3426",
+              "carrier": "United",
+              "route": "MOB→DUB",
+              "date": "2026-10-12",
+              "cabin": "Economy",
+              "stops": 1
+            }
+          ],
+          "hotels": [
+            {
+              "name": "Baggotrath House Apartments, Newbridge Ave, Dublin 4 - One-Bedroom Luxury Apartment",
+              "price": "$1343",
+              "area": "Dublin",
+              "nights": 7,
+              "perNight": "$192"
+            }
+          ],
+          "days": [
+            {
+              "date": "2026-10-12",
+              "title": "Depart Mobile (MOB)",
+              "location": "In transit",
+              "activities": [],
+              "dining": []
+            },
+            {
+              "date": "2026-10-13",
+              "title": "Arrive Dublin",
+              "location": "Dublin",
+              "activities": [
+                {
+                  "name": "Phoenix Park",
+                  "description": "One of Europe's largest enclosed city parks — free to roam, with wild fallow deer and miles of trails. An easy first afternoon after a morning landing.",
+                  "url": "http://www.phoenixpark.ie"
+                }
+              ],
+              "dining": []
+            },
+            {
+              "date": "2026-10-14",
+              "title": "Dublin — Day 2",
+              "location": "Dublin",
+              "activities": [
+                {
+                  "name": "Dublin to Glendalough, Wicklow and Kilkenny Full Day Guided Tour",
+                  "description": "Voted No. 1 Day Tour on Tripadvisor. Full Day Tour to Wicklow mountains, Glendalough and Kilkenny. Expert tour guides with separate coach driver. 5 star award winning luxury touring coaches with Free",
+                  "url": "https://www.viator.com/tours/Dublin/Wicklow-mountains-Glendalough-and-Kilkenny-Day-Tour-from-Dublin/d503-33832P1?pid=P00005400&mcid=58086&currency=USD&medium=api"
+                }
+              ],
+              "dining": []
+            },
+            {
+              "date": "2026-10-15",
+              "title": "Dublin — Day 3",
+              "location": "Dublin",
+              "activities": [
+                {
+                  "name": "Dublin Jameson Distillery and Guinness Storehouse Guided Tour",
+                  "description": "On this tour you’ll experience the Guinness Storehouse the No 1 attraction in Ireland combined with the award winning Jameson Bow Street Whiskey Experience. This Irish Experience tour is a top attract",
+                  "url": "https://www.viator.com/tours/Dublin/Temple-Bar-Highlights-Tour-with-Guinness-and-Whiskey-Tasting-from-Dublin/d503-8954P7?pid=P00005400&mcid=58086&currency=USD&medium=api"
+                }
+              ],
+              "dining": []
+            }
+          ],
+          "includes": [
+            {
+              "key": "whats-included",
+              "title": "What's included",
+              "body": "Round-trip flights, hand-picked hotels, and the day-by-day plan below — all booked and managed in one place."
+            },
+            {
+              "key": "good-to-know",
+              "title": "Good to know",
+              "body": "Activity and dining picks are suggestions you can swap anytime. Prices are live at time of search and confirmed before you book."
+            },
+            {
+              "key": "travel-tips",
+              "title": "Travel tips",
+              "body": "Bring layers for changeable weather, carry a contactless card for transit, and book popular excursions a few days ahead."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "delayMs": 220,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": "Great! Now"
+      }
+    },
+    {
+      "delayMs": 22,
+      "kind": "event",
+      "event": {
+        "type": "text",
+        "delta": " let me search for restaurants (L4):"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "turn",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "turn": 11,
+        "inputTokens": 0,
+        "outputTokens": 89,
+        "cacheReadTokens": 70484,
+        "cacheCreationTokens": 284,
+        "costUsd": 0.0078484,
+        "model": "claude-haiku-4-5"
+      }
+    },
+    {
+      "delayMs": 180,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "tripadvisor_search",
+        "phase": "start"
+      }
+    },
+    {
+      "delayMs": 240,
+      "kind": "event",
+      "event": {
+        "type": "tool",
+        "tool": "tripadvisor_search",
+        "phase": "done",
+        "summary": "ok · 6 candidates"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "tool",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "turn": 11,
+        "name": "tripadvisor_search",
+        "args": {
+          "query": "best restaurants in Dublin",
+          "category": "restaurants"
+        },
+        "result": "{\"status\":\"ok\",\"tripId\":\"demo-e8ff44e6\",\"count\":6,\"candidates\":[{\"id\":\"784311\",\"name\":\"WILDE Restaurant\",\"cuisine\":\"International\",\"rating\":4.8,\"reviewCount\":2013,\"priceLevel\":\"$$$$\",\"description\":\"\"},{\"id\":\"9460247\",\"name\":\"Richmond Restaurant\",\"cuisine\":\"Irish\",\"rating\":4.7,\"reviewCount\":411,\"priceLevel\":\"$$ - $$$\",\"description\":\"\"},{\"id\":\"6403998\",\"name\":\"Darkey Kelly's Bar & Restaurant\",\"cuisine\":\"Irish\",\"rating\":4.7,\"reviewCount\":2314,\"priceLevel\":\"$$ - $$$\",\"description\":\"\"},{\"id\":\"1045605\",\"name\":\"La Caverna Italian Restaurant\",\"cuisine\":\"Italian\",\"rating\":4.4,\"reviewCount\":1467,\"priceL…[trimmed for recording]",
+        "latencyMs": 630,
+        "ok": true
+      }
+    },
+    {
+      "delayMs": 160,
+      "kind": "event",
+      "event": {
+        "type": "folio",
+        "folio": {
+          "tripId": "demo-e8ff44e6",
+          "title": "Dublin in October",
+          "flights": [
+            {
+              "label": "MOB→DUB",
+              "price": "$3426",
+              "carrier": "United",
+              "route": "MOB→DUB",
+              "date": "2026-10-12",
+              "cabin": "Economy",
+              "stops": 1
+            }
+          ],
+          "hotels": [
+            {
+              "name": "Baggotrath House Apartments, Newbridge Ave, Dublin 4 - One-Bedroom Luxury Apartment",
+              "price": "$1343",
+              "area": "Dublin",
+              "nights": 7,
+              "perNight": "$192"
+            }
+          ],
+          "days": [
+            {
+              "date": "2026-10-12",
+              "title": "Depart Mobile (MOB)",
+              "location": "In transit",
+              "activities": [],
+              "dining": []
+            },
+            {
+              "date": "2026-10-13",
+              "title": "Arrive Dublin",
+              "location": "Dublin",
+              "activities": [
+                {
+                  "name": "Phoenix Park",
+                  "description": "One of Europe's largest enclosed city parks — free to roam, with wild fallow deer and miles of trails. An easy first afternoon after a morning landing.",
+                  "url": "http://www.phoenixpark.ie"
+                }
+              ],
+              "dining": [
+                {
+                  "name": "WILDE Restaurant",
+                  "cuisine": "International",
+                  "url": "https://www.tripadvisor.com/Restaurant_Review-g186605-d784311-Reviews-WILDE_Restaurant-Dublin_County_Dublin.html?m=66827"
+                },
+                {
+                  "name": "Dax Restaurant",
+                  "cuisine": "French",
+                  "url": "https://www.tripadvisor.com/Restaurant_Review-g186605-d1146791-Reviews-Dax_Restaurant-Dublin_County_Dublin.html?m=66827"
+                }
+              ]
+            },
+            {
+              "date": "2026-10-14",
+              "title": "Dublin — Day 2",
+              "location": "Dublin",
+              "activities": [
+                {
+                  "name": "Dublin to Glendalough, Wicklow and Kilkenny Full Day Guided Tour",
+                  "description": "Voted No. 1 Day Tour on Tripadvisor. Full Day Tour to Wicklow mountains, Glendalough and Kilkenny. Expert tour guides with separate coach driver. 5 star award winning luxury touring coaches with Free",
+                  "url": "https://www.viator.com/tours/Dublin/Wicklow-mountains-Glendalough-and-Kilkenny-Day-Tour-from-Dublin/d503-33832P1?pid=P00005400&mcid=58086&currency=USD&medium=api"
+                }
+              ],
+              "dining": [
+                {
+                  "name": "Richmond Restaurant",
+                  "cuisine": "Irish",
+                  "url": "https://www.tripadvisor.com/Restaurant_Review-g186605-d9460247-Reviews-Richmond_Restaurant-Dublin_County_Dublin.html?m=66827"
+                }
+              ]
+            },
+            {
+              "date": "2026-10-15",
+              "title": "Dublin — Day 3",
+              "location": "Dublin",
+              "activities": [
+                {
+                  "name": "Dublin Jameson Distillery and Guinness Storehouse Guided Tour",
+                  "description": "On this tour you’ll experience the Guinness Storehouse the No 1 attraction in Ireland combined with the award winning Jameson Bow Street Whiskey Experience. This Irish Experience tour is a top attract",
+                  "url": "https://www.viator.com/tours/Dublin/Temple-Bar-Highlights-Tour-with-Guinness-and-Whiskey-Tasting-from-Dublin/d503-8954P7?pid=P00005400&mcid=58086&currency=USD&medium=api"
+                }
+              ],
+              "dining": [
+                {
+                  "name": "Darkey Kelly's Bar & Restaurant",
+                  "cuisine": "Irish",
+                  "url": "https://www.tripadvisor.com/Restaurant_Review-g186605-d6403998-Reviews-Darkey_Kelly_s_Bar_Restaurant-Dublin_County_Dublin.html?m=66827"
+                }
+              ]
+            },
+            {
+              "date": "2026-10-16",
+              "title": "Dublin — Day 4",
+              "location": "Dublin",
+              "activities": [],
+              "dining": [
+                {
+                  "name": "La Caverna Italian Restaurant",
+                  "cuisine": "Italian",
+                  "url": "https://www.tripadvisor.com/Restaurant_Review-g186605-d1045605-Reviews-La_Caverna_Italian_Restaurant-Dublin_County_Dublin.html?m=66827"
+                }
+              ]
+            },
+            {
+              "date": "2026-10-17",
+              "title": "Dublin — Day 5",
+              "location": "Dublin",
+              "activities": [],
+              "dining": [
+                {
+                  "name": "FIRE Steakhouse and Bar",
+                  "cuisine": "Steakhouse",
+                  "url": "https://www.tripadvisor.com/Restaurant_Review-g186605-d23452960-Reviews-FIRE_Steakhouse_and_Bar-Dublin_County_Dublin.html?m=66827"
+                }
+              ]
+            }
+          ],
+          "includes": [
+            {
+              "key": "whats-included",
+              "title": "What's included",
+              "body": "Round-trip flights, hand-picked hotels, and the day-by-day plan below — all booked and managed in one place."
+            },
+            {
+              "key": "good-to-know",
+              "title": "Good to know",
+              "body": "Activity and dining picks are suggestions you can swap anytime. Prices are live at time of search and confirmed before you book."
+            },
+            {
+              "key": "travel-tips",
+              "title": "Travel tips",
+              "body": "Bring layers for changeable weather, carry a contactless card for transit, and book popular excursions a few days ahead."
+            }
+          ]
+        }
+      }
+    },
+    {
+      "delayMs": 120,
+      "kind": "event",
+      "event": {
+        "type": "turn-complete"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "savings",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "mechanism": "template",
+        "tokensSaved": 905,
+        "basis": "chars/4",
+        "scope": "perRender",
+        "detail": "deterministic render payload (chars÷4) the model never had to generate — not a model-measured count"
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "overhead",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "instrumentationMs": null,
+        "instrumentationBytes": 17543,
+        "addedModelTokens": 0
+      }
+    },
+    {
+      "delayMs": 10,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "summary",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "turns": 12,
+        "toolCalls": 12,
+        "exposedToolCount": 106,
+        "fullToolCount": 120,
+        "inputTokens": 27,
+        "outputTokens": 2190,
+        "cacheReadTokens": 744691,
+        "cacheCreationTokens": 71291,
+        "costByModel": {
+          "haiku": 0.17455985000000002,
+          "sonnet": 0.52367955,
+          "opus": 2.61839775
+        },
+        "actualCostUsd": 0.20353275,
+        "actualCostByModel": {
+          "claude-sonnet-4-6": 0.04345935,
+          "claude-haiku-4-5": 0.1600734
+        }
+      }
+    },
+    {
+      "delayMs": 140,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "validation",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "check": "arrival-date",
+        "label": "Arrival date resolved",
+        "status": "repaired",
+        "detail": "Outbound lands DUB Oct 13 07:20 (overnight via IAD) — day plan corrected from an Oct 12 arrival"
+      }
+    },
+    {
+      "delayMs": 120,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "validation",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "check": "no-activity-before-arrival",
+        "label": "No full-day activity before local arrival",
+        "status": "pass",
+        "detail": "Oct 12 is outbound travel; first Dublin activity is Oct 13 afternoon"
+      }
+    },
+    {
+      "delayMs": 120,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "validation",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "check": "hotel-nights",
+        "label": "Hotel nights match stay window",
+        "status": "pass",
+        "detail": "7 nights booked within the Oct 12–19 window"
+      }
+    },
+    {
+      "delayMs": 120,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "validation",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "check": "options-persisted",
+        "label": "Selected flight + hotel persisted",
+        "status": "pass",
+        "detail": "promote_flights + promote_hotels_to_lodging committed to trip state"
+      }
+    },
+    {
+      "delayMs": 120,
+      "kind": "event",
+      "event": {
+        "type": "inspector",
+        "kind": "validation",
+        "exchangeId": "e4bdc309-4a11-482c-848e-9455fcaa12d6",
+        "check": "folio-rebuilt",
+        "label": "Folio projection rebuilt from trip state",
+        "status": "pass",
+        "detail": "deterministic re-render after each promotion — model never wrote the document"
+      }
+    },
+    {
+      "delayMs": 500,
+      "kind": "turn-end"
+    }
+  ]
+}

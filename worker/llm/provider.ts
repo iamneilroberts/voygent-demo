@@ -11,7 +11,12 @@ export interface AssistantMessage {
 }
 export interface UserToolResult {
   role: "user";
-  content: Array<{ type: "tool_result"; tool_use_id: string; content: string }>;
+  content: Array<
+    | { type: "tool_result"; tool_use_id: string; content: string }
+    // Harness-injected nudge note (see loop.ts) — rides in the same user bundle
+    // after the tool_result blocks; the API accepts mixed blocks.
+    | { type: "text"; text: string }
+  >;
 }
 export type ConversationMessage =
   | { role: "user"; content: string }
@@ -32,5 +37,6 @@ export type ProviderEvent =
   | { type: "turn-complete"; assistant: AssistantMessage };
 
 export interface LLMProvider {
-  stream(messages: ConversationMessage[], tools: ToolSchema[]): AsyncIterable<ProviderEvent>;
+  // opts.model overrides the provider's default model for THIS call (per-turn routing).
+  stream(messages: ConversationMessage[], tools: ToolSchema[], opts?: { model?: string }): AsyncIterable<ProviderEvent>;
 }

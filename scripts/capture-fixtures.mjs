@@ -17,6 +17,10 @@
 //   worker/fixtures/<routeId>.json         slim { route, flights[], hotels[], promotedFlightExample }
 //
 // Cleans up: deletes the demo-* trips it created in prod KV (unless --keep).
+//
+// Before writing each fixture, validates that every excursion bookingUrl + dining
+// url still resolves (HEAD/GET, follow redirects). Warns on dead links by default;
+// --strict-urls aborts the route, --no-url-check skips the pass.
 
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
@@ -34,6 +38,12 @@ if (!MCP_URL) {
 }
 const KEEP = process.argv.includes("--keep");
 const ONLY = (process.argv.find((a) => a.startsWith("--only=")) || "").slice("--only=".length);
+// Validate every excursion bookingUrl + dining url resolves before the fixture
+// ships (dead links rot silently in a public demo). Default: warn. --strict-urls
+// aborts the route on a hard-dead link. --no-url-check skips the pass entirely.
+const STRICT_URLS = process.argv.includes("--strict-urls");
+const SKIP_URL_CHECK = process.argv.includes("--no-url-check");
+const URL_CHECK_UA = "Mozilla/5.0 (compatible; VoygentFixtureBot/1.0)";
 
 // --- curated demo routes (confirmed 2026-06-05). These double as Phase-2b preset chips. ---
 const ROUTES = [
@@ -44,7 +54,105 @@ const ROUTES = [
   { id: "nyc-weekend",  label: "NYC long weekend",         origin: "ORD", destination: "JFK", city: "New York",      depart: "2027-02-12", ret: "2027-02-15", adults: 2 },
 ];
 
+// LLM-proposed + TripAdvisor-validated free "things to do" — the model's value-add:
+// internal-knowledge candidates, each confirmed legit via tripadvisor_search
+// (category=attractions) on 2026-06-06; the TA location_id + reviewCount are the
+// evidence. Viator returns only paid tours, so these deliver the demo's "& free
+// things". Editorial, not bookable: productCode = "TA-<location_id>". Route-scoped
+// so a re-capture preserves them (merged into excursions in captureRoute).
+const FREE_THINGS_BY_ID = {
+  "dublin-oct": [
+    { productCode: "TA-189054", title: "St Stephen's Green", day: 1, free: true, priceFrom: 0, currency: "USD",
+      durationMinutes: null, rating: 4.5, reviewCount: 17094,
+      description: "Dublin's beloved Victorian public park off Grafton Street — free, central, perfect for a stroll.",
+      bookingUrl: "https://heritageireland.ie/visit/places-to-visit/st-stephens-green/", coverImage: null },
+    { productCode: "TA-189068", title: "Phoenix Park", day: 2, free: true, priceFrom: 0, currency: "USD",
+      durationMinutes: null, rating: 4.6, reviewCount: 4877,
+      description: "One of Europe's largest enclosed city parks — free to roam, with wild fallow deer and miles of trails.",
+      bookingUrl: "http://www.phoenixpark.ie", coverImage: null },
+    { productCode: "TA-274489", title: "National Museum of Ireland \u2013 Archaeology", day: 3, free: true, priceFrom: 0, currency: "USD",
+      durationMinutes: null, rating: 4.6, reviewCount: 5921,
+      description: "Free national museum on Kildare Street — Celtic gold, bog bodies, and Viking Dublin.",
+      bookingUrl: "https://www.museum.ie/", coverImage: null },
+    { productCode: "TA-216272", title: "Ha'penny Bridge", day: 4, free: true, priceFrom: 0, currency: "USD",
+      durationMinutes: null, rating: 4.1, reviewCount: 2460,
+      description: "The iconic cast-iron pedestrian bridge over the Liffey — a free, classic Dublin photo stop.",
+      bookingUrl: "https://www.tripadvisor.com/Attraction_Review-g186605-d216272-Reviews-Ha_penny_Bridge-Dublin_County_Dublin.html", coverImage: null },
+  ],
+  "cancun-beach": [
+    { productCode: "TA-152700", title: "Playa Delfines", day: 2, free: true, priceFrom: 0, currency: "USD",
+      durationMinutes: null, rating: 4.5, reviewCount: 5698,
+      description: "Cancún's iconic free public beach on the hotel-zone cliffs — the giant CANCÚN letters and turquoise-water views, no entry fee.",
+      bookingUrl: "https://www.tripadvisor.com/Attraction_Review-g150807-d152700-Reviews-Playa_Delfines-Cancun_Yucatan_Peninsula.html", coverImage: null },
+    { productCode: "TA-152697", title: "Playa Langosta", day: 3, free: true, priceFrom: 0, currency: "USD",
+      durationMinutes: null, rating: 4.3, reviewCount: 403,
+      description: "A small, calm free beach near downtown — gentle water and a quieter alternative to the resort strip.",
+      bookingUrl: "https://www.tripadvisor.com/Attraction_Review-g150807-d152697-Reviews-Playa_Langosta-Cancun_Yucatan_Peninsula.html", coverImage: null },
+    { productCode: "TA-7715234", title: "El Parque de las Palapas", day: 4, free: true, priceFrom: 0, currency: "USD",
+      durationMinutes: null, rating: 4.2, reviewCount: 628,
+      description: "Downtown Cancún's lively free town square — evening food stalls, live music, and local crafts.",
+      bookingUrl: "https://www.tripadvisor.com/Attraction_Review-g150807-d7715234-Reviews-El_Parque_de_las_Palapas-Cancun_Yucatan_Peninsula.html", coverImage: null },
+  ],
+  "nyc-weekend": [
+    { productCode: "TA-105127", title: "Central Park", day: 1, free: true, priceFrom: 0, currency: "USD",
+      durationMinutes: null, rating: 4.7, reviewCount: 134452,
+      description: "843 acres of free Manhattan parkland — the Mall, Bethesda Terrace, and the Bow Bridge, open dawn to late.",
+      bookingUrl: "https://www.centralparknyc.org/", coverImage: null },
+    { productCode: "TA-519474", title: "The High Line", day: 2, free: true, priceFrom: 0, currency: "USD",
+      durationMinutes: null, rating: 4.5, reviewCount: 63414,
+      description: "A free elevated park on a former rail line above the West Side — gardens, art, and Hudson River views.",
+      bookingUrl: "https://www.thehighline.org/", coverImage: null },
+    { productCode: "TA-102741", title: "Brooklyn Bridge", day: 3, free: true, priceFrom: 0, currency: "USD",
+      durationMinutes: null, rating: 4.7, reviewCount: 26249,
+      description: "Walk the free pedestrian promenade across the East River — one of the world's most famous bridges, best at sunrise.",
+      bookingUrl: "http://www.nyc.gov/html/dot/html/bridges/bridges.shtml", coverImage: null },
+    { productCode: "TA-143363", title: "Staten Island Ferry", day: 3, free: true, priceFrom: 0, currency: "USD",
+      durationMinutes: null, rating: 4.6, reviewCount: 23165,
+      description: "The free 25-minute ferry past the Statue of Liberty and the Lower Manhattan skyline — no ticket, runs around the clock.",
+      bookingUrl: "http://www.nyc.gov/html/dot/html/ferrybus/statfery.shtml", coverImage: null },
+  ],
+  "rome-amalfi": [
+    { productCode: "TA-190121", title: "Piazza Navona", day: 2, free: true, priceFrom: 0, currency: "USD",
+      durationMinutes: null, rating: 4.5, reviewCount: 40156,
+      description: "Rome's grand Baroque square — Bernini's Fountain of the Four Rivers, street artists, and cafés, free to wander.",
+      bookingUrl: "https://www.turismoroma.it/it/node/1516", coverImage: null },
+    { productCode: "TA-190131", title: "Trevi Fountain", day: 3, free: true, priceFrom: 0, currency: "USD",
+      durationMinutes: null, rating: 4.4, reviewCount: 104548,
+      description: "The monumental Baroque fountain — toss a coin to ensure a return to Rome; free and dazzling, especially after dark.",
+      bookingUrl: "https://www.turismoroma.it/it/luoghi/fontana-di-trevi", coverImage: null },
+    { productCode: "TA-197717", title: "Spanish Steps", day: 3, free: true, priceFrom: 0, currency: "USD",
+      durationMinutes: null, rating: 3.9, reviewCount: 23241,
+      description: "The sweeping 18th-century staircase from Piazza di Spagna up to Trinità dei Monti — a free, classic Rome perch.",
+      bookingUrl: "https://www.turismoroma.it/it/luoghi/scalinata-di-trinit%C3%A0-dei-monti", coverImage: null },
+    { productCode: "TA-190133", title: "Villa Borghese", day: 4, free: true, priceFrom: 0, currency: "USD",
+      durationMinutes: null, rating: 4.5, reviewCount: 8179,
+      description: "Rome's great landscaped park above the Spanish Steps — free to roam, with shaded paths, a lake, and city viewpoints (the gallery inside is ticketed).",
+      bookingUrl: "https://www.tripadvisor.com/Attraction_Review-g187791-d190133-Reviews-Villa_Borghese-Rome_Lazio.html", coverImage: null },
+  ],
+  "tokyo-blossom": [
+    { productCode: "TA-320447", title: "Senso-ji Temple", day: 2, free: true, priceFrom: 0, currency: "USD",
+      durationMinutes: null, rating: 4.4, reviewCount: 9850,
+      description: "Tokyo's oldest temple, in Asakusa — the Kaminarimon gate and the Nakamise market lane, free to visit.",
+      bookingUrl: "http://www.senso-ji.jp/", coverImage: null },
+    { productCode: "TA-1373780", title: "Meiji Jingu Shrine", day: 3, free: true, priceFrom: 0, currency: "USD",
+      durationMinutes: null, rating: 4.4, reviewCount: 8493,
+      description: "A serene Shinto shrine in a forested 170-acre precinct beside Harajuku — free, and a calm contrast to the city.",
+      bookingUrl: "https://www.meijijingu.or.jp/en/", coverImage: null },
+    { productCode: "TA-4403399", title: "Shibuya Crossing", day: 3, free: true, priceFrom: 0, currency: "USD",
+      durationMinutes: null, rating: 4.2, reviewCount: 7893,
+      description: "The world's busiest pedestrian scramble — free to experience the wave of people surging from every direction.",
+      bookingUrl: "https://www.tripadvisor.com/Attraction_Review-g1066456-d4403399-Reviews-Shibuya_Crossing-Shibuya_Tokyo_Tokyo_Prefecture_Kanto.html", coverImage: null },
+    { productCode: "TA-320625", title: "Imperial Palace East Gardens", day: 4, free: true, priceFrom: 0, currency: "USD",
+      durationMinutes: null, rating: 4.2, reviewCount: 2105,
+      description: "The free public gardens on the old Edo Castle grounds — stone ramparts, moats, and seasonal blooms.",
+      bookingUrl: "http://www.kunaicho.go.jp/event/higashigyoen/higashigyoen.html", coverImage: null },
+  ],
+};
+
 const ENC = new TextEncoder();
+function daysBetween(a, b) { return Math.round((Date.parse(b) - Date.parse(a)) / 86400000) || 1; }
+function numOrNull(v) { const n = Number(v); return Number.isFinite(n) ? n : null; }
+function addDays(d, n) { const t = new Date(Date.parse(d) + n * 86400000); return t.toISOString().slice(0, 10); }
 let rpcId = 0;
 async function rpc(method, params) {
   const t0 = Date.now();
@@ -83,6 +191,50 @@ function log(...a) { console.log(...a); }
 function metaFrom(out) {
   if (!out) return undefined;
   return { rawTokensEst: Math.ceil((out.text?.length ?? 0) / 4), responseBytes: out.responseBytes, prodLatencyMs: out.latencyMs };
+}
+
+// --- fixture URL validation (task: validate fixture URLs at capture time) ---
+// HEAD (GET fallback) each link, follow redirects, classify the status:
+//   ok      2xx/3xx                          — live
+//   blocked 401/403/429                       — reachable but bot-gated; treated as live (warn, not fail)
+//   bad     404/410/5xx, timeout, DNS, etc.   — dead; surfaced loudly (and aborts under --strict-urls)
+async function checkUrl(url, timeoutMs = 12000) {
+  if (typeof url !== "string" || !/^https?:\/\//i.test(url)) return { url, status: null, klass: "skip" };
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), timeoutMs);
+  const opts = { redirect: "follow", signal: ctl.signal, headers: { "user-agent": URL_CHECK_UA } };
+  try {
+    let res = await fetch(url, { method: "HEAD", ...opts });
+    if (res.status === 405 || res.status === 501) res = await fetch(url, { method: "GET", ...opts }); // some servers reject HEAD
+    const s = res.status;
+    const klass = (s >= 200 && s < 400) ? "ok" : (s === 401 || s === 403 || s === 429) ? "blocked" : "bad";
+    return { url, status: s, klass };
+  } catch (e) {
+    return { url, status: null, klass: "bad", error: e.name === "AbortError" ? "timeout" : (e.cause?.code ?? e.message) };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function validateFixtureUrls(routeId, excursions, dining) {
+  const targets = [
+    ...excursions.map((e) => ({ url: e.bookingUrl, label: `excursion ${e.productCode} "${e.title}"` })),
+    ...dining.map((d) => ({ url: d.url, label: `dining "${d.name}"` })),
+  ].filter((t) => typeof t.url === "string" && t.url);
+  if (!targets.length) { log(`  url check: (no URLs to validate)`); return { ok: 0, blocked: 0, bad: 0, badUrls: [] }; }
+  const results = [];
+  const CONC = 6; // be polite — small concurrency, since several may hit the same host
+  for (let i = 0; i < targets.length; i += CONC) {
+    const batch = targets.slice(i, i + CONC);
+    results.push(...await Promise.all(batch.map(async (t) => ({ ...t, ...(await checkUrl(t.url)) }))));
+  }
+  const bad = results.filter((r) => r.klass === "bad");
+  const blocked = results.filter((r) => r.klass === "blocked");
+  const ok = results.filter((r) => r.klass === "ok");
+  log(`  url check: ${ok.length} ok, ${blocked.length} bot-gated(401/403/429), ${bad.length} BAD${bad.length ? " ⚠" : ""}`);
+  for (const b of bad) log(`    ✗ ${b.status ?? b.error} — ${b.label} → ${b.url}`);
+  for (const b of blocked) log(`    ? ${b.status} (likely live, bot-gated) — ${b.label}`);
+  return { ok: ok.length, blocked: blocked.length, bad: bad.length, badUrls: bad };
 }
 
 // Map a real HotelCandidate to the trip.hotels[] staging shape that
@@ -185,6 +337,89 @@ async function captureRoute(r) {
     log(`  promoted lodging: ${Object.keys(promotedLodgingById).length}/${hotelCandidates.length}`);
   }
 
+  // 8. EXCURSIONS (viator) — real candidates for the demo's enrichment replay.
+  //    Viator needs a destination_id; resolve via excursion_search's destination_name
+  //    fallback, or pass a known code. Capture whatever comes back; map to the
+  //    demo's ExcursionCandidate shape (productCode is load-bearing).
+  let excursions = [];
+  try {
+    // Viator requires a numeric destination_id — resolve the city first.
+    const dest = await callTool("resolve_destination", { query: r.city });
+    record("resolve_destination", { query: r.city }, dest);
+    const destinationId = dest.json?.viator?.destinationId ?? null;
+    if (!destinationId) log(`  resolve_destination: no viator id for ${r.city}`);
+    const ex = destinationId
+      ? await callTool("excursion_search", { source: "viator", destination_id: destinationId, destination_name: r.city, date: r.depart, max_results: 10 })
+      : { json: {}, text: "" };
+    record("excursion_search", { source: "viator", destination_id: destinationId, destination_name: r.city }, ex);
+    const raw = ex.json?.products ?? ex.json?.candidates ?? [];
+    // Spread across days round-robin so each demo day gets activity content.
+    const dayCount = Math.max(1, Math.min(5, daysBetween(r.depart, r.ret)));
+    excursions = raw.slice(0, 6).map((c, i) => {
+      const priceFrom = numOrNull(c.priceFrom ?? c.price_from);
+      return {
+        productCode: String(c.productCode ?? c.product_code ?? c.id ?? ""),
+        title: c.title ?? c.name,
+        day: (i % dayCount) + 1,
+        free: priceFrom === 0,
+        priceFrom,
+        currency: c.currency ?? "USD",
+        durationMinutes: numOrNull(c.durationMinutes ?? c.duration_minutes),
+        rating: numOrNull(c.rating),
+        reviewCount: numOrNull(c.reviewCount ?? c.review_count),
+        description: (c.description ?? c.descriptionShort ?? "").slice(0, 200),
+        bookingUrl: c.bookingUrl ?? c.booking_url ?? null,
+        coverImage: c.coverImage ?? c.cover_image ?? null,
+      };
+    }).filter((e) => e.productCode && e.title);
+    log(`  excursions: ${excursions.length}`);
+  } catch (e) { log(`  excursion_search FAILED: ${e.message}`); }
+  // Merge the LLM-proposed + TA-validated free things for this route (the value-add).
+  { const free = FREE_THINGS_BY_ID[r.id] ?? []; if (free.length) { excursions = excursions.concat(free); log(`  free things (LLM+TA-validated): ${free.length}`); } }
+
+  // 9. DINING (tripadvisor) — editorial local picks.
+  let dining = [];
+  try {
+    const di = await callTool("tripadvisor_search", { query: `best restaurants in ${r.city}`, category: "restaurants", max_results: 10, include_reviews: false });
+    record("tripadvisor_search", { query: `best restaurants in ${r.city}`, category: "restaurants" }, di);
+    const raw = di.json?.results ?? di.json?.candidates ?? di.json?.locations ?? [];
+    const dayCount = Math.max(1, Math.min(5, daysBetween(r.depart, r.ret)));
+    dining = raw.slice(0, 6).map((c, i) => ({
+      id: String(c.id ?? c.location_id ?? c.locationId ?? i),
+      name: c.name,
+      day: (i % dayCount) + 1,
+      cuisine: Array.isArray(c.cuisine) ? (c.cuisine[0] ?? null) : (c.cuisine ?? (Array.isArray(c.cuisines) ? c.cuisines[0] : null)),
+      rating: numOrNull(c.rating),
+      reviewCount: numOrNull(c.reviewCount ?? c.num_reviews),
+      priceLevel: c.priceLevel ?? c.price_level ?? null,
+      description: (c.description ?? "").slice(0, 200),
+      url: c.url ?? c.tripadvisor_url ?? c.website ?? c.web_url ?? null,
+    })).filter((d) => d.name);
+    log(`  dining: ${dining.length}`);
+  } catch (e) { log(`  tripadvisor_search FAILED: ${e.message}`); }
+
+  // Validate every link the fixture will ship before writing it (dead links rot
+  // silently in a public demo). Warn by default; --strict-urls aborts the route.
+  let urlCheck = { ok: 0, blocked: 0, bad: 0, badUrls: [] };
+  if (!SKIP_URL_CHECK) {
+    urlCheck = await validateFixtureUrls(r.id, excursions, dining);
+    if (STRICT_URLS && urlCheck.bad > 0) {
+      throw new Error(`${urlCheck.bad} dead URL(s) in ${r.id} fixture (--strict-urls): ${urlCheck.badUrls.map((b) => b.url).join(", ")}`);
+    }
+  }
+
+  // Day scaffold (date + location + title per demo day).
+  const dayCount = Math.max(1, Math.min(5, daysBetween(r.depart, r.ret)));
+  const itineraryDays = Array.from({ length: dayCount }, (_, i) => ({
+    day: i + 1,
+    date: addDays(r.depart, i),
+    location: r.city,
+    // Day 1 is the arrival; later days are generic. We do NOT label a "Depart" day:
+    // dayCount is capped at 5, so the last generated day isn't guaranteed to be r.ret.
+    // Exact day structure/labels for the showcased trip are finalized at capture time.
+    title: i === 0 ? `Arrive ${r.city}` : `${r.city} — Day ${i + 1}`,
+  }));
+
   const meta = {
     flightSearch: metaFrom(flightSearchOut),
     flightList:   metaFrom(flightListOut),
@@ -203,6 +438,9 @@ async function captureRoute(r) {
     route: { id: r.id, label: r.label, origin: r.origin, destination: r.destination, city: r.city, depart: r.depart, ret: r.ret, adults: r.adults },
     flights: flightCandidates,
     hotels: hotelCandidates,
+    excursions,
+    dining,
+    itineraryDays,
     promotedFlightsById,
     promotedLodgingById,
     meta,
@@ -217,6 +455,7 @@ async function captureRoute(r) {
   return {
     id: r.id, flights: flightCandidates.length, hotels: hotelCandidates.length,
     promotedFlights: Object.keys(promotedFlightsById).length, promotedLodging: Object.keys(promotedLodgingById).length,
+    urlsBad: urlCheck.bad, urlsBlocked: urlCheck.blocked,
   };
 }
 
@@ -231,7 +470,9 @@ async function main() {
     catch (e) { log(`  ROUTE ${r.id} FAILED: ${e.message}`); summary.push({ id: r.id, error: e.message }); }
   }
   log(`\n=== summary ===`);
-  for (const s of summary) log(`  ${s.id}: ${s.error ? "ERROR " + s.error : `${s.flights} flights (${s.promotedFlights} promoted), ${s.hotels} hotels (${s.promotedLodging} promoted)`}`);
+  for (const s of summary) log(`  ${s.id}: ${s.error ? "ERROR " + s.error : `${s.flights} flights (${s.promotedFlights} promoted), ${s.hotels} hotels (${s.promotedLodging} promoted)${s.urlsBad ? `, ${s.urlsBad} DEAD URL(s) ⚠` : ""}`}`);
+  const anyBad = summary.some((s) => s.urlsBad > 0);
+  if (anyBad) log(`\n⚠ One or more fixtures contain dead URLs — see the per-route 'url check' lines above. Re-source or drop them.`);
 }
 
 main().catch((e) => { console.error(e); process.exit(1); });

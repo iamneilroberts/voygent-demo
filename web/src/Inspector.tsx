@@ -1,6 +1,24 @@
 import { useState, type ReactNode } from "react";
 import type { EngState } from "./lib/inspector-state";
-import { PLAN_TIERS, TIER_DISCLAIMER, TIER_SOURCES, BTS_CARDS, BTS_DISCLAIMER, VOYGENT_PRICE_POINTS, USAGE_SCENARIOS, BIZ_ASSUMPTION } from "./inspector-data";
+import { PLAN_TIERS } from "./inspector-data";
+import { costWeightedTokens, cacheHitRate } from "./lib/usage";
+import { MODEL_LABELS, PHASES, PHASE_LABELS, type ModelId, type PhaseModelMap, type Phase } from "../../shared/models";
+import type { SelectorMode } from "./lib/model";
+import type { StatsResponse } from "../../shared/events";
+import { StoreOpsWidget, type InsStore } from "./StoreOpsWidget";
+import { storeOpsForTool } from "../../worker/storeops";
+
+// Engineering stories moved out of the panel (task 6c) — the tab keeps live
+// stats; the narratives live on worker-served /info pages.
+const INFO_LINKS: { slug: string; label: string; blurb: string }[] = [
+  { slug: "context-economics", label: "Context economics", blurb: "router consolidation, distill-by-id, out-of-context rendering" },
+  { slug: "cost-engineering", label: "Cost engineering", blurb: "prompt caching, the budget gate, the MCP $0-marginal-cost case" },
+  { slug: "bot-defeat", label: "The bot-defeat saga", blurb: "edge-native anti-bot, with falsifiable verdicts" },
+  { slug: "record-replay", label: "Record/replay engineering", blurb: "real data, deterministically, fabrication made impossible" },
+  { slug: "production-system", label: "The system behind the demo", blurb: "119 tools, the commission firewall, AI-evaluates-AI" },
+  { slug: "llm-options", label: "Choosing the model", blurb: "LLM-agnostic seam: frontier, cheap DeepSeek, local Ollama" },
+  { slug: "data-stores", label: "KV, D1, and a SQL brain", blurb: "the hybrid storage model and the relational-DBA unlearning" },
+];
 
 export interface InsTool {
   type: "inspector"; kind: "tool"; exchangeId: string; turn: number;
@@ -9,12 +27,14 @@ export interface InsTool {
 export interface InsTurn {
   type: "inspector"; kind: "turn"; exchangeId: string; turn: number;
   inputTokens: number; outputTokens: number; cacheReadTokens: number; cacheCreationTokens: number; costUsd: number;
+  model?: string;
 }
 export interface InsSummary {
   type: "inspector"; kind: "summary"; exchangeId: string;
   turns: number; toolCalls: number; exposedToolCount: number; fullToolCount: number;
   inputTokens: number; outputTokens: number; cacheReadTokens: number; cacheCreationTokens: number;
   costByModel: { haiku: number; sonnet: number; opus: number };
+  actualCostUsd?: number; actualCostByModel?: Record<string, number>;
 }
 export interface InsSavings {
   type: "inspector"; kind: "savings"; exchangeId: string;
@@ -25,6 +45,10 @@ export interface InsOverhead {
   type: "inspector"; kind: "overhead"; exchangeId: string;
   instrumentationMs: number | null; instrumentationBytes: number; addedModelTokens: 0;
   folioReprojectMs?: number | null; note?: string;
+}
+export interface InsValidation {
+  type: "inspector"; kind: "validation"; exchangeId: string;
+  check: string; label: string; status: "pass" | "repaired" | "fail"; detail?: string;
 }
 
 const STAGES: { key: string; label: string; tools: string[] }[] = [
@@ -55,24 +79,58 @@ function ToolRow({ t }: { t: InsTool }) {
   );
 }
 
-function Card({ c }: { c: { title: string; claim: string; detail: string; source: string } }) {
-  const [open, setOpen] = useState(false);
+// Trip-Integrity checks. Renders nothing until a validation event fires, so the
+// live (non-replay) path never shows an empty/implied-pass panel.
+function ValidationSection({ items }: { items: InsValidation[] }) {
+  if (items.length === 0) return null;
+  const glyph = (s: InsValidation["status"]) => (s === "fail" ? "✗" : s === "repaired" ? "↻" : "✓");
   return (
-    <div className="ins-card">
-      <button className="ins-card-head" onClick={() => setOpen((o) => !o)}>{open ? "▾" : "▸"} {c.title}</button>
-      {open && <div className="ins-card-body"><p>{c.claim}</p><p className="ins-note">{c.detail}</p><code className="ins-src">{c.source}</code></div>}
-    </div>
+    <section className="ins-region ins-validation">
+      <h3>Trip integrity</h3>
+      <ul className="ins-checks">
+        {items.map((v, i) => (
+          <li key={i} className={`ins-check ins-check-${v.status}`}>
+            <span className="ins-check-glyph" aria-hidden="true">{glyph(v.status)}</span>
+            <span className="ins-check-main">
+              <span className="ins-check-label">{v.label}</span>
+              {v.detail && <span className="ins-check-detail">{v.detail}</span>}
+            </span>
+            {v.status === "repaired" && <span className="ins-check-tag">repaired</span>}
+          </li>
+        ))}
+      </ul>
+    </section>
   );
 }
 
+export interface ModelRoutingUi {
+  mode: SelectorMode;
+  enabledModels: ModelId[];
+  smartMap: PhaseModelMap;
+  activePhase: Phase;
+  onMode: (m: SelectorMode) => void;
+  onSmartMap: (map: PhaseModelMap) => void;
+}
+
 export function Inspector(
-  { state, onToggleCollapse, tools, turns, summaries, savings, overhead, headExtra }:
+  { state, onToggleCollapse, tools, turns, summaries, savings, overhead, headExtra, routing, stats, stores, validations, phases }:
   { state: EngState; onToggleCollapse: () => void; tools: InsTool[]; turns: InsTurn[]; summaries: InsSummary[]; savings: InsSavings[]; overhead: InsOverhead[];
     // Extra controls shown under the head when live — e.g. the palette switcher
     // relocated here in the claude skin (its home header isn't rendered there).
-    headExtra?: ReactNode },
+    headExtra?: ReactNode;
+    routing?: ModelRoutingUi;
+    // Cumulative cross-session aggregates (public). Section hidden when null/empty.
+    stats?: StatsResponse | null;
+    // Projected production KV/D1 ops for this session (Slice B). Empty until tools fire.
+    stores?: InsStore[];
+    // Trip-integrity checks the system ran this session. Empty until a validation event fires.
+    validations?: InsValidation[];
+    // Phase-machine trail: emitted when the server-side phase machine is active (flag-on).
+    // Each entry is one phase transition. Absent when the flag is off — the block simply
+    // doesn't render (guarded by phases?.length).
+    phases?: { phase: string; via: string }[] },
 ) {
-  const [showCost, setShowCost] = useState(false);
+  const [showCost, setShowCost] = useState(true);  // cost shown by default (Neil 2026-06-07)
 
   // Quiet rail: idle (pre-trip) or manually collapsed → render a thin vertical
   // affordance instead of the full panel. Idle renders nothing interactive; the
@@ -102,12 +160,25 @@ export function Inspector(
   const tokensIn = turns.reduce((a, t) => a + t.inputTokens, 0);
   const tokensOut = turns.reduce((a, t) => a + t.outputTokens, 0);
   const cacheRead = turns.reduce((a, t) => a + t.cacheReadTokens, 0);
+  const cacheWrite = turns.reduce((a, t) => a + t.cacheCreationTokens, 0);
   const latest = summaries[summaries.length - 1];
   const cost = summaries.reduce(
     (a, s) => ({ haiku: a.haiku + s.costByModel.haiku, sonnet: a.sonnet + s.costByModel.sonnet, opus: a.opus + s.costByModel.opus }),
     { haiku: 0, sonnet: 0, opus: 0 },
   );
-  const sessionTokens = tokensIn + cacheRead;
+  // MEASURED routed spend (sum of per-turn cost at each turn's model) — distinct
+  // from the all-tier counterfactual above. Source of truth for "what this cost".
+  const actualCost = summaries.reduce((a, s) => a + (s.actualCostUsd ?? 0), 0);
+  const actualByModel: Record<string, number> = {};
+  for (const s of summaries) for (const [m, c] of Object.entries(s.actualCostByModel ?? {})) actualByModel[m] = (actualByModel[m] ?? 0) + c;
+  const routedModels = Object.keys(actualByModel).filter((m) => actualByModel[m] > 0);
+  // Cost-weighted (reads 0.1x, writes 1.25x) — the raw in+cacheRead sum read
+  // 5-10x pessimistic against the sub-window estimate once the moving cache
+  // breakpoint landed. See lib/usage.ts.
+  const usage = { inputTokens: tokensIn, cacheReadTokens: cacheRead, cacheCreationTokens: cacheWrite };
+  const sessionTokens = costWeightedTokens(usage);
+  const hitRate = cacheHitRate(usage);
+  const proWindow = PLAN_TIERS.find((p) => p.id === "pro")?.windowTokens ?? null;
 
   // Honest context-saved model:
   //  - aggregate (patch, searchDistill): one-time savings, summed directly.
@@ -122,6 +193,18 @@ export function Inspector(
   const savedHeadline = aggregateSum + perTurnTotal;
   const ov = overhead[overhead.length - 1];
 
+  // Summary-strip derivations (10-second read). "Persisted writes" = mutating
+  // store ops this session commits (KV put/delete; reads/queries excluded),
+  // projected from the fired tools via the SAME production mapping the store-ops
+  // widget uses — so it's correct whether or not the recording carries store events.
+  const vals = validations ?? [];
+  const persistedWrites = tools.reduce(
+    (n, t) => n + storeOpsForTool(t.name).filter((o) => o.op === "put" || o.op === "delete").length, 0,
+  );
+  const valTotal = vals.length;
+  const valOk = vals.filter((v) => v.status === "pass" || v.status === "repaired").length;
+  const valFail = vals.some((v) => v.status === "fail");
+
   return (
     <aside className="inspector term crt" role="complementary" aria-label="Engineering inspector">
       <div className="ins-head">
@@ -129,6 +212,62 @@ export function Inspector(
         <button className="ins-collapse" onClick={onToggleCollapse} aria-label="Collapse inspector">▾</button>
       </div>
       {headExtra && <div className="ins-extra">{headExtra}</div>}
+
+      {/* 10-second read: the whole system at a glance. Detail stays in the sections below. */}
+      <section className="ins-region ins-summary" aria-label="Run summary">
+        <div className="ins-strip">
+          <div className="ins-stat">
+            <span className="ins-stat-n">{latest ? latest.exposedToolCount : "—"}</span>
+            <span className="ins-stat-l">MCP tools exposed</span>
+          </div>
+          <div className="ins-stat">
+            <span className="ins-stat-n">{tools.length}</span>
+            <span className="ins-stat-l">tools used</span>
+          </div>
+          <div className="ins-stat">
+            <span className="ins-stat-n">{persistedWrites}</span>
+            <span className="ins-stat-l">persisted writes</span>
+          </div>
+          <div className="ins-stat">
+            <span className="ins-stat-n">≈{fmt(savedHeadline)}</span>
+            <span className="ins-stat-l">context kept out</span>
+          </div>
+          <div className="ins-stat">
+            <span className="ins-stat-n ins-stat-cost">{usd(actualCost)}</span>
+            <span className="ins-stat-l">observed cost</span>
+          </div>
+          {valTotal > 0 && (
+            <div className="ins-stat">
+              <span className={`ins-stat-n ${valFail ? "ins-stat-warn" : "ins-stat-ok"}`}>{valOk}/{valTotal}</span>
+              <span className="ins-stat-l">validation</span>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {routing && (
+        <section className="ins-region ins-routing">
+          <h3>Model routing</h3>
+          {routing.mode === "smart" ? (
+            <>
+              <p className="ins-note">Smart routing — a model per trip phase. Active phase: <b>{PHASE_LABELS[routing.activePhase]}</b>.</p>
+              {PHASES.map((ph) => (
+                <label key={ph} className={`ins-phase ${routing.activePhase === ph ? "active" : ""}`}>
+                  <span className="ins-phase-name">{PHASE_LABELS[ph]}{routing.activePhase === ph ? " ←" : ""}</span>
+                  <select
+                    value={routing.smartMap[ph]}
+                    onChange={(e) => routing.onSmartMap({ ...routing.smartMap, [ph]: e.target.value as ModelId })}
+                  >
+                    {routing.enabledModels.map((m) => <option key={m} value={m}>{MODEL_LABELS[m]}</option>)}
+                  </select>
+                </label>
+              ))}
+            </>
+          ) : (
+            <p className="ins-note">Single model: <b>{MODEL_LABELS[routing.mode as ModelId] ?? routing.mode}</b> drives every turn. Switch to <i>Smart</i> to route per phase.</p>
+          )}
+        </section>
+      )}
 
       <section className="ins-region">
         <h3>Live this session</h3>
@@ -152,6 +291,11 @@ export function Inspector(
           <div>{turns.length} turns · {tools.length} tool calls</div>
           {latest && <div>{latest.exposedToolCount} of {latest.fullToolCount} tools exposed</div>}
           <div>{fmt(tokensIn)} in · {fmt(tokensOut)} out · {fmt(cacheRead)} cache-read</div>
+          {hitRate != null && (
+            <div className="ins-hitrate">
+              cache hit rate <b>{(hitRate * 100).toFixed(0)}%</b> · ≈{fmt(sessionTokens)} cost-weighted tokens
+            </div>
+          )}
         </div>
 
         <div className="ins-cost">
@@ -160,30 +304,18 @@ export function Inspector(
           </button>
           {showCost && latest && (
             <div className="ins-cost-rows">
-              <div>This session, API-equivalent: <b>{usd(cost.haiku)}</b> haiku · <b>{usd(cost.sonnet)}</b> sonnet · <b>{usd(cost.opus)}</b> opus</div>
+              <div className="ins-actualcost">Observed routed cost <b>{usd(actualCost)}</b>{routedModels.length > 1
+                ? ` — ${routedModels.map((m) => `${usd(actualByModel[m])} ${MODEL_LABELS[m as ModelId] ?? m}`).join(" + ")}` : ""}</div>
+              <div className="ins-note">Counterfactual estimate — same usage priced as one tier: <b>{usd(cost.haiku)}</b> haiku · <b>{usd(cost.sonnet)}</b> sonnet · <b>{usd(cost.opus)}</b> opus</div>
+              {routedModels.length > 1 && <div className="ins-note">Routing splits models, so caches don't carry across the switch — cache writes are re-paid; the actual figure above already reflects that.</div>}
             </div>
           )}
-          <table className="ins-tiers">
-            <thead><tr><th>Plan</th><th>$/mo</th><th>~tok / 5-hr window</th></tr></thead>
-            <tbody>
-              {PLAN_TIERS.map((p) => {
-                const pct = p.windowTokens ? Math.min(100, (sessionTokens / p.windowTokens) * 100) : null;
-                return (
-                  <tr key={p.id}>
-                    <td>{p.name}</td>
-                    <td>${p.priceMo}</td>
-                    <td>{p.windowTokens ? `~${fmt(p.windowTokens)}${pct != null ? ` · this trip ≈ ${pct.toFixed(pct < 1 ? 2 : 0)}%` : ""}` : p.windowNote}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-          <p className="ins-note">{TIER_DISCLAIMER}</p>
-          <details className="ins-sources">
-            <summary>how we estimate</summary>
-            <p>Monthly estimate = window tokens × 1 fresh window/day × 30. Sources:</p>
-            <ul>{TIER_SOURCES.map((s) => <li key={s.url}><a href={s.url} target="_blank" rel="noreferrer">{s.label}</a></li>)}</ul>
-          </details>
+          {proWindow != null && sessionTokens > 0 && (
+            <div className="ins-tierline">
+              This trip ≈ <b>{((sessionTokens / proWindow) * 100).toFixed(sessionTokens / proWindow < 0.01 ? 2 : 0)}%</b> of a Pro 5-hr window (cost-weighted) ·{" "}
+              <a href="/info/cost-engineering" target="_blank" rel="noreferrer">how this is estimated →</a>
+            </div>
+          )}
         </div>
 
         <div className="ins-saved">
@@ -198,7 +330,7 @@ export function Inspector(
             )}
           </ul>
           {templateMax > 0 && (
-            <div className="ins-note">Folio render: ≈ {fmt(templateMax)} tokens the model never generated (deterministic template, counterfactual — not summed above).</div>
+            <div className="ins-note">Deterministic render estimate — ≈ {fmt(templateMax)} tokens the model never generated (folio is a server-side template render, counterfactual — not summed above).</div>
           )}
         </div>
 
@@ -208,34 +340,55 @@ export function Inspector(
           {ov && <div>Inspector client payload: <b>{(ov.instrumentationBytes / 1024).toFixed(1)} KB</b></div>}
           <div>Instrumentation CPU: <b>{!ov ? "—" : (ov.instrumentationMs != null ? `${ov.instrumentationMs} ms` : "below timer resolution")}</b></div>
         </div>
+
+        {phases && phases.length > 0 && (
+          <div className="ins-workflow">
+            <h4>Workflow engine</h4>
+            <div className="ins-phase-trail">
+              {phases.map((p, i) => (
+                <span key={i} className="ins-phase-step">{p.phase}{i < phases.length - 1 ? " → " : ""}</span>
+              ))}
+            </div>
+            <p className="ins-note">The server-side phase machine drives each step; the model executes one instruction at a time.</p>
+          </div>
+        )}
       </section>
 
-      <section className="ins-region">
-        <h3>Behind the scenes</h3>
-        <p className="ins-note">{BTS_DISCLAIMER}</p>
-        {BTS_CARDS.map((c) => <Card key={c.title} c={c} />)}
-      </section>
+      <ValidationSection items={vals} />
+
+      <StoreOpsWidget stores={stores ?? []} />
+
+      {stats && stats.exchanges > 0 && (() => {
+        const split = (["haiku", "sonnet", "opus"] as const).filter((k) => stats.byModel[k] > 0);
+        return (
+          <section className="ins-region ins-allsessions">
+            <h3>Across all sessions</h3>
+            <p className="ins-note">Cumulative demo usage — every trip built here. The marginal-cost-≈-$0 flex, in real numbers.</p>
+            <div className="ins-scoreboard">
+              <div><b>{fmt(stats.trips)}</b> trips planned · <b>{fmt(stats.sessions)}</b> sessions · <b>{fmt(stats.exchanges)}</b> exchanges</div>
+              <div>≈ <b>{fmt(stats.totalSavedTokens)}</b> tokens kept out of context <span className="ins-note">(estimated)</span></div>
+              <div>
+                Total inference cost <b>{usd(stats.totalActualCostUsd)}</b>
+                {split.length > 1 && (
+                  <span className="ins-note"> — {split.map((k) => `${usd(stats.byModel[k])} ${k[0].toUpperCase()}${k.slice(1)}`).join(" + ")}</span>
+                )}
+                {stats.byModel.other > 0 && (
+                  <span className="ins-note"> · {usd(stats.byModel.other)} other</span>
+                )}
+              </div>
+            </div>
+          </section>
+        );
+      })()}
 
       <section className="ins-region">
-        <h3>The business case</h3>
-        <p>Under the MCP model, Voygent's marginal inference cost is <b>$0</b> — your flat Claude subscription already paid for the tokens. You get frontier-model reasoning at a flat rate; a standalone app must meter, mark up, and bear billing/abuse/infra liability, and that cost compounds with volume and model tier.</p>
-        {latest ? (
-          <table className="ins-tiers">
-            <thead><tr><th>Per month</th>{USAGE_SCENARIOS.map((s) => <th key={s.label}>{s.label} ({s.tripsMo})</th>)}</tr></thead>
-            <tbody>
-              {(["haiku", "sonnet", "opus"] as const).map((m) => (
-                <tr key={m}>
-                  <td>App (API, {m})</td>
-                  {USAGE_SCENARIOS.map((s) => <td key={s.label}>{usd(cost[m] * s.tripsMo)}</td>)}
-                </tr>
-              ))}
-              {VOYGENT_PRICE_POINTS.map((v) => (
-                <tr key={v}><td>Voygent ${v} + your Claude sub</td>{USAGE_SCENARIOS.map((s) => <td key={s.label}>${v} + $0 inference</td>)}</tr>
-              ))}
-            </tbody>
-          </table>
-        ) : <p className="ins-note">Build a trip to populate the live cost basis.</p>}
-        <p className="ins-note">{BIZ_ASSUMPTION}</p>
+        <h3>Deep dives</h3>
+        <p className="ins-note">The numbers above are live from this session. The engineering stories behind them:</p>
+        <ul className="ins-links">
+          {INFO_LINKS.map((l) => (
+            <li key={l.slug}><a href={`/info/${l.slug}`} target="_blank" rel="noreferrer">{l.label} →</a> <span className="ins-note">{l.blurb}</span></li>
+          ))}
+        </ul>
       </section>
     </aside>
   );

@@ -31,6 +31,26 @@ describe("tripToFolio", () => {
     expect(folio.flights[0].label).toBe("Atlanta (ATL) -> Athens (ATH)");
     expect(folio.hotels[0].name).toBe("Hilton Cancun Mar Caribe");
     expect(folio.hotels[0].price).toBe("$3430");
+    expect(folio.hotels[0].commission).toBeUndefined(); // serp lodging: no commission, never invented
+  });
+
+  it("passes through real commission on lodging (cpmaxx) and supports both pct spellings", () => {
+    const raw = {
+      data: {
+        meta: { title: "Cancún Escape" },
+        lodging: [
+          { name: "Omni Cancun", total: 8122.3, commission: 2436.69, commission_pct: 30 },
+          { name: "JW Marriott", total: 5000, commission: 1200, commissionPct: 24 },
+          { name: "Serp Inn", total: 900 },
+        ],
+      },
+    };
+    const folio = tripToFolio("t1", raw);
+    expect(folio.hotels[0].commission).toBe(2436.69);
+    expect(folio.hotels[0].commissionPct).toBe(30);
+    expect(folio.hotels[1].commissionPct).toBe(24);
+    expect(folio.hotels[2].commission).toBeUndefined();
+    expect(folio.hotels[2].commissionPct).toBeUndefined();
   });
 
   it("maps the promoted { outbound, return } flights object (post promote_flights)", () => {
@@ -86,5 +106,41 @@ describe("tripToFolio", () => {
     expect(folio.title).toBe("Trip");
     expect(folio.flights).toEqual([]);
     expect(folio.hotels).toEqual([]);
+  });
+});
+
+describe("tripToFolio enrichment projection", () => {
+  it("projects itinerary[] into days[] and attaches includes when enriched", () => {
+    const raw = { data: {
+      meta: { title: "Dublin" },
+      flights: { outbound: { route: "MOB→DUB", airline: "United", totalPrice: 3426, segments: [] }, return: null },
+      lodging: [{ name: "Baggotrath House", total: 1343 }],
+      itinerary: [{
+        day: 1, date: "2026-10-12", location: "Dublin", title: "Arrive Dublin",
+        activities: [{ name: "Kilmainham Gaol", description: "Historic gaol tour.", url: "https://v", priceFrom: 26 }],
+        dining: [{ name: "The Winding Stair", cuisine: "Modern Irish", description: "Riverside bistro.", url: "https://t" }],
+      }],
+    } };
+    const folio = tripToFolio("t1", raw);
+    expect(folio.days?.[0].title).toContain("Dublin");
+    expect(folio.days?.[0].activities[0].name).toBe("Kilmainham Gaol");
+    expect(folio.days?.[0].dining[0].cuisine).toBe("Modern Irish");
+    expect(folio.includes && folio.includes.length).toBeGreaterThan(0);
+  });
+
+  it("omits days/includes for an un-enriched trip (flights/hotels only, unchanged)", () => {
+    const raw = { data: { meta: { title: "Dublin" }, flights: [], lodging: [] } };
+    const folio = tripToFolio("t1", raw);
+    expect(folio.days).toBeUndefined();
+    expect(folio.includes).toBeUndefined();
+  });
+});
+
+describe("isTripMutating enrichment tools", () => {
+  it("flags apply_gap_tour_picks always, and tripadvisor_search with a trip id (snake or camel)", () => {
+    expect(isTripMutating("apply_gap_tour_picks", {})).toBe(true);
+    expect(isTripMutating("tripadvisor_search", { trip_id: "t1" })).toBe(true);
+    expect(isTripMutating("tripadvisor_search", { tripId: "t1" })).toBe(true); // camelCase accepted
+    expect(isTripMutating("tripadvisor_search", {})).toBe(true); // doubles as apply; real schema has no trip_id
   });
 });

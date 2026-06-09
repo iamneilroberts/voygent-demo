@@ -37,7 +37,8 @@ export function scrubResultText(raw: string): string {
 /** Inject real USD into a zero-cost turn event; passthrough everything else. */
 export function withInspectorCost(ev: ServerEvent, model: string): ServerEvent {
   if (ev.type === "inspector" && ev.kind === "turn" && ev.costUsd === 0) {
-    return { ...ev, costUsd: estimateCostUsd(model, {
+    // The turn event's own per-turn `model` (routing) wins over the session default.
+    return { ...ev, costUsd: estimateCostUsd(ev.model ?? model, {
       inputTokens: ev.inputTokens, outputTokens: ev.outputTokens,
       cacheCreationTokens: ev.cacheCreationTokens, cacheReadTokens: ev.cacheReadTokens,
     }) };

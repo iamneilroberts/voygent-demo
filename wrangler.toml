@@ -18,6 +18,17 @@ class_name = "SessionDO"
 tag = "v1"
 new_sqlite_classes = ["SessionDO"]
 
+# Engineering-stats history (one row per completed exchange). Both the SessionDO
+# (writes) and the top-level worker (GET /stats reads) bind STATS_DB.
+# DEPLOY STEP 1 (before `wrangler deploy`): create the DB and paste its id here:
+#   wrangler d1 create voygent-demo-stats   →   copy database_id below
+#   wrangler d1 execute voygent-demo-stats --remote --file migrations/0001_session_stats.sql
+# Until then the binding is absent in dev/test and the feature is a silent no-op.
+[[d1_databases]]
+binding = "STATS_DB"
+database_name = "voygent-demo-stats"
+database_id = "20321ac2-3669-489e-b67c-5e5bd91d6f2e"
+
 # NOTE: demo.voygent.ai is NOT attached here. The voygent.ai zone has a *.voygent.ai
 # wildcard routing every subdomain to the prod `voygent` Worker, which shadows a plain
 # custom-domain attachment and (observed 2026-06-05) regressed this Worker's workers.dev
@@ -26,5 +37,7 @@ new_sqlite_classes = ["SessionDO"]
 
 # Secrets (set via `wrangler secret put`, NOT checked in):
 #   ANTHROPIC_API_KEY, VOYGENT_MCP_URL, VOYGENT_MCP_BEARER, and optional DEMO_DISABLED.
+#   DEEPSEEK_API_KEY (+ DEMO_DEEPSEEK_ENABLED=1 to go live), optional DEEPSEEK_BASE_URL.
+#   OLLAMA_BASE_URL / DEMO_OLLAMA_URL are local-dev only (a deployed Worker can't reach localhost).
 # Kept as secrets (not [vars]) so the MCP target can be flipped staging<->prod
 # with a single `wrangler secret put` and no redeploy.
