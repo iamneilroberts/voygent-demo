@@ -26,5 +26,18 @@ new_sqlite_classes = ["SessionDO"]
 
 # Secrets (set via `wrangler secret put`, NOT checked in):
 #   ANTHROPIC_API_KEY, VOYGENT_MCP_URL, VOYGENT_MCP_BEARER, and optional DEMO_DISABLED.
+#   CODE_HASH_KEY (HMAC key for hashing passcodes), SESSION_SIGN_KEY (HMAC key for signing
+#   session cookies), optional ADMIN_TOKEN (bearer for /admin/* endpoints), and optional
+#   EST_EXCHANGE_MICROS (override default per-exchange micro-USD estimate).
 # Kept as secrets (not [vars]) so the MCP target can be flipped staging<->prod
 # with a single `wrangler secret put` and no redeploy.
+
+[[d1_databases]]
+binding = "DEMO_DB"
+database_name = "voygent-demo"
+database_id = "PLACEHOLDER_SET_AFTER_d1_create"  # filled in during deploy (Task 15)
+
+[vars]
+# The exact origin the SPA is served from. Used by the Origin/CSRF guard.
+# Local: http://localhost:8787 (wrangler dev). Prod: set to the deployed origin.
+APP_ORIGIN = "http://localhost:8787"

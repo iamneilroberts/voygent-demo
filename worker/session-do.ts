@@ -19,6 +19,8 @@ interface Env {
   SESSION: DurableObjectNamespace;        // self-namespace; a reserved instance is the budget ledger
   LLM_MODEL?: string;                     // cheap default while developing; override to sonnet for quality
   BUDGET_DAILY_USD?: string;              // global daily spend cap (default 5)
+  DEMO_DB: D1Database;
+  EST_EXCHANGE_MICROS?: string;
 }
 
 // Cost guardrail: the demo only needs these ~9 tools. Sending the full ~79-tool

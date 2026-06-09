@@ -1,7 +1,16 @@
 export { SessionDO } from "./session-do";
 import { buildPresets } from "./presets";
 
-interface Env { SESSION: DurableObjectNamespace; DEMO_DISABLED?: string; }
+interface Env {
+  SESSION: DurableObjectNamespace;
+  DEMO_DISABLED?: string;
+  DEMO_DB: D1Database;
+  CODE_HASH_KEY: string;
+  SESSION_SIGN_KEY: string;
+  ADMIN_TOKEN?: string;
+  APP_ORIGIN: string;
+  EST_EXCHANGE_MICROS?: string;
+}
 
 async function dailyBudgetExceeded(env: Env): Promise<boolean> {
   try {
