@@ -71,6 +71,10 @@ async function seed(db: Awaited<ReturnType<typeof makeTestDb>>, over: Partial<an
 }
 
 describe("admission", () => {
+  // NOTE: better-sqlite3 serializes calls, so these tests prove the SEQUENTIAL cap
+  // arithmetic + day rollover, NOT the concurrency property. Safety under concurrent
+  // /chat rests on D1 routing all writes to the single primary (single-statement
+  // conditional UPDATE) — exercise that with a real-D1 race test at deploy (Task 15).
   const NOW = "2026-06-09T12:00:00Z";
   const TODAY = "2026-06-09";
   const EST = 200_000; // $0.20 reservation
@@ -109,5 +113,14 @@ describe("admission", () => {
     const db2 = makeTestDb(); await seed(db2, { expiresAt: "2026-06-09T06:00:00Z" });
     expect(await admit(db2, "c", EST, NOW, TODAY)).toBe(false); // NOW is after expiry
     expect(await admissionReason(db2, "c", EST, NOW, TODAY)).toBe("expired");
+  });
+
+  it("clamps a negative estimate to zero (never refunds budget)", async () => {
+    const db = makeTestDb(); await seed(db, { dailyMicros: 1_000_000, totalMicros: 1_000_000 });
+    await admit(db, "c", 500_000, NOW, TODAY); // book $0.50
+    expect(await admit(db, "c", -400_000, NOW, TODAY)).toBe(true); // clamped to 0 → admits, books nothing
+    const row = await db.first<{ day_spent: number; lifetime_spent: number }>("SELECT day_spent, lifetime_spent FROM codes WHERE id='c'");
+    expect(row?.day_spent).toBe(500_000);      // unchanged — no refund
+    expect(row?.lifetime_spent).toBe(500_000);
   });
 });

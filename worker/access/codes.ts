@@ -92,10 +92,16 @@ export async function lookupByCode(
  * D1's primary) atomically verifies live+budget and books `estMicros`. SQLite/D1
  * evaluate SET/WHERE against the PRE-update row, so the CASE correctly resets the
  * daily window when day_date is stale. Returns true iff exactly one row changed.
+ *
+ * Caps are inclusive — a code may be admitted to land exactly on its cap.
+ * On a crash after admit() but before reconcile, the estimate stays booked (conservative).
+ * Daily over-counts self-heal at the next UTC day rollover; lifetime over-counts do NOT
+ * self-heal and require reconcile (Task 7) or admin correction.
  */
 export async function admit(
   db: Db, codeId: string, estMicros: number, nowIso: string, today: string,
 ): Promise<boolean> {
+  const est = estMicros < 0 ? 0 : estMicros; // never let a bad estimate refund budget
   const r = await db.run(
     `UPDATE codes
         SET day_spent      = (CASE WHEN day_date = ? THEN day_spent ELSE 0 END) + ?,
@@ -106,7 +112,7 @@ export async function admit(
         AND (expires_at IS NULL OR expires_at > ?)
         AND (CASE WHEN day_date = ? THEN day_spent ELSE 0 END) + ? <= daily_micros
         AND lifetime_spent + ? <= total_micros`,
-    [today, estMicros, today, estMicros, codeId, nowIso, today, estMicros, estMicros],
+    [today, est, today, est, codeId, nowIso, today, est, est],
   );
   return r.changes === 1;
 }
@@ -115,12 +121,13 @@ export async function admit(
 export async function admissionReason(
   db: Db, codeId: string, estMicros: number, nowIso: string, today: string,
 ): Promise<AdmissionReason> {
+  const est = estMicros < 0 ? 0 : estMicros; // mirror admit()'s clamp so classifier agrees
   const row = await db.first<CodeRow>("SELECT * FROM codes WHERE id=?", [codeId]);
   if (!row) return "revoked";
   if (row.revoked) return "revoked";
   if (row.expires_at && row.expires_at <= nowIso) return "expired";
   const dayBase = row.day_date === today ? row.day_spent : 0;
-  if (dayBase + estMicros > row.daily_micros) return "daily";
-  if (row.lifetime_spent + estMicros > row.total_micros) return "lifetime";
+  if (dayBase + est > row.daily_micros) return "daily";
+  if (row.lifetime_spent + est > row.total_micros) return "lifetime";
   return "ok";
 }
