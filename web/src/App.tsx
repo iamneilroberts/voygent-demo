@@ -24,6 +24,7 @@ import { createRecorder } from "./lib/recorder";
 import { resolveInitialMode, persistMode, type ModeId } from "./lib/mode";
 import { replayChat } from "./lib/recording";
 import { emptyReelViewState, applyInteraction, reconcileEdits, type ReelViewState } from "./lib/interaction";
+import { isPickTool, resolveBoardPickId } from "./lib/board-match";
 import { selectReel } from "./recordings/registry";
 import { ReelIntro } from "./ReelIntro";
 import { ReelCallout } from "./ReelCallout";
@@ -108,6 +109,10 @@ export function App() {
   // Reel interaction view-state; consumed by ClaudeChatView render.
   const [reelView, setReelView] = useState<ReelViewState>(emptyReelViewState);
   const hlResolve = useRef<(() => void) | null>(null);
+  // Accumulated args+result text of pick-signaling tools (patch_trip / promote_*),
+  // used to resolve which board candidate the agent chose. A ref, not state, so the
+  // folio handler reads the latest value regardless of the stream/replay closure.
+  const stagedBlob = useRef("");
   const postReel = (() => { try { return new URLSearchParams(window.location.search).get("greet") === "reel"; } catch { return false; } })();
   useEffect(() => { persistMode(mode); }, [mode]);
 
@@ -236,15 +241,25 @@ export function App() {
       setReelView((s) => reconcileEdits(s));
       // Fallback resolution: the agent promoted (e.g. after a typed reply),
       // so close out any still-open boards of the now-promoted kind.
-      setItems((m) => m.map((it) => (
-        it.role === "board" && !it.resolved && !it.resolvedId &&
-        ((it.kind === "flight" && e.folio.flights.length > 0) || (it.kind === "hotel" && e.folio.hotels.length > 0))
-          ? { ...it, resolved: true } : it
-      )));
+      setItems((m) => m.map((it) => {
+        if (it.role !== "board" || it.resolved || it.resolvedId) return it;
+        const promoted = (it.kind === "flight" && e.folio.flights.length > 0)
+          || (it.kind === "hotel" && e.folio.hotels.length > 0);
+        if (!promoted) return it;
+        // Mark WHICH candidate was chosen (the staged/promoted id), not just lock
+        // the board. resolvedId stays undefined for reels with no pick tools
+        // (e.g. collab, where the interaction pick already owns the selection).
+        const pickId = resolveBoardPickId(it.candidates.map((c) => c.id), stagedBlob.current);
+        return { ...it, resolved: true, resolvedId: pickId ?? it.resolvedId };
+      }));
     }
     else if (e.type === "error") showError(e.message);
     else if (e.type === "inspector") {
-      if (e.kind === "tool") setInsTools((t) => [...t, e]);
+      if (e.kind === "tool") {
+        setInsTools((t) => [...t, e]);
+        // Record which candidate id the agent staged/promoted (not search results).
+        if (isPickTool(e.name)) stagedBlob.current += ` ${JSON.stringify(e.args)} ${e.result}`;
+      }
       else if (e.kind === "turn") setInsTurns((t) => [...t, e]);
       else if (e.kind === "summary") setInsSummaries((s) => [...s, e]);
       else if (e.kind === "savings") setInsSavings((s) => [...s, e]);
@@ -264,6 +279,7 @@ export function App() {
     setItems([]); setTools([]); setFolio(null); setBusy(false);
     setInsTools([]); setInsTurns([]); setInsSummaries([]); setInsSavings([]);
     setInsOverhead([]); setInsStores([]); setInsValidations([]); setInsPhases([]);
+    stagedBlob.current = "";   // forget prior picks so a Replay re-resolves cleanly
     // Clear any in-flight callout so a Replay never starts under a stale spotlight (Codex review).
     hlResolve.current?.(); hlResolve.current = null; setActiveHighlight(null);
     setReelView(emptyReelViewState());   // P2: clear picks/edits/threads/handoff
@@ -401,7 +417,7 @@ export function App() {
             onToggleCollapse={() => { if (insTools.length > 0) setCollapsed((c) => !c); }}
             tools={insTools} turns={insTurns} summaries={insSummaries}
             savings={insSavings} overhead={insOverhead} stats={stats}
-            stores={insStores} validations={insValidations} phases={insPhases}
+            stores={insStores} validations={insValidations} phases={insPhases} busy={busy}
             headExtra={skin === "claude" ? <><ModelSwitch mode={modelMode} enabled={enabledModels} onPick={setModelMode} onTweaks={() => setTweaksOpen(true)} /><AdvisorSwitch on={advisor} onToggle={setAdvisor} /><ThemeSwitch /></> : undefined}
             routing={{ mode: modelMode, enabledModels, smartMap, activePhase, onMode: setModelMode, onSmartMap: setSmartMap }}
           />

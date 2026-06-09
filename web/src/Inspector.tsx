@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useState, useRef, useEffect, type ReactNode } from "react";
 import type { EngState } from "./lib/inspector-state";
 import { PLAN_TIERS } from "./inspector-data";
 import { costWeightedTokens, cacheHitRate } from "./lib/usage";
@@ -116,8 +116,11 @@ export interface ModelRoutingUi {
 }
 
 export function Inspector(
-  { state, onToggleCollapse, tools, turns, summaries, savings, overhead, headExtra, routing, stats, stores, validations, phases }:
+  { state, onToggleCollapse, tools, turns, summaries, savings, overhead, headExtra, routing, stats, stores, validations, phases, busy }:
   { state: EngState; onToggleCollapse: () => void; tools: InsTool[]; turns: InsTurn[]; summaries: InsSummary[]; savings: InsSavings[]; overhead: InsOverhead[];
+    // True while a turn is actively streaming (live send or reel replay). Drives the
+    // "pipeline resting" settle so the packet stops once work actually stops.
+    busy?: boolean;
     // Extra controls shown under the head when live — e.g. the palette switcher
     // relocated here in the claude skin (its home header isn't rendered there).
     headExtra?: ReactNode;
@@ -134,6 +137,10 @@ export function Inspector(
     phases?: { phase: string; via: string }[] },
 ) {
   const [showCost, setShowCost] = useState(true);  // cost shown by default (Neil 2026-06-07)
+  // The tool log is a fixed-height scroll pane (so it never pushes the sections
+  // below it down the page). Keep the newest call in view as the stream lands.
+  const timelineRef = useRef<HTMLDivElement>(null);
+  useEffect(() => { const el = timelineRef.current; if (el) el.scrollTop = el.scrollHeight; }, [tools.length]);
 
   // Quiet rail: idle (pre-trip) or manually collapsed → render a thin vertical
   // affordance instead of the full panel. Idle renders nothing interactive; the
@@ -157,8 +164,18 @@ export function Inspector(
 
   const firedTools = new Set(tools.map((t) => t.name));
   const hasFolio = tools.some((t) => t.name.startsWith("promote_"));
+  // Distill rarely fires a distinct tool (the recording goes search → promote),
+  // but it always emits a `searchDistill` savings event — the real signal that
+  // candidates were ranked down. Without this the Distill node never lights up.
+  const hasDistill = savings.some((s) => s.mechanism === "searchDistill");
   const stageActive = (s: typeof STAGES[number]) =>
-    s.key === "render" ? hasFolio : s.tools.some((n) => firedTools.has(n));
+    s.key === "render" ? hasFolio
+      : s.key === "distill" ? (hasDistill || s.tools.some((n) => firedTools.has(n)))
+        : s.tools.some((n) => firedTools.has(n));
+  // The pipeline is at rest once the folio exists AND no turn is streaming: settle the
+  // nodes to their done (green) state and stop the traveling packet. While work is still
+  // flowing (enrichment after the first promote), the packet keeps moving.
+  const pipelineDone = hasFolio && !busy;
 
   const tokensIn = turns.reduce((a, t) => a + t.inputTokens, 0);
   const tokensOut = turns.reduce((a, t) => a + t.outputTokens, 0);
@@ -254,21 +271,23 @@ export function Inspector(
           <h3>Model routing</h3>
           {routing.mode === "smart" ? (
             <>
-              <p className="ins-note">Smart routing — a model per trip phase. Active phase: <b>{PHASE_LABELS[routing.activePhase]}</b>.</p>
-              {PHASES.map((ph) => (
-                <label key={ph} className={`ins-phase ${routing.activePhase === ph ? "active" : ""}`}>
-                  <span className="ins-phase-name">{PHASE_LABELS[ph]}{routing.activePhase === ph ? " ←" : ""}</span>
-                  <select
-                    value={routing.smartMap[ph]}
-                    onChange={(e) => routing.onSmartMap({ ...routing.smartMap, [ph]: e.target.value as ModelId })}
-                  >
-                    {routing.enabledModels.map((m) => <option key={m} value={m}>{MODEL_LABELS[m]}</option>)}
-                  </select>
-                </label>
-              ))}
+              <p className="ins-note">A model per phase. Active: <b>{PHASE_LABELS[routing.activePhase]}</b>.</p>
+              <div className="ins-phases">
+                {PHASES.map((ph) => (
+                  <label key={ph} className={`ins-phase ${routing.activePhase === ph ? "active" : ""}`}>
+                    <span className="ins-phase-name">{PHASE_LABELS[ph]}{routing.activePhase === ph ? " ←" : ""}</span>
+                    <select
+                      value={routing.smartMap[ph]}
+                      onChange={(e) => routing.onSmartMap({ ...routing.smartMap, [ph]: e.target.value as ModelId })}
+                    >
+                      {routing.enabledModels.map((m) => <option key={m} value={m}>{MODEL_LABELS[m]}</option>)}
+                    </select>
+                  </label>
+                ))}
+              </div>
             </>
           ) : (
-            <p className="ins-note">Single model: <b>{MODEL_LABELS[routing.mode as ModelId] ?? routing.mode}</b> drives every turn. Switch to <i>Smart</i> to route per phase.</p>
+            <p className="ins-note"><b>{MODEL_LABELS[routing.mode as ModelId] ?? routing.mode}</b> drives every turn. Switch to <i>Smart</i> to route per phase.</p>
           )}
         </section>
       )}
@@ -277,20 +296,17 @@ export function Inspector(
         <h3>Live this session</h3>
 
         <div className="pipe">
-          {STAGES.some(stageActive) && <span className="packet" aria-hidden="true" />}
+          {STAGES.some(stageActive) && !pipelineDone && <span className="packet" aria-hidden="true" />}
           {STAGES.map((s, i) => (
             <span key={s.key}>
-              <span className={`node ${stageActive(s) ? "active" : ""}`}>{stageActive(s) ? "●" : "○"} {s.label}</span>
+              <span className={`node ${stageActive(s) ? (pipelineDone ? "done" : "active") : ""}`}>{stageActive(s) ? "●" : "○"} {s.label}</span>
               {i < STAGES.length - 1 ? <span className="arr">→</span> : null}
             </span>
           ))}
         </div>
 
-        <div className="ins-timeline">
-          {tools.length === 0 ? <p className="ins-empty">No tool calls yet — start planning a trip.</p>
-            : tools.map((t, i) => <ToolRow key={i} t={t} />)}
-        </div>
-
+        {/* Stats sit directly under the pipe (at the top of the section); the tool
+            log scrolls in its own fixed pane below so it never pushes these down. */}
         <div className="ins-scoreboard">
           <div>{turns.length} turns · {tools.length} tool calls</div>
           {latest && <div>{latest.exposedToolCount} of {latest.fullToolCount} tools exposed</div>}
@@ -300,6 +316,11 @@ export function Inspector(
               cache hit rate <b>{(hitRate * 100).toFixed(0)}%</b> · ≈{fmt(sessionTokens)} cost-weighted tokens
             </div>
           )}
+        </div>
+
+        <div className="ins-timeline" ref={timelineRef}>
+          {tools.length === 0 ? <p className="ins-empty">No tool calls yet — start planning a trip.</p>
+            : tools.map((t, i) => <ToolRow key={i} t={t} />)}
         </div>
 
         <div className="ins-cost">

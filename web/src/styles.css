@@ -120,7 +120,12 @@ button.ins-rail:hover { color: var(--ink); }
 .ins-collapse:hover { color: var(--ink); border-color: var(--muted); }
 .ins-region { position: relative; z-index: 3; }
 .ins-region h3 { font: 500 var(--t-12)/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: var(--s4) 0 var(--s2); }
-.ins-timeline { margin: var(--s3) 0; }
+/* Fixed-height scroll pane: the tool log stays put instead of pushing the cost /
+   context / validation sections further down the page as calls stream in. */
+.ins-timeline {
+  margin: var(--s2) 0; max-height: 230px; overflow-y: auto;
+  border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+}
 .ins-empty { color: var(--muted-2); font: 400 var(--t-13)/1.6 var(--mono); }
 .ins-tool { border-top: 1px solid var(--line); }
 .ins-tool.err .ins-tool-head { color: var(--red); }
@@ -133,9 +138,15 @@ button.ins-rail:hover { color: var(--ink); }
 .ins-tierline a, .ins-links a { color: var(--amber); }
 .ins-links { list-style: none; margin: var(--s2) 0 0; padding: 0; }
 .ins-links li { margin: 0 0 var(--s2); line-height: 1.5; font-size: var(--t-13); }
-.ins-routing .ins-phase { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 4px 0; font-size: var(--t-13); }
+/* Condensed: the per-phase pickers sit two-up instead of two stacked full-width
+   rows, so the routing block is a single compact line + one row of selects. */
+.ins-routing h3 { margin-top: var(--s2); }
+.ins-routing .ins-note { margin: 0 0 5px; }
+.ins-phases { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ins-routing .ins-phase { display: flex; flex-direction: column; gap: 3px; margin: 0; font-size: var(--t-12); }
+.ins-routing .ins-phase-name { color: var(--muted); }
 .ins-routing .ins-phase.active .ins-phase-name { color: var(--phosphor); font-weight: 600; }
-.ins-routing select { background: var(--board-3); color: var(--ink); border: 1px solid var(--line); border-radius: 5px; font: 500 var(--t-12)/1 var(--mono); padding: 4px 6px; }
+.ins-routing select { width: 100%; background: var(--board-3); color: var(--ink); border: 1px solid var(--line); border-radius: 5px; font: 500 var(--t-12)/1 var(--mono); padding: 4px 6px; }
 .ins-actualcost { color: var(--phosphor); font-variant-numeric: tabular-nums; }
 .model-switch button[aria-pressed="true"] { color: var(--ink); border-color: var(--phosphor); }
 .ins-toggle { font: 500 var(--t-12)/1 var(--mono); padding: 3px 9px; border: 1px solid var(--line); border-radius: 5px; background: var(--board-3); color: var(--ink); cursor: pointer; }
