@@ -23,9 +23,9 @@ export async function hashCode(plaintext: string, key: string): Promise<string> 
 // Crockford base32 alphabet (no I, L, O, U — unambiguous).
 const ALPHABET = "0123456789abcdefghjkmnpqrstvwxyz";
 
-/** 20 chars of base32 ≈ 100 bits printed, drawn from 160 random bits → grouped 4-4-4-4. */
+/** 16 base32 chars × 5 bits = 80 bits of entropy, grouped 4-4-4-4 (e.g. k7m2-9x4p-w3rq-h8tn). */
 export function generateCode(): string {
-  const bytes = new Uint8Array(20);
+  const bytes = new Uint8Array(16);
   crypto.getRandomValues(bytes);
   let out = "";
   for (let i = 0; i < 16; i++) out += ALPHABET[bytes[i] & 31];
