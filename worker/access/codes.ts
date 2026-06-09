@@ -86,3 +86,41 @@ export async function lookupByCode(
     [code_hash, nowIso],
   );
 }
+
+/**
+ * Reserve budget for one exchange. A single conditional UPDATE (always routed to
+ * D1's primary) atomically verifies live+budget and books `estMicros`. SQLite/D1
+ * evaluate SET/WHERE against the PRE-update row, so the CASE correctly resets the
+ * daily window when day_date is stale. Returns true iff exactly one row changed.
+ */
+export async function admit(
+  db: Db, codeId: string, estMicros: number, nowIso: string, today: string,
+): Promise<boolean> {
+  const r = await db.run(
+    `UPDATE codes
+        SET day_spent      = (CASE WHEN day_date = ? THEN day_spent ELSE 0 END) + ?,
+            day_date       = ?,
+            lifetime_spent = lifetime_spent + ?
+      WHERE id = ?
+        AND revoked = 0
+        AND (expires_at IS NULL OR expires_at > ?)
+        AND (CASE WHEN day_date = ? THEN day_spent ELSE 0 END) + ? <= daily_micros
+        AND lifetime_spent + ? <= total_micros`,
+    [today, estMicros, today, estMicros, codeId, nowIso, today, estMicros, estMicros],
+  );
+  return r.changes === 1;
+}
+
+/** Only called after admit() returns false — classifies the 503 message. */
+export async function admissionReason(
+  db: Db, codeId: string, estMicros: number, nowIso: string, today: string,
+): Promise<AdmissionReason> {
+  const row = await db.first<CodeRow>("SELECT * FROM codes WHERE id=?", [codeId]);
+  if (!row) return "revoked";
+  if (row.revoked) return "revoked";
+  if (row.expires_at && row.expires_at <= nowIso) return "expired";
+  const dayBase = row.day_date === today ? row.day_spent : 0;
+  if (dayBase + estMicros > row.daily_micros) return "daily";
+  if (row.lifetime_spent + estMicros > row.total_micros) return "lifetime";
+  return "ok";
+}

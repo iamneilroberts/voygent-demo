@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { hashCode, generateCode } from "./codes";
 import { makeTestDb } from "./testdb";
 import { createCode, listCodes, revokeCode, lookupByCode, usageForCode } from "./codes";
+import { admit, admissionReason } from "./codes";
 
 describe("code crypto", () => {
   it("hashCode is deterministic and key-sensitive", async () => {
@@ -56,5 +57,57 @@ describe("code store", () => {
     const events = await usageForCode(db, "c", "2026-06-09T00:00:00Z");
     expect(events).toHaveLength(1);
     expect(events[0].actual_micros).toBe(2);
+  });
+});
+
+async function seed(db: Awaited<ReturnType<typeof makeTestDb>>, over: Partial<any> = {}) {
+  await createCode(db, {
+    id: "c", label: "L", view: "default",
+    dailyMicros: over.dailyMicros ?? 1_000_000,   // $1/day
+    totalMicros: over.totalMicros ?? 3_000_000,   // $3 lifetime
+    expiresAt: over.expiresAt ?? null,
+  }, HASH_KEY, "2026-06-09T00:00:00Z");
+  if (over.revoked) await revokeCode(db, "c");
+}
+
+describe("admission", () => {
+  const NOW = "2026-06-09T12:00:00Z";
+  const TODAY = "2026-06-09";
+  const EST = 200_000; // $0.20 reservation
+
+  it("admits up to the daily cap then refuses, bounded by the cap", async () => {
+    const db = makeTestDb(); await seed(db); // $1/day, EST $0.20 → 5 admits
+    let admitted = 0;
+    for (let i = 0; i < 8; i++) if (await admit(db, "c", EST, NOW, TODAY)) admitted++;
+    expect(admitted).toBe(5);
+    expect(await admissionReason(db, "c", EST, NOW, TODAY)).toBe("daily");
+  });
+
+  it("rolls the daily window when day_date is stale without touching lifetime", async () => {
+    const db = makeTestDb(); await seed(db);
+    expect(await admit(db, "c", EST, "2026-06-08T23:00:00Z", "2026-06-08")).toBe(true);
+    const next = await admit(db, "c", EST, NOW, TODAY); // new day → daily resets
+    expect(next).toBe(true);
+    const row = await db.first<{ day_spent: number; lifetime_spent: number }>(
+      "SELECT day_spent, lifetime_spent FROM codes WHERE id='c'");
+    expect(row?.day_spent).toBe(EST);        // window reset to just today's one booking
+    expect(row?.lifetime_spent).toBe(2 * EST); // lifetime accumulates across days
+  });
+
+  it("refuses on lifetime cap even when daily has room", async () => {
+    const db = makeTestDb(); await seed(db, { dailyMicros: 10_000_000, totalMicros: 500_000 });
+    expect(await admit(db, "c", 300_000, NOW, TODAY)).toBe(true);
+    expect(await admit(db, "c", 300_000, NOW, TODAY)).toBe(false); // 600k > 500k lifetime
+    expect(await admissionReason(db, "c", 300_000, NOW, TODAY)).toBe("lifetime");
+  });
+
+  it("refuses revoked and expired codes", async () => {
+    const db1 = makeTestDb(); await seed(db1, { revoked: true });
+    expect(await admit(db1, "c", EST, NOW, TODAY)).toBe(false);
+    expect(await admissionReason(db1, "c", EST, NOW, TODAY)).toBe("revoked");
+
+    const db2 = makeTestDb(); await seed(db2, { expiresAt: "2026-06-09T06:00:00Z" });
+    expect(await admit(db2, "c", EST, NOW, TODAY)).toBe(false); // NOW is after expiry
+    expect(await admissionReason(db2, "c", EST, NOW, TODAY)).toBe("expired");
   });
 });
