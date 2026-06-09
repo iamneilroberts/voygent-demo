@@ -36,8 +36,9 @@ export function applyInteraction(state: ReelViewState, i: ReelInteraction, actor
   }
 }
 
-// Mark edit overlays reconciled once a real folio event lands carrying the change.
-// Called by App when applyEvent processes a "folio" event (P2.2 wiring).
+// Marks ALL pending edit overlays reconciled. The caller (App's applyEvent) fires this on any
+// folio event. V1: the reel's linear flow means a folio event always follows the edit it carries,
+// so "reconcile all pending" is correct here; a path-aware version can come if reels interleave edits.
 export function reconcileEdits(state: ReelViewState): ReelViewState {
   if (!state.edits.some((e) => !e.reconciled)) return state;
   return { ...state, edits: state.edits.map((e) => (e.reconciled ? e : { ...e, reconciled: true })) };

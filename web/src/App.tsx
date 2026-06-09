@@ -23,6 +23,7 @@ import { resolveInitialSkin, applySkin, type SkinId } from "./lib/skin";
 import { createRecorder } from "./lib/recorder";
 import { resolveInitialMode, persistMode, type ModeId } from "./lib/mode";
 import { replayChat } from "./lib/recording";
+import { emptyReelViewState, applyInteraction, reconcileEdits, type ReelViewState } from "./lib/interaction";
 import { selectReel } from "./recordings/registry";
 import { ReelIntro } from "./ReelIntro";
 import { ReelCallout } from "./ReelCallout";
@@ -104,6 +105,7 @@ export function App() {
   const [speed, setSpeed] = useState<number>(2);          // default 2x
   const speedRef = useRef(speed); useEffect(() => { speedRef.current = speed; }, [speed]);
   const [activeHighlight, setActiveHighlight] = useState<Highlight | null>(null);
+  const [, setReelView] = useState<ReelViewState>(emptyReelViewState);
   const hlResolve = useRef<(() => void) | null>(null);
   const postReel = (() => { try { return new URLSearchParams(window.location.search).get("greet") === "reel"; } catch { return false; } })();
   useEffect(() => { persistMode(mode); }, [mode]);
@@ -141,6 +143,7 @@ export function App() {
       pushUser,
       setBusy,
       onHighlight: onReelHighlight,
+      applyInteraction: (i, actor) => setReelView((s) => applyInteraction(s, i, actor)),
     }, {
       reducedMotion: reduced,
       signal: ac.signal,
@@ -228,6 +231,8 @@ export function App() {
     }]);
     else if (e.type === "folio") {
       setFolio(e.folio);
+      // Folio ownership: canonical folio is owned here; an edit overlay clears once its folio event lands.
+      setReelView((s) => reconcileEdits(s));
       // Fallback resolution: the agent promoted (e.g. after a typed reply),
       // so close out any still-open boards of the now-promoted kind.
       setItems((m) => m.map((it) => (
@@ -260,6 +265,7 @@ export function App() {
     setInsOverhead([]); setInsStores([]); setInsValidations([]); setInsPhases([]);
     // Clear any in-flight callout so a Replay never starts under a stale spotlight (Codex review).
     hlResolve.current?.(); hlResolve.current = null; setActiveHighlight(null);
+    setReelView(emptyReelViewState());   // P2: clear picks/edits/threads/handoff
   }
 
   function onReelHighlight(h: Highlight): Promise<void> {
