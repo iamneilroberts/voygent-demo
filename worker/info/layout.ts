@@ -73,7 +73,7 @@ export function renderInfoPage(meta: { title: string; subtitle?: string }, bodyH
     <span class="brand"><a href="/">✳ Voygent</a></span>
     <span class="sub">demo · engineering notes</span>
   </header>
-  <nav class="crumbs"><a href="/">← back to the demo</a> · ${navLinks}</nav>
+  <nav class="crumbs"><a href="/">← back to the demo</a> · <a href="/blog">notes</a> · ${navLinks}</nav>
   <h1 id="info-title">${esc(meta.title)}</h1>
   <p class="subtitle" id="info-subtitle">${meta.subtitle ? esc(meta.subtitle) : ""}</p>
   <div id="info-body">${bodyHtml}</div>

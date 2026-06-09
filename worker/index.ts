@@ -1,7 +1,8 @@
 export { SessionDO } from "./session-do";
 import { buildPresets } from "./presets";
-import { getPageData, mergeOverride, renderInfo, isKnownSlug } from "./info/pages";
+import { getPageData, mergeOverride, renderInfo, isKnownSlug, PAGES } from "./info/pages";
 import { getOverride, putOverride, deleteOverride } from "./info/overrides";
+import { collectPosts, renderBlog } from "./blog/render";
 import { enabledModels, DEFAULT_SMART_MAP } from "../shared/models";
 import { STATS_AGG_SQL, shapeStats, type StatsAggRow } from "./stats";
 import { deepseekEnabled } from "./llm/index";
@@ -99,6 +100,17 @@ export default {
       }
       // Unknown info slug → send them to the demo rather than a bare "ok".
       return Response.redirect(new URL("/", url).toString(), 302);
+    }
+    if (url.pathname === "/blog" && req.method === "GET") {
+      // Blog landing: auto-indexed deep-dive posts (content.json entries flagged
+      // blog:true) + an editable hero narrative (the `blog-home` entry, edited
+      // in place via the same admin editor). Hero edits save through the existing
+      // POST /info/blog-home/save|revert routes.
+      const def = getPageData("blog-home");
+      const ov = def ? await getOverride(db, "blog-home") : null;
+      const hero = def ? mergeOverride(def, ov) : null;
+      const html = renderBlog(hero, collectPosts(PAGES), { withEditor: true, edited: !!ov });
+      return new Response(html, { headers: { ...cors(), "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } });
     }
     if (url.pathname === "/presets" && req.method === "GET") {
       // Featured trips for the first-run chips + IP-geo greeting (no permission prompt).

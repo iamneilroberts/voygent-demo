@@ -72,6 +72,16 @@ describe("mergeOverrides", () => {
     mergeOverrides(c, [{ slug: "subagents", title: "X", subtitle: "y", body: "z", updated_at: 1 }]);
     expect(c.subagents.title).toBe("Subagents");
   });
+  it("preserves non-edited fields like blog/tags on a pulled entry", () => {
+    const content = { "context-economics-v2": { title: "T", subtitle: "S", body: "<p>b</p>", blog: true, tags: ["context", "cost"] } };
+    const { content: next } = mergeOverrides(content, [
+      { slug: "context-economics-v2", title: "New T", subtitle: "S", body: "<p>edited</p>", updated_at: 9 },
+    ]);
+    expect(next["context-economics-v2"].title).toBe("New T");
+    expect(next["context-economics-v2"].body).toBe("<p>edited</p>");
+    expect(next["context-economics-v2"].blog).toBe(true);
+    expect(next["context-economics-v2"].tags).toEqual(["context", "cost"]);
+  });
 });
 
 describe("planClear (snapshot guard)", () => {

@@ -56,7 +56,10 @@ export function mergeOverrides(content, rows) {
   for (const r of rows) {
     if (!Object.prototype.hasOwnProperty.call(next, r.slug)) { skipped.push(r.slug); continue; }
     const before = next[r.slug];
+    // Preserve non-edited fields (e.g. blog/tags) — the editor only ever writes
+    // title/subtitle/body, so anything else lives only in content.json.
     const merged = {
+      ...before,
       title: r.title ?? before.title,
       subtitle: r.subtitle ?? before.subtitle,
       body: r.body ?? before.body,
