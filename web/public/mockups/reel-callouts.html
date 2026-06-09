@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reel — highlight callouts</title>
+<style>
+  :root{
+    --cl-bg:#faf9f5; --cl-surface:#fff; --cl-user-bubble:#f0eee6;
+    --cl-ink:#1f1e1c; --cl-ink-2:#3d3d3a; --cl-muted:#6b6a64; --cl-line:#e8e6dd;
+    --cl-accent:#c96442; --cl-tool-bg:#f5f4ee;
+    --cl-sans:ui-sans-serif,-apple-system,"Segoe UI","Helvetica Neue",system-ui,sans-serif;
+    --cl-serif:Georgia,"Iowan Old Style","Times New Roman",serif;
+    --cl-mono:ui-monospace,"SF Mono",Menlo,monospace;
+    --board:#0c0a07; --bk-ink:#efe7d6; --bk-muted:#9a907c; --amber:#f5a623; --phosphor:#79d98a; --bk-line:#26201a;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:#ece9e1;color:var(--cl-ink);font-family:var(--cl-sans);font-size:15px;line-height:1.5;
+    padding:28px 16px 80px}
+  .page{max-width:1080px;margin:0 auto}
+  h1{font:600 26px/1.1 var(--cl-sans);letter-spacing:-.01em;margin:0 0 4px}
+  .sub{color:var(--cl-muted);max-width:66ch;margin:0 0 6px}
+  .kick{font:600 11px/1 var(--cl-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--cl-accent);
+    margin:34px 0 10px}
+  .note{color:var(--cl-muted);font-size:13px;max-width:74ch;margin:10px 0 0}
+  .note b{color:var(--cl-ink)}
+
+  /* reel frame: claude chat (left) + restrained engineering board (right) */
+  .frame{position:relative;border:1px solid #d9d5c9;border-radius:12px;overflow:hidden;
+    box-shadow:0 12px 40px #0000001a;height:460px;display:grid;grid-template-columns:1.55fr 1fr;background:var(--cl-bg)}
+  .pane-chat{display:flex;flex-direction:column;min-width:0}
+  .topbar{display:flex;align-items:center;gap:8px;padding:9px 16px;border-bottom:1px solid var(--cl-line)}
+  .wordmark{font:600 15px/1 var(--cl-sans)} .wordmark .sp{color:var(--cl-accent);margin-right:2px}
+  .speed{margin-left:auto;display:inline-flex;gap:2px;border:1px solid var(--cl-line);border-radius:8px;
+    padding:2px;font:600 11px/1 var(--cl-mono)}
+  .speed span{padding:4px 7px;border-radius:6px;color:var(--cl-muted)}
+  .speed span.on{background:var(--cl-accent);color:#fff}
+  .chat{padding:18px 20px;display:flex;flex-direction:column;gap:14px;overflow:hidden}
+  .bubble-u{align-self:flex-end;max-width:72%;background:var(--cl-user-bubble);padding:8px 13px;border-radius:14px;font-size:13.5px}
+  .prose{font-family:var(--cl-serif);font-size:15px;line-height:1.55;color:var(--cl-ink-2);max-width:54ch}
+  .chip{display:inline-flex;align-items:center;gap:7px;background:var(--cl-tool-bg);border:1px solid var(--cl-line);
+    border-radius:8px;padding:6px 11px;font:500 12px/1.2 var(--cl-mono);color:var(--cl-muted);align-self:flex-start}
+  .chip.recover{border-color:#e6b9a8;background:#fbf1ec;color:#9c4a2e}
+  .chip .dot{width:7px;height:7px;border-radius:50%;background:currentColor;display:inline-block}
+
+  /* restrained engineering board (right) */
+  .pane-board{background:var(--board);color:var(--bk-ink);font-family:var(--cl-mono);font-size:12px;
+    border-left:1px solid #d9d5c9;padding:14px 14px;display:flex;flex-direction:column;gap:11px;overflow:hidden}
+  .pane-board .bhead{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--bk-muted)}
+  .row{display:flex;justify-content:space-between;gap:10px;color:var(--bk-muted)}
+  .row b{color:var(--bk-ink);font-weight:600}
+  .row .ok{color:var(--phosphor)}
+  .row .am{color:var(--amber)}
+  .meter{height:5px;border-radius:3px;background:#241d12;overflow:hidden}
+  .meter i{display:block;height:100%;background:var(--amber)}
+
+  /* dim layer when a callout pauses playback */
+  .dim::after{content:"";position:absolute;inset:0;background:#1f1e1c2e;z-index:3;pointer-events:none}
+
+  /* === Treatment 1: spotlight + anchored card === */
+  .spot{position:absolute;z-index:5;border-radius:10px;box-shadow:0 0 0 3px var(--cl-accent),0 0 0 9999px #1f1e1c55;}
+  .callout{position:absolute;z-index:6;background:#fff;border:1px solid var(--cl-line);border-radius:12px;
+    width:268px;padding:13px 15px;box-shadow:0 18px 48px #00000033}
+  .callout .ey{font:600 10px/1 var(--cl-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--cl-accent);
+    display:flex;align-items:center;gap:6px}
+  .callout h4{font:600 14px/1.25 var(--cl-sans);margin:8px 0 5px}
+  .callout p{font-size:12.5px;line-height:1.5;color:var(--cl-muted);margin:0}
+  .callout .bar{display:flex;align-items:center;gap:8px;margin-top:11px;font:500 11px/1 var(--cl-mono);color:var(--cl-muted)}
+  .callout .prog{flex:1;height:3px;border-radius:2px;background:var(--cl-line);overflow:hidden}
+  .callout .prog i{display:block;height:100%;width:55%;background:var(--cl-accent)}
+  .callout .cont{color:var(--cl-accent);font-weight:600;cursor:pointer}
+  .callout::before{content:"";position:absolute;width:12px;height:12px;background:#fff;border:1px solid var(--cl-line);
+    border-right:none;border-bottom:none;transform:rotate(-45deg)}
+
+  /* === Treatment 2: gutter note (non-blocking, playback just slows) === */
+  .gutter{position:absolute;z-index:5;left:50%;transform:translateX(-50%);max-width:300px;background:#fff;
+    border:1px solid var(--cl-line);border-left:3px solid var(--cl-accent);border-radius:10px;padding:11px 13px;
+    box-shadow:0 12px 32px #00000022}
+  .gutter .ey{font:600 10px/1 var(--cl-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--cl-accent)}
+  .gutter h4{font:600 13px/1.25 var(--cl-sans);margin:6px 0 4px}
+  .gutter p{font-size:12px;line-height:1.45;color:var(--cl-muted);margin:0}
+  .badge{position:absolute;top:9px;left:11px;z-index:7;font:600 10px/1 var(--cl-mono);letter-spacing:.1em;
+    text-transform:uppercase;color:#fff;background:#1f1e1c;padding:5px 9px;border-radius:6px}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Highlight callouts — pause &amp; explain the engineered moments</h1>
+  <p class="sub">Two treatments for spotlighting the beats that prove “engineered, not a chatbot”:
+     <b>auto-recovery</b>, <b>context/token saved</b>, <b>cost</b>. Same reel frame
+     (claude chat left, restrained engineering board right), frozen on the recovery beat.</p>
+
+  <!-- ============ Treatment 1 ============ -->
+  <div class="kick">Treatment 1 · Spotlight + anchored card (pauses playback)</div>
+  <div class="frame dim">
+    <span class="badge">Paused · highlight</span>
+    <div class="pane-chat">
+      <div class="topbar"><span class="wordmark"><span class="sp">✳</span>Voygent</span>
+        <span class="speed"><span>1×</span><span class="on">2×</span></span></div>
+      <div class="chat">
+        <div class="bubble-u">Plan me 5 days in Dublin this October</div>
+        <div class="prose">Pulling live flights now…</div>
+        <span class="chip">⚙ flight_search · MOB→DUB</span>
+        <!-- the highlighted chip gets the spotlight ring below -->
+        <span class="chip recover" id="anchor1"><span class="dot"></span> ↩ first source timed out — retrying another</span>
+        <div class="prose">Got it — Aer Lingus via a second source, no detail lost.</div>
+      </div>
+    </div>
+    <div class="pane-board">
+      <div class="bhead">Engineering · live</div>
+      <div class="row"><span>turn</span><b>3 / 11</b></div>
+      <div class="row"><span>tool calls</span><b>7</b> <span class="ok">ok</span></div>
+      <div class="row"><span>recovered</span><span class="am">1 retry</span></div>
+      <div class="meter"><i style="width:34%"></i></div>
+      <div class="row"><span>context reused</span><span class="ok">12.4k cached</span></div>
+      <div class="row"><span>spend</span><b>$0.018</b></div>
+    </div>
+    <!-- spotlight ring around the recovery chip -->
+    <div class="spot" style="left:20px;top:206px;width:330px;height:34px"></div>
+    <!-- callout card pointing up-left at the chip -->
+    <div class="callout" style="left:120px;top:258px">
+      <div class="ey">↩ Auto-recovery</div>
+      <h4>It handled a failure without losing the trip</h4>
+      <p>The first flight supplier timed out. The agent caught it, retried a different
+         source, and continued — no error shown to the traveler.</p>
+      <div class="bar"><span class="prog"><i></i></span><span>resuming…</span><span class="cont">Continue ▶</span></div>
+      <span style="position:absolute;left:34px;top:-7px" class="arrow"></span>
+    </div>
+  </div>
+  <p class="note"><b>Treatment 1 —</b> playback freezes, everything dims except the beat, a card explains it
+     in plain language, then auto-resumes (with a “Continue” to skip the wait). Strongest for teaching;
+     it briefly stops the show 3–4 times. Card can anchor to the <b>chat</b> (recovery) or the
+     <b>board</b> (savings/cost).</p>
+
+  <!-- ============ Treatment 2 ============ -->
+  <div class="kick">Treatment 2 · Gutter note (non-blocking — playback just slows)</div>
+  <div class="frame">
+    <div class="pane-chat">
+      <div class="topbar"><span class="wordmark"><span class="sp">✳</span>Voygent</span>
+        <span class="speed"><span>1×</span><span class="on">2×</span></span></div>
+      <div class="chat">
+        <div class="bubble-u">Plan me 5 days in Dublin this October</div>
+        <div class="prose">Pulling live flights now…</div>
+        <span class="chip">⚙ flight_search · MOB→DUB</span>
+        <span class="chip recover"><span class="dot"></span> ↩ first source timed out — retrying another</span>
+        <div class="prose">Got it — Aer Lingus via a second source, no detail lost.</div>
+      </div>
+    </div>
+    <div class="pane-board">
+      <div class="bhead">Engineering · live</div>
+      <div class="row"><span>turn</span><b>3 / 11</b></div>
+      <div class="row"><span>tool calls</span><b>7</b> <span class="ok">ok</span></div>
+      <div class="row"><span>recovered</span><span class="am">1 retry</span></div>
+      <div class="meter"><i style="width:34%"></i></div>
+      <div class="row"><span>context reused</span><span class="ok">12.4k cached</span></div>
+      <div class="row"><span>spend</span><b>$0.018</b></div>
+    </div>
+    <!-- a small note slides in over the pane seam, playback continues underneath at slow speed -->
+    <div class="gutter" style="top:150px">
+      <div class="ey">↩ Auto-recovery</div>
+      <h4>Handled a failure mid-build</h4>
+      <p>First supplier timed out → retried another, trip intact. No error reached the traveler.</p>
+    </div>
+  </div>
+  <p class="note"><b>Treatment 2 —</b> no freeze; the reel keeps playing (at the slow pace) while a small
+     note slides in near the beat and fades out. Less didactic, never stops the show — but easier to
+     miss, and competes with the live motion. Good if you want flow over teaching.</p>
+
+  <p class="note" style="margin-top:30px">Reply in the terminal: <b>Treatment 1 or 2</b>, plus —
+     for T1 — should it <b>auto-resume after a few seconds</b>, or <b>wait for a click</b>? And confirm
+     the moments to spotlight (recovery · context-saved · cost), or add/drop any.</p>
+</div>
+</body>
+</html>

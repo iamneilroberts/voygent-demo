@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reel — intro modal directions</title>
+<style>
+  :root{
+    --cl-bg:#faf9f5; --cl-surface:#fff; --cl-user-bubble:#f0eee6;
+    --cl-ink:#1f1e1c; --cl-ink-2:#3d3d3a; --cl-muted:#6b6a64; --cl-line:#e8e6dd;
+    --cl-accent:#c96442; --cl-accent-ink:#fff; --cl-tool-bg:#f5f4ee;
+    --cl-sans:ui-sans-serif,-apple-system,"Segoe UI","Helvetica Neue",system-ui,sans-serif;
+    --cl-serif:Georgia,"Iowan Old Style","Times New Roman",serif;
+    --cl-mono:ui-monospace,"SF Mono",Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:#ece9e1;color:var(--cl-ink);font-family:var(--cl-sans);font-size:15px;line-height:1.5;
+    padding:28px 16px 80px}
+  .page{max-width:1040px;margin:0 auto}
+  h1{font:600 26px/1.1 var(--cl-sans);letter-spacing:-.01em;margin:0 0 4px}
+  .sub{color:var(--cl-muted);max-width:64ch;margin:0 0 28px}
+  .kick{font:600 11px/1 var(--cl-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--cl-accent);
+    margin:34px 0 10px}
+  .note{color:var(--cl-muted);font-size:13px;max-width:70ch;margin:8px 0 0}
+  .note b{color:var(--cl-ink)}
+
+  /* faux claude-skin app frame behind each modal */
+  .frame{position:relative;border:1px solid #d9d5c9;border-radius:12px;overflow:hidden;background:var(--cl-bg);
+    box-shadow:0 12px 40px #0000001a;height:430px}
+  .frame .topbar{display:flex;align-items:center;gap:8px;padding:10px 18px;border-bottom:1px solid var(--cl-line);
+    background:var(--cl-bg)}
+  .wordmark{font:600 16px/1 var(--cl-sans);letter-spacing:-.01em}
+  .wordmark .sp{color:var(--cl-accent);margin-right:2px}
+  .topbar .pos{margin-left:auto;color:var(--cl-muted);font:500 10px/1.3 var(--cl-mono);text-align:right;max-width:40ch}
+  .ribbon{padding:5px 18px;text-align:center;font-size:12px;color:var(--cl-muted);background:var(--cl-tool-bg);
+    border-bottom:1px solid var(--cl-line)}
+  .chat{padding:22px 24px;display:flex;flex-direction:column;gap:16px;filter:saturate(.96)}
+  .bubble-u{align-self:flex-end;max-width:70%;background:var(--cl-user-bubble);padding:9px 14px;border-radius:15px;
+    font-size:14px}
+  .prose{font-family:var(--cl-serif);font-size:16px;line-height:1.6;color:var(--cl-ink-2);max-width:60ch}
+  .toolpill{display:inline-flex;align-items:center;gap:7px;background:var(--cl-tool-bg);border:1px solid var(--cl-line);
+    border-radius:8px;padding:5px 11px;font:500 12px/1 var(--cl-mono);color:var(--cl-muted);align-self:flex-start}
+  .dim{filter:blur(2px) brightness(.99);opacity:.85}
+
+  /* shared overlay */
+  .scrim{position:absolute;inset:0;background:#1f1e1c40;backdrop-filter:blur(2px);display:flex;align-items:center;
+    justify-content:center;padding:20px}
+
+  /* ---- A: calm centered card ---- */
+  .cardA{background:var(--cl-surface);border:1px solid var(--cl-line);border-radius:16px;max-width:460px;width:100%;
+    padding:28px 28px 24px;box-shadow:0 24px 60px #00000026;text-align:center}
+  .cardA .eyebrow{font:600 11px/1 var(--cl-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--cl-accent)}
+  .cardA h2{font:600 22px/1.2 var(--cl-sans);margin:12px 0 6px;letter-spacing:-.01em}
+  .cardA p{color:var(--cl-muted);font-size:14px;margin:0 auto 22px;max-width:46ch}
+  .btn{display:block;width:100%;border-radius:11px;padding:13px 16px;font:600 15px/1.2 var(--cl-sans);cursor:pointer;
+    border:1px solid transparent;text-align:center}
+  .btn-primary{background:var(--cl-accent);color:#fff}
+  .btn-primary .meta{display:block;font:500 12px/1 var(--cl-mono);opacity:.85;margin-top:5px}
+  .btn-secondary{background:#fff;color:var(--cl-ink);border-color:var(--cl-line);margin-top:10px}
+  .btn-secondary .meta{display:block;font:500 12px/1 var(--cl-mono);color:var(--cl-muted);margin-top:5px}
+
+  /* ---- B: split two-panel ---- */
+  .splitWrap{display:flex;width:100%;max-width:640px;border-radius:16px;overflow:hidden;
+    box-shadow:0 24px 60px #00000030;border:1px solid var(--cl-line)}
+  .half{flex:1;padding:30px 24px;background:var(--cl-surface);text-align:center;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;min-height:300px;cursor:pointer}
+  .half.primary{background:#fbf6f3;border-right:1px solid var(--cl-line)}
+  .half .ico{font-size:26px;margin-bottom:12px}
+  .half h3{font:600 18px/1.2 var(--cl-sans);margin:0 0 8px}
+  .half p{color:var(--cl-muted);font-size:13px;margin:0 0 16px;max-width:30ch}
+  .half .cta{font:600 13px/1 var(--cl-mono);color:var(--cl-accent);letter-spacing:.02em}
+  .half.alt .cta{color:var(--cl-ink-2)}
+  /* mini flip accent */
+  .flip{display:inline-flex;gap:2px;margin-bottom:14px}
+  .flip b{display:inline-grid;place-items:center;min-width:18px;padding:4px 2px;font:700 13px/1 var(--cl-mono);
+    color:#f5a623;background:#16120c;border-radius:3px}
+
+  /* ---- C: subdued inline banner (least intrusive) ---- */
+  .bannerWrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+  .bannerWrap .behind{position:absolute;inset:0}
+  .banner{position:relative;background:var(--cl-surface);border:1px solid var(--cl-line);border-radius:14px;
+    max-width:560px;width:100%;padding:16px 18px;box-shadow:0 16px 40px #0000001f;display:flex;align-items:center;
+    gap:16px}
+  .banner .txt{flex:1}
+  .banner .txt h3{font:600 15px/1.3 var(--cl-sans);margin:0 0 2px}
+  .banner .txt p{color:var(--cl-muted);font-size:13px;margin:0}
+  .banner .acts{display:flex;gap:8px;flex-shrink:0}
+  .pill{border-radius:9px;padding:9px 14px;font:600 13px/1 var(--cl-sans);cursor:pointer;white-space:nowrap;
+    border:1px solid var(--cl-line);background:#fff;color:var(--cl-ink)}
+  .pill.primary{background:var(--cl-accent);color:#fff;border-color:transparent}
+  .label{position:absolute;top:10px;left:12px;font:600 11px/1 var(--cl-mono);letter-spacing:.12em;
+    text-transform:uppercase;color:#fff;background:#1f1e1c;padding:5px 9px;border-radius:6px;z-index:5}
+</style>
+</head>
+<body>
+<div class="page">
+  <h1>Reel intro — pick the entry moment</h1>
+  <p class="sub">The first thing a visitor sees before the demo plays. It must pause, set expectations
+  (“a <b>real</b> replayed session”), and offer the two doors: <b>watch the 2× replay</b> or
+  <b>plan your own trip live</b>. All three are claude-skin native (warm cream, terracotta accent).</p>
+
+  <!-- ============ A ============ -->
+  <div class="kick">Direction A · Calm centered card</div>
+  <div class="frame">
+    <div class="topbar dim"><span class="wordmark"><span class="sp">✳</span>Voygent</span>
+      <span class="pos">MCP agent · live flights &amp; hotels · engineered, not a chatbot</span></div>
+    <div class="ribbon dim">Demo — real model, real supplier data, no booking</div>
+    <div class="chat dim">
+      <div class="bubble-u">Plan me 5 days in Dublin this October</div>
+      <span class="toolpill">⚙ manage_trip_goal · deriving checklist</span>
+      <div class="prose">Great — Dublin in October is a lovely shoulder-season pick. Let me line up flights first…</div>
+    </div>
+    <div class="scrim">
+      <div class="cardA">
+        <div class="eyebrow">▶ Watch a real session</div>
+        <h2>See Voygent plan a real trip</h2>
+        <p>A 2-minute replay of an actual advisor session — live flights, hotels, edits, and the
+           client hand-off. Nothing is faked.</p>
+        <button class="btn btn-primary">▶ Watch the 2× replay<span class="meta">Dublin · Oct · ~2 min</span></button>
+        <button class="btn btn-secondary">Plan your own trip instead<span class="meta">live · type anything</span></button>
+      </div>
+    </div>
+  </div>
+  <p class="note"><b>A —</b> conventional, calm, on-brand. Lowest risk. Primary action is the replay;
+     “plan your own” is the quiet escape hatch. Easy to add “skip intro” memory.</p>
+
+  <!-- ============ B ============ -->
+  <div class="kick">Direction B · Two-door split (with optional flip accent)</div>
+  <div class="frame">
+    <div class="topbar dim"><span class="wordmark"><span class="sp">✳</span>Voygent</span>
+      <span class="pos">MCP agent · live flights &amp; hotels · engineered, not a chatbot</span></div>
+    <div class="ribbon dim">Demo — real model, real supplier data, no booking</div>
+    <div class="chat dim"><div class="bubble-u">Plan me 5 days in Dublin this October</div></div>
+    <div class="scrim">
+      <div class="splitWrap">
+        <div class="half primary">
+          <div class="flip"><b>2</b><b>×</b></div>
+          <div class="ico">🎬</div>
+          <h3>Watch a real session</h3>
+          <p>2-min replay: live search, advisor edits, client hand-off. All real.</p>
+          <div class="cta">▶ Play the replay →</div>
+        </div>
+        <div class="half alt">
+          <div class="ico">✎</div>
+          <h3>Plan your own trip</h3>
+          <p>Go live now — type any destination and watch it build for real.</p>
+          <div class="cta">Start building →</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="note"><b>B —</b> the two doors are equal-weight and explicit — strong for a demo where some
+     visitors want to lean back and some want to drive. The little amber <b>2×</b> flip is the one
+     departure-board nod; drop it for fully subdued.</p>
+
+  <!-- ============ C ============ -->
+  <div class="kick">Direction C · Subdued inline banner (least intrusive)</div>
+  <div class="frame">
+    <div class="topbar"><span class="wordmark"><span class="sp">✳</span>Voygent</span>
+      <span class="pos">MCP agent · live flights &amp; hotels · engineered, not a chatbot</span></div>
+    <div class="ribbon">Demo — real model, real supplier data, no booking</div>
+    <div class="chat">
+      <div class="bubble-u">Plan me 5 days in Dublin this October</div>
+      <span class="toolpill">⚙ manage_trip_goal · deriving checklist</span>
+    </div>
+    <div class="bannerWrap">
+      <div class="banner">
+        <div class="txt">
+          <h3>▶ Want to see it work first?</h3>
+          <p>Watch a 2-min replay of a real Dublin session — or just keep typing to go live.</p>
+        </div>
+        <div class="acts">
+          <button class="pill primary">Watch replay</button>
+          <button class="pill">Dismiss</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p class="note"><b>C —</b> no full takeover — the chat is already usable underneath; the banner just
+     offers the replay. Most “subdued,” closest to your fallback instinct. Weakest at framing
+     “this is a real session,” strongest at not blocking a visitor who wants to dive in.</p>
+
+  <p class="note" style="margin-top:32px">Reply in the terminal with the direction you want
+     (A / B / C), any mix, or tweaks. Final will be wired into the real claude-skin React app — these
+     are layout/feel explorations.</p>
+</div>
+</body>
+</html>
