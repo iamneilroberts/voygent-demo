@@ -1,0 +1,33 @@
+{
+  "trip": "dublin-oct",
+  "highlights": [
+    {
+      "match": { "eventType": "inspector", "kind": "savings", "where": { "mechanism": "searchDistill" }, "nth": 1 },
+      "anchor": "board",
+      "eyebrow": "Context saved",
+      "title": "It distilled a big search instead of resending it",
+      "body": "A full supplier response is large. Voygent keeps a slim version in context and reuses it, so later turns stay cheap. The engineering panel counts the tokens saved."
+    },
+    {
+      "match": { "eventType": "board", "kind": "flight", "nth": 1 },
+      "anchor": "chat",
+      "eyebrow": "Real supplier data",
+      "title": "These are real live fares",
+      "body": "Every option here came from a live flight search, not from the model's imagination. Voygent only writes real, sourced inventory into a trip."
+    },
+    {
+      "match": { "eventType": "inspector", "kind": "summary", "nth": 3 },
+      "anchor": "board",
+      "eyebrow": "What it cost",
+      "title": "A full planning session for pennies",
+      "body": "Model routing and context discipline keep spend low. This is measured routed cost for the whole run, not an estimate."
+    },
+    {
+      "match": { "eventType": "inspector", "kind": "validation", "where": { "status": "repaired" }, "nth": 1 },
+      "anchor": "board",
+      "eyebrow": "Self-correction",
+      "title": "It caught a problem and fixed it",
+      "body": "A trip-integrity check found something off in the projected trip and repaired it in place. The panel logs the check honestly, pass or repaired."
+    }
+  ]
+}
