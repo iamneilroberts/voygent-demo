@@ -23,6 +23,8 @@
   --cl-actor-agent:   #6a4c93;   /* muted violet */
   --cl-actor-advisor-soft: #fbeee8;
   --cl-actor-client-soft:  #e4eff1;
+  --cl-actor-advisor-bright: #f4c9b6;
+  --cl-actor-client-bright:  #a9dbe2;
   --cl-tool-bg: #f5f4ee;     /* tool-use pill background                      */
   --cl-sans: ui-sans-serif, -apple-system, "Segoe UI", "Helvetica Neue", system-ui, sans-serif;
   --cl-serif: Georgia, "Iowan Old Style", "Times New Roman", serif;
@@ -143,10 +145,9 @@
 :root[data-skin="claude"] .cl-option-wrap.picked.cl-actor-advisor .cl-option { border-color: var(--cl-actor-advisor); background: var(--cl-actor-advisor-soft); }
 :root[data-skin="claude"] .cl-option-wrap.picked.cl-actor-client .cl-option-mark { color: var(--cl-actor-client); white-space: nowrap; font: 600 11px/1 var(--cl-mono); }
 :root[data-skin="claude"] .cl-option-wrap.picked.cl-actor-advisor .cl-option-mark { color: var(--cl-actor-advisor); white-space: nowrap; font: 600 11px/1 var(--cl-mono); }
-:root[data-skin="claude"] .cl-option-wrap.picked.cl-actor-client { animation: cl-reel-pick-flash-cli .9s ease-out 1; }
-:root[data-skin="claude"] .cl-option-wrap.picked.cl-actor-advisor { animation: cl-reel-pick-flash-adv .9s ease-out 1; }
-@keyframes cl-reel-pick-flash-cli { 0% { box-shadow: 0 0 0 3px var(--cl-actor-client); } 100% { box-shadow: 0 0 0 0 transparent; } }
-@keyframes cl-reel-pick-flash-adv { 0% { box-shadow: 0 0 0 3px var(--cl-actor-advisor); } 100% { box-shadow: 0 0 0 0 transparent; } }
+@keyframes cl-reel-pick-flash { 0% { box-shadow: 0 0 0 3px var(--flash-color); } 100% { box-shadow: 0 0 0 0 transparent; } }
+:root[data-skin="claude"] .cl-option-wrap.picked.cl-actor-client  { --flash-color: var(--cl-actor-client);  animation: cl-reel-pick-flash .9s ease-out 1; }
+:root[data-skin="claude"] .cl-option-wrap.picked.cl-actor-advisor { --flash-color: var(--cl-actor-advisor); animation: cl-reel-pick-flash .9s ease-out 1; }
 :root[data-skin="claude"] .cl-option-detail { align-self: flex-end; margin: 3px 4px 0; font-size: .75rem; color: var(--cl-accent); text-decoration: none; }
 :root[data-skin="claude"] .cl-option-detail:hover { text-decoration: underline; }
 :root[data-skin="claude"] .cl-option-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
@@ -405,8 +406,10 @@
 :root[data-skin="claude"] .cl-day-edited .cl-edit-tag { font: 600 9.5px/1 var(--cl-mono); letter-spacing: .05em; text-transform: uppercase; padding: 2px 6px; border-radius: 999px; }
 :root[data-skin="claude"] .cl-day-edited.cl-actor-advisor .cl-edit-tag { color: var(--cl-actor-advisor); background: var(--cl-actor-advisor-soft); }
 :root[data-skin="claude"] .cl-day-edited.cl-actor-client  .cl-edit-tag { color: var(--cl-actor-client);  background: var(--cl-actor-client-soft); }
+@keyframes cl-reel-edit-flash { 0% { background: var(--edit-flash, #f4c9b6); } 100% { background: transparent; } }
+:root[data-skin="claude"] .cl-day-edited.cl-actor-advisor { --edit-flash: var(--cl-actor-advisor-bright); }
+:root[data-skin="claude"] .cl-day-edited.cl-actor-client  { --edit-flash: var(--cl-actor-client-bright); }
 :root[data-skin="claude"] .cl-day-edited:not(.reconciled) .cl-edit-marker { animation: cl-reel-edit-flash 1.1s ease-out 1; }
-@keyframes cl-reel-edit-flash { 0% { background: #f4c9b6; } 100% { background: transparent; } }
 :root[data-skin="claude"] .cl-day-edited.reconciled .cl-edit-was { opacity: .7; }
 
 /* Screen-reader-only utility */
