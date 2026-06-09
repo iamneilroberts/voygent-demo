@@ -11,3 +11,6 @@ scripts/_fixtures-raw/
 
 # Local embedding model cache (huge; never commit)
 .fastembed_cache/
+
+# ephemeral handoff between `info-content.mjs pull` and `clear` (machine-local)
+worker/info/.pull-snapshot.json
