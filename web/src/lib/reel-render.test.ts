@@ -13,14 +13,13 @@ describe("actorClass / actorLabel", () => {
 });
 
 describe("pickedActor", () => {
-  const selected = { "b-flight": { candidateId: "serp:70wngy", actor: "client" as const } };
+  const entry = { candidateId: "serp:70wngy", actor: "client" as const };
   it("returns the actor when this candidate is the reel-selected one", () => {
-    expect(pickedActor(selected, "b-flight", "serp:70wngy")).toBe("client");
+    expect(pickedActor(entry, "serp:70wngy")).toBe("client");
   });
-  it("returns null for a non-selected candidate or unknown board", () => {
-    expect(pickedActor(selected, "b-flight", "serp:other")).toBeNull();
-    expect(pickedActor(selected, "b-hotel", "serp:70wngy")).toBeNull();
-    expect(pickedActor({}, "b-flight", "serp:70wngy")).toBeNull();
+  it("returns null for a non-selected candidate or when there's no entry", () => {
+    expect(pickedActor(entry, "serp:other")).toBeNull();
+    expect(pickedActor(undefined, "serp:70wngy")).toBeNull();
   });
 });
 

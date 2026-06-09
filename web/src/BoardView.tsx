@@ -21,7 +21,7 @@ export function BoardView(
       <div className="cl-board-title">{title}</div>
       <div className="cl-board-list">
         {board.candidates.map((c) => {
-          const reelActor = pickedActor(selectedCandidate ? { [board.boardId]: selectedCandidate } : {}, board.boardId, c.id);
+          const reelActor = pickedActor(selectedCandidate, c.id);
           const picked = board.resolvedId === c.id || reelActor != null;
           const detail = safeHttpUrl(c.detailUrl);
           return (
