@@ -105,9 +105,8 @@ export function App() {
   const [speed, setSpeed] = useState<number>(2);          // default 2x
   const speedRef = useRef(speed); useEffect(() => { speedRef.current = speed; }, [speed]);
   const [activeHighlight, setActiveHighlight] = useState<Highlight | null>(null);
-  // Setter-only: reel interaction view-state (picks/edits/threads/handoff). The value is consumed
-  // when interactions render in P2.2; `emptyReelViewState` (no parens) is the lazy initialiser.
-  const [, setReelView] = useState<ReelViewState>(emptyReelViewState);
+  // Reel interaction view-state; consumed by ClaudeChatView render.
+  const [reelView, setReelView] = useState<ReelViewState>(emptyReelViewState);
   const hlResolve = useRef<(() => void) | null>(null);
   const postReel = (() => { try { return new URLSearchParams(window.location.search).get("greet") === "reel"; } catch { return false; } })();
   useEffect(() => { persistMode(mode); }, [mode]);
@@ -359,6 +358,7 @@ export function App() {
               onToggleDemo={toggleDemo} demoLabel={demoLabel}
               engHasContent={insTools.length > 0}
               postReel={postReel}
+              reelView={reelView}
             />
           ) : (
             <>

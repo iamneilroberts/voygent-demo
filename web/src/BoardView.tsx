@@ -1,27 +1,31 @@
 import type { BoardCandidate } from "../../shared/events";
 import type { BoardItem } from "./timeline";
+import type { Actor } from "./lib/recording";
 import { commissionLabel } from "./lib/advisor";
 import { safeHttpUrl } from "./lib/url";
+import { actorClass, actorLabel, pickedActor } from "./lib/reel-render";
 
 // Inline chooser board — the claude.ai "MCP app" moment. Candidates render as
 // clickable option cards; a click sends the selection back to the agent as the
 // next user turn. Once resolved (clicked, or the agent promoted after a typed
 // reply) the board locks: the pick stays highlighted, siblings dim.
 export function BoardView(
-  { board, busy, advisor, onPick }:
-  { board: BoardItem; busy: boolean; advisor: boolean; onPick: (board: BoardItem, c: BoardCandidate) => void },
+  { board, busy, advisor, onPick, selectedCandidate }:
+  { board: BoardItem; busy: boolean; advisor: boolean; onPick: (board: BoardItem, c: BoardCandidate) => void; selectedCandidate?: { candidateId: string; actor: Actor } },
 ) {
-  const locked = board.resolved || !!board.resolvedId;
+  const reelSelectedId = selectedCandidate?.candidateId;
+  const locked = board.resolved || !!board.resolvedId || !!reelSelectedId;
   const title = board.kind === "flight" ? "Select a flight" : "Choose a hotel";
   return (
     <div className="cl-board" role="group" aria-label={title} data-reel-target={`board-${board.kind}`}>
       <div className="cl-board-title">{title}</div>
       <div className="cl-board-list">
         {board.candidates.map((c) => {
-          const picked = board.resolvedId === c.id;
+          const reelActor = pickedActor(selectedCandidate ? { [board.boardId]: selectedCandidate } : {}, board.boardId, c.id);
+          const picked = board.resolvedId === c.id || reelActor != null;
           const detail = safeHttpUrl(c.detailUrl);
           return (
-            <div key={c.id} className={`cl-option-wrap ${picked ? "picked" : ""} ${locked && !picked ? "dimmed" : ""}`}>
+            <div key={c.id} className={`cl-option-wrap ${picked ? "picked" : ""} ${picked && reelActor ? actorClass(reelActor) : ""} ${locked && !picked ? "dimmed" : ""}`}>
               <button
                 type="button"
                 className="cl-option"
@@ -38,7 +42,9 @@ export function BoardView(
                     <span className="cl-option-comm">{commissionLabel(c.commission, c.commissionPct)}</span>
                   )}
                 </span>
-                <span className="cl-option-mark" aria-hidden="true">{picked ? "✓" : ""}</span>
+                <span className="cl-option-mark" aria-hidden={reelActor ? undefined : "true"}>
+                  {picked ? (reelActor ? `✓ ${actorLabel(reelActor)} chose this` : "✓") : ""}
+                </span>
               </button>
               {detail && (
                 <a className="cl-option-detail" href={detail} target="_blank" rel="noopener noreferrer">details ↗</a>

@@ -8,6 +8,8 @@ import { BoardView } from "./BoardView";
 import { commissionLabel, commissionTotal, fmtUsd } from "./lib/advisor";
 import { safeHttpUrl } from "./lib/url";
 import { type MobileView, toggleMobileView } from "./lib/mobile-view";
+import { editForActivity, actorClass, actorLabel } from "./lib/reel-render";
+import type { ReelViewState, ReelEditMarker } from "./lib/interaction";
 
 // claude.ai-lookalike left pane. Deliberately close to claude.ai's layout
 // (centered column, user bubbles right, assistant prose on the page, inline
@@ -16,7 +18,7 @@ import { type MobileView, toggleMobileView } from "./lib/mobile-view";
 // the whole pane a simulation. All classes are cl-* (scoped in skin-claude.css)
 // so nothing leaks into the amber board skin.
 
-function FolioArtifact({ folio, advisor }: { folio: FolioData; advisor: boolean }) {
+function FolioArtifact({ folio, advisor, edits }: { folio: FolioData; advisor: boolean; edits: ReelEditMarker[] }) {
   const commTotal = advisor ? commissionTotal(folio.hotels) : null;
   // A title-only card (trip created, nothing promoted yet) is just noise inline.
   const hasDays = !!folio.days && folio.days.length > 0;
@@ -73,7 +75,7 @@ function FolioArtifact({ folio, advisor }: { folio: FolioData; advisor: boolean 
         <div className="cl-artifact-sec" data-reel-target="folio-days">
           <h4>Day by day</h4>
           {folio.days!.map((d, i) => (
-            <div key={i} className="cl-day">
+            <div key={i} className="cl-day" data-reel-target={`folio-day-${i}`}>
               <div className="cl-day-head">
                 <span className="cl-day-title">{d.title}</span>
                 {d.date && <span className="cl-day-date">{d.date}</span>}
@@ -82,8 +84,16 @@ function FolioArtifact({ folio, advisor }: { folio: FolioData; advisor: boolean 
                 <ul className="cl-day-list">
                   {d.activities.map((a, j) => {
                     const au = safeHttpUrl(a.url);
+                    const edit = editForActivity(edits, i, j);
                     return (
-                      <li key={j}>
+                      <li key={j} className={edit ? `cl-day-edited ${actorClass(edit.actor)}${edit.reconciled ? " reconciled" : ""}` : undefined}>
+                        {edit && (
+                          <span className="cl-edit-marker">
+                            <span className="cl-edit-was">{edit.was}</span>
+                            <span className="cl-edit-arrow" aria-hidden="true"> → </span>
+                            <span className="cl-edit-tag">{actorLabel(edit.actor)} edited</span>
+                          </span>
+                        )}
                         {au ? <a href={au} target="_blank" rel="noopener noreferrer">{a.name}</a> : a.name}
                         {a.description && <span className="cl-day-desc"> — {a.description}</span>}
                       </li>
@@ -148,7 +158,7 @@ function Welcome({ presets, geoCity, onSend, busy, postReel }: { presets: Preset
 }
 
 export function ClaudeChatView(
-  { items, folio, onSend, onPick, busy, presets, geoCity, advisor, mobileView, onMobileView, onToggleDemo, demoLabel, engHasContent, postReel }:
+  { items, folio, onSend, onPick, busy, presets, geoCity, advisor, mobileView, onMobileView, onToggleDemo, demoLabel, engHasContent, postReel, reelView }:
   {
     items: TimelineItem[];
     folio: FolioData | null;
@@ -164,6 +174,7 @@ export function ClaudeChatView(
     demoLabel: string;
     engHasContent: boolean;
     postReel?: boolean;
+    reelView: ReelViewState;
   },
 ) {
   const [input, setInput] = useState("");
@@ -200,12 +211,12 @@ export function ClaudeChatView(
           {firstRun && <Welcome presets={presets} geoCity={geoCity} onSend={onSend} busy={busy} postReel={postReel} />}
           {items.map((it, i) => {
             if (it.role === "toolchip") return <ClaudeToolChip key={i} item={it} />;
-            if (it.role === "board") return <BoardView key={it.boardId} board={it} busy={busy} advisor={advisor} onPick={onPick} />;
+            if (it.role === "board") return <BoardView key={it.boardId} board={it} busy={busy} advisor={advisor} onPick={onPick} selectedCandidate={reelView.selected[it.boardId]} />;
             if (it.role === "user") return <div key={i} className="cl-msg-user">{it.text}</div>;
             if (it.text) return <div key={i} className="cl-prose"><Prose text={it.text} /></div>;
             return busy && i === lastIdx ? <div key={i} className="cl-thinking" aria-label="Thinking"><span /></div> : null;
           })}
-          {folio && <div className="cl-folio-inline"><FolioArtifact folio={folio} advisor={advisor} /></div>}
+          {folio && <div className="cl-folio-inline"><FolioArtifact folio={folio} advisor={advisor} edits={reelView.edits} /></div>}
           <div ref={endRef} />
         </div>
       </div>
@@ -216,7 +227,7 @@ export function ClaudeChatView(
             <button type="button" className="cl-sheet-close" onClick={() => onMobileView("chat")} aria-label="Back to chat">✕ chat</button>
           </div>
           <div className="cl-sheet-body">
-            {folio ? <FolioArtifact folio={folio} advisor={advisor} /> : <p className="cl-day-desc">Your trip folio will build here as Voygent works.</p>}
+            {folio ? <FolioArtifact folio={folio} advisor={advisor} edits={reelView.edits} /> : <p className="cl-day-desc">Your trip folio will build here as Voygent works.</p>}
           </div>
         </div>
       )}
