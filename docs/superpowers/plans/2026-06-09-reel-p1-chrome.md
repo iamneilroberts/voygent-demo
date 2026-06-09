@@ -324,7 +324,7 @@ Expected: the recovery (1), searchDistill (2), summary (3), and a flight board e
       "body": "A trip-integrity check found something off in the projected trip and repaired it in place. The panel logs the check honestly, pass or repaired."
     },
     {
-      "match": { "eventType": "inspector", "kind": "summary", "nth": 1 },
+      "match": { "eventType": "inspector", "kind": "summary", "nth": 3 },
       "anchor": "board",
       "eyebrow": "What it cost",
       "title": "A full planning session for pennies",
@@ -334,11 +334,50 @@ Expected: the recovery (1), searchDistill (2), summary (3), and a flight board e
 }
 ```
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 3: Grounding test — resolve the real track against the real recording**
+
+This is the test Codex asked for: prove all 4 highlights actually resolve against `dublin-oct.json`, that none silently drop, and that they fire in the intended narrative order (ascending frame index). It also pins the `summary nth:3` = whole-run cost choice.
+
+Create `web/src/recordings/dublin-oct.highlights.test.ts`:
+
+```ts
+import { describe, it, expect } from "vitest";
+import { resolveHighlightFrames, type HighlightTrack } from "../lib/highlights";
+import type { Recording } from "../lib/recording";
+import rec from "./dublin-oct.json";
+import track from "./dublin-oct.highlights.json";
+
+describe("dublin-oct highlight track (grounding)", () => {
+  const frames = (rec as Recording).frames;
+  const highlights = (track as HighlightTrack).highlights;
+  const resolved = resolveHighlightFrames(frames, highlights);
+
+  it("resolves every highlight (none dropped)", () => {
+    expect(resolved.size).toBe(highlights.length);
+  });
+
+  it("the cost highlight binds to the LAST summary (whole-run), not an early partial", () => {
+    const summaryFrames = frames.flatMap((f, i) => (f.kind === "event" && (f.event as any).type === "inspector" && (f.event as any).kind === "summary") ? [i] : []);
+    const costIdx = [...resolved.entries()].find(([, h]) => h.eyebrow === "What it cost")?.[0];
+    expect(costIdx).toBe(summaryFrames.at(-1));   // nth:3 == last of the 3 summaries
+  });
+
+  it("fires in ascending frame order (narrative order is intentional)", () => {
+    const idxs = [...resolved.keys()].sort((a, b) => a - b);
+    expect([...resolved.keys()]).toEqual(idxs); // keys already insertion-ordered by index in the resolver? assert sorted regardless
+    // If this ever reorders unexpectedly, re-pick the matchers/nth so the on-screen order reads right.
+  });
+});
+```
+
+Run: `npx vitest run web/src/recordings/dublin-oct.highlights.test.ts`
+Expected: PASS. **If "resolves every highlight" fails**, a matcher missed — fix that highlight's matcher against the real event (use the Step 1 greps to find the beat). **If the cost test fails**, adjust the summary `nth`. **If order reads wrong on screen** during Task 12 smoke (e.g. "context saved" fires before any flights), re-pick the savings matcher to a later beat.
+
+- [ ] **Step 4: Commit**
 
 ```bash
-git add web/src/recordings/dublin-oct.highlights.json
-git commit -m "feat(reel): Dublin highlight track (supplier, context-saved, self-correction, cost)"
+git add web/src/recordings/dublin-oct.highlights.json web/src/recordings/dublin-oct.highlights.test.ts
+git commit -m "feat(reel): Dublin highlight track + grounding test (resolves against real recording)"
 ```
 
 ---
@@ -446,6 +485,8 @@ git add web/src/recordings/registry.ts web/src/recordings/registry.test.ts
 git commit -m "feat(reel): reel registry + round-robin selectReel (?reel override)"
 ```
 
+**Test-boundary note (Codex review):** the unit test covers the pure `pickReel` (the rotation logic). `selectReel`'s `localStorage`/`window` I/O is deliberately NOT unit-tested — vitest runs in a node env here (no jsdom; no existing test mocks `localStorage`), so a DOM test would be brittle and off-convention. The render-time double-advance risk Codex raised is removed structurally by the Task 11 lazy-init guard; `selectReel`'s one-advance-per-load is verified in Task 12 smoke (reload twice with one reel registered → no error; with a future 2nd reel → alternation).
+
 ---
 
 ## Task 5: Extend `replayChat` (pacing + speed + highlights)
@@ -459,26 +500,48 @@ git commit -m "feat(reel): reel registry + round-robin selectReel (?reel overrid
 - [ ] **Step 1: Write the failing test (append to recording.test.ts)**
 
 ```ts
-import { resolveHighlightFrames } from "./highlights"; // (top-of-file import; place with other imports)
-
-describe("replayChat highlights", () => {
-  it("invokes onHighlight after the matching frame and continues", async () => {
+// NOTE: no new import line — replayChat resolves the track internally.
+// Strengthened per Codex review: prove playback PAUSES on a highlight (not just that it fires),
+// and prove speed() is read per frame.
+describe("replayChat highlights + speed", () => {
+  it("pauses at the matching frame until onHighlight resolves, then continues", async () => {
     const rec: Recording = { skin: "claude", trip: "t", frames: [
       { delayMs: 1, kind: "event", event: { type: "board", kind: "flight", boardId: "b", tripId: "t", candidates: [] } as ServerEvent },
-      { delayMs: 1, kind: "event", event: { type: "text", delta: "done" } as ServerEvent },
+      { delayMs: 1, kind: "event", event: { type: "text", delta: "after" } as ServerEvent },
       { delayMs: 1, kind: "turn-end" },
     ] };
-    const fired: string[] = [];
-    await replayChat(rec, {
-      applyEvent: () => {},
+    const applied: string[] = [];
+    let release!: () => void;
+    const gate = new Promise<void>((r) => { release = r; });
+    const done = replayChat(rec, {
+      applyEvent: (e) => applied.push(e.type),
       pushUser: () => {},
       setBusy: () => {},
-      onHighlight: async (h) => { fired.push(h.title); },
+      onHighlight: async () => { await gate; },   // block until we release
     }, {
       wait: async () => {},
       highlights: [{ match: { eventType: "board", kind: "flight" }, anchor: "chat", eyebrow: "E", title: "Real fares", body: "B" }],
     });
-    expect(fired).toEqual(["Real fares"]);
+    await Promise.resolve(); await Promise.resolve();   // let the loop run up to the paused callout
+    expect(applied).toEqual(["board"]);                 // paused: the "text" frame has NOT applied yet
+    release();
+    await done;
+    expect(applied).toEqual(["board", "text"]);         // resumed after the callout
+  });
+
+  it("reads speed() per frame (lower speed => longer waits)", async () => {
+    const rec: Recording = { skin: "claude", trip: "t", frames: [
+      { delayMs: 0, kind: "event", event: { type: "board", kind: "flight", boardId: "b", tripId: "t", candidates: [] } as ServerEvent },
+    ] };
+    const waits: number[] = [];
+    let speed = 2;
+    await replayChat(rec, { applyEvent: () => {}, pushUser: () => {}, setBusy: () => {} },
+      { wait: async (ms) => { waits.push(ms); }, speed: () => speed });
+    const fast = waits[0];
+    waits.length = 0; speed = 1;
+    await replayChat(rec, { applyEvent: () => {}, pushUser: () => {}, setBusy: () => {} },
+      { wait: async (ms) => { waits.push(ms); }, speed: () => speed });
+    expect(waits[0]).toBeGreaterThan(fast);             // 1x waits longer than 2x
   });
 });
 ```
@@ -519,6 +582,16 @@ function sleep(ms: number, signal?: AbortSignal): Promise<void> {
   });
 }
 
+// Resolves when the signal aborts (or immediately if already aborted). Used to
+// race a paused callout so an abort during a highlight never leaves the loop hanging.
+function waitForAbort(signal?: AbortSignal): Promise<void> {
+  if (!signal) return new Promise<void>(() => {}); // never resolves; only used inside Promise.race with onHighlight
+  return new Promise<void>((resolve) => {
+    if (signal.aborted) return resolve();
+    signal.addEventListener("abort", () => resolve(), { once: true });
+  });
+}
+
 export async function replayChat(rec: Recording, h: ReplayHandlers, opts: ReplayOpts = {}): Promise<void> {
   const wait = opts.wait ?? ((ms: number) => sleep(ms, opts.signal));
   const getSpeed = opts.speed ?? (() => 1);
@@ -536,7 +609,10 @@ export async function replayChat(rec: Recording, h: ReplayHandlers, opts: Replay
     const hit = hlMap?.get(i);
     if (hit && h.onHighlight) {
       if (opts.signal?.aborted) return;
-      await h.onHighlight(hit);
+      // Race the callout against abort: if the reel is restarted / unmounted mid-callout,
+      // this resolves instead of hanging on a promise App can no longer settle.
+      await Promise.race([h.onHighlight(hit), waitForAbort(opts.signal)]);
+      if (opts.signal?.aborted) return;
     }
   }
 }
@@ -714,9 +790,14 @@ git commit -m "feat(reel): end bookend card (honest recap + try-it-yourself CTA)
 
 ```css
 /* ============================ reel chrome (P1) ============================ */
-/* Scrim + centered card (intro + end bookend) */
+/* The reel overlays mount INSIDE .product (where the --cl-* tokens live). Make it
+   the positioned containing block for the absolute overlays (Codex review). */
+:root[data-skin="claude"] .product { position: relative; }
+
+/* Scrim + centered card (intro + end bookend). z-index 60 sits above the app's
+   fixed .skin-switch/.watch-demo (z-index 50) even though those are also hidden in reel mode. */
 :root[data-skin="claude"] .cl-reel-scrim {
-  position: absolute; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center;
+  position: absolute; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
   padding: 20px; background: #1f1e1c40; backdrop-filter: blur(2px);
 }
 :root[data-skin="claude"] .cl-reel-card {
@@ -745,7 +826,7 @@ git commit -m "feat(reel): end bookend card (honest recap + try-it-yourself CTA)
 
 /* Spotlight dim + anchored callout */
 :root[data-skin="claude"] .cl-reel-spotlight {
-  position: absolute; inset: 0; z-index: 38; background: #1f1e1c2e; display: flex; padding: 22px;
+  position: absolute; inset: 0; z-index: 58; background: #1f1e1c2e; display: flex; padding: 22px;
 }
 :root[data-skin="claude"] .cl-reel-anchor-chat { align-items: flex-end; justify-content: flex-start; }
 :root[data-skin="claude"] .cl-reel-anchor-board { align-items: flex-start; justify-content: flex-end; }
@@ -762,8 +843,13 @@ git commit -m "feat(reel): end bookend card (honest recap + try-it-yourself CTA)
 @keyframes cl-reel-fill { from { width: 0 } to { width: 100% } }
 :root[data-skin="claude"] .cl-reel-continue { background: none; border: none; color: var(--cl-accent); font: 600 .6875rem/1 var(--cl-mono); cursor: pointer; }
 
-/* Speed toggle (in the chat header area while playing) */
-:root[data-skin="claude"] .cl-reel-speed { display: inline-flex; gap: 2px; border: 1px solid var(--cl-line); border-radius: 8px; padding: 2px; }
+/* Speed toggle — absolutely positioned in the top-right of .product while playing.
+   MUST be positioned (Codex review): as a plain inline-flex child it would push the layout. */
+:root[data-skin="claude"] .cl-reel-speed {
+  position: absolute; top: 12px; right: 16px; z-index: 60;
+  display: inline-flex; gap: 2px; background: var(--cl-surface);
+  border: 1px solid var(--cl-line); border-radius: 8px; padding: 2px;
+}
 :root[data-skin="claude"] .cl-reel-speed button { background: none; border: none; padding: 4px 8px; border-radius: 6px; font: 600 .6875rem/1 var(--cl-mono); color: var(--cl-muted); cursor: pointer; }
 :root[data-skin="claude"] .cl-reel-speed button[aria-pressed="true"] { background: var(--cl-accent); color: var(--cl-accent-ink); }
 
@@ -873,12 +959,17 @@ import { ReelCallout } from "./ReelCallout";
 import { ReelEndCard } from "./ReelEndCard";
 import type { Highlight } from "./lib/highlights";
 ```
-Keep `import { replayChat, type Recording } from "./lib/recording";` (Recording type still used).
+Change `import { replayChat, type Recording } from "./lib/recording";` to `import { replayChat } from "./lib/recording";` — after replacing `dublinRecording as Recording`, the `Recording` type is no longer referenced in App.tsx and `noUnusedLocals` would fail (Codex review). `selectedReel.recording` is typed via `ReelEntry`.
 
 - [ ] **Step 2: Add reel state (after line 91, near `replayAbort`)**
 
 ```tsx
-  const selectedReel = useRef(selectReel()).current;
+  // Lazy-init guard (Codex review): useRef(selectReel()) would evaluate selectReel()
+  // on EVERY render, and selectReel() advances the localStorage rotation counter — so a
+  // plain useRef(arg) would double-count rotation. Compute exactly once per mount.
+  const selectedReelRef = useRef<ReturnType<typeof selectReel> | null>(null);
+  if (!selectedReelRef.current) selectedReelRef.current = selectReel();
+  const selectedReel = selectedReelRef.current;
   type ReelPhase = "intro" | "playing" | "ended";
   const [reelPhase, setReelPhase] = useState<ReelPhase>(() => (resolveInitialMode() === "auto" ? "intro" : "ended"));
   const [speed, setSpeed] = useState<number>(2);          // default 2x
@@ -892,9 +983,11 @@ Keep `import { replayChat, type Recording } from "./lib/recording";` (Recording 
 
 ```tsx
   function resetReelState() {
-    setItems([]); setTools([]); setFolio(null);
+    setItems([]); setTools([]); setFolio(null); setBusy(false);
     setInsTools([]); setInsTurns([]); setInsSummaries([]); setInsSavings([]);
     setInsOverhead([]); setInsStores([]); setInsValidations([]); setInsPhases([]);
+    // Clear any in-flight callout so a Replay never starts under a stale spotlight (Codex review).
+    hlResolve.current?.(); hlResolve.current = null; setActiveHighlight(null);
   }
 
   function onReelHighlight(h: Highlight): Promise<void> {
@@ -941,14 +1034,23 @@ Keep `import { replayChat, type Recording } from "./lib/recording";` (Recording 
       speed: () => speedRef.current,
       highlights: selectedReel.highlights,
     }).then(() => { if (!ac.signal.aborted) setReelPhase("ended"); });
-    return () => ac.abort();
+    return () => {
+      ac.abort();
+      // Settle any paused callout so the replayChat loop's Promise.race resolves and
+      // no stale spotlight survives a restart/mode-switch (Codex review).
+      hlResolve.current?.(); hlResolve.current = null; setActiveHighlight(null);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, reelPhase]);
 ```
 
-- [ ] **Step 5: Render the overlays + speed toggle**
+- [ ] **Step 5: Render the overlays + speed toggle (INSIDE `.product`)**
 
-In the return, immediately after the opening `<div className="app">` (line 276), add:
+Mount the overlays **inside `<section className="product">`**, immediately AFTER the
+`{skin === "claude" ? (<ClaudeChatView .../>) : (<>…</>)}` block and before `</section>` (around line 301).
+This is required (Codex review): the `--cl-*` design tokens are defined on `.product` only, so overlays mounted
+under `.app` would render with undefined `var(--cl-*)`. `.product` is also made `position: relative` (Task 9 CSS)
+so these `position:absolute` overlays have a containing block. Add:
 
 ```tsx
       {skin === "claude" && mode === "auto" && reelPhase === "intro" && (
@@ -976,7 +1078,20 @@ In the return, immediately after the opening `<div className="app">` (line 276),
       )}
 ```
 
-(The speed toggle is fixed-positioned by the CSS in Task 9; if it overlaps the header during smoke, adjust the `.cl-reel-speed` rule with `position:absolute; top:10px; right:16px;` — add that to the Task 9 block.)
+The speed toggle is `position:absolute; top:12px; right:16px` within `.product` (defined in Task 9, NOT an optional smoke adjustment — Codex flagged that a plain `inline-flex` child would push the layout).
+
+- [ ] **Step 5b: Hide app-level chrome during the reel**
+
+The fixed `.skin-switch` and `.watch-demo` controls sit at `z-index:50` (`styles.css`) and would float over the reel modal, and they are redundant while the reel owns the surface (the intro/end cards carry their own actions). Render them only outside reel mode. Change the two lines near the end of the return:
+
+```tsx
+      {mode !== "auto" && <SkinSwitch skin={skin} onPick={setSkin} />}
+      {mode !== "auto" && (
+        <button type="button" className="watch-demo" onClick={toggleDemo}>{demoLabel}</button>
+      )}
+```
+
+(The in-chat `demoLabel` pill inside `ClaudeChatView`'s pillbar is separate and stays.)
 
 - [ ] **Step 6: Pass `postReel` to ClaudeChatView**
 
@@ -1041,3 +1156,17 @@ Then verify: `curl -s -o /dev/null -w "%{http_code}\n" https://demo.voygent.ai/`
 **Type consistency:** `Frame`/`Recording` (recording.ts) reused everywhere; `Highlight`/`HighlightTrack`/`HighlightMatch` (highlights.ts) used in registry, recording.ts, ReelCallout, App; `ReelEntry` (registry) used in App; `computeDelay(frame, prev, {speed,reducedMotion})` signature matches its caller in recording.ts; `selectReel`/`pickReel` names consistent; `onHighlight` handler name consistent across recording.ts and App.
 
 **Deviation from spec (logged):** the "ribbon flips to Live · you're driving now" is implemented as a **separate greeting banner** so the legal disambiguation ribbon (not-affiliated-with-Anthropic) is preserved. Confirm acceptable with Neil at smoke time.
+
+## Codex external review (2026-06-09) — findings applied
+
+A `/codex-review` pass (read-only, against the real files) caught several issues now folded in:
+- **Blocker — rotation double-advance:** `useRef(selectReel())` re-runs the side-effecting `selectReel()` every render → Task 11 Step 2 now uses a lazy-init guard.
+- **Blocker — token scope:** `--cl-*` tokens live on `.product`; overlays now mount **inside `.product`** (Task 11 Step 5) and `.product` is `position: relative` (Task 9).
+- **Blocker — speed toggle layout:** now `position:absolute` in `.product` (Task 9), not an inline-flex child.
+- **Blocker — z-index / chrome:** overlays raised to z 58/60 AND app `.skin-switch`/`.watch-demo` hidden in reel mode (Task 11 Step 5b).
+- **Blocker — `noUnusedLocals`:** dropped unused `type Recording` (Task 11 Step 1) and the unused test import (Task 5 Step 1).
+- **Should-fix — abort hangs:** `replayChat` now races `onHighlight` against `waitForAbort`; the reel effect cleanup + `resetReelState` settle any pending callout (Task 5 Step 3, Task 11 Steps 3/4).
+- **Should-fix — cost matcher:** `summary nth:3` (last summary = whole-run cost) + a **grounding test** resolving the real track against the real recording (Task 3 Step 3).
+- **Should-fix — weak replay test:** strengthened to prove playback PAUSES and that `speed()` is read per frame (Task 5 Step 1).
+- **Decision (Neil):** the "2×" honesty wording was relaxed to a *speed* label (2× the 1× pace), not a "half the original session" duration claim. See spec C2.
+- **Acknowledged nit (not changed):** `resolveHighlightFrames` returns `Map<number, Highlight>` (one highlight per frame); fine for this track (grounding test asserts all 4 resolve to distinct frames). Revisit to `Highlight[]` only if a future track stacks two callouts on one frame.

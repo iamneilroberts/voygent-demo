@@ -70,8 +70,10 @@ divides it. Rules (tunable constants, set during a calibration pass):
 - `reducedMotion` collapses all dwells to a small floor (keeps the existing accessibility behavior).
 
 **Speed control:** a small `1× / 2×` toggle in the player chrome, **default 2×**. `final = base / speed`.
-"2×" is calibrated so total runtime ≈ **half the real session's wall-clock** (honest "2×" label, matches Neil's
-honesty thesis). `replayChat` is modified to take `{ pacing, speed }` and replace the raw `delayMs * scale`.
+"2×" means **twice the calm 1× reading pace** (the 1× base is re-derived from event semantics, so we do NOT
+claim "half the original session's wall-clock" — that base was an artifact of how fast the live capture
+streamed, not a meaningful baseline). The "2×" badge is an honest *speed* label, not a duration-fraction claim.
+`replayChat` is modified to take `{ pacing, speed }` and replace the raw `delayMs * scale`. (Codex review.)
 
 ### C3 — Highlight callouts (Treatment 1: spotlight + anchored card, auto-resume)
 
@@ -164,7 +166,7 @@ No worker / MCP / faithful changes.
 ## Decisions locked
 
 - Intro = **Direction A** (calm centered card; replay primary, "plan your own" secondary).
-- Pacing = **semantic re-timing** (`pacing.ts`) + **viewer 1×/2× control**, default **2×** ≈ half real wall-clock.
+- Pacing = **semantic re-timing** (`pacing.ts`) + **viewer 1×/2× control**, default **2×** (= 2× the calm 1× reading pace; an honest speed label, not a "half the original session" duration claim).
 - Callouts = **Treatment 1** (spotlight + anchored card), **auto-resume ~4s** with a "Continue" skip; authored as
   a **sidecar highlight track** (no recording-format change). Moments: recovery · context-saved · cost · real-supplier-data-on-promotion.
 - End = **bookend card** (honest recap of current reel) → **live mode** + **crafted static greeting** + ribbon flip.
