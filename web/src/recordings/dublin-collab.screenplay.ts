@@ -19,7 +19,10 @@ export const dublinCollab = screenplay({ trip: "Dublin · collab", skin: "claude
   s.agent.tool("flight_search", { summary: "MOB→DUB · Oct 4–11" });
   s.agent.board("flight", "b-flight", flights);
   s.client.picks("b-flight", "serp:70wngy", "Aer Lingus · MOB→DUB · $3,180", withFlight);
-  s.agent.folio(draft);                                   // draft itinerary visible
+  // PROOF-REEL SIMPLIFICATION: re-emits `draft` (flights:[]) after the pick so the edit beat
+  // has a folio to target. When rendering lands (P2.4), use `withFlight` here instead — emitting
+  // `draft` would visibly drop the just-picked flight then re-add it (a flicker). Inert in P2.1 (no rendering).
+  s.agent.folio(draft);
   s.advisor.edits("days[1].activities[0]", { was: "Free morning in Temple Bar", now: "Cliffs of Moher day trip", tag: "Advisor edited" }, edited);
   s.advisor.sendsToClient({ subject: "Your Dublin trip is ready to review", reply: "Can we add a food tour on Day 6?" });
   s.client.comments("days[2]", "Can we add a food tour this day? We loved the one in Lisbon.", "thread-day6");
