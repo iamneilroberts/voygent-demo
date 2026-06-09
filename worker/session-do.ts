@@ -11,6 +11,8 @@ import { withInspectorCost, sessionCostByModel, estTokens, utf8Bytes } from "./i
 import { encodeSse } from "../shared/events";
 import type { ConversationMessage, TokenUsage } from "./llm/provider";
 import type { ServerEvent } from "../shared/events";
+import { D1Db } from "./access/db";
+import { reconcile } from "./access/codes";
 
 interface Env {
   ANTHROPIC_API_KEY: string;
@@ -128,6 +130,8 @@ export class SessionDO {
 
   private async handleChat(req: Request): Promise<Response> {
     const { message, mode } = await req.json<{ message: string; mode?: string }>();
+    const codeId = req.headers.get("x-code-id");
+    const estForReconcile = Number(req.headers.get("x-est-micros") ?? "0");
     const model = this.env.LLM_MODEL || DEFAULT_MODEL;
     const mcp = new McpClient(this.env.VOYGENT_MCP_URL, this.env.VOYGENT_MCP_BEARER);
     const provider = new ClaudeProvider(this.env.ANTHROPIC_API_KEY, model);
@@ -279,6 +283,20 @@ export class SessionDO {
         if (sessionCost > 0) {
           try { await this.budgetStub().fetch("https://do/__budget/add", { method: "POST", body: JSON.stringify({ usd: sessionCost }) }); }
           catch { /* ledger update is best-effort */ }
+        }
+        if (codeId && estForReconcile > 0) {
+          try {
+            await reconcile(new D1Db(this.env.DEMO_DB), {
+              codeId,
+              exchangeId,
+              estMicros: estForReconcile,
+              actualMicros: Math.round(sessionCost * 1_000_000),
+              model,
+              inputTokens: u.inputTokens,
+              outputTokens: u.outputTokens,
+              ts: new Date().toISOString(),
+            });
+          } catch { /* reconcile is best-effort; the reserved est stays booked (conservative) */ }
         }
       }
     })();

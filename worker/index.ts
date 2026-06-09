@@ -94,7 +94,9 @@ export default {
         method: "POST",
         headers: { "content-type": "application/json", "x-code-id": claims.codeId, "x-est-micros": String(est) },
         body: req.body,
-      });
+        // duplex is required in Node.js when forwarding a streaming body
+        ...(req.body ? { duplex: "half" } : {}),
+      } as RequestInit);
       return env.SESSION.get(id).fetch(forward);
     }
 
