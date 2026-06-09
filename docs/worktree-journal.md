@@ -12,8 +12,8 @@ when the work ships or is abandoned.
 - **Worktree:** `/home/neil/dev/voygent-demo-reel-p1`
 - **Base:** `main` (38b2f27)
 - **Description:** Reel replay P1 — intro modal, semantic pacing + 1×/2× control, spotlight highlight callouts, end CTA + live greeting, reel registry/rotation. Client-only, claude-skin. Plan: docs/superpowers/plans/2026-06-09-reel-p1-chrome.md
-- **Working on:** CODE COMPLETE — all 11 impl commits on `reel-p1`, full gate green (tsc clean, 331 tests, build clean). Paused before Task 12 visual-smoke + deploy (need Neil: passcode for smoke, deploy approval). NOT deployed.
-- **Last update:** 2026-06-09 12:35
+- **Working on:** SHIPPED — reel-p1 rebased onto main + ff-merged + DEPLOYED to prod (`origin/main` = `e0721bb`, Worker `voygent-demo`, bundle `index-bZ0k90qw.js`). Superset of prod (origin/main ⊆ reel-p1; info-content + faithful untouched, no secret/worker-behavior change beyond the client reel). Awaiting Neil passcode for visual smoke + one narrative-order tune (savings callout currently fires before the flight board).
+- **Last update:** 2026-06-09 12:44
 - **Don't touch:** `web/src/App.tsx`, `web/src/ClaudeChatView.tsx`, `web/src/lib/recording.ts`, `web/src/skin-claude.css`, and new `web/src/lib/pacing.ts` / `highlights.ts` / `web/src/recordings/registry.ts` + highlight track / `web/src/Reel*.tsx` — reel P1 in flight (client-only; no worker/MCP/secret touch)
 - **Status:** active
 
