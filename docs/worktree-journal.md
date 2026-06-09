@@ -6,13 +6,23 @@ when the work ships or is abandoned.
 
 ## Active
 
-(none)
+### reel-p2-2-render
+- **Started:** 2026-06-09 17:05
+- **Branch:** `reel-p2-2-render`
+- **Worktree:** `/home/neil/dev/voygent-demo-reel-p2-2`
+- **Base:** `main` (5c60da8)
+- **Description:** Reel P2.2 — RENDER the pick + edit interactions (first visible P2 phase). Binds `reelView` value, renders board pick (actor-colored selected state) + folio edit (before→after marker) from `ReelViewState`. Pure helpers in `web/src/lib/reel-render.ts`; touches App.tsx/ClaudeChatView.tsx/BoardView.tsx/skin-claude.css. Plan: docs/superpowers/plans/2026-06-09-reel-p2-2-pick-edit-render.md
+- **Working on:** (starting) subagent-driven TDD per task
+- **Last update:** 2026-06-09 17:05
+- **Don't touch:** `web/src/App.tsx`, `web/src/ClaudeChatView.tsx`, `web/src/BoardView.tsx`, `web/src/skin-claude.css` — P2.2 mid-flight on branch `reel-p2-2-render`. Reel-only/additive props; coordinate before touching.
+- **Status:** active
 
 ## Coordination
 
 Cross-cutting constraints active across sessions. Format:
 `<YYYY-MM-DD HH:MM> — <slug>: <constraint>. <expires when or unblock condition>.`
 
+- 2026-06-09 17:05 — reel-p2-2-render → all sessions: 🔨 **P2.2 in flight on branch `reel-p2-2-render`** (worktree `../voygent-demo-reel-p2-2`, base `5c60da8`). First VISIBLE P2 phase: renders the board **pick** (actor-colored selected state + "✓ {Actor} chose this") + folio **edit** (before→after marker) from `reelView`. Touching `App.tsx`, `ClaudeChatView.tsx`, `BoardView.tsx`, `skin-claude.css` (+ new `web/src/lib/reel-render.ts`). Additive/reel-only; canonical folio still owned by `ServerEvent` folio (edit marker is read-only over `reelView.edits`). Coordinate before editing those files. Plan: `docs/superpowers/plans/2026-06-09-reel-p2-2-pick-edit-render.md`.
 - 2026-06-09 16:50 — reel-p2-spine → all sessions: ✅ **reel P2.1 SPINE SHIPPED + DEPLOYED.** `origin/main` advanced to `b24a517`, Worker `voygent-demo` redeployed (web bundle `index-B-SEXSOa.js`). Rebased onto your `1c4bbc0` /info content commit first — superset. **Client-only, logic-only, NO rendering yet** (interactions don't display until P2.2). Added: reel-only `interaction` `Frame` kind + `Actor`/`ReelInteraction` (`recording.ts`); pure `applyInteraction` reducer over `ReelViewState` (`interaction.ts`, holds NO folio — canonical folio still owned by `ServerEvent` folio); post-apply interaction dwell (`pacing.ts`); `replayChat` interaction playback + extended highlight matcher targeting interaction frames (`Map<number,Highlight[]>`, backward-compat with `eventType`); screenplay DSL + compiler with lowering validation (`screenplay.ts`); a proof reel at `?reel=collab` (`dublin-collab.screenplay.ts`, NOT in rotation). **No worker/MCP/`ServerEvent`/secret/D1 change.** 354 tests green, tsc clean, prod 200. Branch `reel-p2-spine` merged (FF); worktree removed; branch ref retained for Neil to delete. Next: P2.2 rendering (plan TBD). Spec: `docs/superpowers/specs/2026-06-09-reel-p2-screenplay-interactions-design.md`; P2.1 plan: `docs/superpowers/plans/2026-06-09-reel-p2-1-spine.md`.
 - 2026-06-09 14:08 — reel session → all sessions: ✅ **reel + inspector polish DEPLOYED** (`origin/main` = `dfbfa67`, bundle `index-Tr7XLMwJ.js`). Two rounds shipped after reel-p1: (a) inspector polish — distinct-tools-vs-calls split, `data-stat` hooks, compacted model/view/theme control line; (b) **anchored callouts** — reel highlight callouts spotlight their exact target via a fixed overlay + DOM targeting (`data-stat` on Inspector cards, `data-reel-target` on boards/folio-sections/tool-chips, `target` key per highlight), now 8 callouts (flights, hotels, context-saved, excursions, daily-itinerary, value-add, cost, self-correction). Client-only (web/src reel + Inspector + skin-claude.css + styles.css). No worker/secret/D1 change; superset of prior prod. 331 tests green.
 - 2026-06-09 12:05 — info-content-portback → all sessions: ✅ **SHIPPED — /info content moved to a regenerable seed + port-back tooling.** `origin/main` = `0b53a6a`, Worker `voygent-demo` redeployed. **Refactor heads-up:** `/info` page content now lives in `worker/info/content.json` (NOT inline in `pages.ts`); `worker/info/resume.ts` was **deleted** (folded into content.json). `pages.ts` exports unchanged (getPageData/mergeOverride/renderInfo/isKnownSlug/infoPageHtml) and rendered output is byte-identical, so no behavior change — but if you edit /info copy, edit `content.json` (or use the live editor + `node scripts/info-content.mjs pull`). `vitest.config.ts` include now also matches `scripts/**/*.test.mjs`. `worker/info/.pull-snapshot.json` is gitignored. No D1 schema/secret change. Rebased onto your reel-plan commit (`806188a`) first — superset. Runbook: `docs/runbooks/info-page-editing.md`.
