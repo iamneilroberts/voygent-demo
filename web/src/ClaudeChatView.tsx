@@ -89,6 +89,7 @@ function FolioArtifact({ folio, advisor, edits }: { folio: FolioData; advisor: b
                       <li key={j} className={edit ? `cl-day-edited ${actorClass(edit.actor)}${edit.reconciled ? " reconciled" : ""}` : undefined}>
                         {edit && (
                           <span className="cl-edit-marker">
+                            <span className="cl-sr-only">Changed from </span>
                             <span className="cl-edit-was">{edit.was}</span>
                             <span className="cl-edit-arrow" aria-hidden="true"> → </span>
                             <span className="cl-edit-tag">{actorLabel(edit.actor)} edited</span>
