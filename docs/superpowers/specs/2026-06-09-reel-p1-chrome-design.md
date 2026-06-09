@@ -49,8 +49,11 @@ into the demo"). Centered card over a dimmed chat backdrop:
   (`mode.ts` → "live"), no playback.
 - Dismiss/choice may be remembered for the session (soft; not required).
 
-**Landing (confirmed 2026-06-09):** the intro modal is **reel-entry-only** — it appears when reel mode is
-entered, NOT on first visit. The public default landing stays **faithful live** (unchanged).
+**Landing (confirmed 2026-06-09):** the intro modal is **reel-entry-only** — it gates the reel whenever reel
+mode (`mode=auto`) is active, rather than being a separate first-visit-only gate. Since `DEFAULT_MODE="auto"`
+(`web/src/lib/mode.ts`), reel mode IS the default landing today, so the intro shows on load and **pauses before
+the reel plays** (which is the desired "pause before launching into the demo"). "Plan your own" switches to
+live (faithful) mode. The default-mode value itself is unchanged by P1; rotation (C5) picks which reel loads.
 
 Mockup: `https://demo.voygent.ai/mockups/reel-intro` (Direction A).
 
