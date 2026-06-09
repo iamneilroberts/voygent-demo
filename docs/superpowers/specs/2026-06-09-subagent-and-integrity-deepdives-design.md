@@ -92,15 +92,29 @@ Sections:
   `patch_trip consistencyWarnings`, the `/proposal/<tripId>` self-heal.
 - CTA: watch the integrity checks run live.
 
-### 3. Extend `context-economics` — one new `<h2>` section
+### 3. Extend `context-economics` — strengthen consolidation + new schema section
 
-**"Schemas are context too."** The intent-routed schema-discriminator finding
-(ADR-0007, **proposed / measured — not yet in `src`**, stated honestly as a
-finding from the schema-eval harness): replacing a literal `source` enum with a
+**3a. Make the router-consolidation section current and honest about the wave.**
+The existing section frames the ~70→~35 collapse as already-done ("collapsed").
+Reality is a risk-sequenced, *verify-then-remove* migration in flight, which is a
+better story: a **cruise pilot shipped first** (`cruise_search` + `cruise_detail`
+replacing ~18 standalones, −17 catalog names, live in prod), a **five-domain
+fan-out following** (flight / hotel / package / car / excursion routers), and the
+**old per-supplier tools retired only after each router is verified against the
+adapters** — which is the work a parallel session is doing right now. Tie the
+narrative to the `MCP tools exposed` stat: the count drops as each wave lands.
+Frame the deletion discipline (don't remove a standalone until its router is
+proven equivalent) as the point, not an aside.
+
+**3b. New `<h2>` "Schemas are context too."** The intent-routed schema-discriminator
+finding (ADR-0007, **proposed / measured — not yet in `src`**, stated honestly as
+a finding from the schema-eval harness): replacing a literal `source` enum with a
 semantic `need` discriminator plus a server-side `INTENT_MAP` cut schema tokens
-~54% while holding dispatch accuracy across five models. Hooks the
-`MCP tools exposed` stat and complements the existing router-consolidation
-section. Update the page's `sources:` line to add the ADR-0007 reference.
+~54% while holding dispatch accuracy across five models. Complements 3a — fewer
+tools *and* leaner schemas per tool.
+
+Update the page's `sources:` line to add the cruise pilot (PR #167), the M1
+fan-out, and the ADR-0007 reference.
 
 ### 4. `Inspector.tsx` `INFO_LINKS` wiring
 

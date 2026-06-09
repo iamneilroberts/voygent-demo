@@ -10,14 +10,17 @@ import { storeOpsForTool } from "../../worker/storeops";
 
 // Engineering stories moved out of the panel (task 6c) — the tab keeps live
 // stats; the narratives live on worker-served /info pages.
-const INFO_LINKS: { slug: string; label: string; blurb: string }[] = [
+const INFO_LINKS: { slug: string; label: string; blurb: string; comingSoon?: boolean }[] = [
   { slug: "context-economics", label: "Context economics", blurb: "router consolidation, distill-by-id, out-of-context rendering" },
   { slug: "cost-engineering", label: "Cost engineering", blurb: "prompt caching, the budget gate, the MCP $0-marginal-cost case" },
   { slug: "bot-defeat", label: "The bot-defeat saga", blurb: "edge-native anti-bot, with falsifiable verdicts" },
   { slug: "record-replay", label: "Record/replay engineering", blurb: "real data, deterministically, fabrication made impossible" },
+  { slug: "trip-integrity", label: "Trip integrity", blurb: "server-side guards + self-heal — the validation checks above, explained" },
+  { slug: "phase-machine", label: "Keeping the model on track", blurb: "the server-side phase machine driving the workflow trail above" },
   { slug: "production-system", label: "The system behind the demo", blurb: "119 tools, the commission firewall, AI-evaluates-AI" },
   { slug: "llm-options", label: "Choosing the model", blurb: "LLM-agnostic seam: frontier, cheap DeepSeek, local Ollama" },
   { slug: "data-stores", label: "KV, D1, and a SQL brain", blurb: "the hybrid storage model and the relational-DBA unlearning" },
+  { slug: "subagents", label: "Subagents for the drudge work", blurb: "an email/offers agent that proposes and never disposes", comingSoon: true },
 ];
 
 export interface InsTool {
@@ -386,7 +389,7 @@ export function Inspector(
         <p className="ins-note">The numbers above are live from this session. The engineering stories behind them:</p>
         <ul className="ins-links">
           {INFO_LINKS.map((l) => (
-            <li key={l.slug}><a href={`/info/${l.slug}`} target="_blank" rel="noreferrer">{l.label} →</a> <span className="ins-note">{l.blurb}</span></li>
+            <li key={l.slug}><a href={`/info/${l.slug}`} target="_blank" rel="noreferrer">{l.label} →</a>{l.comingSoon && <span className="ins-soon">soon</span>} <span className="ins-note">{l.blurb}</span></li>
           ))}
         </ul>
       </section>

@@ -11,9 +11,11 @@ export const INFO_NAV: InfoPageMeta[] = [
   { slug: "record-replay",     title: "Record/replay engineering",          nav: "record/replay" },
   { slug: "cost-engineering",  title: "Cost engineering",                   nav: "cost engineering" },
   { slug: "production-system", title: "The system behind the demo",         nav: "the system" },
+  { slug: "trip-integrity",    title: "Trip integrity",                     nav: "trip integrity" },
   { slug: "data-stores",       title: "KV, D1, and a SQL brain",            nav: "data stores" },
   { slug: "llm-options",       title: "Choosing the model",                 nav: "llm options" },
   { slug: "phase-machine",     title: "Keeping the model on track",         nav: "phase machine" },
+  { slug: "subagents",         title: "Subagents for the drudge work",      nav: "subagents (soon)" },
   { slug: "resume",            title: "Neil Roberts — resume",              nav: "resume" },
 ];
 

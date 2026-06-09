@@ -22,6 +22,28 @@ describe("infoPageHtml", () => {
     expect(html!).toContain("DEMO_PHASE_MACHINE");
     expect(html!).toContain("Haiku");
   });
+  it("renders the trip-integrity page hooking the validation panel + ADR-0006 guards", () => {
+    const html = infoPageHtml("trip-integrity");
+    expect(html).not.toBeNull();
+    expect(html!).toContain("empty-decisions guard");
+    expect(html!).toContain("consistencyWarnings");
+    expect(html!).toContain("ADR-0006");
+    expect(html!).toContain("sources:");
+  });
+  it("renders the subagents page (coming soon) grounded in the real offers agent", () => {
+    const html = infoPageHtml("subagents");
+    expect(html).not.toBeNull();
+    expect(html!).toContain("EXAMINE");
+    expect(html!).toContain("DRY_RUN");
+    expect(html!).toContain("coming soon");
+    expect(html!).toContain("sources:");
+  });
+  it("context-economics covers the consolidation wave + the ADR-0007 schema finding", () => {
+    const html = infoPageHtml("context-economics");
+    expect(html).not.toBeNull();
+    expect(html!).toContain("cruise pilot");
+    expect(html!).toContain("ADR-0007");
+  });
   it("returns null for an unknown slug", () => {
     expect(infoPageHtml("nope")).toBeNull();
   });

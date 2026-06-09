@@ -181,6 +181,10 @@ button.ins-rail:hover { color: var(--ink); }
   flex: 0 0 auto; align-self: center; font: 600 var(--t-12)/1 var(--mono); color: var(--amber-hi);
   border: 1px solid var(--line); border-radius: 999px; padding: 3px 8px;
 }
+.ins-soon {
+  font: 600 var(--t-12)/1 var(--mono); color: var(--amber-hi); text-transform: uppercase;
+  letter-spacing: .04em; border: 1px solid var(--line); border-radius: 999px; padding: 1px 6px; margin-left: 4px;
+}
 
 /* ---- inspector head extra (relocated palette switcher in claude skin) ---- */
 .ins-extra { margin-bottom: var(--s3); position: relative; z-index: 3; }

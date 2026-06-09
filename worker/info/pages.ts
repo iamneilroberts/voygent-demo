@@ -39,7 +39,8 @@ const PAGES: Record<string, InfoPage> = {
 <p>Every tool schema, every raw search payload, every rendered document the model sees costs context — and context costs latency, money, and reasoning quality. Voygent treats the context window as a metered resource with explicit engineering around what enters it.</p>
 
 <h2>Router consolidation: ~70 tools → ~35</h2>
-<p>Per-supplier tools don't scale: ChatGPT caps connectors around 35 tools, and every schema rides in every request. Voygent collapsed ~70 per-supplier tools into per-domain routers — <code>cruise_search(line)</code>, <code>flight_search(source)</code>, <code>hotel_search(source)</code> — with the supplier as an argument. Fewer names, smaller catalog, same coverage; downstream adapters keep stable contracts so the router calls them unchanged.</p>
+<p>Per-supplier tools don't scale: ChatGPT caps connectors around 35 tools, and every schema rides in every request. The fix is per-domain <em>router</em> tools — <code>cruise_search(line)</code>, <code>flight_search(source)</code>, <code>hotel_search(source)</code> — with the supplier as an argument. Fewer names, smaller catalog, same coverage; downstream adapters keep stable <code>name</code> + <code>inputSchema</code> contracts so the router calls them unchanged.</p>
+<p>This lands as a <strong>risk-sequenced migration, not a big-bang rename</strong> — and the sequencing is the point. A <strong>cruise pilot shipped first</strong> (<code>cruise_search</code> + <code>cruise_detail</code> replacing ~18 standalones — <span class="stat">−17 catalog names</span>, live in production), proving the router-over-adapter pattern before it scaled. A <strong>five-domain fan-out follows</strong> (flight / hotel / package / car / excursion). Crucially, the old per-supplier tools are retired only <em>after</em> their router is verified equivalent against the live adapters — the deletion is gated on a passing parity check, never on faith. You can watch the count fall as each wave lands: the <strong>"MCP tools exposed"</strong> stat in this demo's Engineering panel <em>is</em> the size of that catalog.</p>
 
 <h2>Search → distill → stage by id</h2>
 <p>Raw supplier responses are huge (a single flight search can be hundreds of KB). They never enter the model. Searches write to a server-side candidate store; the model reads a <em>distilled</em> list (<code>flight_list</code>) and stages a pick by <strong>candidate id</strong> — the server joins the id back to the full data. The model carries a pointer, not the payload. This demo's Engineering tab shows the per-call savings live.</p>
@@ -49,7 +50,10 @@ const PAGES: Record<string, InfoPage> = {
 
 <h2>Patches, not rewrites</h2>
 <p>Trip state mutates through <code>patch_trip</code> — field-level updates against server-held state — rather than round-tripping the whole trip JSON through the model each turn. The demo's "context kept out of the model" panel is measuring exactly this.</p>
-<span class="artifact">sources: voygent-lite router consolidation (cruise pilot PR #167, M1 fan-out) · src/folio-renderer/* · flight_list/hotel_list distill tools · ADR-0004 (catalog locked per session)</span>
+
+<h2>Schemas are context too</h2>
+<p>Consolidation shrinks the <em>number</em> of tools; the next lever is the <em>weight of each schema</em>. A measured proposal (<span class="mono">voygent-lite ADR-0007</span>, characterized on a schema-eval harness — <strong>not yet in <code>src</code></strong>) replaces a literal <code>source</code> enum with a smaller semantic discriminator — the model says what it <em>needs</em>, and a server-side <code>INTENT_MAP</code> resolves that to the supplier. Across five models (Haiku, Sonnet, Opus, and two OpenAI models) it held ~90% dispatch accuracy while cutting per-tool schema tokens <span class="stat">~54%</span>. Fewer tools <em>and</em> leaner schemas per tool — the two compound. It's filed as a proposal precisely because the demo's honesty rule is to call shipped "shipped" and a finding "a finding."</p>
+<span class="artifact">sources: voygent-lite router consolidation (cruise pilot PR #167 · M1 fan-out PR #170) · ADR-0007 (intent-routed schema discriminators, proposed) · src/folio-renderer/* · flight_list/hotel_list distill tools · ADR-0004 (catalog locked per session)</span>
 <p><a class="cta" href="/">watch the savings accrue live →</a></p>`,
   },
 
@@ -204,6 +208,54 @@ const PAGES: Record<string, InfoPage> = {
 <blockquote>The general lesson for agent products: don't ask a cheap model to be disciplined for twenty turns — make the discipline a property of the system, and let the model do the one small thing in front of it. The same orchestration discipline is what would let the production MCP make cheaper <em>host</em> models viable, too.</blockquote>
 <span class="artifact">sources: worker/agent/phases.ts (TripPhase reducer + per-phase directives) · worker/agent/loop.ts (afterToolBatch + capped continueDirective) · worker/session-do.ts (flag-gated wiring) · scripts/smoke-enriched-run.mjs (10/10 haiku acceptance) · docs/summaries/handoff-2026-06-08-phase-machine.md</span>
 <p><a class="cta" href="/">watch the workflow engine step live →</a></p>`,
+  },
+
+  "trip-integrity": {
+    title: "Trip integrity: the data is the product",
+    subtitle: "A weak model will ship a blank or fabricated proposal unless the server won't let it. Voygent owns data quality end-to-end.",
+    body: `
+<p>The validation panel in this demo's Engineering tab — the <strong>"validation N/N"</strong> stat and the <strong>Trip integrity ✓ / ↻ / ✗</strong> checks — isn't cosmetic. It's the visible edge of a production stance: the trip data <em>is</em> the deliverable, so its correctness is enforced by the server, not hoped for from the model. This is a different concern from <a href="/info/record-replay">record/replay</a> (that's about the public demo never showing invented data); this is about the live product refusing to emit a bad proposal in the first place.</p>
+
+<h2>Lite owns it end-to-end</h2>
+<p>An earlier architecture split the work — one service wrote raw trip JSON, another "reconciled" it later. Voygent collapsed that: data-quality findings (duplicate booking shapes, a missing <code>amount</code>, a double-encoded HTML entity, a price that doesn't sum) are bugs fixed <em>at the source</em>, on write, in one place. The decision is codified (<span class="mono">voygent-lite ADR-0006</span>) so the ownership can't quietly drift back apart.</p>
+
+<h2>Guard, don't hope</h2>
+<p>The strongest guards are the ones a model literally cannot talk past. <code>preview_folio_board</code> carries an <strong>empty-decisions guard</strong> — it will not render a client proposal with no choices in it, which is exactly the failure mode a rushed or cheap model produces. A decisions <em>builder</em> assembles pickable options from trip state, and a <code>completenessHint</code> rides back in tool metadata to nudge the model toward the gaps. On the write path, <code>validateAndCleanTripData</code> normalizes shapes and <code>reconcilePricing</code> makes the numbers add up before anything is shown to a client.</p>
+
+<h2>Advisory vs. blocking — on purpose</h2>
+<p>Not every warning should stop the world. <code>patch_trip</code> returns <code>consistencyWarnings[]</code> — amber, non-blocking signals ("this hotel's dates don't overlap the trip", "this leg has no price") that surface to the advisor without halting the build. The hard guards block a publish; the advisories inform a human. The split is deliberate: over-blocking trains people to bypass the guard.</p>
+
+<h2>Self-heal — the "↻ repaired" checks</h2>
+<p>Some problems are better fixed than flagged. When a published proposal URL once resolved to <span class="mono">/proposal/unknown</span> (a missing trip id), the fix wasn't a louder error — the builder now stamps <code>meta.tripId</code> at save time and the render path self-heals the link. Duplicate-booking shapes get normalized; double-encoded entities get decoded. Those are the runs that show as <strong>↻ repaired</strong> in the panel above: the server caught a flaw and corrected it, rather than passing it to a client.</p>
+
+<blockquote>Demo honesty (replay) and product integrity (these guards) are two different invariants, both structural. One stops the <em>demo</em> from lying; the other stops the <em>product</em> from shipping a blank or broken proposal — even when a cheap model is driving.</blockquote>
+<span class="artifact">sources: voygent-lite docs/adr/0006-lite-owns-data-integrity-end-to-end.md · validateAndCleanTripData / reconcilePricing · preview_folio_board empty-decisions guard + completenessHint _meta · patch_trip consistencyWarnings · /proposal/&lt;tripId&gt; meta.tripId self-heal</span>
+<p><a class="cta" href="/">watch the integrity checks run live →</a></p>`,
+  },
+
+  "subagents": {
+    title: "Subagents for the drudge work",
+    subtitle: "Routine inbox-and-offers toil, handled by an agent that proposes and never disposes — the advisor stays in the loop by construction.",
+    body: `
+<p>A travel advisor's day is full of necessary tedium: triaging a flooded inbox, pulling promo codes out of supplier blasts, matching a booking confirmation to the right active trip. It's exactly the work an agent should absorb — <em>and</em> exactly the work where a wrong autonomous action (a deleted email, a message sent to the wrong client) does real damage. Voygent's answer is a subagent that does the reading and the drafting but holds no authority to act. <strong>It proposes; the human disposes.</strong></p>
+
+<h2>The shipped one: the offers inbox</h2>
+<p>This isn't hypothetical — it runs today against a real advisor mailbox. An <strong>IMAP IDLE watcher</strong> (a systemd service) reacts to mail as it arrives. A <strong>Haiku-4.5 classifier</strong> sorts each message into one of 13 categories (promo blast, booking confirmation, client-active, supplier doc, junk…), and anything it isn't sure about — confidence under 0.6 — is parked as <code>UNCERTAIN</code> rather than guessed. A <strong>second pass</strong> pulls structured offers (code, type, dates) out of the promo blasts and <strong>posts them straight into Voygent's shared offers index</strong>, where they become searchable inventory for trip-building. A trip-linker matches operational mail to the advisor's live trips. Every morning a <strong>deterministic 06:00 digest</strong> — pure SQL→markdown, <em>zero</em> LLM calls, so it can't hallucinate — lands as the advisor's triage queue. To date: <span class="stat">~3,700</span> messages ingested, <span class="stat">~2,300</span> classified, for about <span class="stat">$4.50</span> of model spend.</p>
+
+<h2>Propose, never dispose</h2>
+<p>The safety model is structural, not a promise. The watcher opens the mailbox <strong>read-only</strong> — IMAP <code>EXAMINE</code>, never <code>SELECT</code> for write — so a code path that calls <code>STORE</code>, <code>MOVE</code>, <code>EXPUNGE</code>, or <code>APPEND</code> is treated as a <em>bug</em>, not a feature. <code>DRY_RUN</code> is the default and the only permitted value in this phase: actions the agent recommends are written to an <code>actions</code> table with <code>executed_at</code> left <code>NULL</code> — a log of <em>proposed</em> moves, nothing performed. The advisor works the digest (or a mobile triage view) and decides. The codified rule, in priority order: <em>mailbox safety &gt; classification correctness &gt; feature completeness &gt; speed.</em> When two goals collide, the human's data wins.</p>
+
+<h2>Coming soon — the rest of the fleet</h2>
+<p>The offers agent is the first of a pattern, and the pattern generalizes to other advisor drudge work — each piece <strong>coming soon</strong>, each built the same propose-don't-dispose way:</p>
+<ul>
+  <li><strong>Offers into the trip.</strong> Today the agent files offers into the index; next it surfaces the relevant ones <em>inside</em> the build — "three of your suppliers are running Greece promos this week" — as suggestions the advisor accepts, never auto-applied.</li>
+  <li><strong>An adapter-audit watchdog.</strong> The same onboarding pipeline that ships a supplier adapter has an <code>--audit</code> mode that re-runs it against captured baselines. Run on a schedule as a subagent, it files an issue when a supplier site drifts — catching a broken integration before an advisor hits it live.</li>
+  <li><strong>A trip-integrity sweeper.</strong> A background pass over trips that flags the <a href="/info/trip-integrity">data-quality</a> issues the live guards would catch — stale prices, dangling bookings — and proposes the fix for review.</li>
+</ul>
+
+<blockquote>The principle that makes this safe to ship is the same one behind the <a href="/info/phase-machine">phase machine</a>: don't ask the model for judgment it shouldn't hold. An agent can read a thousand emails and draft every action — and still touch nothing until a human says go. Keeping the advisor in the loop isn't a limitation bolted on; it's the architecture.</blockquote>
+<span class="artifact">sources: voygent-mailagent — deploy/voygent-mailagent-watcher.service (IMAP IDLE, EXAMINE-only) · classification/ (Haiku 4.5, 13 categories) · extraction/promo.py → voygent-lite offers index · digest/generator.py (deterministic, no LLM) · DRY_RUN actions table + constraint hierarchy · .claude/skills/onboard (--audit mode)</span>
+<p><a class="cta" href="/">back to the live demo →</a></p>`,
   },
 
   "resume": {
