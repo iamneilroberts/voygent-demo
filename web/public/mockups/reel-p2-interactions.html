@@ -110,9 +110,12 @@
   .stage{background:#efece4;border:1px solid #d9d5c9;border-radius:12px;padding:22px;display:flex;flex-direction:column;gap:16px}
   .gnotif{align-self:flex-start;display:flex;gap:11px;align-items:flex-start;background:#fff;border:1px solid var(--cl-line);
     border-radius:12px;padding:11px 14px;max-width:430px;box-shadow:0 8px 22px #0000001c;--settle:#fff;--flash:#fff3c4}
-  .gicon{width:30px;height:30px;border-radius:7px;background:#ea4335;color:#fff;font:700 15px/30px var(--cl-sans);text-align:center;flex:none}
+  .gicon{width:30px;height:30px;border-radius:7px;background:var(--cl-tool-bg);border:1px solid var(--cl-line);
+    color:var(--cl-muted);font:600 15px/30px var(--cl-sans);text-align:center;flex:none}
   .gtxt{font-size:13px}.gtxt .gt{font-weight:700}.gtxt .gs{color:var(--cl-muted);margin-top:2px}
   .gtxt .gmeta{font:600 10px/1 var(--cl-mono);color:var(--cl-muted);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px}
+  .simtag{display:inline-block;margin-left:8px;font:600 9px/1 var(--cl-mono);letter-spacing:.08em;text-transform:uppercase;
+    color:var(--cl-muted);background:var(--cl-tool-bg);border:1px solid var(--cl-line);border-radius:999px;padding:3px 7px;vertical-align:middle}
   .route{display:flex;align-items:center;gap:9px;font:600 12px/1 var(--cl-mono);color:var(--client);align-self:flex-start;
     background:var(--client-soft);border:1px solid var(--client-bright);border-radius:999px;padding:7px 13px}
   .route .ar{font-size:14px}
@@ -189,15 +192,15 @@
     click to expand/collapse. In the reel it auto-expands for the beat, then collapses so the folio stays clean.</p>
 
   <!-- 4 SEND gmail notification, bidirectional -->
-  <div class="kick"><span class="n">04 ·</span> Send to client + reply routed back (Gmail notification)</div>
+  <div class="kick"><span class="n">04 ·</span> Send to client + reply routed back (email notification · simulated)</div>
   <div class="stage" data-anim data-seq="send" data-dwell="5200" data-actor="advisor" data-label="Sent to client → reply routed back">
     <div class="gnotif focal pop">
-      <div class="gicon">M</div>
-      <div class="gtxt"><div class="gmeta">Gmail · to client</div><div class="gt">Your Dublin trip is ready to review</div><div class="gs">Voygent sent the folio. The client can pick options and comment.</div></div>
+      <div class="gicon">✉</div>
+      <div class="gtxt"><div class="gmeta">Email · to client <span class="simtag">simulated</span></div><div class="gt">Your Dublin trip is ready to review</div><div class="gs">Voygent sent the folio. The client can pick options and comment.</div></div>
     </div>
     <div class="gnotif focal pop" style="animation-delay:.5s">
-      <div class="gicon">M</div>
-      <div class="gtxt"><div class="gmeta">Gmail · new reply from client</div><div class="gt">“Can we add a food tour on Day 6?”</div></div>
+      <div class="gicon">✉</div>
+      <div class="gtxt"><div class="gmeta">Email · new reply from client <span class="simtag">simulated</span></div><div class="gt">“Can we add a food tour on Day 6?”</div></div>
     </div>
     <div class="route pop" style="animation-delay:1s"><span class="dot client"></span> client’s note <span class="ar">→</span> routed back to the agent</div>
     <div class="frame" style="max-width:560px">
@@ -205,9 +208,10 @@
       <div class="chat"><div class="prose" style="font-size:14px">Picking up the client’s note — adding a food tour to Day 6 and checking it against the schedule…</div></div>
     </div>
   </div>
-  <p class="note"><b>The flow:</b> a Gmail notification shows the trip went out (client notified by email) → a second
-    notification shows the client replied → a routing chip makes it explicit the reply goes <b>back to the agent</b>,
-    which then acts. No email body, no compose window — just the channel. All simulated client-side.</p>
+  <p class="note"><b>The flow:</b> a generic email notification (neutral mail icon + a <b>simulated</b> tag, no Gmail
+    branding) shows the trip went out (client notified by email) → a second notification shows the client replied →
+    a routing chip makes it explicit the reply goes <b>back to the agent</b>, which then acts. No email body, no
+    compose window — just the channel, clearly marked as a demo. All simulated client-side.</p>
 
   <p class="note" style="margin-top:32px"><b>Cross-cutting:</b> each focal flash doubles as a P1 spotlight target, gets
     its own pacing dwell, and the end-card recap grows a "client picked / commented" chip.</p>
