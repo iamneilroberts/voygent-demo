@@ -8,3 +8,6 @@ dist-web
 scripts/_fixtures-raw/
 .env
 .env.*
+
+# Local embedding model cache (huge; never commit)
+.fastembed_cache/

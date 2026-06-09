@@ -17,6 +17,8 @@ import { STATS_INSERT_SQL, statsRowFromSummary, type StatsSummary } from "./stat
 import { encodeSse } from "../shared/events";
 import type { ConversationMessage, TokenUsage } from "./llm/provider";
 import type { ServerEvent } from "../shared/events";
+import { D1Db } from "./access/db";
+import { reconcile } from "./access/codes";
 
 interface Env {
   ANTHROPIC_API_KEY: string;
@@ -34,6 +36,8 @@ interface Env {
   DEMO_DEEPSEEK_ENABLED?: string;         // dual gate with the key
   OLLAMA_BASE_URL?: string;               // local-dev only; never set in the deployed Worker
   DEMO_OLLAMA_URL?: string;               // alias gate for local Ollama (host-allowlisted)
+  DEMO_DB: D1Database;                    // access-control: per-code budgets + reconcile ledger
+  EST_EXCHANGE_MICROS?: string;           // access-control: per-exchange reservation override
 }
 
 // Public-surface denylist (Neil 2026-06-07): the catalog stays claude.ai-faithful
@@ -276,6 +280,10 @@ export class SessionDO {
     // + the wall-clock the exchange started, stamped into the stats row at finalize.
     const sessionId = new URL(req.url).searchParams.get("session") ?? "anon";
     const exchangeTs = Date.now();
+    // access-control: per-code reconciliation headers, set by the worker's admission gate.
+    const codeId = req.headers.get("x-code-id");
+    const estForReconcile = Number(req.headers.get("x-est-micros") ?? "0");
+    // Read the request body exactly once (it carries message/mode + optional model-routing).
     const body = await req.json<{ message: string; mode?: string; model?: unknown; routing?: { discovery?: unknown; enrichment?: unknown } }>();
     const { message, mode } = body;
     const fallbackModel = (this.env.LLM_MODEL || DEFAULT_MODEL) as ModelId;
@@ -582,9 +590,10 @@ export class SessionDO {
         // Record cost: log (visible via `wrangler tail`).
         console.log(`[cost] model=${model} trip=${this.tripId} in=${u.inputTokens} out=${u.outputTokens} cacheR=${u.cacheReadTokens} cacheW=${u.cacheCreationTokens} usd=${sessionCost.toFixed(4)}`);
         // Anchor the telemetry writes BEFORE mux.close() — a detached tail after
-        // close can be lost on DO eviction (Codex #2). Both are best-effort:
+        // close can be lost on DO eviction (Codex #2). All best-effort:
         // allSettled never rejects, so a D1/ledger failure never aborts the turn.
         // Stats writes skip test/smoke runs and no-op when STATS_DB is unbound.
+        // The access-control reconcile settles the reserved per-code estimate vs actual spend.
         await Promise.allSettled([
           (this.env.STATS_DB && !isTest)
             ? this.env.STATS_DB.prepare(STATS_INSERT_SQL)
@@ -597,6 +606,18 @@ export class SessionDO {
             : Promise.resolve(),
           (sessionCost > 0 && !isTest)
             ? this.budgetStub().fetch("https://do/__budget/add", { method: "POST", body: JSON.stringify({ usd: sessionCost }) })
+            : Promise.resolve(),
+          (codeId && estForReconcile > 0)
+            ? reconcile(new D1Db(this.env.DEMO_DB), {
+                codeId,
+                exchangeId,
+                estMicros: estForReconcile,
+                actualMicros: Math.round(sessionCost * 1_000_000),
+                model,
+                inputTokens: u.inputTokens,
+                outputTokens: u.outputTokens,
+                ts: new Date().toISOString(),
+              })
             : Promise.resolve(),
         ]);
         mux.close();

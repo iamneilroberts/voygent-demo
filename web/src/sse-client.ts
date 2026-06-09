@@ -1,14 +1,19 @@
 import type { ServerEvent } from "../../shared/events";
 
+export class UnauthorizedError extends Error {}
+
 export async function streamChat(
-  apiBase: string, sessionId: string, message: string, onEvent: (e: ServerEvent) => void,
+  apiBase: string, message: string, onEvent: (e: ServerEvent) => void,
   mode?: "boards", // claude skin: ask the worker for present-and-wait + board events
   extraBody?: Record<string, unknown>, // e.g. { model } / { routing } for per-phase model selection
 ): Promise<void> {
-  const res = await fetch(`${apiBase}/chat?session=${encodeURIComponent(sessionId)}`, {
-    method: "POST", headers: { "content-type": "application/json" },
-    body: JSON.stringify({ message, ...(mode ? { mode } : {}), ...(extraBody ?? {}) }),
+  const res = await fetch(`${apiBase}/chat`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    credentials: "include", // access-control: server-issued sid cookie (no sessionId query param)
+    body: JSON.stringify({ message, ...(mode ? { mode } : {}), ...(extraBody ?? {}) }), // enrichment: mode + model-routing extraBody
   });
+  if (res.status === 401) throw new UnauthorizedError("session expired");
   if (!res.ok) throw new Error(`chat request failed: HTTP ${res.status}`);
   if (!res.body) throw new Error("no response stream");
   const reader = res.body.getReader();

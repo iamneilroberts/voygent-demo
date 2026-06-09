@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { streamChat } from "./sse-client";
+import { streamChat, UnauthorizedError } from "./sse-client";
+import { Gate } from "./Gate";
+import { readCodeFromHash, authenticate, hasSession } from "./lib/gate";
 import { ChatView, type ChatMessage, type Preset } from "./ChatView";
 import { ClaudeChatView } from "./ClaudeChatView";
 import { FolioPanel } from "./FolioPanel";
@@ -36,11 +38,12 @@ export function App() {
   const [busy, setBusy] = useState(false);
   const [presets, setPresets] = useState<Preset[]>([]);
   const [geoCity, setGeoCity] = useState<string | null>(null);
-  const sessionId = useRef(crypto.randomUUID()).current;
   const recordParam = (() => { try { return new URLSearchParams(window.location.search).get("record") === "1"; } catch { return false; } })();
   // Recording is claude-skin only (the Recording type is locked to skin:"claude"), so
   // ?record=1 is a no-op unless the claude skin is active — capture as ?skin=claude&record=1.
   const recorder = useRef(recordParam && resolveInitialSkin() === "claude" ? createRecorder("dublin-oct") : null).current;
+  const [authed, setAuthed] = useState<boolean | null>(null); // null = checking
+  const [pendingCode, setPendingCode] = useState("");
   const [collapsed, setCollapsed] = useState(false);
   const [skin, setSkin] = useState<SkinId>(() => {
     if (resolveInitialMode() === "auto") {
@@ -141,6 +144,12 @@ export function App() {
       .then((r) => r.json() as Promise<StatsResponse>)
       .then((s) => { if (s && typeof s.exchanges === "number") setStats(s); })
       .catch(() => { /* section just stays hidden when stats are unavailable */ });
+    const code = readCodeFromHash(window.location, window.history);
+    (async () => {
+      if (code && (await authenticate(API_BASE, code))) { setAuthed(true); return; }
+      if (code) setPendingCode(code);
+      setAuthed(await hasSession(API_BASE));
+    })();
   }, []);
 
   function showError(msg: string) {
@@ -223,8 +232,9 @@ export function App() {
     recorder?.recordUser(text);
     setBusy(true);
     try {
-      await streamChat(API_BASE, sessionId, text, (e) => { recorder?.recordEvent(e); applyEvent(e, claude); }, claude ? "boards" : undefined, routingBody(modelMode, smartMap));
+      await streamChat(API_BASE, text, (e) => { recorder?.recordEvent(e); applyEvent(e, claude); }, claude ? "boards" : undefined, routingBody(modelMode, smartMap));
     } catch (err) {
+      if (err instanceof UnauthorizedError) { setAuthed(false); return; }
       showError((err as Error).message);
     } finally {
       setBusy(false);
@@ -253,6 +263,14 @@ export function App() {
     } catch { /* no-op */ }
   }
   const demoLabel = mode === "auto" ? "● build your own" : "▶ watch the demo";
+
+  // access-control gate: block the app shell until a valid session exists.
+  if (authed === null) return <div style={{ margin: "12vh auto", textAlign: "center", color: "#888" }}>Loading…</div>;
+  if (!authed) return <Gate initialCode={pendingCode} onSubmit={async (c) => {
+    const ok = await authenticate(API_BASE, c);
+    if (ok) setAuthed(true);
+    return ok;
+  }} />;
 
   return (
     <div className="app">

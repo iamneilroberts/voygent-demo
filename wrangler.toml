@@ -39,5 +39,19 @@ database_id = "20321ac2-3669-489e-b67c-5e5bd91d6f2e"
 #   ANTHROPIC_API_KEY, VOYGENT_MCP_URL, VOYGENT_MCP_BEARER, and optional DEMO_DISABLED.
 #   DEEPSEEK_API_KEY (+ DEMO_DEEPSEEK_ENABLED=1 to go live), optional DEEPSEEK_BASE_URL.
 #   OLLAMA_BASE_URL / DEMO_OLLAMA_URL are local-dev only (a deployed Worker can't reach localhost).
+#   CODE_HASH_KEY (HMAC key for hashing passcodes), SESSION_SIGN_KEY (HMAC key for signing
+#   session cookies), optional ADMIN_TOKEN (bearer for /admin/* endpoints), and optional
+#   EST_EXCHANGE_MICROS (override default per-exchange micro-USD estimate).
 # Kept as secrets (not [vars]) so the MCP target can be flipped staging<->prod
 # with a single `wrangler secret put` and no redeploy.
+
+[[d1_databases]]
+binding = "DEMO_DB"
+database_name = "voygent-demo"
+database_id = "7825123d-3e56-423b-b2da-c5add703b252"
+
+[vars]
+# The exact origin the SPA is served from. Used by the Origin/CSRF guard.
+# Local dev (wrangler dev): http://localhost:8787. Prod: the deployed workers.dev origin
+# (demo.voygent.ai is shadowed by the *.voygent.ai wildcard — see note above).
+APP_ORIGIN = "https://voygent-demo.somotravel.workers.dev"
