@@ -3,28 +3,28 @@
   "highlights": [
     {
       "match": { "eventType": "board", "kind": "flight", "nth": 1 },
-      "anchor": "chat",
+      "target": "board-flight",
       "eyebrow": "Real supplier data",
       "title": "These are real live fares",
       "body": "Every option here came from a live flight search, not from the model's imagination. Voygent only writes real, sourced inventory into a trip."
     },
     {
       "match": { "eventType": "inspector", "kind": "savings", "where": { "mechanism": "patch" }, "nth": 1 },
-      "anchor": "board",
+      "target": "stat:contextKeptOut",
       "eyebrow": "Context saved",
       "title": "It patches the trip instead of rewriting it",
       "body": "Each change is a small incremental patch to the saved trip, not a full rewrite. That keeps every turn cheap. The engineering panel counts the tokens saved."
     },
     {
       "match": { "eventType": "inspector", "kind": "summary", "nth": 3 },
-      "anchor": "board",
+      "target": "stat:observedCost",
       "eyebrow": "What it cost",
       "title": "A full planning session for pennies",
       "body": "Model routing and context discipline keep spend low. This is measured routed cost for the whole run, not an estimate."
     },
     {
       "match": { "eventType": "inspector", "kind": "validation", "where": { "status": "repaired" }, "nth": 1 },
-      "anchor": "board",
+      "target": "stat:validation",
       "eyebrow": "Self-correction",
       "title": "It caught a problem and fixed it",
       "body": "A trip-integrity check found something off in the projected trip and repaired it in place. The panel logs the check honestly, pass or repaired."

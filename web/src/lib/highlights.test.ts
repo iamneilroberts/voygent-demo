@@ -11,7 +11,7 @@ const frames: Frame[] = [
   ev({ type: "inspector", kind: "validation", exchangeId: "x", check: "c", label: "L", status: "repaired" }),
 ];
 
-const hl = (match: Highlight["match"]): Highlight => ({ match, anchor: "board", eyebrow: "E", title: "T", body: "B" });
+const hl = (match: Highlight["match"]): Highlight => ({ match, target: "stat:x", eyebrow: "E", title: "T", body: "B" });
 
 describe("resolveHighlightFrames", () => {
   it("maps a matcher to the index of the matching frame", () => {

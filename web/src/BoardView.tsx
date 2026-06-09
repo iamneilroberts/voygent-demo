@@ -14,7 +14,7 @@ export function BoardView(
   const locked = board.resolved || !!board.resolvedId;
   const title = board.kind === "flight" ? "Select a flight" : "Choose a hotel";
   return (
-    <div className="cl-board" role="group" aria-label={title}>
+    <div className="cl-board" role="group" aria-label={title} data-reel-target={`board-${board.kind}`}>
       <div className="cl-board-title">{title}</div>
       <div className="cl-board-list">
         {board.candidates.map((c) => {

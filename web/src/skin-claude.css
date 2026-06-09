@@ -344,11 +344,16 @@
 :root[data-skin="claude"] .cl-reel-btn-meta { display: block; font: 500 .75rem/1 var(--cl-mono); opacity: .85; margin-top: 5px; }
 
 /* Spotlight dim + anchored callout */
-:root[data-skin="claude"] .cl-reel-spotlight {
-  position: absolute; inset: 0; z-index: 58; background: #1f1e1c2e; display: flex; padding: 22px;
+/* Anchored callout overlay: full-viewport, click-through except the card. */
+:root[data-skin="claude"] .cl-reel-overlay { position: fixed; inset: 0; z-index: 60; pointer-events: none; }
+:root[data-skin="claude"] .cl-reel-dim { position: fixed; inset: 0; background: #1f1e1c66; }
+/* Spotlight: a transparent box at the target; the huge box-shadow spread dims everything outside it,
+   the inner ring + glow mark the stat. Order: ring, glow, then the dimming spread (painted behind). */
+:root[data-skin="claude"] .cl-reel-spot {
+  border-radius: 6px; pointer-events: none;
+  box-shadow: 0 0 0 2px var(--cl-accent), 0 0 16px 2px #c9644255, 0 0 0 9999px #1f1e1c80;
 }
-:root[data-skin="claude"] .cl-reel-anchor-chat { align-items: flex-end; justify-content: flex-start; }
-:root[data-skin="claude"] .cl-reel-anchor-board { align-items: flex-start; justify-content: flex-end; }
+:root[data-skin="claude"] .cl-reel-callout { pointer-events: auto; }
 :root[data-skin="claude"] .cl-reel-callout {
   background: var(--cl-surface); border: 1px solid var(--cl-line); border-radius: 12px; width: 272px;
   padding: 13px 15px; box-shadow: 0 18px 48px #00000033;

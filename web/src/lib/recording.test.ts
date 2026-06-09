@@ -65,7 +65,7 @@ describe("replayChat highlights + speed", () => {
       onHighlight: async () => { await gate; },   // block until we release
     }, {
       wait: async () => {},
-      highlights: [{ match: { eventType: "board", kind: "flight" }, anchor: "chat", eyebrow: "E", title: "Real fares", body: "B" }],
+      highlights: [{ match: { eventType: "board", kind: "flight" }, target: "board-flight", eyebrow: "E", title: "Real fares", body: "B" }],
     });
     await Promise.resolve(); await Promise.resolve();   // let the loop run up to the paused callout
     expect(applied).toEqual(["board"]);                 // paused: the "text" frame has NOT applied yet

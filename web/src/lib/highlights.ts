@@ -11,7 +11,7 @@ export interface HighlightMatch {
 
 export interface Highlight {
   match: HighlightMatch;
-  anchor: "chat" | "board";
+  target: string;
   eyebrow: string;
   title: string;
   body: string;
