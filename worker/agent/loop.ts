@@ -4,6 +4,24 @@ import { isTripMutating } from "./folio-sync";
 import { scrubArgs, scrubResultText } from "../inspector";
 import { summarizeToolResult } from "./tool-summary";
 
+function visitorToolSummary(content: string, ok: boolean, friendlyOnFail: boolean): string {
+  if (!friendlyOnFail) return summarizeToolResult(content); // default path unchanged (byte-identical)
+  // Faithful mode: hide ANY failure from the visitor — the thrown/ERROR: case (ok===false) AND a
+  // JSON {error:...} envelope that didn't trip the ERROR: prefix (so ok stayed true). The model
+  // still receives the raw tool_result; we do NOT touch the `ok` flag (used for boards/inspector),
+  // so flag-off behavior is unchanged.
+  if (!ok || hasJsonError(content)) return "that source was slow — trying another…";
+  return summarizeToolResult(content);
+}
+
+function hasJsonError(content: string): boolean {
+  try {
+    const o = JSON.parse(content);
+    return !!o && typeof o === "object" && typeof (o as { error?: unknown }).error === "string"
+      && !!(o as { error?: string }).error;
+  } catch { return false; }
+}
+
 export interface AgentLoopArgs {
   provider: LLMProvider;
   tools: ToolSchema[];
@@ -37,6 +55,10 @@ export interface AgentLoopArgs {
   maxTurns?: number;
   maxToolCalls?: number;
   exchangeId?: string;
+  // When true (faithful mode), a FAILED tool emits a visitor-safe chip summary instead of the
+  // raw error. Default false → the error chip text is byte-identical to today. The model-facing
+  // tool_result content is unchanged in both cases.
+  friendlyToolErrors?: boolean;
 }
 
 export async function runAgentLoop(args: AgentLoopArgs): Promise<void> {
@@ -100,7 +122,7 @@ export async function runAgentLoop(args: AgentLoopArgs): Promise<void> {
       try { content = await callTool(t.name, t.input); if (content.startsWith("ERROR:")) ok = false; }
       catch (e) { content = `ERROR: ${(e as Error).message}`; ok = false; }
       const latencyMs = Date.now() - t0;
-      emit({ type: "tool", tool: t.name, phase: "done", summary: summarizeToolResult(content) });
+      emit({ type: "tool", tool: t.name, phase: "done", summary: visitorToolSummary(content, ok, !!args.friendlyToolErrors) });
       if (ok && args.buildBoard) {
         const board = args.buildBoard(t.name, content);
         if (board) emit(board);

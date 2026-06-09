@@ -258,6 +258,82 @@ describe("runAgentLoop", () => {
     expect(seen[0].result).toContain("ok");
   });
 
+  it("with friendlyToolErrors, hides the raw error from the visitor but keeps it for the model", async () => {
+    const asstTool: AssistantMessage = {
+      role: "assistant",
+      content: [{ type: "tool_use", id: "t1", name: "flight_search", input: {} }],
+    };
+    const asstFinal: AssistantMessage = { role: "assistant", content: [{ type: "text", text: "ok" }] };
+    const messages: ConversationMessage[] = [{ role: "user", content: "go" }];
+    const out: ServerEvent[] = [];
+    await runAgentLoop({
+      provider: fakeProvider([
+        [{ type: "tool-call", id: "t1", name: "flight_search", input: {} }, { type: "turn-complete", assistant: asstTool }],
+        [{ type: "text-delta", delta: "ok" }, { type: "turn-complete", assistant: asstFinal }],
+      ]),
+      tools: [], messages, friendlyToolErrors: true,
+      callTool: async () => { throw new Error("MCP flight_search HTTP 502"); },
+      onFolio: async () => {},
+      emit: (e) => out.push(e),
+    });
+    const done = out.find((e) => e.type === "tool" && (e as any).phase === "done") as any;
+    expect(done.summary).not.toContain("502");
+    expect(done.summary).not.toContain("HTTP");
+    expect(done.summary.toLowerCase()).toContain("another");
+    const toolResult = messages
+      .flatMap((m) => (Array.isArray((m as any).content) ? (m as any).content : []))
+      .find((c: any) => c.type === "tool_result");
+    expect(toolResult.content).toContain("502"); // model still sees the real error
+  });
+
+  it("with friendlyToolErrors, hides a JSON {error} envelope too", async () => {
+    const asstTool: AssistantMessage = {
+      role: "assistant",
+      content: [{ type: "tool_use", id: "t2", name: "hotel_search", input: {} }],
+    };
+    const asstFinal: AssistantMessage = { role: "assistant", content: [{ type: "text", text: "ok" }] };
+    const messages: ConversationMessage[] = [{ role: "user", content: "go" }];
+    const out: ServerEvent[] = [];
+    await runAgentLoop({
+      provider: fakeProvider([
+        [{ type: "tool-call", id: "t2", name: "hotel_search", input: {} }, { type: "turn-complete", assistant: asstTool }],
+        [{ type: "text-delta", delta: "ok" }, { type: "turn-complete", assistant: asstFinal }],
+      ]),
+      tools: [], messages, friendlyToolErrors: true,
+      callTool: async () => '{"error":"upstream 502 gateway timeout"}',
+      onFolio: async () => {},
+      emit: (e) => out.push(e),
+    });
+    const done = out.find((e) => e.type === "tool" && (e as any).phase === "done") as any;
+    expect(done.summary).not.toContain("502");
+    expect(done.summary.toLowerCase()).toContain("another");
+    const toolResult = messages
+      .flatMap((m) => (Array.isArray((m as any).content) ? (m as any).content : []))
+      .find((c: any) => c.type === "tool_result");
+    expect(toolResult.content).toContain("502"); // model still sees the raw error
+  });
+
+  it("without friendlyToolErrors (default), the failure chip is byte-identical to summarizeToolResult", async () => {
+    const asstTool: AssistantMessage = {
+      role: "assistant",
+      content: [{ type: "tool_use", id: "t1", name: "flight_search", input: {} }],
+    };
+    const asstFinal: AssistantMessage = { role: "assistant", content: [{ type: "text", text: "ok" }] };
+    const out: ServerEvent[] = [];
+    await runAgentLoop({
+      provider: fakeProvider([
+        [{ type: "tool-call", id: "t1", name: "flight_search", input: {} }, { type: "turn-complete", assistant: asstTool }],
+        [{ type: "text-delta", delta: "ok" }, { type: "turn-complete", assistant: asstFinal }],
+      ]),
+      tools: [], messages: [{ role: "user", content: "go" }] as ConversationMessage[],
+      callTool: async () => "ERROR: boom 502",
+      onFolio: async () => {},
+      emit: (e) => out.push(e),
+    });
+    const done = out.find((e) => e.type === "tool" && (e as any).phase === "done") as any;
+    expect(done.summary).toContain("boom 502"); // unchanged: raw error still surfaced when flag is off
+  });
+
   it("continueDirective injects a synthetic user turn when the model stops, capped", async () => {
     // A provider that NEVER calls a tool — always yields a text turn and stops.
     // Without continueDirective this would end after the first turn.

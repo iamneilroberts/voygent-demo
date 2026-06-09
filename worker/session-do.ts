@@ -573,6 +573,7 @@ export class SessionDO {
         await runAgentLoop({
           provider, tools, messages: this.messages, exchangeId,
           callTool, nextModel,
+          friendlyToolErrors: faithful,
           nudge: (phaseMachine || faithfulGates(faithful, this.liveMode).suppressOrchestration) ? undefined : nudge,
           afterToolBatch: phaseMachine ? (batch) => {
             for (const b of batch) {
