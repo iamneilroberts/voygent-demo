@@ -9,7 +9,7 @@ export function ClaudeToolChip({ item }: { item: ToolChipItem }) {
   const [open, setOpen] = useState(false);
   const running = item.status === "running";
   return (
-    <div className={`cl-tool ${running ? "running" : "done"}`}>
+    <div className={`cl-tool ${running ? "running" : "done"}`} data-reel-target={`tool-${item.name}`}>
       <button
         type="button"
         className="cl-tool-head"

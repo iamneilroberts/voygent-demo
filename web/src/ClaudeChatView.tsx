@@ -70,7 +70,7 @@ function FolioArtifact({ folio, advisor }: { folio: FolioData; advisor: boolean 
         </div>
       )}
       {hasDays && (
-        <div className="cl-artifact-sec">
+        <div className="cl-artifact-sec" data-reel-target="folio-days">
           <h4>Day by day</h4>
           {folio.days!.map((d, i) => (
             <div key={i} className="cl-day">
@@ -111,7 +111,7 @@ function FolioArtifact({ folio, advisor }: { folio: FolioData; advisor: boolean 
         </div>
       )}
       {hasIncludes && (
-        <div className="cl-artifact-sec">
+        <div className="cl-artifact-sec" data-reel-target="folio-includes">
           <h4>What&#39;s included &amp; good to know</h4>
           {folio.includes!.map((inc) => (
             <div key={inc.key} className="cl-include">
