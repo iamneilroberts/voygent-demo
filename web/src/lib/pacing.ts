@@ -17,6 +17,7 @@ const REDUCED = 90;
 function baseDelay(f: Frame): number {
   if (f.kind === "user") return USER_BEAT;
   if (f.kind === "turn-end") return TURN_BEAT;
+  if (f.kind === "interaction") return USER_BEAT;
   const e = f.event;
   switch (e.type) {
     case "text": return Math.min(TEXT_MAX, Math.max(TEXT_MIN, e.delta.length * MS_PER_CHAR));

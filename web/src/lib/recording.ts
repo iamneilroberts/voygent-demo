@@ -2,10 +2,20 @@ import type { ServerEvent } from "../../../shared/events";
 import { computeDelay } from "./pacing";
 import { resolveHighlightFrames, type Highlight } from "./highlights";
 
+export type Actor = "agent" | "advisor" | "client";
+
+// Reel-only interaction payloads. NEVER a ServerEvent — the worker/live app never sees these.
+export type ReelInteraction =
+  | { kind: "pick"; boardId: string; candidateId: string; echo: string }
+  | { kind: "edit"; path: string; was: string; now: string; tag: string }
+  | { kind: "comment"; anchor: string; threadId: string; text: string }
+  | { kind: "handoff"; channel: "email"; subject: string; reply?: string };
+
 export type Frame =
-  | { delayMs: number; kind: "user"; text: string }        // push user msg + assistant placeholder; busy=true
-  | { delayMs: number; kind: "event"; event: ServerEvent } // run through the shared reducer
-  | { delayMs: number; kind: "turn-end" };                 // busy=false
+  | { delayMs: number; kind: "user"; text: string; actor?: Actor; beatId?: string }
+  | { delayMs: number; kind: "event"; event: ServerEvent; beatId?: string }
+  | { delayMs: number; kind: "turn-end" }
+  | { delayMs: number; kind: "interaction"; actor: Actor; interaction: ReelInteraction; beatId?: string };
 
 export interface Recording {
   skin: "claude";
