@@ -22,8 +22,12 @@ import { applyTheme, loadTheme } from "./lib/theme";
 import { resolveInitialSkin, applySkin, type SkinId } from "./lib/skin";
 import { createRecorder } from "./lib/recorder";
 import { resolveInitialMode, persistMode, type ModeId } from "./lib/mode";
-import { replayChat, type Recording } from "./lib/recording";
-import dublinRecording from "./recordings/dublin-oct.json";
+import { replayChat } from "./lib/recording";
+import { selectReel } from "./recordings/registry";
+import { ReelIntro } from "./ReelIntro";
+import { ReelCallout } from "./ReelCallout";
+import { ReelEndCard } from "./ReelEndCard";
+import type { Highlight } from "./lib/highlights";
 import { isChatMessage, type TimelineItem, type BoardItem } from "./timeline";
 
 const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8787";
@@ -89,6 +93,19 @@ export function App() {
   // Mobile-only: which surface is showing (chat base + folio/engineering overlays).
   const [mobileView, setMobileView] = useState<MobileView>(DEFAULT_MOBILE_VIEW);
   const replayAbort = useRef<AbortController | null>(null);
+  // Lazy-init guard (Codex review): useRef(selectReel()) would evaluate selectReel()
+  // on EVERY render, and selectReel() advances the localStorage rotation counter — so a
+  // plain useRef(arg) would double-count rotation. Compute exactly once per mount.
+  const selectedReelRef = useRef<ReturnType<typeof selectReel> | null>(null);
+  if (!selectedReelRef.current) selectedReelRef.current = selectReel();
+  const selectedReel = selectedReelRef.current;
+  type ReelPhase = "intro" | "playing" | "ended";
+  const [reelPhase, setReelPhase] = useState<ReelPhase>(() => (resolveInitialMode() === "auto" ? "intro" : "ended"));
+  const [speed, setSpeed] = useState<number>(2);          // default 2x
+  const speedRef = useRef(speed); useEffect(() => { speedRef.current = speed; }, [speed]);
+  const [activeHighlight, setActiveHighlight] = useState<Highlight | null>(null);
+  const hlResolve = useRef<(() => void) | null>(null);
+  const postReel = (() => { try { return new URLSearchParams(window.location.search).get("greet") === "reel"; } catch { return false; } })();
   useEffect(() => { persistMode(mode); }, [mode]);
 
   // Skin is React state (component trees differ) AND a data attribute (CSS scoping).
@@ -113,20 +130,31 @@ export function App() {
   }, [recorder]);
 
   useEffect(() => {
-    if (mode !== "auto") return;
-    if (skin !== "claude") setSkin("claude");      // auto always plays in the claude skin
+    if (mode !== "auto" || reelPhase !== "playing") return;
+    if (skin !== "claude") setSkin("claude");
     const ac = new AbortController();
     replayAbort.current?.abort();
     replayAbort.current = ac;
     const reduced = (() => { try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; } })();
-    void replayChat(dublinRecording as Recording, {
+    void replayChat(selectedReel.recording, {
       applyEvent: (e) => applyEvent(e, true),
       pushUser,
       setBusy,
-    }, { reducedMotion: reduced, signal: ac.signal });
-    return () => ac.abort();
+      onHighlight: onReelHighlight,
+    }, {
+      reducedMotion: reduced,
+      signal: ac.signal,
+      speed: () => speedRef.current,
+      highlights: selectedReel.highlights,
+    }).then(() => { if (!ac.signal.aborted) setReelPhase("ended"); });
+    return () => {
+      ac.abort();
+      // Settle any paused callout so the replayChat loop's Promise.race resolves and
+      // no stale spotlight survives a restart/mode-switch (Codex review).
+      hlResolve.current?.(); hlResolve.current = null; setActiveHighlight(null);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode]);
+  }, [mode, reelPhase]);
 
   useEffect(() => {
     fetch(`${API_BASE}/presets`)
@@ -226,6 +254,36 @@ export function App() {
     setTools([]);
   }
 
+  function resetReelState() {
+    setItems([]); setTools([]); setFolio(null); setBusy(false);
+    setInsTools([]); setInsTurns([]); setInsSummaries([]); setInsSavings([]);
+    setInsOverhead([]); setInsStores([]); setInsValidations([]); setInsPhases([]);
+    // Clear any in-flight callout so a Replay never starts under a stale spotlight (Codex review).
+    hlResolve.current?.(); hlResolve.current = null; setActiveHighlight(null);
+  }
+
+  function onReelHighlight(h: Highlight): Promise<void> {
+    setActiveHighlight(h);
+    return new Promise<void>((resolve) => {
+      hlResolve.current = () => { hlResolve.current = null; setActiveHighlight(null); resolve(); };
+    });
+  }
+
+  function startReel() { resetReelState(); setReelPhase("playing"); }
+  function planYourOwn() { goLive(false); }
+  function tryYourself() { goLive(true); }
+
+  // Switch to live mode via a clean reload (re-latches the session), optionally flagged post-reel.
+  function goLive(greet: boolean) {
+    persistMode("live");
+    try {
+      const u = new URL(window.location.href);
+      u.searchParams.set("mode", "live"); u.searchParams.set("skin", "claude");
+      if (greet) u.searchParams.set("greet", "reel"); else u.searchParams.delete("greet");
+      window.location.href = u.toString();
+    } catch { /* no-op */ }
+  }
+
   async function send(text: string) {
     const claude = skin === "claude";
     pushUser(text);
@@ -292,12 +350,36 @@ export function App() {
               mobileView={mobileView} onMobileView={setMobileView}
               onToggleDemo={toggleDemo} demoLabel={demoLabel}
               engHasContent={insTools.length > 0}
+              postReel={postReel}
             />
           ) : (
             <>
               <ChatView messages={chatMessages} tools={tools} onSend={send} busy={busy} presets={presets} geoCity={geoCity} />
               <FolioPanel folio={folio} advisor={advisor} />
             </>
+          )}
+          {skin === "claude" && mode === "auto" && reelPhase === "intro" && (
+            <ReelIntro
+              title={selectedReel.title} blurb={selectedReel.blurb} durationLabel={selectedReel.durationLabel}
+              onWatch={startReel} onPlanYourOwn={planYourOwn}
+            />
+          )}
+          {skin === "claude" && mode === "auto" && reelPhase === "playing" && activeHighlight && (
+            <ReelCallout
+              key={activeHighlight.title}
+              highlight={activeHighlight}
+              dwellMs={activeHighlight.dwellMs ?? 4000}
+              onContinue={() => hlResolve.current?.()}
+            />
+          )}
+          {skin === "claude" && mode === "auto" && reelPhase === "playing" && (
+            <div className="cl-reel-speed" role="group" aria-label="Playback speed">
+              <button type="button" aria-pressed={speed === 1} onClick={() => setSpeed(1)}>1×</button>
+              <button type="button" aria-pressed={speed === 2} onClick={() => setSpeed(2)}>2×</button>
+            </div>
+          )}
+          {skin === "claude" && mode === "auto" && reelPhase === "ended" && (
+            <ReelEndCard onTryYourself={tryYourself} onReplay={startReel} />
           )}
         </section>
         <section className="engineering" data-eng={eng}>
@@ -318,8 +400,10 @@ export function App() {
         </section>
       </div>
       <footer className="meta">Built with coding-agent workflows; architecture, constraints, and review by Neil Roberts.</footer>
-      <SkinSwitch skin={skin} onPick={setSkin} />
-      <button type="button" className="watch-demo" onClick={toggleDemo}>{demoLabel}</button>
+      {mode !== "auto" && <SkinSwitch skin={skin} onPick={setSkin} />}
+      {mode !== "auto" && (
+        <button type="button" className="watch-demo" onClick={toggleDemo}>{demoLabel}</button>
+      )}
       <TweaksPanel
         open={tweaksOpen} onClose={() => setTweaksOpen(false)}
         enabled={enabledModels} mode={modelMode} onMode={setModelMode} onRouting={applyRouting}
