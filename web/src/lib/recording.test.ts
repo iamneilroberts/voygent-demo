@@ -44,3 +44,48 @@ describe("replayChat", () => {
     expect(busy).toEqual([true, false]);
   });
 });
+
+// NOTE: no new import line — replayChat resolves the track internally.
+// Strengthened per Codex review: prove playback PAUSES on a highlight (not just that it fires),
+// and prove speed() is read per frame.
+describe("replayChat highlights + speed", () => {
+  it("pauses at the matching frame until onHighlight resolves, then continues", async () => {
+    const rec: Recording = { skin: "claude", trip: "t", frames: [
+      { delayMs: 1, kind: "event", event: { type: "board", kind: "flight", boardId: "b", tripId: "t", candidates: [] } as ServerEvent },
+      { delayMs: 1, kind: "event", event: { type: "text", delta: "after" } as ServerEvent },
+      { delayMs: 1, kind: "turn-end" },
+    ] };
+    const applied: string[] = [];
+    let release!: () => void;
+    const gate = new Promise<void>((r) => { release = r; });
+    const done = replayChat(rec, {
+      applyEvent: (e) => applied.push(e.type),
+      pushUser: () => {},
+      setBusy: () => {},
+      onHighlight: async () => { await gate; },   // block until we release
+    }, {
+      wait: async () => {},
+      highlights: [{ match: { eventType: "board", kind: "flight" }, anchor: "chat", eyebrow: "E", title: "Real fares", body: "B" }],
+    });
+    await Promise.resolve(); await Promise.resolve();   // let the loop run up to the paused callout
+    expect(applied).toEqual(["board"]);                 // paused: the "text" frame has NOT applied yet
+    release();
+    await done;
+    expect(applied).toEqual(["board", "text"]);         // resumed after the callout
+  });
+
+  it("reads speed() per frame (lower speed => longer waits)", async () => {
+    const rec: Recording = { skin: "claude", trip: "t", frames: [
+      { delayMs: 0, kind: "event", event: { type: "board", kind: "flight", boardId: "b", tripId: "t", candidates: [] } as ServerEvent },
+    ] };
+    const waits: number[] = [];
+    let speed = 2;
+    await replayChat(rec, { applyEvent: () => {}, pushUser: () => {}, setBusy: () => {} },
+      { wait: async (ms) => { waits.push(ms); }, speed: () => speed });
+    const fast = waits[0];
+    waits.length = 0; speed = 1;
+    await replayChat(rec, { applyEvent: () => {}, pushUser: () => {}, setBusy: () => {} },
+      { wait: async (ms) => { waits.push(ms); }, speed: () => speed });
+    expect(waits[0]).toBeGreaterThan(fast);             // 1x waits longer than 2x
+  });
+});
