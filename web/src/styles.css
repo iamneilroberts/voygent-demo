@@ -165,6 +165,7 @@ button.ins-rail:hover { color: var(--ink); }
 .ins-stat-cost, .ins-stat-ok { color: var(--phosphor); }
 .ins-stat-warn { color: var(--amber-hi); }
 .ins-stat-l { font: 500 .6875rem/1.2 var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.ins-stat-sub { font: 500 .625rem/1.2 var(--mono); color: var(--muted-2); letter-spacing: .03em; }
 
 /* ---- inspector: trip-integrity checks ---- */
 .ins-validation .ins-checks { list-style: none; margin: var(--s2) 0 0; padding: 0; }
