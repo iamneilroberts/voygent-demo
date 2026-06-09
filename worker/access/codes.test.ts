@@ -153,4 +153,13 @@ describe("reconcile", () => {
     const row = await db.first<{ day_spent: number }>("SELECT day_spent FROM codes WHERE id='c'");
     expect(row?.day_spent).toBe(50_000); // not 200k-400k+... — applied exactly once
   });
+
+  it("clamps a negative actual cost to zero (no ledger corruption)", async () => {
+    const db = makeTestDb(); await seed(db, { dailyMicros: 10_000_000, totalMicros: 10_000_000 });
+    await admit(db, "c", 200_000, NOW, TODAY);
+    await reconcile(db, { codeId: "c", exchangeId: "e9", estMicros: 200_000, actualMicros: -5,
+      model: null, inputTokens: null, outputTokens: null, ts: NOW });
+    const row = await db.first<{ day_spent: number }>("SELECT day_spent FROM codes WHERE id='c'");
+    expect(row?.day_spent).toBe(0); // 200k - 200k + 0
+  });
 });

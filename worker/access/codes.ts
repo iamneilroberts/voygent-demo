@@ -124,25 +124,39 @@ export interface ReconcileArgs {
 
 /**
  * Replace the reserved estimate with the real cost AND record history in one
- * atomic batch(). The plain INSERT (no OR IGNORE) on a UNIQUE exchange_id means a
- * duplicate reconcile throws → the whole batch rolls back → the UPDATE can't
- * double-apply. We swallow that specific case so retries are safe no-ops.
+ * atomic batch(). Idempotency rests on a positive fact — a pre-check for an
+ * existing spend_events row by exchange_id — so a retry is an explicit no-op and
+ * does not depend on parsing an error string. The UNIQUE(exchange_id) catch
+ * remains as a backstop for a concurrent reconcile that races past the pre-check:
+ * the plain INSERT throws, the whole batch rolls back, and the UPDATE can't
+ * double-apply. estMicros/actualMicros are clamped >= 0 to mirror admit()'s clamp;
+ * the contract is that estMicros here is the SAME value admit() booked.
+ *
+ * Note: the cap is an admit-time gate against the ESTIMATE. If actualMicros >
+ * estMicros (an underestimate), day_spent/lifetime_spent may end slightly above
+ * the cap by one exchange's overage — an accepted reserve-then-true-up tradeoff.
  */
 export async function reconcile(db: Db, a: ReconcileArgs): Promise<void> {
+  const est = a.estMicros < 0 ? 0 : a.estMicros;
+  const actual = a.actualMicros < 0 ? 0 : a.actualMicros;
+  const existing = await db.first<{ x: number }>(
+    "SELECT 1 AS x FROM spend_events WHERE exchange_id = ?", [a.exchangeId],
+  );
+  if (existing) return; // already reconciled — explicit idempotent no-op
   try {
     await db.batch([
       {
         sql: `UPDATE codes SET day_spent = day_spent - ? + ?, lifetime_spent = lifetime_spent - ? + ? WHERE id = ?`,
-        params: [a.estMicros, a.actualMicros, a.estMicros, a.actualMicros, a.codeId],
+        params: [est, actual, est, actual, a.codeId],
       },
       {
         sql: `INSERT INTO spend_events (code_id, exchange_id, ts, est_micros, actual_micros, model, input_tokens, output_tokens)
               VALUES (?,?,?,?,?,?,?,?)`,
-        params: [a.codeId, a.exchangeId, a.ts, a.estMicros, a.actualMicros, a.model, a.inputTokens, a.outputTokens],
+        params: [a.codeId, a.exchangeId, a.ts, est, actual, a.model, a.inputTokens, a.outputTokens],
       },
     ]);
   } catch (e) {
-    // UNIQUE(exchange_id) violation = already reconciled. Any other error rethrows.
+    // Backstop for a concurrent reconcile that raced past the pre-check.
     if (!String((e as Error)?.message ?? "").toUpperCase().includes("UNIQUE")) throw e;
   }
 }
