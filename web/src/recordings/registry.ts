@@ -3,6 +3,7 @@ import type { Recording } from "../lib/recording";
 import type { Highlight, HighlightTrack } from "../lib/highlights";
 import dublin from "./dublin-oct.json";
 import dublinHl from "./dublin-oct.highlights.json";
+import { dublinCollab } from "./dublin-collab.screenplay";
 
 export interface ReelEntry {
   id: string;
@@ -21,6 +22,14 @@ export const REELS: ReelEntry[] = [
     durationLabel: "~2 min",
     recording: dublin as Recording,
     highlights: (dublinHl as HighlightTrack).highlights,
+  },
+  {
+    id: "collab",
+    title: "A trip, built together",
+    blurb: "Watch the advisor and traveler shape a Dublin trip with the agent.",
+    durationLabel: "~2 min",
+    recording: dublinCollab.recording,
+    highlights: dublinCollab.highlights,
   },
 ];
 

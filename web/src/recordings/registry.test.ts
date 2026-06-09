@@ -1,6 +1,6 @@
 // web/src/recordings/registry.test.ts
 import { describe, it, expect } from "vitest";
-import { pickReel, type ReelEntry } from "./registry";
+import { REELS, pickReel, type ReelEntry } from "./registry";
 
 const reels = [{ id: "a" }, { id: "b" }, { id: "c" }] as ReelEntry[];
 
@@ -19,5 +19,15 @@ describe("pickReel", () => {
   it("always returns the only reel when there is one", () => {
     const one = [{ id: "dublin-oct" }] as ReelEntry[];
     expect(pickReel(one, null, 7).id).toBe("dublin-oct");
+  });
+});
+
+describe("collab reel registration", () => {
+  it("registers a collab reel resolvable by ?reel=collab", () => {
+    const entry = pickReel(REELS, "collab", 0);
+    expect(entry.id).toBe("collab");
+    expect(entry.recording.frames.length).toBeGreaterThan(0);
+    // it actually contains interaction frames (the whole point of P2)
+    expect(entry.recording.frames.some((f) => f.kind === "interaction")).toBe(true);
   });
 });
