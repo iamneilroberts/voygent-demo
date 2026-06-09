@@ -10,12 +10,14 @@ describe("dublin-oct highlight track (grounding)", () => {
   const resolved = resolveHighlightFrames(frames, highlights);
 
   it("resolves every highlight (none dropped)", () => {
-    expect(resolved.size).toBe(highlights.length);
+    // resolver value is now Highlight[] per frame index; total bound = sum of arrays.
+    const total = [...resolved.values()].reduce((n, hs) => n + hs.length, 0);
+    expect(total).toBe(highlights.length);
   });
 
   it("the cost highlight binds to the LAST summary (whole-run), not an early partial", () => {
     const summaryFrames = frames.flatMap((f, i) => (f.kind === "event" && (f.event as any).type === "inspector" && (f.event as any).kind === "summary") ? [i] : []);
-    const costIdx = [...resolved.entries()].find(([, h]) => h.eyebrow === "What it cost")?.[0];
+    const costIdx = [...resolved.entries()].find(([, hs]) => hs.some((h) => h.eyebrow === "What it cost"))?.[0];
     expect(costIdx).toBe(summaryFrames.at(-1));   // nth:3 == last of the 3 summaries
   });
 

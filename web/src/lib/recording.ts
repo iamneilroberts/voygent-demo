@@ -1,5 +1,5 @@
 import type { ServerEvent } from "../../../shared/events";
-import { computeDelay } from "./pacing";
+import { computeDelay, interactionDwell } from "./pacing";
 import { resolveHighlightFrames, type Highlight } from "./highlights";
 
 export type Actor = "agent" | "advisor" | "client";
@@ -27,6 +27,7 @@ export interface ReplayHandlers {
   applyEvent: (e: ServerEvent) => void;  // caller binds claude=true
   pushUser: (text: string) => void;      // user bubble + assistant placeholder
   setBusy: (b: boolean) => void;
+  applyInteraction?: (i: ReelInteraction, actor: Actor) => void; // reel-only interaction frame
   onHighlight?: (h: Highlight) => Promise<void>; // paused callout; resolves to resume
 }
 
@@ -70,14 +71,23 @@ export async function replayChat(rec: Recording, h: ReplayHandlers, opts: Replay
     if (f.kind === "user") { h.pushUser(f.text); h.setBusy(true); }
     else if (f.kind === "event") h.applyEvent(f.event);
     else if (f.kind === "turn-end") h.setBusy(false);
+    else if (f.kind === "interaction") h.applyInteraction?.(f.interaction, f.actor);
     prev = f;
-    const hit = hlMap?.get(i);
-    if (hit && h.onHighlight) {
+    const hits = hlMap?.get(i);
+    // Interactions HOLD after applying (post-apply dwell) unless a spotlight on this
+    // same frame provides the hold (handled below) — avoids double-dwell.
+    if (f.kind === "interaction" && !(hits && hits.length)) {
+      await wait(interactionDwell(f.interaction.kind, { speed: getSpeed(), reducedMotion: opts.reducedMotion }));
       if (opts.signal?.aborted) return;
-      // Race the callout against abort: if the reel is restarted / unmounted mid-callout,
-      // this resolves instead of hanging on a promise App can no longer settle.
-      await Promise.race([h.onHighlight(hit), waitForAbort(opts.signal)]);
-      if (opts.signal?.aborted) return;
+    }
+    if (hits && hits.length && h.onHighlight) {
+      for (const hl of hits) {
+        if (opts.signal?.aborted) return;
+        // Race each callout against abort: if the reel is restarted / unmounted mid-callout,
+        // this resolves instead of hanging on a promise App can no longer settle.
+        await Promise.race([h.onHighlight(hl), waitForAbort(opts.signal)]);
+        if (opts.signal?.aborted) return;
+      }
     }
   }
 }

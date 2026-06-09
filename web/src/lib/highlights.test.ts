@@ -32,3 +32,40 @@ describe("resolveHighlightFrames", () => {
     expect([...m.keys()]).toEqual([4]);
   });
 });
+
+describe("highlight matching for interaction frames + multi-per-frame", () => {
+  const frames: Frame[] = [
+    { delayMs: 0, kind: "interaction", actor: "client", interaction: { kind: "pick", boardId: "b1", candidateId: "c1", echo: "x" }, beatId: "pick1" },
+    { delayMs: 0, kind: "event", event: { type: "folio", folio: { tripId: "t", title: "T", flights: [], hotels: [] } } as any },
+  ];
+
+  it("matches an interaction frame by interactionKind", () => {
+    const map = resolveHighlightFrames(frames, [
+      { match: { interactionKind: "pick" }, target: "board-flight", eyebrow: "E", title: "Client picked", body: "B" },
+    ]);
+    expect(map.get(0)).toHaveLength(1);
+    expect(map.get(0)![0].title).toBe("Client picked");
+  });
+
+  it("matches by compiler beatId (stable target)", () => {
+    const map = resolveHighlightFrames(frames, [
+      { match: { beatId: "pick1" }, target: "board-flight", eyebrow: "E", title: "By beat", body: "B" },
+    ]);
+    expect(map.get(0)![0].title).toBe("By beat");
+  });
+
+  it("keeps the existing eventType matching working (backward compatible)", () => {
+    const map = resolveHighlightFrames(frames, [
+      { match: { eventType: "folio" }, target: "folio-days", eyebrow: "E", title: "Folio", body: "B" },
+    ]);
+    expect(map.get(1)![0].title).toBe("Folio");
+  });
+
+  it("allows multiple highlights on the same frame index", () => {
+    const map = resolveHighlightFrames(frames, [
+      { match: { interactionKind: "pick" }, target: "board-flight", eyebrow: "E", title: "One", body: "B" },
+      { match: { beatId: "pick1" }, target: "board-flight", eyebrow: "E", title: "Two", body: "B" },
+    ]);
+    expect(map.get(0)!.map((h) => h.title)).toEqual(["One", "Two"]);
+  });
+});

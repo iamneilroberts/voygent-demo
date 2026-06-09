@@ -21,6 +21,7 @@ describe("recorder", () => {
 });
 
 import { replayChat } from "./recording";
+import type { ReelInteraction } from "./recording";
 import type { ServerEvent } from "../../../shared/events";
 
 describe("replayChat", () => {
@@ -87,5 +88,42 @@ describe("replayChat highlights + speed", () => {
     await replayChat(rec, { applyEvent: () => {}, pushUser: () => {}, setBusy: () => {} },
       { wait: async (ms) => { waits.push(ms); }, speed: () => speed });
     expect(waits[0]).toBeGreaterThan(fast);             // 1x waits longer than 2x
+  });
+});
+
+describe("replayChat interaction frames", () => {
+  it("applies the interaction BEFORE the post-apply dwell wait", async () => {
+    const rec: Recording = { skin: "claude", trip: "t", frames: [
+      { delayMs: 0, kind: "interaction", actor: "client", interaction: { kind: "pick", boardId: "b1", candidateId: "c1", echo: "x" } },
+      { delayMs: 0, kind: "turn-end" },
+    ] };
+    const order: string[] = [];
+    await replayChat(rec, {
+      applyEvent: () => {},
+      pushUser: () => {},
+      setBusy: () => {},
+      applyInteraction: (i: ReelInteraction, actor) => order.push(`apply:${i.kind}:${actor}`),
+    }, { wait: async (ms) => { if (ms > 0) order.push(`wait:${ms}`); } });
+    const applyIdx = order.indexOf("apply:pick:client");
+    expect(applyIdx).toBeGreaterThanOrEqual(0);
+    const dwellAfter = order.slice(applyIdx + 1).find((o) => o.startsWith("wait:"));
+    expect(dwellAfter).toBeDefined();
+    expect(parseInt(dwellAfter!.split(":")[1], 10)).toBeGreaterThanOrEqual(3000);
+  });
+
+  it("aborting during the post-apply dwell exits cleanly", async () => {
+    const rec: Recording = { skin: "claude", trip: "t", frames: [
+      { delayMs: 0, kind: "interaction", actor: "advisor", interaction: { kind: "edit", path: "days[0]", was: "a", now: "b", tag: "Advisor edited" } },
+      { delayMs: 0, kind: "event", event: { type: "text", delta: "after" } as ServerEvent },
+    ] };
+    const applied: string[] = [];
+    const ac = new AbortController();
+    await replayChat(rec, {
+      applyEvent: (e) => applied.push(e.type),
+      pushUser: () => {},
+      setBusy: () => {},
+      applyInteraction: () => { ac.abort(); },
+    }, { signal: ac.signal, wait: async () => {} });
+    expect(applied).toEqual([]);
   });
 });
