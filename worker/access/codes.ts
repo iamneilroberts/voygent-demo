@@ -117,6 +117,36 @@ export async function admit(
   return r.changes === 1;
 }
 
+export interface ReconcileArgs {
+  codeId: string; exchangeId: string; estMicros: number; actualMicros: number;
+  model: string | null; inputTokens: number | null; outputTokens: number | null; ts: string;
+}
+
+/**
+ * Replace the reserved estimate with the real cost AND record history in one
+ * atomic batch(). The plain INSERT (no OR IGNORE) on a UNIQUE exchange_id means a
+ * duplicate reconcile throws → the whole batch rolls back → the UPDATE can't
+ * double-apply. We swallow that specific case so retries are safe no-ops.
+ */
+export async function reconcile(db: Db, a: ReconcileArgs): Promise<void> {
+  try {
+    await db.batch([
+      {
+        sql: `UPDATE codes SET day_spent = day_spent - ? + ?, lifetime_spent = lifetime_spent - ? + ? WHERE id = ?`,
+        params: [a.estMicros, a.actualMicros, a.estMicros, a.actualMicros, a.codeId],
+      },
+      {
+        sql: `INSERT INTO spend_events (code_id, exchange_id, ts, est_micros, actual_micros, model, input_tokens, output_tokens)
+              VALUES (?,?,?,?,?,?,?,?)`,
+        params: [a.codeId, a.exchangeId, a.ts, a.estMicros, a.actualMicros, a.model, a.inputTokens, a.outputTokens],
+      },
+    ]);
+  } catch (e) {
+    // UNIQUE(exchange_id) violation = already reconciled. Any other error rethrows.
+    if (!String((e as Error)?.message ?? "").toUpperCase().includes("UNIQUE")) throw e;
+  }
+}
+
 /** Only called after admit() returns false — classifies the 503 message. */
 export async function admissionReason(
   db: Db, codeId: string, estMicros: number, nowIso: string, today: string,

@@ -3,6 +3,7 @@ import { hashCode, generateCode } from "./codes";
 import { makeTestDb } from "./testdb";
 import { createCode, listCodes, revokeCode, lookupByCode, usageForCode } from "./codes";
 import { admit, admissionReason } from "./codes";
+import { reconcile } from "./codes";
 
 describe("code crypto", () => {
   it("hashCode is deterministic and key-sensitive", async () => {
@@ -122,5 +123,34 @@ describe("admission", () => {
     const row = await db.first<{ day_spent: number; lifetime_spent: number }>("SELECT day_spent, lifetime_spent FROM codes WHERE id='c'");
     expect(row?.day_spent).toBe(500_000);      // unchanged — no refund
     expect(row?.lifetime_spent).toBe(500_000);
+  });
+});
+
+describe("reconcile", () => {
+  const NOW = "2026-06-09T12:00:00Z";
+  const TODAY = "2026-06-09";
+
+  it("trues the estimate to actual cost and records history", async () => {
+    const db = makeTestDb(); await seed(db, { dailyMicros: 10_000_000, totalMicros: 10_000_000 });
+    await admit(db, "c", 200_000, NOW, TODAY); // booked $0.20
+    await reconcile(db, { codeId: "c", exchangeId: "e1", estMicros: 200_000, actualMicros: 50_000,
+      model: "claude-haiku-4-5", inputTokens: 100, outputTokens: 20, ts: NOW });
+    const row = await db.first<{ day_spent: number; lifetime_spent: number }>(
+      "SELECT day_spent, lifetime_spent FROM codes WHERE id='c'");
+    expect(row?.day_spent).toBe(50_000);      // 200k - 200k + 50k
+    expect(row?.lifetime_spent).toBe(50_000);
+    const events = await usageForCode(db, "c", "2026-06-09T00:00:00Z");
+    expect(events[0].actual_micros).toBe(50_000);
+  });
+
+  it("is idempotent: a duplicate reconcile does not double-apply", async () => {
+    const db = makeTestDb(); await seed(db, { dailyMicros: 10_000_000, totalMicros: 10_000_000 });
+    await admit(db, "c", 200_000, NOW, TODAY);
+    const args = { codeId: "c", exchangeId: "e1", estMicros: 200_000, actualMicros: 50_000,
+      model: null, inputTokens: null, outputTokens: null, ts: NOW };
+    await reconcile(db, args);
+    await reconcile(db, args); // second call: UNIQUE(exchange_id) aborts the batch, swallowed
+    const row = await db.first<{ day_spent: number }>("SELECT day_spent FROM codes WHERE id='c'");
+    expect(row?.day_spent).toBe(50_000); // not 200k-400k+... — applied exactly once
   });
 });
