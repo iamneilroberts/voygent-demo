@@ -2,9 +2,36 @@ import type { ToolSchema } from "../llm/provider";
 
 type Fetch = typeof fetch;
 
+export interface ServerInfo { name: string; version?: string }
+export interface InitializeResult {
+  protocolVersion?: string;
+  capabilities?: Record<string, unknown>;
+  serverInfo?: ServerInfo;
+  instructions?: string;
+}
+
+const PROTOCOL_VERSION = "2025-03-26";
+
 export class McpClient {
   private id = 0;
+  private sessionId: string | null = null;
+  private _instructions: string | null = null;
+  private _serverInfo: ServerInfo | null = null;
   constructor(private url: string, private bearer: string, private f: Fetch = fetch) {}
+
+  /** Operating core delivered by the server's MCP `instructions`. Null until initialize(). */
+  get instructions(): string | null { return this._instructions; }
+  get serverInfo(): ServerInfo | null { return this._serverInfo; }
+
+  private headers(): Record<string, string> {
+    const h: Record<string, string> = {
+      "authorization": `Bearer ${this.bearer}`,
+      "content-type": "application/json",
+      "accept": "application/json, text/event-stream",
+    };
+    if (this.sessionId) h["mcp-session-id"] = this.sessionId;
+    return h;
+  }
 
   private async rpc(method: string, params: unknown): Promise<any> {
     // Call through a local binding, NOT `this.f(...)`: invoking the global `fetch` as a
@@ -13,17 +40,44 @@ export class McpClient {
     const doFetch = this.f;
     const res = await doFetch(this.url, {
       method: "POST",
-      headers: {
-        "authorization": `Bearer ${this.bearer}`,
-        "content-type": "application/json",
-        "accept": "application/json, text/event-stream",
-      },
+      headers: this.headers(),
       body: JSON.stringify({ jsonrpc: "2.0", id: ++this.id, method, params }),
     });
     if (!res.ok) throw new Error(`MCP ${method} HTTP ${res.status}`);
+    const sid = res.headers.get("mcp-session-id");
+    if (sid) this.sessionId = sid;
     const payload = await this.parseBody(res);
     if (payload.error) throw new Error(`MCP ${method}: ${payload.error.message}`);
     return payload.result;
+  }
+
+  /** Fire-and-forget JSON-RPC notification (no id, no result expected). */
+  private async notify(method: string, params: unknown): Promise<void> {
+    const doFetch = this.f;
+    const res = await doFetch(this.url, {
+      method: "POST",
+      headers: this.headers(),
+      body: JSON.stringify({ jsonrpc: "2.0", method, params }),
+    });
+    if (!res.ok && res.status !== 202 && res.status !== 204) {
+      throw new Error(`MCP ${method} HTTP ${res.status}`);
+    }
+    const sid = res.headers.get("mcp-session-id");
+    if (sid) this.sessionId = sid;
+  }
+
+  /** MCP initialize handshake. Captures serverInfo + instructions + session id, then sends initialized. */
+  async initialize(): Promise<InitializeResult> {
+    const result = (await this.rpc("initialize", {
+      protocolVersion: PROTOCOL_VERSION,
+      capabilities: {},
+      clientInfo: { name: "voygent-demo", version: "1.0.0" },
+    })) as InitializeResult | undefined;
+    const r: InitializeResult = (result && typeof result === "object") ? result : {};
+    this._instructions = r.instructions ?? null;
+    this._serverInfo = r.serverInfo ?? null;
+    await this.notify("notifications/initialized", {});
+    return r;
   }
 
   private async parseBody(res: Response): Promise<any> {
