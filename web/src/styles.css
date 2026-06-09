@@ -190,6 +190,13 @@ button.ins-rail:hover { color: var(--ink); }
 /* ---- inspector head extra (relocated palette switcher in claude skin) ---- */
 .ins-extra { margin-bottom: var(--s3); position: relative; z-index: 3; }
 
+/* Claude-skin inspector controls: one compact wrapping line instead of 3 rows. */
+.ins-extra { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; }
+.ins-extra .theme-switch { display: inline-flex; align-items: center; gap: 5px; padding: 0; margin: 0; overflow: visible; }
+.ins-extra .theme-switch .lab { margin: 0; font-size: 10px; opacity: .85; }
+.ins-extra .theme-switch button { min-height: 0; padding: 3px 7px; font-size: 11px; }
+.ins-extra > .theme-switch + .theme-switch::before { content: "·"; color: var(--line); margin-right: 4px; align-self: center; }
+
 /* ---- skin switch: fixed demo-harness chrome, present in BOTH skins.
         Hardcoded dark styling (not theme tokens) so it reads as part of the
         demo rig and never follows the claude pane or a light palette. ---- */
