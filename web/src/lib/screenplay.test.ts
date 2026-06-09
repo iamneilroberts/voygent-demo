@@ -44,6 +44,13 @@ describe("screenplay compiler", () => {
     })).toThrow(/path "days\[9\]/);
   });
 
+  it("throws if a comment anchor does not exist in the current folio", () => {
+    expect(() => screenplay({ trip: "Dublin", skin: "claude" }, (s) => {
+      s.agent.folio(draft);
+      s.advisor.comments("days[9]", "nice", "t9");
+    })).toThrow(/anchor "days\[9\]/);
+  });
+
   it("assigns stable beatIds and collects spotlights into the highlight track", () => {
     const { highlights } = screenplay({ trip: "Dublin", skin: "claude" }, (s) => {
       s.agent.board("flight", "b1", cands);

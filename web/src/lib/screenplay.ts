@@ -9,9 +9,11 @@ interface Meta { trip: string; skin: "claude" }
 function pathExists(folio: FolioData | null, path: string): boolean {
   if (!folio) return false;
   const parts = path.replace(/\[(\d+)\]/g, ".$1").split(".").filter(Boolean);
+  if (!parts.length) return false;
   let cur: unknown = folio;
   for (const p of parts) {
     if (cur == null || typeof cur !== "object") return false;
+    if (!Object.prototype.hasOwnProperty.call(cur, p)) return false;
     cur = (cur as Record<string, unknown>)[p];
   }
   return cur !== undefined;
