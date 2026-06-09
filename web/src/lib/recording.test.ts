@@ -126,4 +126,26 @@ describe("replayChat interaction frames", () => {
     }, { signal: ac.signal, wait: async () => {} });
     expect(applied).toEqual([]);
   });
+
+  it("does NOT fire the plain interaction dwell when the frame is spotlighted (no double-dwell)", async () => {
+    const rec: Recording = { skin: "claude", trip: "t", frames: [
+      { delayMs: 0, kind: "interaction", actor: "client", interaction: { kind: "pick", boardId: "b1", candidateId: "c1", echo: "x" }, beatId: "pick1" },
+      { delayMs: 0, kind: "turn-end" },
+    ] };
+    const waits: number[] = [];
+    let highlighted = false;
+    await replayChat(rec, {
+      applyEvent: () => {},
+      pushUser: () => {},
+      setBusy: () => {},
+      applyInteraction: () => {},
+      onHighlight: async () => { highlighted = true; }, // resolves immediately = the spotlight provides the hold
+    }, {
+      wait: async (ms) => { if (ms > 0) waits.push(ms); },
+      highlights: [{ match: { beatId: "pick1" }, target: "board-flight", eyebrow: "E", title: "Spot", body: "B" }],
+    });
+    expect(highlighted).toBe(true);                       // the spotlight fired on the interaction frame
+    // No wait >= the interaction dwell floor (3000ms) — the plain dwell was skipped because the frame was spotlighted.
+    expect(waits.some((w) => w >= 3000)).toBe(false);
+  });
 });

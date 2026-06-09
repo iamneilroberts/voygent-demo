@@ -2,6 +2,7 @@
 import type { Frame } from "./recording";
 import type { ServerEvent } from "../../../shared/events";
 
+// Set exactly ONE of beatId | interactionKind | eventType. Precedence if more are set: beatId > interactionKind > eventType.
 export interface HighlightMatch {
   eventType?: ServerEvent["type"];        // event-frame match: "inspector" | "board" | "folio" | "tool" | "text" | ...
   kind?: string;                          // inspector kind or board kind
@@ -22,10 +23,14 @@ export interface Highlight {
 
 export interface HighlightTrack { trip: string; highlights: Highlight[] }
 
+// beatId lives on user/event/interaction frames but not turn-end; read it safely across the union.
+function frameBeatId(f: Frame): string | undefined {
+  return "beatId" in f ? f.beatId : undefined;
+}
+
 function frameMatches(f: Frame, m: HighlightMatch): boolean {
   // beatId is the most specific target: exact compiler-assigned frame id.
-  const fb = (f as { beatId?: string }).beatId;
-  if (m.beatId != null) return fb === m.beatId;
+  if (m.beatId != null) return frameBeatId(f) === m.beatId;
   if (m.interactionKind != null) return f.kind === "interaction" && f.interaction.kind === m.interactionKind;
   if (m.eventType != null) {
     if (f.kind !== "event") return false;
