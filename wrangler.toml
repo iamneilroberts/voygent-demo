@@ -35,9 +35,10 @@ new_sqlite_classes = ["SessionDO"]
 [[d1_databases]]
 binding = "DEMO_DB"
 database_name = "voygent-demo"
-database_id = "PLACEHOLDER_SET_AFTER_d1_create"  # filled in during deploy (Task 15)
+database_id = "7825123d-3e56-423b-b2da-c5add703b252"
 
 [vars]
 # The exact origin the SPA is served from. Used by the Origin/CSRF guard.
-# Local: http://localhost:8787 (wrangler dev). Prod: set to the deployed origin.
-APP_ORIGIN = "http://localhost:8787"
+# Local dev (wrangler dev): http://localhost:8787. Prod: the deployed workers.dev origin
+# (demo.voygent.ai is shadowed by the *.voygent.ai wildcard — see note above).
+APP_ORIGIN = "https://voygent-demo.somotravel.workers.dev"
