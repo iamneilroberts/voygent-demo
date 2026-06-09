@@ -334,6 +334,31 @@ describe("runAgentLoop", () => {
     expect(done.summary).toContain("boom 502"); // unchanged: raw error still surfaced when flag is off
   });
 
+  it("passes tool-call input through to callTool as an object (brief stays an object)", async () => {
+    const received: unknown[] = [];
+    const brief = { party: { adults: 2 }, dates: { mode: "fixed" }, destinations: ["Cork"] };
+    const asstTool: AssistantMessage = {
+      role: "assistant",
+      content: [{ type: "tool_use", id: "g1", name: "manage_trip_goal", input: { action: "derive", brief } }],
+    };
+    const asstFinal: AssistantMessage = { role: "assistant", content: [{ type: "text", text: "ok" }] };
+    const provider = fakeProvider([
+      [{ type: "tool-call", id: "g1", name: "manage_trip_goal", input: { action: "derive", brief } },
+       { type: "turn-complete", assistant: asstTool }],
+      [{ type: "text-delta", delta: "ok" }, { type: "turn-complete", assistant: asstFinal }],
+    ]);
+    await runAgentLoop({
+      provider, tools: [],
+      messages: [{ role: "user", content: "go" }] as ConversationMessage[],
+      callTool: async (_name, args) => { received.push(args); return "{}"; },
+      onFolio: async () => {},
+      emit: () => {},
+    });
+    expect(typeof received[0]).toBe("object");
+    expect((received[0] as any).brief.party.adults).toBe(2);
+    expect(typeof (received[0] as any).brief).not.toBe("string");
+  });
+
   it("continueDirective injects a synthetic user turn when the model stops, capped", async () => {
     // A provider that NEVER calls a tool — always yields a text turn and stops.
     // Without continueDirective this would end after the first turn.
