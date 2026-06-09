@@ -17,6 +17,7 @@ export interface SessRecord {
   tripId: string;
   boardsMode: boolean;
   liveMode?: boolean;  // latched true when a search left the featured-trip catalog (real-Voygent pass-through)
+  faithful?: boolean;  // latched on first turn: the whole session runs faithful-or-not regardless of later env flips (Decision A4)
   // One-shot host-nudge flags (true = the nudge fired OR the behavior was
   // observed). Session-scoped: persisted so a nudge can't re-fire after an
   // exchange boundary or a DO eviction.

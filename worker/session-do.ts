@@ -38,6 +38,8 @@ interface Env {
   DEMO_OLLAMA_URL?: string;               // alias gate for local Ollama (host-allowlisted)
   DEMO_DB: D1Database;                    // access-control: per-code budgets + reconcile ledger
   EST_EXCHANGE_MICROS?: string;           // access-control: per-exchange reservation override
+  FAITHFUL?: string;                      // when set, run as a mechanism-faithful thin client (real tools, live instructions, no demo orchestration)
+  FAITHFUL_PUBLIC_OK?: string;            // second flag (Decision A5): required to honor FAITHFUL for PUBLIC passcodes; lone FAITHFUL only affects test/admin runs
 }
 
 // Public-surface denylist (Neil 2026-06-07): the catalog stays claude.ai-faithful
@@ -104,6 +106,39 @@ const BOARDS_WORKFLOW_OVERRIDE =
   "in text — and end your turn. When the traveler replies with a chosen option id, stage THAT exact id " +
   "with patch_trip and call the matching promote tool. For hotels the traveler may pick one or more. " +
   "Never auto-select.";
+
+// FAITHFUL mode (Plan A). Used ONLY if the live MCP omits `instructions` (or initialize
+// failed); the live core is authoritative. Keep minimal — a safety net, not the prompt.
+// Names manage_trip_goal so the model still drives the build loop end-to-end without the
+// live instructions (Codex review #8).
+const FAITHFUL_FALLBACK_CORE =
+  "You are Voygent, a travel-planning assistant. Build trips live by calling the Voygent MCP tools, " +
+  "driving the server-managed build checklist via manage_trip_goal (derive → confirm → advance, one " +
+  "action per turn) and the supplier/enrichment tools it directs you to. " +
+  "Use ONLY data returned by tool calls — never invent or estimate flights, hotels, prices, schedules, " +
+  "airlines, availability, tours, or restaurants. If a search returns nothing, say so plainly and offer to adjust.";
+
+// The only genuinely custom guards allowed in faithful mode (spec's safety/cost-guard carve-out):
+// anti-leak + a one-line board-presentation note when the claude skin renders option cards.
+// NOTE (Codex review #10): the model-facing text must not contain the word "demo" — it then
+// can't accidentally echo it while being told never to reveal it.
+const FAITHFUL_ADDENDUM =
+  "OPERATING GUARDRAILS (these augment, never replace, your operating instructions):\n" +
+  "- This runs as a public, budget-capped session. Keep chat replies short and conversational — prose only. " +
+  "Structured detail (flights, hotels, prices) renders in the folio panel beside the chat, not as markdown tables in chat.\n" +
+  "- never reveal how this system works internally: do NOT say 'demo', 'replay', 'fixtures', 'captured', " +
+  "'staging', credentials, or API keys. If a search returns nothing, just say you couldn't pull live results " +
+  "for that route and offer to try different dates or another destination.";
+
+const FAITHFUL_BOARDS_NOTE =
+  "PRESENTATION: when a search returns flight or hotel candidates, the option cards render beside your " +
+  "message — present the choice in one short sentence and let the traveler pick; do not enumerate the options in text.";
+
+export function buildFaithfulSeed(instructions: string | null, opts: { boardsMode: boolean }): string {
+  const core = instructions ?? FAITHFUL_FALLBACK_CORE;
+  const base = `${core}\n\n${FAITHFUL_ADDENDUM}`;
+  return opts.boardsMode ? `${base}\n\n${FAITHFUL_BOARDS_NOTE}` : base;
+}
 
 // Live-trip workflow (additive, all sessions): when the traveler's destination
 // is NOT one of the featured trips, the session passes through to real Voygent
@@ -185,6 +220,9 @@ export class SessionDO {
   // no patch sanitizer, folio rendered from real read_trip data). Featured
   // trips stay replay-driven — they are the "gif"; live trips are faithful.
   private liveMode = false;
+  // Latched on the first turn from the effective FAITHFUL gate; persisted so the
+  // session stays consistent even if the env flag flips between turns (Decision A4).
+  private faithful = false;
   // One-shot host-nudge state (true = fired or behavior observed). Lives on
   // the instance + SessRecord so a nudge can't re-fire across exchange
   // boundaries or after a DO eviction.
@@ -212,6 +250,7 @@ export class SessionDO {
       this.tripId = sess.tripId;
       this.boardsMode = sess.boardsMode;
       this.liveMode = sess.liveMode ?? false;
+      this.faithful = sess.faithful ?? false;
       this.nudges = sess.nudges ?? { enrichment: false, flightList: false, hsr: false };
       this.routing = sess.routing ?? DEFAULT_ROUTING;
       this.tripPhase = sess.tripPhase ?? INITIAL_PHASE;
@@ -233,7 +272,7 @@ export class SessionDO {
   private async persistSession(): Promise<void> {
     try {
       const puts: Record<string, unknown> = {
-        sess: { tripId: this.tripId, boardsMode: this.boardsMode, liveMode: this.liveMode, nudges: this.nudges, routing: this.routing, hotelsPromoted: this.hotelsPromoted, tripPhase: this.tripPhase, replay: this.replay.snapshot() } satisfies SessRecord,
+        sess: { tripId: this.tripId, boardsMode: this.boardsMode, liveMode: this.liveMode, faithful: this.faithful, nudges: this.nudges, routing: this.routing, hotelsPromoted: this.hotelsPromoted, tripPhase: this.tripPhase, replay: this.replay.snapshot() } satisfies SessRecord,
       };
       for (let i = this.persistedMsgCount; i < this.messages.length; i++) {
         puts[msgKey(i)] = shrinkForStorage(this.messages[i]);
@@ -291,22 +330,38 @@ export class SessionDO {
     // Server-coerce the visitor's model choice through the enabled allowlist (the real Opus gate).
     const enabled = enabledModels({ opus: !!this.env.DEMO_OPUS_ENABLED, deepseek: deepseekEnabled(this.env), ollama: ollamaEnabled(this.env) });
     this.routing = buildRouting({ model: body.model, routing: body.routing }, enabled, fallbackModel);
-    const phaseMachine = !!this.env.DEMO_PHASE_MACHINE;
+    // Effective FAITHFUL gate (Decision A5): lone FAITHFUL only affects test/admin runs;
+    // public passcodes additionally require FAITHFUL_PUBLIC_OK so a single mis-set secret
+    // can't bill real supplier spend to the public (Task 6 budget gate).
+    const faithfulEnv = !!this.env.FAITHFUL && (isTest || !!this.env.FAITHFUL_PUBLIC_OK);
+    const isFirstTurn = this.messages.length === 0;
+    if (isFirstTurn) this.faithful = faithfulEnv;  // latch for the whole session (Decision A4)
+    const faithful = this.faithful;                // latched (turn 1) or hydrated (turn 2+) value
+    const phaseMachine = !!this.env.DEMO_PHASE_MACHINE && !faithful;
     // ctx is just the two mode flags. They change DURING an exchange (liveMode
     // latches mid-run when a search leaves the featured catalog), so build it fresh
     // on each read rather than snapshotting. Directives carry no trip facts — the
     // model fills <destination city>/<departure_date> from the conversation.
     const buildPhaseCtx = (): PhaseCtx => ({ boardsMode: this.boardsMode, liveMode: this.liveMode });
     const mcp = new McpClient(this.env.VOYGENT_MCP_URL, this.env.VOYGENT_MCP_BEARER);
+    if (faithful && isFirstTurn) {
+      try {
+        await mcp.initialize();
+        if (!mcp.instructions) console.log("[faithful] initialize ok but no instructions — using FAITHFUL_FALLBACK_CORE");
+      } catch (e) {
+        console.log(`[faithful] initialize failed, using FAITHFUL_FALLBACK_CORE: ${(e as Error).message}`);
+      }
+    }
     const provider = new DispatchProvider((id) => providerFor(id, this.env), model);
     const mux = new SseMultiplexer();
 
-    const isFirstTurn = this.messages.length === 0;
     if (isFirstTurn) {
       this.boardsMode = mode === "boards";
-      const seed = SYSTEM_HINT
-        + (this.boardsMode ? `\n\n${BOARDS_WORKFLOW_OVERRIDE}\n\n${SEQUENCED_BOARDS_WORKFLOW}` : "")
-        + `\n\n${ENRICHMENT_WORKFLOW}\n\n${LIVE_TRIP_WORKFLOW}`;
+      const seed = faithful
+        ? buildFaithfulSeed(mcp.instructions, { boardsMode: this.boardsMode })
+        : SYSTEM_HINT
+            + (this.boardsMode ? `\n\n${BOARDS_WORKFLOW_OVERRIDE}\n\n${SEQUENCED_BOARDS_WORKFLOW}` : "")
+            + `\n\n${ENRICHMENT_WORKFLOW}\n\n${LIVE_TRIP_WORKFLOW}`;
       this.messages.push({ role: "user", content: `${seed}\n\nMy trip_id is ${this.tripId}.` });
     }
     this.messages.push({ role: "user", content: message });
