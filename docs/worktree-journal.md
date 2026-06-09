@@ -6,7 +6,16 @@ when the work ships or is abandoned.
 
 ## Active
 
-(none)
+### reel-p1
+- **Started:** 2026-06-09 12:13
+- **Branch:** `reel-p1`
+- **Worktree:** `/home/neil/dev/voygent-demo-reel-p1`
+- **Base:** `main` (38b2f27)
+- **Description:** Reel replay P1 — intro modal, semantic pacing + 1×/2× control, spotlight highlight callouts, end CTA + live greeting, reel registry/rotation. Client-only, claude-skin. Plan: docs/superpowers/plans/2026-06-09-reel-p1-chrome.md
+- **Working on:** CODE COMPLETE — all 11 impl commits on `reel-p1`, full gate green (tsc clean, 331 tests, build clean). Paused before Task 12 visual-smoke + deploy (need Neil: passcode for smoke, deploy approval). NOT deployed.
+- **Last update:** 2026-06-09 12:35
+- **Don't touch:** `web/src/App.tsx`, `web/src/ClaudeChatView.tsx`, `web/src/lib/recording.ts`, `web/src/skin-claude.css`, and new `web/src/lib/pacing.ts` / `highlights.ts` / `web/src/recordings/registry.ts` + highlight track / `web/src/Reel*.tsx` — reel P1 in flight (client-only; no worker/MCP/secret touch)
+- **Status:** active
 
 ## Coordination
 
