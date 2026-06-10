@@ -58,6 +58,16 @@
   padding: 5px 20px; text-align: center; font-size: .75rem; color: var(--cl-muted);
   background: var(--cl-tool-bg); border-bottom: 1px solid var(--cl-line);
 }
+/* Honesty tag: live supplier data vs curated sample fixtures. */
+:root[data-skin="claude"] .cl-source {
+  display: flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 5px 20px; text-align: center; font-size: .75rem; border-bottom: 1px solid var(--cl-line);
+}
+:root[data-skin="claude"] .cl-source-dot { width: 7px; height: 7px; border-radius: 50%; flex: 0 0 auto; }
+:root[data-skin="claude"] .cl-source-live { color: #1a7f37; background: #f0f7f1; }
+:root[data-skin="claude"] .cl-source-live .cl-source-dot { background: #1a7f37; box-shadow: 0 0 0 2px #1a7f3733; }
+:root[data-skin="claude"] .cl-source-sample { color: var(--cl-ink-2); background: #fbf7ef; }
+:root[data-skin="claude"] .cl-source-sample .cl-source-dot { background: var(--cl-muted); }
 
 /* ---- message column ---- */
 :root[data-skin="claude"] .cl-scroll { flex: 1; overflow-y: auto; min-height: 0; }

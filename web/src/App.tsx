@@ -147,6 +147,9 @@ export function App() {
   }
   // Reel interaction view-state; consumed by ClaudeChatView render.
   const [reelView, setReelView] = useState<ReelViewState>(emptyReelViewState);
+  // Honesty tag: whether this live session's flight/hotel results are real ("live") or
+  // curated sample fixtures ("sample"). Set from the worker's `source` event.
+  const [dataSource, setDataSource] = useState<"live" | "sample" | null>(null);
   const hlResolve = useRef<(() => void) | null>(null);
   // Accumulated args+result text of pick-signaling tools (patch_trip / promote_*),
   // used to resolve which board candidate the agent chose. A ref, not state, so the
@@ -303,6 +306,7 @@ export function App() {
       }));
     }
     else if (e.type === "error") showError(e.message);
+    else if (e.type === "source") setDataSource(e.live ? "live" : "sample");
     else if (e.type === "inspector") {
       if (e.kind === "tool") {
         setInsTools((t) => [...t, e]);
@@ -333,6 +337,7 @@ export function App() {
     // Clear any in-flight callout so a Replay never starts under a stale spotlight (Codex review).
     hlResolve.current?.(); hlResolve.current = null; setActiveHighlight(null);
     setReelView(emptyReelViewState());   // P2: clear picks/edits/threads/handoff
+    setDataSource(null);                 // honesty tag re-derives on the next live search
   }
 
   function onReelHighlight(h: Highlight): Promise<void> {
@@ -428,6 +433,7 @@ export function App() {
               postReel={postReel}
               reelView={reelView}
               reelMode={mode === "auto"}
+              dataSource={dataSource}
             />
           ) : (
             <>

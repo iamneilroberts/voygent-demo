@@ -252,7 +252,7 @@ function Welcome({ presets, geoCity, onSend, busy, postReel }: { presets: Preset
 }
 
 export function ClaudeChatView(
-  { items, folio, onSend, onPick, busy, presets, geoCity, advisor, mobileView, onMobileView, onToggleDemo, demoLabel, engHasContent, postReel, reelView, reelMode }:
+  { items, folio, onSend, onPick, busy, presets, geoCity, advisor, mobileView, onMobileView, onToggleDemo, demoLabel, engHasContent, postReel, reelView, reelMode, dataSource }:
   {
     items: TimelineItem[];
     folio: FolioData | null;
@@ -270,6 +270,7 @@ export function ClaudeChatView(
     postReel?: boolean;
     reelView: ReelViewState;
     reelMode?: boolean;   // reel playback (mode=auto) — shows the folio "Send to client" affordance
+    dataSource?: "live" | "sample" | null;  // honesty tag: live supplier data vs curated sample fixtures
   },
 ) {
   const [input, setInput] = useState("");
@@ -298,6 +299,13 @@ export function ClaudeChatView(
         <span className="cl-positioning">Live MCP orchestration · persisted trip state · model routing · cost/context telemetry</span>
       </header>
       <div className="cl-ribbon" role="note">A Voygent demo in a Claude-style chat surface — not affiliated with Anthropic.</div>
+      {dataSource && (
+        <div className={`cl-source cl-source-${dataSource}`} role="note">
+          {dataSource === "live"
+            ? <><span className="cl-source-dot" aria-hidden="true" /> Live results — real-time flights and hotels from suppliers.</>
+            : <><span className="cl-source-dot" aria-hidden="true" /> Sample results — this featured trip uses curated data. Try an off-menu destination for a live run.</>}
+        </div>
+      )}
       <div className="cl-scroll" ref={scrollRef} onScroll={onScroll}>
         <div className="cl-col">
           {firstRun && postReel && (

@@ -460,14 +460,24 @@ export class SessionDO {
       patchTrip: async (updates) => { await mcp.callTool("patch_trip", { tripId: this.tripId, updates }); },
     };
     const SEARCH_TOOLS = new Set(["flight_search", "hotel_search", "hotel_search_and_rank"]);
+    // Honesty signal: emit `source` once, on the first search, telling the UI whether
+    // these flight/hotel results are LIVE supplier data or curated sample fixtures.
+    let sourceEmitted = false;
+    const markSource = (live: boolean) => { if (!sourceEmitted) { sourceEmitted = true; emit({ type: "source", live }); } };
     const baseCallTool = (name: string, input: Record<string, unknown>): Promise<string> => {
-      if (faithfulGates(faithful, this.liveMode).bypassReplay) return mcp.callTool(name, input); // real pass-through, no interception
+      const isSearch = SEARCH_TOOLS.has(name);
+      if (faithfulGates(faithful, this.liveMode).bypassReplay) {
+        if (isSearch) markSource(true); // faithful / already-live → real supplier data
+        return mcp.callTool(name, input); // real pass-through, no interception
+      }
       const intercepted = this.replay.isIntercepted(name) || name === "hotel_search_and_rank";
       if (!intercepted) return mcp.callTool(name, input);
-      if (SEARCH_TOOLS.has(name) && !this.replay.matchesFixture(name, input as Record<string, any>)) {
+      if (isSearch && !this.replay.matchesFixture(name, input as Record<string, any>)) {
         this.liveMode = true; // destination left the featured catalog — latch live for the rest of the session
+        markSource(true);     // off-menu → real supplier data
         return mcp.callTool(name, input);
       }
+      if (isSearch) markSource(false); // featured trip → curated sample fixtures
       // Featured trip: hotel_search_and_rank serves the hotel fixture (replay
       // reads location ?? destination, so cpmaxx-style args map cleanly).
       return this.replay.handle(name === "hotel_search_and_rank" ? "hotel_search" : name, input as Record<string, any>, helpers);

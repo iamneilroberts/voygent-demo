@@ -60,6 +60,11 @@ export type ServerEvent =
   | { type: "tool"; tool: string; phase: "start" | "done"; summary?: string }
   | { type: "folio"; folio: FolioData }
   | { type: "board"; kind: "flight" | "hotel" | "includes"; boardId: string; tripId: string; candidates: BoardCandidate[] }
+  // Honesty signal: whether this session's flight/hotel results are LIVE supplier data
+  // (true) or curated sample fixtures (false). Emitted once, when the first search
+  // resolves. The UI shows a "live" / "sample results" tag so we never imply replayed
+  // results are live.
+  | { type: "source"; live: boolean }
   | { type: "turn-complete" }
   | { type: "error"; message: string }
   | InspectorEvent;
