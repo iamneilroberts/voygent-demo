@@ -1839,5 +1839,216 @@
       "prodLatencyMs": 299
     },
     "capturedAt": "2026-06-07"
-  }
+  },
+  "cpmaxxHotels": [
+    {
+      "id": "497758",
+      "source": "cpmaxx",
+      "name": "Dreams Playa Mujeres Golf & Spa Resort",
+      "stars": 4,
+      "area": "Lote RTH-7-PM-II, Lte1, Mz 1, Smz 3 Punta Sam 77400",
+      "pricePerNight": 1379,
+      "priceTotal": 9655.54,
+      "nights": 7,
+      "currency": "USD",
+      "commission": 2896.66,
+      "commissionPct": 30,
+      "clientPrice": 10428,
+      "marginPct": 8,
+      "profitScore": 100,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/497758/eyJjaGVja2luIjoiMjAyNy0wMy0xMyIsImNoZWNrb3V0IjoiMjAyNy0wMy0yMCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiQ2FuY1x1MDBmYW4iLCJjaXR5IjoiQ2FuY1x1MDBmYW4iLCJjb3VudHJ5X2NvZGUiOiJNWCIsImxhdCI6IjIxLjE2MTkwOCIsImxuZyI6Ii04Ni44NTE1Mjc5Iiwicm9vbXMiOlt7Im51bV9hZHVsdHMiOiIyIiwibnVtX2NoaWxkcmVuIjoiMCJ9XSwibnVtX25pZ2h0cyI6IjcifQ==",
+      "image": "https://i.travelapi.com/lodging/14000000/13370000/13363300/13363267/f7ed6dd3_b.jpg",
+      "marketingBlurb": "With a stay at Dreams Playa Mujeres Golf & Spa Resort - All Inclusive in Punta Sam (Playa Mujeres), you'll be a 2-minute drive from Playa Mujeres Golf Club and 15 minutes from Gran Puerto Pier. This all-inclusive property is 8 mi (12.8 km) from North Beach and 9.1 mi (14.6 km) from Puerto Cancun Marina Town Center.",
+      "pictureCount": 85,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 1379
+        }
+      ]
+    },
+    {
+      "id": "537754",
+      "source": "cpmaxx",
+      "name": "Omni Cancun Villas",
+      "stars": 4,
+      "area": "Boulevard Kukulcan KM 16.5 Cancun 77500",
+      "pricePerNight": 1160,
+      "priceTotal": 8122.3,
+      "nights": 7,
+      "currency": "USD",
+      "commission": 2436.69,
+      "commissionPct": 30,
+      "clientPrice": 8772,
+      "marginPct": 8,
+      "profitScore": 85,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/537754/eyJjaGVja2luIjoiMjAyNy0wMy0xMyIsImNoZWNrb3V0IjoiMjAyNy0wMy0yMCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiQ2FuY1x1MDBmYW4iLCJjaXR5IjoiQ2FuY1x1MDBmYW4iLCJjb3VudHJ5X2NvZGUiOiJNWCIsImxhdCI6IjIxLjE2MTkwOCIsImxuZyI6Ii04Ni44NTE1Mjc5Iiwicm9vbXMiOlt7Im51bV9hZHVsdHMiOiIyIiwibnVtX2NoaWxkcmVuIjoiMCJ9XSwibnVtX25pZ2h0cyI6IjcifQ==",
+      "image": "https://i.travelapi.com/lodging/12000000/11460000/11454700/11454603/22cdfbe0_b.jpg",
+      "marketingBlurb": "With a stay at Family 3 Bedroom Ocean Villa By Wyndham Grand Cancun in Cancun (Zona Hotelera), you'll be a short 5-minute walk from Iberostar Cancun Golf Course and within 4 minutes by car from Delfines Beach. This all-inclusive resort is 2.7 mi (4.3 km) from La Isla Shopping Mall and 12.3 mi (19.8 km) from Moon Palace",
+      "pictureCount": 51,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 1160
+        }
+      ]
+    },
+    {
+      "id": "405292",
+      "source": "cpmaxx",
+      "name": "Secrets Playa Mujeres Golf & Spa Resort",
+      "stars": 4,
+      "area": "Lote RTH-7-PM-II, Lte1, Mz 1, Smz 3 Punta Sam 77400",
+      "pricePerNight": 880,
+      "priceTotal": 6162.58,
+      "nights": 7,
+      "currency": "USD",
+      "commission": 1848.77,
+      "commissionPct": 30,
+      "clientPrice": 6656,
+      "marginPct": 8,
+      "profitScore": 66,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/405292/eyJjaGVja2luIjoiMjAyNy0wMy0xMyIsImNoZWNrb3V0IjoiMjAyNy0wMy0yMCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiQ2FuY1x1MDBmYW4iLCJjaXR5IjoiQ2FuY1x1MDBmYW4iLCJjb3VudHJ5X2NvZGUiOiJNWCIsImxhdCI6IjIxLjE2MTkwOCIsImxuZyI6Ii04Ni44NTE1Mjc5Iiwicm9vbXMiOlt7Im51bV9hZHVsdHMiOiIyIiwibnVtX2NoaWxkcmVuIjoiMCJ9XSwibnVtX25pZ2h0cyI6IjcifQ==",
+      "image": "https://i.travelapi.com/lodging/8000000/7880000/7875000/7874912/a77384e4_b.jpg",
+      "marketingBlurb": "Located in Punta Sam (Playa Mujeres), Secrets Playa Mujeres Golf & Spa Resort - Adults Only - All Inclusive is within a 15-minute drive of Playa Mujeres Golf Club and Mujeres Beach. This all-inclusive property is 6.9 mi (11.1 km) from Gran Puerto Pier and 8 mi (12.9 km) from North Beach.",
+      "pictureCount": 87,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 880
+        }
+      ]
+    },
+    {
+      "id": "1334831",
+      "source": "cpmaxx",
+      "name": "Impression Isla Mujeres by Secrets",
+      "stars": 5,
+      "area": "Ave Perimetral Pon SM 009 Manzana 055 Isla Mujeres 77400",
+      "pricePerNight": 1269,
+      "priceTotal": 8883.68,
+      "nights": 7,
+      "currency": "USD",
+      "commission": 1721.44,
+      "commissionPct": 19.4,
+      "clientPrice": 9594,
+      "marginPct": 8,
+      "profitScore": 60,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/1334831/eyJjaGVja2luIjoiMjAyNy0wMy0xMyIsImNoZWNrb3V0IjoiMjAyNy0wMy0yMCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiQ2FuY1x1MDBmYW4iLCJjaXR5IjoiQ2FuY1x1MDBmYW4iLCJjb3VudHJ5X2NvZGUiOiJNWCIsImxhdCI6IjIxLjE2MTkwOCIsImxuZyI6Ii04Ni44NTE1Mjc5Iiwicm9vbXMiOlt7Im51bV9hZHVsdHMiOiIyIiwibnVtX2NoaWxkcmVuIjoiMCJ9XSwibnVtX25pZ2h0cyI6IjcifQ==",
+      "image": "https://i.travelapi.com/lodging/84000000/83290000/83287700/83287617/ee55d626_b.jpg",
+      "marketingBlurb": "With a stay at Impression Isla Mujeres by Secrets – Adults only – All Inclusive in Isla Mujeres, you'll be 0.4 mi (0.6 km) from Garrafon Natural Reef Park and 4.3 mi (6.9 km) from North Beach. This beach property is 13.8 mi (22.3 km) from Puerto Cancun Golf Course and 15 mi (24.1 km) from Puerto Cancun Marina Town Cent",
+      "pictureCount": 93,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 1269
+        }
+      ]
+    },
+    {
+      "id": "1376355",
+      "source": "cpmaxx",
+      "name": "Secrets Playa Blanca Costa Mujeres",
+      "stars": 5,
+      "area": "Carr Punta Sam - Isla Blanca Costa Mujeres 77400",
+      "pricePerNight": 2045,
+      "priceTotal": 14313.22,
+      "nights": 7,
+      "currency": "USD",
+      "commission": 2208.77,
+      "commissionPct": 15.4,
+      "clientPrice": 15458,
+      "marginPct": 8,
+      "profitScore": 75,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/1376355/eyJjaGVja2luIjoiMjAyNy0wMy0xMyIsImNoZWNrb3V0IjoiMjAyNy0wMy0yMCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiQ2FuY1x1MDBmYW4iLCJjaXR5IjoiQ2FuY1x1MDBmYW4iLCJjb3VudHJ5X2NvZGUiOiJNWCIsImxhdCI6IjIxLjE2MTkwOCIsImxuZyI6Ii04Ni44NTE1Mjc5Iiwicm9vbXMiOlt7Im51bV9hZHVsdHMiOiIyIiwibnVtX2NoaWxkcmVuIjoiMCJ9XSwibnVtX25pZ2h0cyI6IjcifQ==",
+      "image": "https://i.travelapi.com/lodging/97000000/96120000/96116400/96116315/3df10dd9_b.jpg",
+      "marketingBlurb": "With a stay at Secrets Playa Blanca Costa Mujeres - Adults Only - All Inclusive in Costa Mujeres, you'll be 3.2 mi (5.1 km) from Playa Mujeres Golf Club and 12.1 mi (19.5 km) from Puerto Cancun Marina Town Center. This all-inclusive property is 13.2 mi (21.2 km) from Playa Tortugas and 14.4 mi (23.1 km) from Langosta B",
+      "pictureCount": 87,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 2045
+        }
+      ]
+    },
+    {
+      "id": "12512",
+      "source": "cpmaxx",
+      "name": "Grand Fiesta Americana Coral Beach Cancun All Inclusive Spa Resort",
+      "stars": 5,
+      "area": "Blvd. Kukulcan km. 9.5 Cancun 77500",
+      "pricePerNight": 707,
+      "priceTotal": 4946.24,
+      "nights": 7,
+      "currency": "USD",
+      "commission": 1228.28,
+      "commissionPct": 24.8,
+      "clientPrice": 5342,
+      "marginPct": 8,
+      "profitScore": 44,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/12512/eyJjaGVja2luIjoiMjAyNy0wMy0xMyIsImNoZWNrb3V0IjoiMjAyNy0wMy0yMCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiQ2FuY1x1MDBmYW4iLCJjaXR5IjoiQ2FuY1x1MDBmYW4iLCJjb3VudHJ5X2NvZGUiOiJNWCIsImxhdCI6IjIxLjE2MTkwOCIsImxuZyI6Ii04Ni44NTE1Mjc5Iiwicm9vbXMiOlt7Im51bV9hZHVsdHMiOiIyIiwibnVtX2NoaWxkcmVuIjoiMCJ9XSwibnVtX25pZ2h0cyI6IjcifQ==",
+      "image": "https://i.travelapi.com/lodging/1000000/20000/12700/12689/e5998787_b.jpg",
+      "marketingBlurb": "With a stay at Grand Fiesta Americana Coral Beach Cancun - All Inclusive in Cancun (Zona Hotelera), you'll be within a 5-minute drive of Plaza Caracol Mall and La Isla Shopping Mall. This all-inclusive property is 5.1 mi (8.2 km) from Puerto Cancun Marina Town Center and 5.1 mi (8.2 km) from Iberostar Cancun Golf Cours",
+      "pictureCount": 147,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 707
+        }
+      ]
+    },
+    {
+      "id": "1424771",
+      "source": "cpmaxx",
+      "name": "Hotel Mousai Cancun",
+      "stars": 5,
+      "area": "Carretera Punta Sam km. 5.2 Mza 9 Lote 3 Punta Sam 77400",
+      "pricePerNight": 1752,
+      "priceTotal": 12265.68,
+      "nights": 7,
+      "currency": "USD",
+      "commission": 1480.45,
+      "commissionPct": 12.1,
+      "clientPrice": 13247,
+      "marginPct": 8,
+      "profitScore": 50,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/1424771/eyJjaGVja2luIjoiMjAyNy0wMy0xMyIsImNoZWNrb3V0IjoiMjAyNy0wMy0yMCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiQ2FuY1x1MDBmYW4iLCJjaXR5IjoiQ2FuY1x1MDBmYW4iLCJjb3VudHJ5X2NvZGUiOiJNWCIsImxhdCI6IjIxLjE2MTkwOCIsImxuZyI6Ii04Ni44NTE1Mjc5Iiwicm9vbXMiOlt7Im51bV9hZHVsdHMiOiIyIiwibnVtX2NoaWxkcmVuIjoiMCJ9XSwibnVtX25pZ2h0cyI6IjcifQ==",
+      "image": "https://i.travelapi.com/lodging/100000000/99930000/99924100/99924030/0c6c705d_b.jpg",
+      "marketingBlurb": "When you stay at Hotel Mousai Cancun Adults Only - All Inclusive in Punta Sam, you'll be on the beach, within a 10-minute drive of Ultramar Ferry Puerto Juárez and Cancun Mall. This all-inclusive property is 9 mi (14.5 km) from Langosta Beach and 12.9 mi (20.7 km) from La Isla Shopping Mall.",
+      "pictureCount": 122,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 1752
+        }
+      ]
+    },
+    {
+      "id": "55352",
+      "source": "cpmaxx",
+      "name": "Live Aqua Cancun",
+      "stars": 5,
+      "area": "Blvd. Kukulcan KM.12.5, Zona Hotelera Cancun 77500",
+      "pricePerNight": 707,
+      "priceTotal": 4946.26,
+      "nights": 7,
+      "currency": "USD",
+      "commission": 1197.77,
+      "commissionPct": 24.2,
+      "clientPrice": 5342,
+      "marginPct": 8,
+      "profitScore": 43,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/55352/eyJjaGVja2luIjoiMjAyNy0wMy0xMyIsImNoZWNrb3V0IjoiMjAyNy0wMy0yMCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiQ2FuY1x1MDBmYW4iLCJjaXR5IjoiQ2FuY1x1MDBmYW4iLCJjb3VudHJ5X2NvZGUiOiJNWCIsImxhdCI6IjIxLjE2MTkwOCIsImxuZyI6Ii04Ni44NTE1Mjc5Iiwicm9vbXMiOlt7Im51bV9hZHVsdHMiOiIyIiwibnVtX2NoaWxkcmVuIjoiMCJ9XSwibnVtX25pZ2h0cyI6IjcifQ==",
+      "image": "https://i.travelapi.com/lodging/2000000/1150000/1140800/1140762/e0a57cc7_b.jpg",
+      "marketingBlurb": "With a stay at Live Aqua Cancun - Adults Only - All-Inclusive in Cancun (Zona Hotelera), you'll be a 4-minute walk from La Isla Shopping Mall and 6 minutes by foot from West Coast of Isla Mujeres, Punta Cancun, and Punta Nizuc National Park. This all-inclusive property is 0.4 mi (0.7 km) from Hotel Zone Beaches and 4.5",
+      "pictureCount": 206,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 707
+        }
+      ]
+    }
+  ],
+  "promotedCpmaxxLodgingById": {}
 }

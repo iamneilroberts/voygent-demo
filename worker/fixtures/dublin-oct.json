@@ -2203,5 +2203,216 @@
       "prodLatencyMs": 337
     },
     "capturedAt": "2026-06-07"
-  }
+  },
+  "cpmaxxHotels": [
+    {
+      "id": "1427902",
+      "source": "cpmaxx",
+      "name": "Eden Quay Lodge",
+      "stars": 0,
+      "area": "24 Eden Quay Dublin",
+      "pricePerNight": 1018,
+      "priceTotal": 7125.32,
+      "nights": 7,
+      "currency": "USD",
+      "commission": 1166.95,
+      "commissionPct": 16.4,
+      "clientPrice": 7695,
+      "marginPct": 8,
+      "profitScore": 100,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/1427902/eyJjaGVja2luIjoiMjAyNi0xMC0xMiIsImNoZWNrb3V0IjoiMjAyNi0xMC0xOSIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiRHVibGluIiwiY2l0eSI6IkR1YmxpbiIsImNvdW50cnlfY29kZSI6IklFIiwibGF0IjoiNTMuMzQ5ODA1MyIsImxuZyI6Ii02LjI2MDMwOTciLCJyb29tcyI6W3sibnVtX2FkdWx0cyI6IjIiLCJudW1fY2hpbGRyZW4iOiIwIn1dLCJudW1fbmlnaHRzIjoiNyJ9",
+      "image": null,
+      "marketingBlurb": null,
+      "pictureCount": 0,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 1018
+        }
+      ]
+    },
+    {
+      "id": "359728",
+      "source": "cpmaxx",
+      "name": "Anantara The Marker Dublin Hotel",
+      "stars": 5,
+      "area": "Grand Canal Square, Docklands Dublin D02 CK38",
+      "pricePerNight": 536,
+      "priceTotal": 3752.77,
+      "nights": 7,
+      "currency": "USD",
+      "commission": 760.66,
+      "commissionPct": 20.3,
+      "clientPrice": 4053,
+      "marginPct": 8,
+      "profitScore": 71,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/359728/eyJjaGVja2luIjoiMjAyNi0xMC0xMiIsImNoZWNrb3V0IjoiMjAyNi0xMC0xOSIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiRHVibGluIiwiY2l0eSI6IkR1YmxpbiIsImNvdW50cnlfY29kZSI6IklFIiwibGF0IjoiNTMuMzQ5ODA1MyIsImxuZyI6Ii02LjI2MDMwOTciLCJyb29tcyI6W3sibnVtX2FkdWx0cyI6IjIiLCJudW1fY2hpbGRyZW4iOiIwIn1dLCJudW1fbmlnaHRzIjoiNyJ9",
+      "image": "https://i.travelapi.com/lodging/6000000/5930000/5921200/5921132/fb089654_b.jpg",
+      "marketingBlurb": "With a stay at Anantara The Marker Dublin - A Leading Hotel of the World, you'll be centrally located in Dublin, steps from Bord Gáis Energy Theatre and within a 10-minute walk of Trinity College. This luxury hotel is 0.8 mi (1.3 km) from 3Arena and 1.2 mi (1.9 km) from Aviva Stadium.",
+      "pictureCount": 75,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 536
+        }
+      ]
+    },
+    {
+      "id": "102552",
+      "source": "cpmaxx",
+      "name": "Dylan Hotel",
+      "stars": 5,
+      "area": "Eastmoreland Place Dublin 4",
+      "pricePerNight": 394,
+      "priceTotal": 2759.94,
+      "nights": 7,
+      "currency": "USD",
+      "commission": 687.64,
+      "commissionPct": 24.9,
+      "clientPrice": 2981,
+      "marginPct": 8,
+      "profitScore": 68,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/102552/eyJjaGVja2luIjoiMjAyNi0xMC0xMiIsImNoZWNrb3V0IjoiMjAyNi0xMC0xOSIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiRHVibGluIiwiY2l0eSI6IkR1YmxpbiIsImNvdW50cnlfY29kZSI6IklFIiwibGF0IjoiNTMuMzQ5ODA1MyIsImxuZyI6Ii02LjI2MDMwOTciLCJyb29tcyI6W3sibnVtX2FkdWx0cyI6IjIiLCJudW1fY2hpbGRyZW4iOiIwIn1dLCJudW1fbmlnaHRzIjoiNyJ9",
+      "image": "https://i.travelapi.com/lodging/1000000/10000/1200/1187/53920c03_b.jpg",
+      "marketingBlurb": "A stay at Dylan Hotel places you in the heart of Dublin, steps from Baggot Street and a 3-minute drive from Merrion Square. This family-friendly hotel is 1.1 mi (1.8 km) from St. Stephen's Green and 1.1 mi (1.8 km) from National Gallery of Ireland at Merrion Square.",
+      "pictureCount": 63,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 394
+        }
+      ]
+    },
+    {
+      "id": "12929",
+      "source": "cpmaxx",
+      "name": "InterContinental Dublin",
+      "stars": 0,
+      "area": "Simmonscourt Road Dublin 4",
+      "pricePerNight": 427,
+      "priceTotal": 2989.82,
+      "nights": 7,
+      "currency": "USD",
+      "commission": 636.5,
+      "commissionPct": 21.3,
+      "clientPrice": 3229,
+      "marginPct": 8,
+      "profitScore": 62,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/12929/eyJjaGVja2luIjoiMjAyNi0xMC0xMiIsImNoZWNrb3V0IjoiMjAyNi0xMC0xOSIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiRHVibGluIiwiY2l0eSI6IkR1YmxpbiIsImNvdW50cnlfY29kZSI6IklFIiwibGF0IjoiNTMuMzQ5ODA1MyIsImxuZyI6Ii02LjI2MDMwOTciLCJyb29tcyI6W3sibnVtX2FkdWx0cyI6IjIiLCJudW1fY2hpbGRyZW4iOiIwIn1dLCJudW1fbmlnaHRzIjoiNyJ9",
+      "image": "https://i.travelapi.com/lodging/1000000/480000/476000/475902/1aa1209a_b.jpg",
+      "marketingBlurb": "In the heart of Dublin, InterContinental Dublin by IHG is within a 5-minute drive of Herbert Park and National Gallery of Ireland at Merrion Square. This family-friendly hotel is 1 mi (1.6 km) from Sandymount Beach and 1.8 mi (2.9 km) from Trinity College.",
+      "pictureCount": 108,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 427
+        }
+      ]
+    },
+    {
+      "id": "21488",
+      "source": "cpmaxx",
+      "name": "The Shelbourne Autograph Collection",
+      "stars": 5,
+      "area": "27 St. Stephen's Green North Dublin 2",
+      "pricePerNight": 565,
+      "priceTotal": 3958.44,
+      "nights": 7,
+      "currency": "USD",
+      "commission": 582.68,
+      "commissionPct": 14.7,
+      "clientPrice": 4275,
+      "marginPct": 8,
+      "profitScore": 54,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/21488/eyJjaGVja2luIjoiMjAyNi0xMC0xMiIsImNoZWNrb3V0IjoiMjAyNi0xMC0xOSIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiRHVibGluIiwiY2l0eSI6IkR1YmxpbiIsImNvdW50cnlfY29kZSI6IklFIiwibGF0IjoiNTMuMzQ5ODA1MyIsImxuZyI6Ii02LjI2MDMwOTciLCJyb29tcyI6W3sibnVtX2FkdWx0cyI6IjIiLCJudW1fY2hpbGRyZW4iOiIwIn1dLCJudW1fbmlnaHRzIjoiNyJ9",
+      "image": "https://i.travelapi.com/lodging/1000000/20000/12600/12564/439c33b0_b.jpg",
+      "marketingBlurb": "With a stay at The Shelbourne, Autograph Collection, you'll be centrally located in Dublin, steps from St. Stephen's Green and 4 minutes by foot from Grafton Street. This luxury hotel is 0.3 mi (0.5 km) from Trinity College and 0.7 mi (1.2 km) from O'Connell Street.",
+      "pictureCount": 124,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 565
+        }
+      ]
+    },
+    {
+      "id": "79207",
+      "source": "cpmaxx",
+      "name": "The Dawson Hostel",
+      "stars": 0,
+      "area": "35 Dawson Street Dublin",
+      "pricePerNight": 300,
+      "priceTotal": 2102.87,
+      "nights": 7,
+      "currency": "USD",
+      "commission": 433.06,
+      "commissionPct": 20.6,
+      "clientPrice": 2271,
+      "marginPct": 8,
+      "profitScore": 45,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/79207/eyJjaGVja2luIjoiMjAyNi0xMC0xMiIsImNoZWNrb3V0IjoiMjAyNi0xMC0xOSIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiRHVibGluIiwiY2l0eSI6IkR1YmxpbiIsImNvdW50cnlfY29kZSI6IklFIiwibGF0IjoiNTMuMzQ5ODA1MyIsImxuZyI6Ii02LjI2MDMwOTciLCJyb29tcyI6W3sibnVtX2FkdWx0cyI6IjIiLCJudW1fY2hpbGRyZW4iOiIwIn1dLCJudW1fbmlnaHRzIjoiNyJ9",
+      "image": null,
+      "marketingBlurb": null,
+      "pictureCount": 0,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 300
+        }
+      ]
+    },
+    {
+      "id": "23040",
+      "source": "cpmaxx",
+      "name": "The Westbury",
+      "stars": 5,
+      "area": "Grafton Street Dublin 2",
+      "pricePerNight": 498,
+      "priceTotal": 3485.39,
+      "nights": 7,
+      "currency": "USD",
+      "commission": 458.29,
+      "commissionPct": 13.2,
+      "clientPrice": 3764,
+      "marginPct": 8,
+      "profitScore": 43,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/23040/eyJjaGVja2luIjoiMjAyNi0xMC0xMiIsImNoZWNrb3V0IjoiMjAyNi0xMC0xOSIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiRHVibGluIiwiY2l0eSI6IkR1YmxpbiIsImNvdW50cnlfY29kZSI6IklFIiwibGF0IjoiNTMuMzQ5ODA1MyIsImxuZyI6Ii02LjI2MDMwOTciLCJyb29tcyI6W3sibnVtX2FkdWx0cyI6IjIiLCJudW1fY2hpbGRyZW4iOiIwIn1dLCJudW1fbmlnaHRzIjoiNyJ9",
+      "image": "https://i.travelapi.com/lodging/1000000/30000/21400/21308/cf3ab313_b.jpg",
+      "marketingBlurb": "With a stay at The Westbury Hotel, you'll be centrally located in Dublin, steps from Phil Lynott Statue and Grafton Street. This family-friendly hotel is 0.1 mi (0.1 km) from The Sporting Emporium Casino, Dublin and 0.1 mi (0.1 km) from Bewley's Lunchtime Theatre.",
+      "pictureCount": 69,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 498
+        }
+      ]
+    },
+    {
+      "id": "1178638",
+      "source": "cpmaxx",
+      "name": "Wren Urban Nest",
+      "stars": 3,
+      "area": "St. Andrew's Lane Dublin D02 P9K0",
+      "pricePerNight": 207,
+      "priceTotal": 1450.96,
+      "nights": 7,
+      "currency": "USD",
+      "commission": 381.11,
+      "commissionPct": 26.3,
+      "clientPrice": 1567,
+      "marginPct": 8,
+      "profitScore": 43,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/1178638/eyJjaGVja2luIjoiMjAyNi0xMC0xMiIsImNoZWNrb3V0IjoiMjAyNi0xMC0xOSIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiRHVibGluIiwiY2l0eSI6IkR1YmxpbiIsImNvdW50cnlfY29kZSI6IklFIiwibGF0IjoiNTMuMzQ5ODA1MyIsImxuZyI6Ii02LjI2MDMwOTciLCJyb29tcyI6W3sibnVtX2FkdWx0cyI6IjIiLCJudW1fY2hpbGRyZW4iOiIwIn1dLCJudW1fbmlnaHRzIjoiNyJ9",
+      "image": "https://i.travelapi.com/lodging/37000000/36980000/36970100/36970045/22a5bf2b_b.jpg",
+      "marketingBlurb": "With a stay at Wren Urban Nest, you'll be centrally located in Dublin, within a 5-minute walk of Grafton Street and Trinity College. This hotel is 0.4 mi (0.6 km) from St. Stephen's Green and 0.3 mi (0.5 km) from Dublin Castle.",
+      "pictureCount": 33,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 207
+        }
+      ]
+    }
+  ],
+  "promotedCpmaxxLodgingById": {}
 }

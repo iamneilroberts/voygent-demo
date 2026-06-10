@@ -1884,5 +1884,216 @@
       "prodLatencyMs": 220
     },
     "capturedAt": "2026-06-07"
-  }
+  },
+  "cpmaxxHotels": [
+    {
+      "id": "1148597",
+      "source": "cpmaxx",
+      "name": "Takanawa Hanakohro",
+      "stars": 5,
+      "area": "Takanawa 3-13-1, Minato-ku, Shinagawa Tokyo 108-8612",
+      "pricePerNight": 1215,
+      "priceTotal": 12147.59,
+      "nights": 10,
+      "currency": "USD",
+      "commission": 2862.73,
+      "commissionPct": 23.6,
+      "clientPrice": 13119,
+      "marginPct": 8,
+      "profitScore": 100,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/1148597/eyJjaGVja2luIjoiMjAyNy0wNC0wNCIsImNoZWNrb3V0IjoiMjAyNy0wNC0xNCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiVG9reW8iLCJjaXR5IjoiVG9reW8iLCJjb3VudHJ5X2NvZGUiOiJKUCIsImxhdCI6IjM1LjY3NjQyMjUiLCJsbmciOiIxMzkuNjUwMDI3Iiwicm9vbXMiOlt7Im51bV9hZHVsdHMiOiIyIiwibnVtX2NoaWxkcmVuIjoiMCJ9XSwibnVtX25pZ2h0cyI6IjEwIn0=",
+      "image": "https://i.travelapi.com/lodging/19000000/18540000/18534100/18534053/ac02f2f6_b.jpg",
+      "marketingBlurb": "With a stay at Takanawa Hanakohro, a Member of Small Luxury Hotels of the World, you'll be centrally located in Tokyo, within a 5-minute drive of Tokyo Tower and Tokyo Bay. This luxury hotel is 3.6 mi (5.8 km) from Shibuya Crossing and 4.4 mi (7.1 km) from Tokyo Imperial Palace.",
+      "pictureCount": 160,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 1215
+        }
+      ]
+    },
+    {
+      "id": "265291",
+      "source": "cpmaxx",
+      "name": "The Tokyo Edition, Toranomon",
+      "stars": 5,
+      "area": "4-1-1 Toranomon, Minato-ku Tokyo 105-0001",
+      "pricePerNight": 1663,
+      "priceTotal": 16626.07,
+      "nights": 10,
+      "currency": "USD",
+      "commission": 2447.37,
+      "commissionPct": 14.7,
+      "clientPrice": 17956,
+      "marginPct": 8,
+      "profitScore": 84,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/265291/eyJjaGVja2luIjoiMjAyNy0wNC0wNCIsImNoZWNrb3V0IjoiMjAyNy0wNC0xNCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiVG9reW8iLCJjaXR5IjoiVG9reW8iLCJjb3VudHJ5X2NvZGUiOiJKUCIsImxhdCI6IjM1LjY3NjQyMjUiLCJsbmciOiIxMzkuNjUwMDI3Iiwicm9vbXMiOlt7Im51bV9hZHVsdHMiOiIyIiwibnVtX2NoaWxkcmVuIjoiMCJ9XSwibnVtX25pZ2h0cyI6IjEwIn0=",
+      "image": "https://i.travelapi.com/lodging/49000000/48970000/48963000/48962996/b57bc84b_b.jpg",
+      "marketingBlurb": "With a stay at The Tokyo EDITION, Toranomon in Tokyo (Minato), you'll be within a 5-minute drive of Tokyo Tower and Tokyo Imperial Palace. This luxury hotel is 2 mi (3.2 km) from Tokyo Bay and 3 mi (4.8 km) from Shibuya Crossing.",
+      "pictureCount": 149,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 1663
+        }
+      ]
+    },
+    {
+      "id": "111243",
+      "source": "cpmaxx",
+      "name": "The Ritz-Carlton Tokyo",
+      "stars": 5,
+      "area": "Tokyo Midtown, 9-7-1 Akasaka, Minato-ku Tokyo 107-6245",
+      "pricePerNight": 1475,
+      "priceTotal": 14746.49,
+      "nights": 10,
+      "currency": "USD",
+      "commission": 2170.69,
+      "commissionPct": 14.7,
+      "clientPrice": 15926,
+      "marginPct": 8,
+      "profitScore": 75,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/111243/eyJjaGVja2luIjoiMjAyNy0wNC0wNCIsImNoZWNrb3V0IjoiMjAyNy0wNC0xNCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiVG9reW8iLCJjaXR5IjoiVG9reW8iLCJjb3VudHJ5X2NvZGUiOiJKUCIsImxhdCI6IjM1LjY3NjQyMjUiLCJsbmciOiIxMzkuNjUwMDI3Iiwicm9vbXMiOlt7Im51bV9hZHVsdHMiOiIyIiwibnVtX2NoaWxkcmVuIjoiMCJ9XSwibnVtX25pZ2h0cyI6IjEwIn0=",
+      "image": "https://i.travelapi.com/lodging/2000000/1590000/1583300/1583214/4aad2ad0_b.jpg",
+      "marketingBlurb": "With a stay at The Ritz-Carlton, Tokyo, you'll be centrally located in Tokyo, steps from Tokyo Midtown and Suntory Museum of Art. This luxury hotel is 0.1 mi (0.1 km) from 21 21 Design Sight and 0.3 mi (0.5 km) from National Art Center, Tokyo.",
+      "pictureCount": 73,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 1475
+        }
+      ]
+    },
+    {
+      "id": "1481036",
+      "source": "cpmaxx",
+      "name": "Fairmont Tokyo",
+      "stars": 5,
+      "area": "1-1-1 Shibaura, Minato-ku Tokyo 105-0023",
+      "pricePerNight": 1173,
+      "priceTotal": 11730.3,
+      "nights": 10,
+      "currency": "USD",
+      "commission": 1954.29,
+      "commissionPct": 16.7,
+      "clientPrice": 12669,
+      "marginPct": 8,
+      "profitScore": 68,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/1481036/eyJjaGVja2luIjoiMjAyNy0wNC0wNCIsImNoZWNrb3V0IjoiMjAyNy0wNC0xNCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiVG9reW8iLCJjaXR5IjoiVG9reW8iLCJjb3VudHJ5X2NvZGUiOiJKUCIsImxhdCI6IjM1LjY3NjQyMjUiLCJsbmciOiIxMzkuNjUwMDI3Iiwicm9vbXMiOlt7Im51bV9hZHVsdHMiOiIyIiwibnVtX2NoaWxkcmVuIjoiMCJ9XSwibnVtX25pZ2h0cyI6IjEwIn0=",
+      "image": "https://i.travelapi.com/lodging/115000000/114240000/114235600/114235504/5859a0ad_b.jpg",
+      "marketingBlurb": "A stay at Fairmont Tokyo places you in the heart of Tokyo, within a 5-minute drive of Tokyo Bay and Tokyo Tower. This luxury hotel is 2.6 mi (4.3 km) from Tokyo Imperial Palace and 3.5 mi (5.7 km) from Toyosu Market.",
+      "pictureCount": 229,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 1173
+        }
+      ]
+    },
+    {
+      "id": "1287212",
+      "source": "cpmaxx",
+      "name": "illi Shimokitazawa",
+      "stars": 0,
+      "area": "2-24-12 Tokyo 155-0031",
+      "pricePerNight": 759,
+      "priceTotal": 7590.19,
+      "nights": 10,
+      "currency": "USD",
+      "commission": 1629.51,
+      "commissionPct": 21.5,
+      "clientPrice": 8197,
+      "marginPct": 8,
+      "profitScore": 59,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/1287212/eyJjaGVja2luIjoiMjAyNy0wNC0wNCIsImNoZWNrb3V0IjoiMjAyNy0wNC0xNCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiVG9reW8iLCJjaXR5IjoiVG9reW8iLCJjb3VudHJ5X2NvZGUiOiJKUCIsImxhdCI6IjM1LjY3NjQyMjUiLCJsbmciOiIxMzkuNjUwMDI3Iiwicm9vbXMiOlt7Im51bV9hZHVsdHMiOiIyIiwibnVtX2NoaWxkcmVuIjoiMCJ9XSwibnVtX25pZ2h0cyI6IjEwIn0=",
+      "image": null,
+      "marketingBlurb": null,
+      "pictureCount": 0,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 759
+        }
+      ]
+    },
+    {
+      "id": "565934",
+      "source": "cpmaxx",
+      "name": "Hotel New Otani Tokyo The Main",
+      "stars": 4,
+      "area": "4-1 Kioi-cho Chiyoda-ku Tokyo 102-8578",
+      "pricePerNight": 458,
+      "priceTotal": 4581.61,
+      "nights": 10,
+      "currency": "USD",
+      "commission": 1374.48,
+      "commissionPct": 30,
+      "clientPrice": 4948,
+      "marginPct": 8,
+      "profitScore": 53,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/565934/eyJjaGVja2luIjoiMjAyNy0wNC0wNCIsImNoZWNrb3V0IjoiMjAyNy0wNC0xNCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiVG9reW8iLCJjaXR5IjoiVG9reW8iLCJjb3VudHJ5X2NvZGUiOiJKUCIsImxhdCI6IjM1LjY3NjQyMjUiLCJsbmciOiIxMzkuNjUwMDI3Iiwicm9vbXMiOlt7Im51bV9hZHVsdHMiOiIyIiwibnVtX2NoaWxkcmVuIjoiMCJ9XSwibnVtX25pZ2h0cyI6IjEwIn0=",
+      "image": "https://i.travelapi.com/lodging/1000000/20000/16200/16187/8e7fb82e_b.jpg",
+      "marketingBlurb": "With a stay at Hotel New Otani Tokyo The Main, you'll be centrally located in Tokyo, within a 5-minute drive of Tokyo Imperial Palace and Tokyo Tower. This luxury hotel is 3 mi (4.9 km) from Tokyo Dome and 3 mi (4.9 km) from Shibuya Crossing.",
+      "pictureCount": 158,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 458
+        }
+      ]
+    },
+    {
+      "id": "406126",
+      "source": "cpmaxx",
+      "name": "Andaz Tokyo Toranomon Hills",
+      "stars": 5,
+      "area": "1-23-4 Toranomon, Minato-ku Tokyo 105-0001",
+      "pricePerNight": 1349,
+      "priceTotal": 13485.7,
+      "nights": 10,
+      "currency": "USD",
+      "commission": 1629.07,
+      "commissionPct": 12.1,
+      "clientPrice": 14565,
+      "marginPct": 8,
+      "profitScore": 56,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/406126/eyJjaGVja2luIjoiMjAyNy0wNC0wNCIsImNoZWNrb3V0IjoiMjAyNy0wNC0xNCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiVG9reW8iLCJjaXR5IjoiVG9reW8iLCJjb3VudHJ5X2NvZGUiOiJKUCIsImxhdCI6IjM1LjY3NjQyMjUiLCJsbmciOiIxMzkuNjUwMDI3Iiwicm9vbXMiOlt7Im51bV9hZHVsdHMiOiIyIiwibnVtX2NoaWxkcmVuIjoiMCJ9XSwibnVtX25pZ2h0cyI6IjEwIn0=",
+      "image": "https://i.travelapi.com/lodging/8000000/7480000/7473600/7473589/edbbf741_b.jpg",
+      "marketingBlurb": "A stay at Andaz Tokyo Toranomon Hills - a concept by Hyatt places you in the heart of Tokyo, within a 5-minute drive of Tokyo Imperial Palace and Tokyo Tower. This luxury hotel is 4.4 mi (7 km) from Meiji Jingu Shrine and 4.9 mi (7.8 km) from Sensoji Temple.",
+      "pictureCount": 109,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 1349
+        }
+      ]
+    },
+    {
+      "id": "733396",
+      "source": "cpmaxx",
+      "name": "The Centurion Classic Akasaka",
+      "stars": 3,
+      "area": "Akasaka 3-11-8, Minato-ku Tokyo 107-0052",
+      "pricePerNight": 474,
+      "priceTotal": 4744.29,
+      "nights": 10,
+      "currency": "USD",
+      "commission": 1273.35,
+      "commissionPct": 26.8,
+      "clientPrice": 5124,
+      "marginPct": 8,
+      "profitScore": 49,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/733396/eyJjaGVja2luIjoiMjAyNy0wNC0wNCIsImNoZWNrb3V0IjoiMjAyNy0wNC0xNCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiVG9reW8iLCJjaXR5IjoiVG9reW8iLCJjb3VudHJ5X2NvZGUiOiJKUCIsImxhdCI6IjM1LjY3NjQyMjUiLCJsbmciOiIxMzkuNjUwMDI3Iiwicm9vbXMiOlt7Im51bV9hZHVsdHMiOiIyIiwibnVtX2NoaWxkcmVuIjoiMCJ9XSwibnVtX25pZ2h0cyI6IjEwIn0=",
+      "image": "https://i.travelapi.com/lodging/19000000/18580000/18573700/18573620/1e1e1059_b.jpg",
+      "marketingBlurb": "With a stay at The Centurion Hotel Classic Akasaka, you'll be centrally located in Tokyo, within a 5-minute drive of Tokyo Imperial Palace and Tokyo Tower. This hotel is 2.8 mi (4.5 km) from Tokyo Bay and 2.8 mi (4.5 km) from Shibuya Crossing.",
+      "pictureCount": 75,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 474
+        }
+      ]
+    }
+  ],
+  "promotedCpmaxxLodgingById": {}
 }

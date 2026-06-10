@@ -2579,5 +2579,216 @@
       "prodLatencyMs": 208
     },
     "capturedAt": "2026-06-07"
-  }
+  },
+  "cpmaxxHotels": [
+    {
+      "id": "226486",
+      "source": "cpmaxx",
+      "name": "Royalton Park Avenue",
+      "stars": 5,
+      "area": "420 Park Avenue South New York 10016",
+      "pricePerNight": 8499,
+      "priceTotal": 25497.45,
+      "nights": 3,
+      "currency": "USD",
+      "commission": 1224.36,
+      "commissionPct": 4.8,
+      "clientPrice": 27537,
+      "marginPct": 8,
+      "profitScore": 100,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/226486/eyJjaGVja2luIjoiMjAyNy0wMi0xMiIsImNoZWNrb3V0IjoiMjAyNy0wMi0xNSIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiTmV3IFlvcmsiLCJjaXR5IjoiTmV3IFlvcmsiLCJzdGF0ZV9jb2RlIjoiTlkiLCJjb3VudHJ5X2NvZGUiOiJVUyIsImxhdCI6IjQwLjcxMjc3NTMiLCJsbmciOiItNzQuMDA1OTcyOCIsInJvb21zIjpbeyJudW1fYWR1bHRzIjoiMiIsIm51bV9jaGlsZHJlbiI6IjAifV0sIm51bV9uaWdodHMiOiIzIn0=",
+      "image": "https://i.travelapi.com/lodging/4000000/3580000/3573000/3572938/1b473ebd_b.jpg",
+      "marketingBlurb": "With a stay at Royalton Park Avenue, you'll be centrally located in New York, a short 8-minute walk from Empire State Building and 13 minutes by foot from Madison Square Garden. This luxury hotel is 0.8 mi (1.3 km) from Grand Central Terminal and 1.2 mi (2 km) from Times Square.",
+      "pictureCount": 46,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 8499
+        }
+      ]
+    },
+    {
+      "id": "1320159",
+      "source": "cpmaxx",
+      "name": "The Ritz-Carlton New York, NoMad",
+      "stars": 5,
+      "area": "25 WEST 28TH STREET New York 10001",
+      "pricePerNight": 1066,
+      "priceTotal": 3198.74,
+      "nights": 3,
+      "currency": "USD",
+      "commission": 593.65,
+      "commissionPct": 18.6,
+      "clientPrice": 3455,
+      "marginPct": 8,
+      "profitScore": 56,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/1320159/eyJjaGVja2luIjoiMjAyNy0wMi0xMiIsImNoZWNrb3V0IjoiMjAyNy0wMi0xNSIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiTmV3IFlvcmsiLCJjaXR5IjoiTmV3IFlvcmsiLCJzdGF0ZV9jb2RlIjoiTlkiLCJjb3VudHJ5X2NvZGUiOiJVUyIsImxhdCI6IjQwLjcxMjc3NTMiLCJsbmciOiItNzQuMDA1OTcyOCIsInJvb21zIjpbeyJudW1fYWR1bHRzIjoiMiIsIm51bV9jaGlsZHJlbiI6IjAifV0sIm51bV9uaWdodHMiOiIzIn0=",
+      "image": "https://i.travelapi.com/lodging/73000000/72290000/72283700/72283631/b4d24201_b.jpg",
+      "marketingBlurb": "Located in New York (Manhattan), The Ritz-Carlton New York, NoMad is a 4-minute walk from Madison Square Park and 7 minutes by foot from Empire State Building. This luxury hotel is 0.7 mi (1.1 km) from Madison Square Garden and 0.8 mi (1.4 km) from Bryant Park.",
+      "pictureCount": 194,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 1066
+        }
+      ]
+    },
+    {
+      "id": "1079582",
+      "source": "cpmaxx",
+      "name": "SpringHill Suites New York Midtown Manhattan/Park Avenue",
+      "stars": 3,
+      "area": "111 EAST 24TH STREET New York 10010",
+      "pricePerNight": 594,
+      "priceTotal": 1782.44,
+      "nights": 3,
+      "currency": "USD",
+      "commission": 534.73,
+      "commissionPct": 30,
+      "clientPrice": 1925,
+      "marginPct": 8,
+      "profitScore": 54,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/1079582/eyJjaGVja2luIjoiMjAyNy0wMi0xMiIsImNoZWNrb3V0IjoiMjAyNy0wMi0xNSIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiTmV3IFlvcmsiLCJjaXR5IjoiTmV3IFlvcmsiLCJzdGF0ZV9jb2RlIjoiTlkiLCJjb3VudHJ5X2NvZGUiOiJVUyIsImxhdCI6IjQwLjcxMjc3NTMiLCJsbmciOiItNzQuMDA1OTcyOCIsInJvb21zIjpbeyJudW1fYWR1bHRzIjoiMiIsIm51bV9jaGlsZHJlbiI6IjAifV0sIm51bV9uaWdodHMiOiIzIn0=",
+      "image": "https://i.travelapi.com/lodging/37000000/36970000/36969000/36968921/483d4614_b.jpg",
+      "marketingBlurb": "In the heart of New York, SpringHill Suites by Marriott New York Midtown Manhattan/Park Avenue is within a 5-minute drive of Empire State Building and Grand Central Terminal. This hotel is 1.2 mi (2 km) from Madison Square Garden and 1.5 mi (2.5 km) from Bryant Park.",
+      "pictureCount": 43,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 594
+        }
+      ]
+    },
+    {
+      "id": "232102",
+      "source": "cpmaxx",
+      "name": "The Langham New York, Fifth Avenue",
+      "stars": 5,
+      "area": "400 Fifth Avenue New York 10018",
+      "pricePerNight": 734,
+      "priceTotal": 2202.99,
+      "nights": 3,
+      "currency": "USD",
+      "commission": 530.82,
+      "commissionPct": 24.1,
+      "clientPrice": 2379,
+      "marginPct": 8,
+      "profitScore": 52,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/232102/eyJjaGVja2luIjoiMjAyNy0wMi0xMiIsImNoZWNrb3V0IjoiMjAyNy0wMi0xNSIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiTmV3IFlvcmsiLCJjaXR5IjoiTmV3IFlvcmsiLCJzdGF0ZV9jb2RlIjoiTlkiLCJjb3VudHJ5X2NvZGUiOiJVUyIsImxhdCI6IjQwLjcxMjc3NTMiLCJsbmciOiItNzQuMDA1OTcyOCIsInJvb21zIjpbeyJudW1fYWR1bHRzIjoiMiIsIm51bV9jaGlsZHJlbiI6IjAifV0sIm51bV9uaWdodHMiOiIzIn0=",
+      "image": "https://i.travelapi.com/lodging/4000000/3630000/3630000/3629903/c21195be_b.jpg",
+      "marketingBlurb": "With a stay at The Langham, New York, Fifth Avenue in New York (Manhattan), you'll be steps from 5th Avenue and 3 minutes by foot from Empire State Building. This family-friendly hotel is 0.3 mi (0.4 km) from Bryant Park and 0.5 mi (0.8 km) from Broadway.",
+      "pictureCount": 126,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 734
+        }
+      ]
+    },
+    {
+      "id": "232167",
+      "source": "cpmaxx",
+      "name": "Holiday Inn Express New York City-Wall Street",
+      "stars": 2,
+      "area": "126 Water St New York 10005",
+      "pricePerNight": 451,
+      "priceTotal": 1351.99,
+      "nights": 3,
+      "currency": "USD",
+      "commission": 405.6,
+      "commissionPct": 30,
+      "clientPrice": 1460,
+      "marginPct": 8,
+      "profitScore": 42,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/232167/eyJjaGVja2luIjoiMjAyNy0wMi0xMiIsImNoZWNrb3V0IjoiMjAyNy0wMi0xNSIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiTmV3IFlvcmsiLCJjaXR5IjoiTmV3IFlvcmsiLCJzdGF0ZV9jb2RlIjoiTlkiLCJjb3VudHJ5X2NvZGUiOiJVUyIsImxhdCI6IjQwLjcxMjc3NTMiLCJsbmciOiItNzQuMDA1OTcyOCIsInJvb21zIjpbeyJudW1fYWR1bHRzIjoiMiIsIm51bV9jaGlsZHJlbiI6IjAifV0sIm51bV9uaWdodHMiOiIzIn0=",
+      "image": "https://i.travelapi.com/lodging/3000000/2580000/2571900/2571813/32021b08_b.jpg",
+      "marketingBlurb": "With a stay at Holiday Inn Express New York City- Wall Street by IHG, you'll be centrally located in New York, steps from Wall Street and 10 minutes by foot from Brooklyn Bridge. This hotel is 0.7 mi (1.1 km) from One World Trade Center and 0.4 mi (0.7 km) from Battery Park.",
+      "pictureCount": 35,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 451
+        }
+      ]
+    },
+    {
+      "id": "1398602",
+      "source": "cpmaxx",
+      "name": "The Fifth Avenue Hotel",
+      "stars": 5,
+      "area": "1 West 28th Street New York 10001",
+      "pricePerNight": 797,
+      "priceTotal": 2389.99,
+      "nights": 3,
+      "currency": "USD",
+      "commission": 415.66,
+      "commissionPct": 17.4,
+      "clientPrice": 2581,
+      "marginPct": 8,
+      "profitScore": 40,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/1398602/eyJjaGVja2luIjoiMjAyNy0wMi0xMiIsImNoZWNrb3V0IjoiMjAyNy0wMi0xNSIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiTmV3IFlvcmsiLCJjaXR5IjoiTmV3IFlvcmsiLCJzdGF0ZV9jb2RlIjoiTlkiLCJjb3VudHJ5X2NvZGUiOiJVUyIsImxhdCI6IjQwLjcxMjc3NTMiLCJsbmciOiItNzQuMDA1OTcyOCIsInJvb21zIjpbeyJudW1fYWR1bHRzIjoiMiIsIm51bV9jaGlsZHJlbiI6IjAifV0sIm51bV9uaWdodHMiOiIzIn0=",
+      "image": "https://i.travelapi.com/lodging/97000000/96480000/96472700/96472655/ee6757ea_b.jpg",
+      "marketingBlurb": "The Fifth Avenue Hotel is centrally located in New York, a 3-minute walk from Madison Square Park and 6 minutes by foot from Empire State Building. This family-friendly hotel is 0.3 mi (0.5 km) from Flatiron Building and 0.8 mi (1.2 km) from Madison Square Garden.",
+      "pictureCount": 67,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 797
+        }
+      ]
+    },
+    {
+      "id": "1351425",
+      "source": "cpmaxx",
+      "name": "Moxy NYC Lower East Side",
+      "stars": 4,
+      "area": "145 BOWERY New York 10002",
+      "pricePerNight": 348,
+      "priceTotal": 1042.94,
+      "nights": 3,
+      "currency": "USD",
+      "commission": 312.88,
+      "commissionPct": 30,
+      "clientPrice": 1126,
+      "marginPct": 8,
+      "profitScore": 34,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/1351425/eyJjaGVja2luIjoiMjAyNy0wMi0xMiIsImNoZWNrb3V0IjoiMjAyNy0wMi0xNSIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiTmV3IFlvcmsiLCJjaXR5IjoiTmV3IFlvcmsiLCJzdGF0ZV9jb2RlIjoiTlkiLCJjb3VudHJ5X2NvZGUiOiJVUyIsImxhdCI6IjQwLjcxMjc3NTMiLCJsbmciOiItNzQuMDA1OTcyOCIsInJvb21zIjpbeyJudW1fYWR1bHRzIjoiMiIsIm51bV9jaGlsZHJlbiI6IjAifV0sIm51bV9uaWdodHMiOiIzIn0=",
+      "image": "https://i.travelapi.com/lodging/83000000/82940000/82937800/82937730/754e178b_b.jpg",
+      "marketingBlurb": "Located in New York (Manhattan), Moxy NYC Lower East Side is within a 15-minute walk of New York University and Brooklyn Bridge. This hotel is 1.3 mi (2 km) from 5th Avenue and 1.3 mi (2.1 km) from Wall Street.",
+      "pictureCount": 71,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 348
+        }
+      ]
+    },
+    {
+      "id": "556156",
+      "source": "cpmaxx",
+      "name": "The Beekman, a Thompson Hotel",
+      "stars": 5,
+      "area": "123 Nassau Street New York 10038",
+      "pricePerNight": 498,
+      "priceTotal": 1494.98,
+      "nights": 3,
+      "currency": "USD",
+      "commission": 327.54,
+      "commissionPct": 21.9,
+      "clientPrice": 1615,
+      "marginPct": 8,
+      "profitScore": 34,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/556156/eyJjaGVja2luIjoiMjAyNy0wMi0xMiIsImNoZWNrb3V0IjoiMjAyNy0wMi0xNSIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiTmV3IFlvcmsiLCJjaXR5IjoiTmV3IFlvcmsiLCJzdGF0ZV9jb2RlIjoiTlkiLCJjb3VudHJ5X2NvZGUiOiJVUyIsImxhdCI6IjQwLjcxMjc3NTMiLCJsbmciOiItNzQuMDA1OTcyOCIsInJvb21zIjpbeyJudW1fYWR1bHRzIjoiMiIsIm51bV9jaGlsZHJlbiI6IjAifV0sIm51bV9uaWdodHMiOiIzIn0=",
+      "image": "https://i.travelapi.com/lodging/13000000/12080000/12078200/12078123/cc1d6312_b.jpg",
+      "marketingBlurb": "Located in New York (Manhattan), The Beekman, A Thompson Hotel, by Hyatt is a 3-minute walk from Brooklyn Bridge and 6 minutes by foot from South Street Seaport. This luxury hotel is 0.4 mi (0.6 km) from One World Trade Center and 0.7 mi (1.2 km) from Brookfield Place.",
+      "pictureCount": 80,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 498
+        }
+      ]
+    }
+  ],
+  "promotedCpmaxxLodgingById": {}
 }
