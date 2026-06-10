@@ -521,9 +521,6 @@ export function App() {
       </div>
       <footer className="meta">Built with coding-agent workflows; architecture, constraints, and review by Neil Roberts.</footer>
       {mode !== "auto" && <SkinSwitch skin={skin} onPick={setSkin} />}
-      {mode !== "auto" && (
-        <button type="button" className="watch-demo" onClick={toggleDemo}>{demoLabel}</button>
-      )}
       <TweaksPanel
         open={tweaksOpen} onClose={() => setTweaksOpen(false)}
         enabled={enabledModels} mode={modelMode} onMode={setModelMode} onRouting={applyRouting}

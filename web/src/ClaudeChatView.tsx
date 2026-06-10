@@ -288,7 +288,19 @@ export function ClaudeChatView(
     if (!el) return;
     pinnedRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
   }
-  useEffect(() => { if (pinnedRef.current) endRef.current?.scrollIntoView({ block: "end" }); }, [items, busy]);
+  useEffect(() => {
+    if (!pinnedRef.current) return;
+    // If a chooser board is awaiting a pick, keep IT in view instead of scrolling past it
+    // to the trailing summary text (Neil: better to miss the summary than have to scroll
+    // back up to choose). Otherwise stick to the bottom as before.
+    const pendingBoard = items.some((it) => it.role === "board" && !it.resolved && !it.resolvedId);
+    if (pendingBoard) {
+      const boards = scrollRef.current?.querySelectorAll<HTMLElement>('[data-reel-target^="board-"]');
+      const last = boards && boards[boards.length - 1];
+      if (last) { last.scrollIntoView({ block: "start" }); return; }
+    }
+    endRef.current?.scrollIntoView({ block: "end" });
+  }, [items, busy]);
 
   const lastIdx = items.length - 1;
   return (
@@ -342,10 +354,6 @@ export function ClaudeChatView(
           {engHasContent && (
             <button type="button" className={`cl-pill ${mobileView === "engineering" ? "on" : ""}`} onClick={() => onMobileView(toggleMobileView(mobileView, "engineering"))}>⚙ Engineering</button>
           )}
-          {/* No mid-reel "build your own" shortcut — the flow is reel → get auth → live
-              demo via the end-of-reel CTA. Keep the toggle in live mode (it reads
-              "watch the demo"), matching the desktop button. */}
-          {!reelMode && <button type="button" className="cl-pill" onClick={onToggleDemo}>{demoLabel}</button>}
         </div>
         <form
           className="cl-composer"
@@ -360,7 +368,6 @@ export function ClaudeChatView(
           />
           <button type="submit" className="cl-send" disabled={busy || !input.trim()} aria-label="Send message">↑</button>
         </form>
-        <div className="cl-disclaimer">Voygent demo · a Claude-style chat surface, not affiliated with Anthropic.</div>
       </div>
     </main>
   );
