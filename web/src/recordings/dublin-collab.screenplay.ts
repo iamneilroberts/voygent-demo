@@ -76,9 +76,9 @@ const flights: BoardCandidate[] = [
 // ── Hotels: four mid-range options with Voygent badges; the advisor shortlists the
 //    three non-chain ones (drops the Hilton). ──────────────────────────────────────────
 const hotels: BoardCandidate[] = [
-  { id: "serp:h1", title: "The Dean Dublin", price: "$168/night", badge: "Best location", meta: "Camden St · 4★ · boutique",   summary: "The Dean Dublin $168/night" },
-  { id: "serp:h2", title: "Beckett Locke",   price: "$137/night", badge: "Best value",    meta: "Docklands · aparthotel",       summary: "Beckett Locke $137/night" },
-  { id: "serp:h3", title: "The Mayson",       price: "$159/night", badge: "Waterfront",    meta: "North Quays · waterfront",      summary: "The Mayson $159/night" },
+  { id: "serp:h1", title: "The Dean Dublin", price: "$168/night", badge: "Best location", meta: "Camden St · 4★ · boutique",   summary: "The Dean Dublin $168/night", commission: 176, commissionPct: 15 },
+  { id: "serp:h2", title: "Beckett Locke",   price: "$137/night", badge: "Best value",    meta: "Docklands · aparthotel",       summary: "Beckett Locke $137/night", commission: 144, commissionPct: 15 },
+  { id: "serp:h3", title: "The Mayson",       price: "$159/night", badge: "Waterfront",    meta: "North Quays · waterfront",      summary: "The Mayson $159/night", commission: 167, commissionPct: 15 },
   { id: "serp:h4", title: "Hilton Garden Inn", price: "$182/night",                        meta: "O'Connell St · chain",         summary: "Hilton Garden Inn $182/night" },
 ];
 const HOTEL_SHORTLIST = ["serp:h1", "serp:h2", "serp:h3"]; // the three the advisor sends the traveler
@@ -119,7 +119,7 @@ const edited: FolioData     = { ...withDays, days: days.map((d, i) => i === 2 ? 
 const withIncludes: FolioData = { ...edited, includes: chosenIncludes };
 const finalFolio: FolioData = {
   ...withIncludes,
-  hotels: [{ name: "The Dean Dublin", area: "Camden St", stars: 4, nights: 7, perNight: "$168" }],
+  hotels: [{ name: "The Dean Dublin", area: "Camden St", stars: 4, nights: 7, perNight: "$168", commission: 176, commissionPct: 15 }],
   days: withIncludes.days!.map((d, i) => i === 4 ? { ...d, activities: [...d.activities, { name: "Temple Bar food tour" }] } : d),
 };
 
@@ -239,4 +239,6 @@ export const dublinCollab = screenplay({ trip: "Dublin · collab", skin: "claude
   s.agent.says("Picking up the note. The Dean is locked in, and I've added a Temple Bar food tour to the last evening. Checked it against dinner, no conflict.");
   s.agent.folio(finalFolio);
   s.spotlight({ interactionKind: "comment", nth: 2 }, { target: "comment-thread-food", eyebrow: "Shaped together", title: "The note becomes the plan", body: "Their pick and their request land back in the same thread, Voygent makes the change, and the trip is done." });
+  // Closing value-prop: the advisor's commission, tracked the whole way (advisor view).
+  s.spotlight({ eventType: "folio", nth: 5 }, { target: "trip-commission", eyebrow: "For the advisor", title: "Your commission, tracked", body: "In advisor mode, Voygent keeps your commission in view and updates it as the trip changes, so the number is current when it is time to book." });
 });

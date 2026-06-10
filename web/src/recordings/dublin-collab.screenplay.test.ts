@@ -61,11 +61,11 @@ describe("dublin-collab full reel (grounding)", () => {
     expect(settled?.hotels.find((h) => h.id === "serp:h1")?.price).toBe(168 * 7);
   });
 
-  it("resolves all ten per-act callouts (none dropped)", () => {
-    expect(dublinCollab.highlights.length).toBe(10);
+  it("resolves all eleven per-act callouts (none dropped)", () => {
+    expect(dublinCollab.highlights.length).toBe(11);
     const resolved = resolveHighlightFrames(frames, dublinCollab.highlights);
     const total = [...resolved.values()].reduce((n, hs) => n + hs.length, 0);
-    expect(total).toBe(10);
+    expect(total).toBe(11);
   });
 
   it("fires the callouts in ascending frame order (act order reads right)", () => {

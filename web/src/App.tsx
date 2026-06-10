@@ -416,7 +416,7 @@ export function App() {
           {skin === "claude" ? (
             <ClaudeChatView
               items={items} folio={folio} onSend={send} onPick={onPick}
-              busy={busy} presets={presets} geoCity={geoCity} advisor={advisor}
+              busy={busy} presets={presets} geoCity={geoCity} advisor={mode === "auto" ? true : advisor}
               mobileView={mobileView} onMobileView={setMobileView}
               onToggleDemo={toggleDemo} demoLabel={demoLabel}
               engHasContent={insTools.length > 0}

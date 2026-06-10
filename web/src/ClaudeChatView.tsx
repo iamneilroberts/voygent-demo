@@ -92,7 +92,7 @@ function FolioArtifact({ folio, advisor, edits, threads, showSend, sent }: { fol
         <span className="cl-artifact-titlerow">
           <span className="cl-artifact-kicker">Folio</span>
           <span className="cl-artifact-title">{folio.title}</span>
-          {commTotal != null && <span className="cl-artifact-comm cl-artifact-headcomm">{fmtUsd(commTotal)} comm.</span>}
+          {commTotal != null && <span className="cl-artifact-comm cl-artifact-headcomm" data-reel-target="trip-commission">{fmtUsd(commTotal)} comm.</span>}
         </span>
         {summaryChips.length > 0 && (
           <span className="cl-artifact-summary">
