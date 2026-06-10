@@ -957,6 +957,88 @@ Ask Neil to click "view critical path" under the pipeline and confirm the gantt 
 
 ---
 
+# STAGE 4 — Supplier Fan-Out
+
+Delivers: the `fanout` replay event + `SUPPLIER_CATALOG` reference data + a `suppliersQueried`
+drillable tile whose drill shows, per consolidated call, which provider adapters were genuinely
+queried (lit, with counts) plus the rest of the production catalog (dimmed). Hotels-first; real
+multi-source from the existing serp+cpmaxx fixture data. Model payload unchanged.
+
+### Task 12: `fanout` inspector event (shared + client mirror)
+
+**Files:** `shared/events.ts`, `shared/events.test.ts`, `web/src/Inspector.tsx` (`InsFanout`)
+
+- [ ] Test (events.test.ts): round-trip a `fanout` event.
+- [ ] `shared/events.ts` add variant:
+  `| { type: "inspector"; kind: "fanout"; exchangeId: string; tool: string; sources: { id: string; label: string; count: number; credentialed: boolean }[]; shortlisted: number }`
+- [ ] `Inspector.tsx` add `InsFanout` interface mirroring it.
+- [ ] `npx vitest run shared/events.test.ts && npx tsc --noEmit`; commit.
+
+### Task 13: replay records fan-out + worker emits
+
+**Files:** `worker/mcp/replay.ts`, `worker/session-do.ts`
+
+- [ ] `replay.ts`: add `private fanout: { tool: string; sources: {id;label;count;credentialed}[]; shortlisted: number } | null = null;`,
+  a `lastFanout()` getter, reset it where `measurement` resets (~:337). In `hotelSearch`/`hotelList`,
+  cpmaxx branch → `sources: [cpmaxx (count, credentialed:true), serp fixture.hotels.length]`,
+  serp branch → `sources: [serp only]`; `shortlisted = candidates.length`.
+- [ ] `session-do.ts`: after the searchDistill block, `if (this.replay.isIntercepted(name)) { const fo = this.replay.lastFanout(); if (fo?.sources.length) emit({ type:"inspector", kind:"fanout", exchangeId, ...fo }); }`.
+- [ ] `npx vitest run worker/ && npx tsc --noEmit`; commit.
+
+### Task 14: App.tsx accumulates fanout + passes prop
+
+**Files:** `web/src/App.tsx`
+
+- [ ] Mirror `savings`: `insFanouts` state, `else if (e.kind === "fanout") setInsFanouts(...)`, reset, `fanouts={insFanouts}` prop, import `InsFanout`.
+- [ ] `npx tsc --noEmit`; commit.
+
+### Task 15: SUPPLIER_CATALOG reference data
+
+**Files:** `web/src/inspector-data.ts`
+
+- [ ] Add `SUPPLIER_CATALOG: { id; label; category; credentialed; coverage }[]` — real production adapters
+  (cpmaxx, serp, expedia, kiwi, lastminute, viator, toursbylocals, tripadvisor, viking, onesource,
+  vacationstogo, carrental), `id` matching the fanout source ids (`cpmaxx`,`serp`) for the lit ones,
+  + a `SUPPLIER_DISCLAIMER` in the BTS register.
+- [ ] commit.
+
+### Task 16: `suppliersQueried` drillable tile
+
+**Files:** `web/src/lib/inspector-stats.ts`, `web/src/lib/inspector-stats.test.ts`
+
+- [ ] Test: `byKey.suppliersQueried.drill === "fanout"`.
+- [ ] `StatInput += suppliersQueried: number`; new stat entry `{ key:"suppliersQueried", value: fmtInt, label:"suppliers queried", deepDive:"production-system", drill:"fanout" }` (no `rail`).
+- [ ] vitest + tsc; commit.
+
+### Task 17: `fanoutGroups` transform
+
+**Files:** `web/src/lib/inspector-drills.tsx`, `web/src/lib/inspector-drills.test.ts`
+
+- [ ] `DrillContext += fanout: InsFanout[]`.
+- [ ] Test `fanoutGroups(ctx)`: one group per fanout event {tool, sources, shortlisted}; `litIds` = distinct source ids.
+- [ ] Implement `fanoutGroups` + `litSupplierIds`.
+- [ ] vitest + tsc; commit.
+
+### Task 18: FanoutView + registry entry + Inspector wiring
+
+**Files:** `web/src/lib/inspector-drills.tsx`, `web/src/Inspector.tsx`
+
+- [ ] `FanoutView`: per group → `tool → [lit provider tiles w/ counts] → deduped to N`; then dimmed
+  `SUPPLIER_CATALOG` (minus lit) with `<details>` depth/breadth popups.
+- [ ] DRILLS += `{ id:"fanout", title:"Supplier fan-out", trigger:{kind:"stat",statKey:"suppliersQueried"}, render }`.
+- [ ] `Inspector.tsx`: new `fanouts?: InsFanout[]` prop (default []), include in `drillCtx`, compute
+  `suppliersQueried` (distinct lit ids) into the `buildStats` input.
+- [ ] build + vitest + tsc; commit.
+
+### Task 19: CSS + deploy Stage 4
+
+**Files:** `web/src/styles.css`
+
+- [ ] Provider tile + dimmed + popup CSS (`.ins-fan*`).
+- [ ] `npx vitest run && npx tsc --noEmit && VITE_API_BASE="" npm run build:web && npx wrangler deploy`; verify new bundle; commit; Neil smoke.
+
+---
+
 ## Self-Review
 
 **Spec coverage:**
