@@ -95,7 +95,10 @@
 
 /* thinking indicator: a soft terracotta pulse */
 :root[data-skin="claude"] .cl-thinking { align-self: flex-start; padding: 4px 2px; }
-:root[data-skin="claude"] .cl-thinking span {
+/* the pulsing dot is ONLY the simple thinking indicator's bare <span>; scoping with
+   :not(.cl-thinking-live) keeps this off the live indicator's text spans (which would
+   otherwise inherit this 10px-circle styling at a higher specificity than their reset). */
+:root[data-skin="claude"] .cl-thinking:not(.cl-thinking-live) span {
   display: inline-block; width: 10px; height: 10px; border-radius: 50%;
   background: var(--cl-accent); animation: cl-pulse 1.2s ease-in-out infinite;
 }
@@ -298,7 +301,7 @@
 /* ---- reduced motion: theme.css already kills animations globally; give the
         spinner a sensible static look (partial ring still reads as activity) */
 @media (prefers-reduced-motion: reduce) {
-  :root[data-skin="claude"] .cl-thinking span { opacity: 1; transform: none; }
+  :root[data-skin="claude"] .cl-thinking:not(.cl-thinking-live) span { opacity: 1; transform: none; }
 }
 
 /* ---- day-by-day itinerary rows (compact: one tight block per day) ---- */

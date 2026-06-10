@@ -54,6 +54,13 @@ const DENYLISTED_TOOLS = new Set([
   "report_issue", "update_issue",
 ]);
 
+// The real Voygent checklist driver. On a featured/orchestrated session it lets the model
+// escape the demo's intercepted save_trip/flight_search replay flow (which matches the
+// fixtures, steps via the phase machine, and renders boards) into a self-driven live
+// build. Hidden when NOT faithful AND NOT yet live, so featured trips stay on the cached/
+// stepped path; re-exposed in faithful mode or once a session latches live (off-menu).
+const CHECKLIST_DRIVER_TOOLS = new Set(["manage_trip_goal"]);
+
 const DEFAULT_MODEL = "claude-haiku-4-5";  // cheap while we work; flip via LLM_MODEL secret
 const DEFAULT_DAILY_CAP_USD = 5;
 
@@ -548,8 +555,11 @@ export class SessionDO {
         // Sort by name: prompt caching is prefix-exact, so a stable order keeps
         // the tools-block cache key deterministic even if the upstream catalog
         // re-registers in a different order across deploys.
+        // Hide the live checklist driver on featured/orchestrated sessions (Option 1) so
+        // the model can't bypass the replay flow; faithful or already-live sessions keep it.
+        const hideChecklist = !faithful && !this.liveMode;
         const tools = fullTools
-          .filter((t) => !DENYLISTED_TOOLS.has(t.name))
+          .filter((t) => !DENYLISTED_TOOLS.has(t.name) && !(hideChecklist && CHECKLIST_DRIVER_TOOLS.has(t.name)))
           .sort((a, b) => a.name.localeCompare(b.name));
         exposedToolCount = tools.length;
         // One-shot enrichment nudge: when the hotel lands and enrichment hasn't
