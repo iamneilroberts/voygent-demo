@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Voygent — skinny live inspector rail (mockup)</title>
+<style>
+  :root{
+    --cl-bg:#faf9f5; --cl-surface:#fff; --cl-user-bubble:#f0eee6;
+    --cl-ink:#1f1e1c; --cl-ink-2:#3d3d3a; --cl-muted:#6b6a64; --cl-line:#e8e6dd;
+    --cl-accent:#c96442; --cl-accent-ink:#fff; --cl-tool-bg:#f5f4ee;
+    --cl-sans: ui-sans-serif,-apple-system,"Segoe UI",system-ui,sans-serif;
+    --cl-serif: Georgia,"Iowan Old Style","Times New Roman",serif;
+    --cl-mono:  ui-monospace,"SF Mono",Menlo,monospace;
+    --ok:#1a7f37;
+    /* terminal skin for the inspector */
+    --term-bg:#14130f; --term-ink:#d8d2c2; --term-dim:#8b8676; --term-amber:#e0a458; --term-green:#7fb069; --term-line:#2c2a23;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:#ece9e0;font-family:var(--cl-sans);color:var(--cl-ink);}
+  .note{max-width:1100px;margin:18px auto 10px;padding:0 16px;color:var(--cl-ink-2);font-size:14px;line-height:1.5}
+  .note b{color:var(--cl-ink)}
+  .note code{font-family:var(--cl-mono);background:#fff;border:1px solid var(--cl-line);border-radius:4px;padding:1px 5px;font-size:12px}
+  .toggle{display:inline-flex;gap:0;border:1px solid var(--cl-line);border-radius:8px;overflow:hidden;margin:6px 0 0}
+  .toggle button{font:600 13px/1 var(--cl-sans);padding:9px 14px;border:0;background:#fff;color:var(--cl-ink-2);cursor:pointer}
+  .toggle button[aria-pressed="true"]{background:var(--cl-accent);color:#fff}
+
+  .frame{max-width:1100px;margin:8px auto 40px;height:660px;border:1px solid var(--cl-line);border-radius:14px;overflow:hidden;
+    display:grid;grid-template-columns:1fr 96px;background:var(--cl-line);gap:1px;transition:grid-template-columns .4s cubic-bezier(.4,0,.2,1)}
+  .frame.open{grid-template-columns:1.15fr 1fr}
+
+  /* ---------- product (chat) column ---------- */
+  .product{background:var(--cl-bg);overflow:auto;padding:20px 26px}
+  .ribbon{font-size:12px;color:var(--cl-muted);text-align:center;border-bottom:1px solid var(--cl-line);padding-bottom:10px;margin-bottom:16px}
+  .sample{display:inline-block;margin-top:6px;font-size:11px;color:#8a6d3b;background:#fbf4e6;border:1px solid #ecd9b0;border-radius:999px;padding:2px 9px}
+  .asst{font-family:var(--cl-serif);font-size:16px;line-height:1.6;color:var(--cl-ink);margin:0 0 14px}
+  .asst .lead{color:var(--cl-accent);font-weight:600}
+
+  /* tool chips — improved */
+  .chip{display:flex;align-items:center;gap:10px;background:var(--cl-surface);border:1px solid var(--cl-line);border-radius:10px;padding:9px 13px;margin:7px 0}
+  .chip .mk{flex:0 0 auto;width:16px;height:16px;display:grid;place-items:center}
+  .chip .mk .ck{color:var(--ok);font-size:13px}
+  .chip .mk .sp{width:12px;height:12px;border:2px solid var(--cl-line);border-top-color:var(--cl-accent);border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .chip .lab{flex:1;min-width:0;font-size:14px;color:var(--cl-ink)}
+  .chip .lab .doing{font-weight:600}
+  .chip .raw{font-family:var(--cl-mono);font-size:10.5px;color:var(--cl-muted);background:var(--cl-tool-bg);border:1px solid var(--cl-line);border-radius:5px;padding:1px 6px;margin-left:8px;white-space:nowrap}
+  .chip .det{font-size:12.5px;color:var(--cl-muted);white-space:nowrap}
+  .chip .st{font-size:12px;color:var(--cl-muted);white-space:nowrap}
+
+  /* hotel card — fixed pricing */
+  .hcard{display:flex;gap:12px;background:var(--cl-surface);border:1px solid var(--cl-line);border-radius:12px;padding:12px;margin:9px 0;align-items:flex-start}
+  .hcard img{flex:0 0 auto;width:60px;height:60px;border-radius:9px;object-fit:cover;background:var(--cl-tool-bg)}
+  .hcard .main{flex:1;min-width:0}
+  .hcard .nm{font-weight:600;font-size:15px}
+  .hcard .ctx{margin-top:3px;font-size:12.5px;color:var(--cl-muted)}
+  .hcard .ai{display:inline-block;font-size:11px;color:#2c6e49;background:#eaf5ee;border:1px solid #c7e6d2;border-radius:999px;padding:1px 8px;margin-top:6px}
+  .hcard .rooms{display:inline-block;margin-top:7px;font-size:12px;color:var(--cl-accent);text-decoration:none}
+  .hcard .econ{text-align:right;white-space:nowrap}
+  .hcard .price{font-weight:700;font-size:15px}
+  .hcard .price small{display:block;font-weight:400;font-size:11.5px;color:var(--cl-muted);margin-top:2px}
+  .hcard .comm{display:block;font-weight:600;font-size:12px;color:var(--ok);margin-top:4px}
+  .you{font-family:var(--cl-sans);font-size:14px;background:var(--cl-user-bubble);border-radius:14px;padding:10px 14px;margin:14px 0 14px auto;max-width:78%}
+
+  /* ---------- engineering column ---------- */
+  .eng{background:var(--term-bg);color:var(--term-ink);font-family:var(--cl-mono);overflow:hidden;position:relative}
+
+  /* resting: skinny live rail */
+  .rail{height:100%;display:flex;flex-direction:column;align-items:stretch;gap:0;cursor:pointer;padding:14px 8px;text-align:center}
+  .frame.open .rail{display:none}
+  .rail .top{font:600 10px/1.3 var(--cl-mono);letter-spacing:.08em;color:var(--term-dim);text-transform:uppercase}
+  .rail .livedot{display:inline-flex;align-items:center;gap:5px;justify-content:center;margin-top:8px;font-size:11px;color:var(--term-green)}
+  .rail .livedot i{width:7px;height:7px;border-radius:50%;background:var(--term-green);box-shadow:0 0 0 0 rgba(127,176,105,.7);animation:pulse 1.6s ease-out infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(127,176,105,.6)}70%{box-shadow:0 0 0 6px rgba(127,176,105,0)}100%{box-shadow:0 0 0 0 rgba(127,176,105,0)}}
+  .rail .phase{margin-top:6px;font-size:11px;color:var(--term-amber)}
+  .rail .dots{margin-top:10px;display:flex;justify-content:center;gap:4px;flex-wrap:wrap}
+  .rail .dots i{width:7px;height:7px;border-radius:50%;background:var(--term-line)}
+  .rail .dots i.on{background:var(--term-green)}
+  .rail .dots i.cur{background:var(--term-amber);animation:pulse 1.6s ease-out infinite}
+  .rail .metrics{margin-top:auto;display:flex;flex-direction:column;gap:12px;padding-bottom:6px}
+  .rail .m .v{font-size:16px;font-weight:700;color:var(--term-ink)}
+  .rail .m .v.green{color:var(--term-green)}
+  .rail .m .k{font-size:8.5px;letter-spacing:.06em;color:var(--term-dim);text-transform:uppercase;margin-top:1px}
+  .rail .savebar{height:4px;border-radius:2px;background:var(--term-line);margin:5px 6px 0;overflow:hidden}
+  .rail .savebar i{display:block;height:100%;width:62%;background:var(--term-green)}
+  .rail .grow{margin-top:12px;font-size:15px;color:var(--term-dim)}
+  .rail:hover .grow{color:var(--term-amber)}
+
+  /* expanded: full panel sketch */
+  .panel{display:none;height:100%;flex-direction:column;padding:14px 16px;overflow:auto}
+  .frame.open .panel{display:flex}
+  .panel .ph{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--term-line);padding-bottom:8px}
+  .panel .ph .t{font:600 12px/1 var(--cl-mono);letter-spacing:.08em;color:var(--term-amber);text-transform:uppercase}
+  .panel .ph .x{background:none;border:1px solid var(--term-line);color:var(--term-dim);border-radius:6px;font-size:12px;padding:3px 9px;cursor:pointer;font-family:var(--cl-mono)}
+  .tiles{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--term-line);border:1px solid var(--term-line);margin-top:12px}
+  .tiles .tile{background:var(--term-bg);padding:9px 8px}
+  .tiles .tile .v{font-size:17px;font-weight:700}
+  .tiles .tile .v.green{color:var(--term-green)}
+  .tiles .tile .k{font-size:8px;letter-spacing:.05em;color:var(--term-dim);text-transform:uppercase;margin-top:3px;line-height:1.3}
+  .sec{margin-top:14px}
+  .sec h4{font:600 10px/1 var(--cl-mono);letter-spacing:.08em;color:var(--term-dim);text-transform:uppercase;margin:0 0 8px}
+  .pipe{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+  .pipe .node{font-size:10.5px;padding:3px 7px;border:1px solid var(--term-line);border-radius:5px;color:var(--term-dim)}
+  .pipe .node.on{color:var(--term-green);border-color:var(--term-green)}
+  .pipe .node.cur{color:var(--term-amber);border-color:var(--term-amber)}
+  .pipe .ar{color:var(--term-line);font-size:10px}
+  .log .row{display:flex;justify-content:space-between;font-size:11px;color:var(--term-ink);padding:4px 0;border-bottom:1px solid var(--term-line)}
+  .log .row .nm{color:var(--term-dim)}
+  .log .row .ms{color:var(--term-green)}
+  /* bottom: contextual deep-dive links tied to the stats shown */
+  .dig{margin-top:auto;padding-top:14px;border-top:1px solid var(--term-line)}
+  .dig a{display:flex;align-items:baseline;gap:8px;text-decoration:none;padding:6px 0;border-bottom:1px dotted var(--term-line)}
+  .dig a:last-child{border-bottom:0}
+  .dig a .stat{flex:0 0 96px;font-size:10px;letter-spacing:.04em;color:var(--term-amber);text-transform:uppercase}
+  .dig a .sub{flex:1;font-size:12px;color:var(--term-ink)}
+  .dig a .sub b{color:var(--term-green);font-weight:600}
+  .dig a .go{color:var(--term-dim);font-size:12px}
+  .dig a:hover .sub b{text-decoration:underline}
+  .dig .more{font-size:10.5px;color:var(--term-dim);margin-top:8px;text-align:center}
+</style>
+</head>
+<body>
+  <div class="note">
+    <b>Mockup — skinny live inspector rail.</b> Resting state is a ~96px right rail that stays
+    <b>live</b> (pulsing dot, active phase, pipeline dots, tool count, cost, tokens-saved) but never
+    grabs the screen. Click it to grow into the full two-pane inspector; click <code>✕</code> to go back.
+    Also shown: self-describing tool chips and the fixed price card.
+    <div class="toggle" role="group" aria-label="Inspector state">
+      <button id="b-rail" aria-pressed="true" onclick="setOpen(false)">Resting (rail)</button>
+      <button id="b-open" aria-pressed="false" onclick="setOpen(true)">Expanded (panel)</button>
+    </div>
+  </div>
+
+  <div class="frame" id="frame">
+    <!-- PRODUCT / CHAT -->
+    <div class="product">
+      <div class="ribbon">A Voygent demo in a Claude-style chat surface. Not affiliated with Anthropic.
+        <br><span class="sample">Sample results — this featured trip uses curated data.</span></div>
+
+      <p class="asst"><span class="lead">Great news — found some great options in Cancún.</span> Here are a few I'd highlight from the results.</p>
+
+      <!-- improved tool chips -->
+      <div class="chip"><span class="mk"><span class="ck">✓</span></span><span class="lab"><span class="doing">Searching hotels in Cancún</span><span class="raw">hotel_search</span></span><span class="det">8 resorts</span></div>
+      <div class="chip"><span class="mk"><span class="ck">✓</span></span><span class="lab"><span class="doing">Shortlisting hotels</span><span class="raw">patch_trip</span></span><span class="det">3 picks</span></div>
+      <div class="chip"><span class="mk"><span class="ck">✓</span></span><span class="lab"><span class="doing">Locking in the hotels</span><span class="raw">promote_hotels_to_lodging</span></span><span class="det">3 options</span></div>
+      <div class="chip"><span class="mk"><span class="sp"></span></span><span class="lab"><span class="doing">Building the day-by-day</span><span class="raw">patch_trip</span></span><span class="st">Working… 3s</span></div>
+
+      <!-- fixed hotel card -->
+      <div class="hcard">
+        <img src="https://i.travelapi.com/lodging/14000000/13370000/13363300/13363267/f7ed6dd3_b.jpg" alt="" referrerpolicy="no-referrer" />
+        <div class="main">
+          <div class="nm">Live Aqua Cancún</div>
+          <div class="ctx">Hotel Zone · 5★</div>
+          <span class="ai">All-inclusive · 7 nts · 2 travelers</span><br>
+          <a class="rooms" href="#">view rooms ↗</a>
+        </div>
+        <div class="econ">
+          <div class="price">$5,342<small>$763 / night · all-in</small></div>
+          <span class="comm">+$1,198 comm (24.2%)</span>
+        </div>
+      </div>
+      <div class="hcard">
+        <img src="https://i.travelapi.com/lodging/14000000/13370000/13363300/13363267/f7ed6dd3_b.jpg" alt="" referrerpolicy="no-referrer" />
+        <div class="main">
+          <div class="nm">Grand Fiesta Americana Coral Beach</div>
+          <div class="ctx">Hotel Zone · 5★</div>
+          <span class="ai">All-inclusive · 7 nts · 2 travelers</span><br>
+          <a class="rooms" href="#">view rooms ↗</a>
+        </div>
+        <div class="econ">
+          <div class="price">$5,342<small>$763 / night · all-in</small></div>
+          <span class="comm">+$1,228 comm (24.8%)</span>
+        </div>
+      </div>
+
+      <div class="you">I'll take Live Aqua. What about flights?</div>
+      <p class="asst">Round-trip Atlanta to Cancún for your dates, <b>2 travelers</b>: Delta at <b>$2,954</b> total ($1,477 each), nonstop.</p>
+    </div>
+
+    <!-- ENGINEERING -->
+    <div class="eng">
+      <!-- resting rail -->
+      <div class="rail" onclick="setOpen(true)" title="Open the engineering inspector">
+        <div class="top">Engineering</div>
+        <div class="livedot"><i></i> live</div>
+        <div class="phase">Enrichment</div>
+        <div class="dots" aria-label="pipeline">
+          <i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="cur"></i>
+        </div>
+        <div class="metrics">
+          <div class="m"><div class="v">12</div><div class="k">MCP tools</div></div>
+          <div class="m"><div class="v green">$0.41</div><div class="k">cost</div></div>
+          <div class="m"><div class="v green">230</div><div class="k">tokens kept out</div><div class="savebar"><i></i></div></div>
+          <div class="grow">⤢</div>
+        </div>
+      </div>
+
+      <!-- expanded panel sketch -->
+      <div class="panel">
+        <div class="ph"><span class="t">Engineering Inspector</span><button class="x" onclick="event.stopPropagation();setOpen(false)">✕ collapse</button></div>
+        <div class="tiles">
+          <div class="tile"><div class="v">72</div><div class="k">MCP tools exposed</div></div>
+          <div class="tile"><div class="v">6</div><div class="k">distinct tools</div></div>
+          <div class="tile"><div class="v">4</div><div class="k">persisted writes</div></div>
+          <div class="tile"><div class="v green">230</div><div class="k">context kept out</div></div>
+          <div class="tile"><div class="v green">$0.41</div><div class="k">observed cost</div></div>
+        </div>
+        <div class="sec">
+          <h4>Live this session</h4>
+          <div class="pipe">
+            <span class="node on">Create</span><span class="ar">›</span>
+            <span class="node on">Search</span><span class="ar">›</span>
+            <span class="node on">Distill</span><span class="ar">›</span>
+            <span class="node on">Stage</span><span class="ar">›</span>
+            <span class="node on">Promote</span><span class="ar">›</span>
+            <span class="node cur">Render</span>
+          </div>
+        </div>
+        <div class="sec">
+          <h4>Model routing — search & recommend: Sonnet · enrichment: Haiku</h4>
+        </div>
+        <div class="sec log">
+          <h4>Tool log</h4>
+          <div class="row"><span class="nm">hotel_search</span><span class="ms">512 ms ✓</span></div>
+          <div class="row"><span class="nm">patch_trip</span><span class="ms">589 ms ✓</span></div>
+          <div class="row"><span class="nm">promote_hotels_to_lodging</span><span class="ms">370 ms ✓</span></div>
+          <div class="row"><span class="nm">patch_trip</span><span class="ms">623 ms ✓</span></div>
+          <div class="row"><span class="nm">excursion_search</span><span class="ms">176 ms ✓</span></div>
+        </div>
+
+        <!-- bottom: deep-dive links tied to the stats above. each stat in the registry
+             can carry a deepDiveSlug; this section renders the subjects for the stats in play. -->
+        <div class="sec dig">
+          <h4>Dig deeper</h4>
+          <a href="/info/context-economics"><span class="stat">230 kept out</span><span class="sub">How <b>context economics</b> keeps tokens out of the model</span><span class="go">↗</span></a>
+          <a href="/info/cost-engineering"><span class="stat">$0.41 cost</span><span class="sub">The <b>cost engineering</b> behind a sub-cent trip</span><span class="go">↗</span></a>
+          <a href="/info/phase-machine"><span class="stat">6-stage pipeline</span><span class="sub">The server-side <b>phase machine</b> driving the trail</span><span class="go">↗</span></a>
+          <a href="/info/record-replay"><span class="stat">Sample results</span><span class="sub">Real data, deterministically: <b>record / replay</b></span><span class="go">↗</span></a>
+          <div class="more">More stats and stories land here as the system grows.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function setOpen(open){
+      document.getElementById('frame').classList.toggle('open', open);
+      document.getElementById('b-open').setAttribute('aria-pressed', String(open));
+      document.getElementById('b-rail').setAttribute('aria-pressed', String(!open));
+    }
+  </script>
+</body>
+</html>
