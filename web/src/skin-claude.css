@@ -289,10 +289,15 @@
 :root[data-skin="claude"] .cl-day-dining { font-size: .75rem; margin-top: .1rem; color: var(--cl-muted); }
 :root[data-skin="claude"] .cl-day-dining-label { font-weight: 600; }
 
-/* ---- includes / good-to-know: compact inline chips, titles only ---- */
-:root[data-skin="claude"] .cl-include-list { display: flex; flex-wrap: wrap; gap: 5px; }
-:root[data-skin="claude"] .cl-include { display: inline-flex; font-size: .75rem; background: var(--cl-tool-bg); border: 1px solid var(--cl-line); border-radius: 6px; padding: 3px 8px; }
-:root[data-skin="claude"] .cl-include-title { font-weight: 500; color: var(--cl-ink-2); }
+/* ---- includes / good-to-know: collapsible long-form, one row per item ---- */
+:root[data-skin="claude"] .cl-include-list { display: flex; flex-direction: column; gap: 4px; }
+:root[data-skin="claude"] .cl-include { border: 1px solid var(--cl-line); border-radius: 8px; background: var(--cl-tool-bg); overflow: hidden; }
+:root[data-skin="claude"] .cl-include-title { display: flex; align-items: center; justify-content: space-between; cursor: pointer; font: 600 .8125rem/1.3 var(--cl-sans); color: var(--cl-ink-2); padding: 7px 11px; list-style: none; }
+:root[data-skin="claude"] .cl-include-title::-webkit-details-marker { display: none; }
+:root[data-skin="claude"] .cl-include-title::after { content: "▸"; color: var(--cl-muted); font-size: .75rem; margin-left: 8px; transition: transform .15s ease; }
+:root[data-skin="claude"] .cl-include[open] .cl-include-title::after { transform: rotate(90deg); }
+:root[data-skin="claude"] .cl-include-title:hover { color: var(--cl-accent); }
+:root[data-skin="claude"] .cl-include-body { padding: 0 11px 9px; font-size: .8125rem; line-height: 1.45; color: var(--cl-muted); }
 
 /* ===== Model switch (claude skin head) — green active to match engineering chrome ===== */
 :root[data-skin="claude"] .model-switch button[aria-pressed="true"] { color: var(--cl-ink); border-color: #1a7f37; }

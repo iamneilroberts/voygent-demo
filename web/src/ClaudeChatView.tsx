@@ -187,7 +187,10 @@ function FolioArtifact({ folio, advisor, edits, threads, showSend, sent }: { fol
           <h4>Good to know</h4>
           <div className="cl-include-list">
             {folio.includes!.map((inc) => (
-              <span key={inc.key} className="cl-include"><span className="cl-include-title">{inc.title}</span></span>
+              <details key={inc.key} className="cl-include">
+                <summary className="cl-include-title">{inc.title}</summary>
+                <div className="cl-include-body">{inc.body}</div>
+              </details>
             ))}
           </div>
         </div>
