@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { streamChat, UnauthorizedError } from "./sse-client";
 import { Gate } from "./Gate";
+import { OnboardingForm } from "./OnboardingForm";
 import { readCodeFromHash, authenticate, sessionInfo } from "./lib/gate";
 import { effectiveMode, gateOnGoLive, showPublicDisclaimer, type Tier } from "./lib/access";
 import { ChatView, type ChatMessage, type Preset } from "./ChatView";
@@ -59,6 +60,7 @@ export function App() {
   // to cross into the live demo — that crossing flips showOnboard on (Phase A
   // renders the existing Gate; Phase B swaps in the self-serve OnboardingForm).
   const [showOnboard, setShowOnboard] = useState(false);
+  const [forceGate, setForceGate] = useState(false); // "already have a code?" → passcode entry
   const [tier, setTier] = useState<Tier | null>(null);
   const [collapsed, setCollapsed] = useState(false);
   const [skin, setSkin] = useState<SkinId>(() => {
@@ -367,10 +369,11 @@ export function App() {
   function planYourOwn() { goLive(false); }
   function tryYourself() { goLive(true); }
 
-  // Switch to live mode via a clean reload (re-latches the session), optionally flagged post-reel.
-  function goLive(greet: boolean) {
-    // Crossing into live requires a session — show the onboarding/gate when absent.
-    if (gateOnGoLive(authed === true)) { setShowOnboard(true); return; }
+  // The actual live transition — a clean reload that re-latches the session.
+  // No session check here: callers either already gated (goLive) or just
+  // authenticated in the same tick (onboarding), where `authed` state is still
+  // stale-false so re-checking it would wrongly re-gate.
+  function enterLive(greet: boolean) {
     persistMode("live");
     try {
       const u = new URL(window.location.href);
@@ -378,6 +381,12 @@ export function App() {
       if (greet) u.searchParams.set("greet", "reel"); else u.searchParams.delete("greet");
       window.location.href = u.toString();
     } catch { /* no-op */ }
+  }
+
+  // Reel CTA → live. Crossing into live requires a session — show onboarding when absent.
+  function goLive(greet: boolean) {
+    if (gateOnGoLive(authed === true)) { setShowOnboard(true); return; }
+    enterLive(greet);
   }
 
   async function send(text: string) {
@@ -423,13 +432,20 @@ export function App() {
   // Reel is public — only block while we're still checking the session.
   if (authed === null) return <div style={{ margin: "12vh auto", textAlign: "center", color: "#888" }}>Loading…</div>;
   // The gate appears only when the visitor crosses into the live demo without a
-  // session (showOnboard), or after a mid-session expiry. Phase B replaces this
-  // <Gate> with the self-serve <OnboardingForm>.
-  if (!authed && showOnboard) return <Gate initialCode={pendingCode} onSubmit={async (c) => {
-    const r = await authenticate(API_BASE, c);
-    if (r.ok) { setAuthed(true); setTier(r.tier); setShowOnboard(false); }
-    return r.ok;
-  }} />;
+  // session. Default to the self-serve onboarding form; "already have a code?"
+  // (forceGate) switches to the passcode entry.
+  if (!authed && showOnboard) {
+    if (forceGate) return <Gate initialCode={pendingCode} onSubmit={async (c) => {
+      const r = await authenticate(API_BASE, c);
+      if (r.ok) { setAuthed(true); setTier(r.tier); setShowOnboard(false); setForceGate(false); }
+      return r.ok;
+    }} />;
+    return <OnboardingForm
+      apiBase={API_BASE}
+      onAuthed={(t) => { setAuthed(true); setTier(t); setShowOnboard(false); enterLive(true); }}
+      onHaveCode={() => setForceGate(true)}
+    />;
+  }
 
   return (
     <div className="app">
