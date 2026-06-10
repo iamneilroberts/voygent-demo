@@ -76,3 +76,40 @@ export const USAGE_SCENARIOS = [
 export const BIZ_ASSUMPTION =
   "Assumes 1 trip ≈ this session's measured tokens; infra + margin not modeled. " +
   "API-equivalent $ is real (this session × each model's published rates).";
+
+// Supplier adapters the production router can reach. `id` matches the fanout event's
+// source ids for the ones genuinely queried this session (cpmaxx, serp), so the Supplier
+// Fan-Out drill lights those and dims the rest. A selection of the real catalog, not invented.
+export interface SupplierAdapter { id: string; label: string; category: string; credentialed: boolean; coverage: string; }
+
+export const SUPPLIER_CATALOG: SupplierAdapter[] = [
+  { id: "cpmaxx", label: "CPMaxx", category: "Hotels · all-inclusive · cruise", credentialed: true,
+    coverage: "Credentialed advisor network (VAX / CP Maxx): net rates, commission, profit and quote sheets the public can't see." },
+  { id: "serp", label: "Google / serp", category: "Hotels · flights", credentialed: false,
+    coverage: "Public retail metasearch — the same prices a traveler would find on Google." },
+  { id: "expedia", label: "Expedia", category: "Hotels · flights", credentialed: false,
+    coverage: "Expedia property and flight inventory via the partner API." },
+  { id: "kiwi", label: "Kiwi.com", category: "Flights", credentialed: false,
+    coverage: "Virtual-interlining flight search across low-cost and legacy carriers." },
+  { id: "lastminute", label: "lastminute.com", category: "Flights · hotels · packages", credentialed: false,
+    coverage: "Flight, hotel and dynamic-package search with live booking links." },
+  { id: "viator", label: "Viator", category: "Tours · activities", credentialed: false,
+    coverage: "Activities, excursions and skip-the-line tickets worldwide." },
+  { id: "toursbylocals", label: "Tours by Locals", category: "Private guides", credentialed: false,
+    coverage: "Private, locally guided tours across thousands of destinations." },
+  { id: "tripadvisor", label: "TripAdvisor", category: "Places · reviews", credentialed: false,
+    coverage: "Points of interest, ratings and reviews for itinerary enrichment." },
+  { id: "viking", label: "Viking", category: "Cruise", credentialed: false,
+    coverage: "Ocean and river cruise ship + sailing reference." },
+  { id: "onesource", label: "OneSource", category: "Cruise", credentialed: true,
+    coverage: "Cruise and cruise-tour quoting through the trade aggregator." },
+  { id: "vacationstogo", label: "VacationsToGo", category: "Cruise", credentialed: false,
+    coverage: "Cruise inventory and discount reference." },
+  { id: "carrental", label: "Car rental", category: "Cars", credentialed: false,
+    coverage: "Multi-supplier car-rental search across the major brands." },
+];
+
+export const SUPPLIER_DISCLAIMER =
+  "A selection of the production supplier catalog (~30 adapters across hotel, flight, cruise, " +
+  "package, car and activity). Lit suppliers were genuinely queried in this session; the rest " +
+  "show what the production router can reach.";
