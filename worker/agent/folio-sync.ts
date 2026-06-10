@@ -123,7 +123,8 @@ export function tripToFolio(tripId: string, raw: any): FolioData {
   // never flashes nameless "Hotel" placeholders between stage and promote.
   const hotels: FolioHotel[] = lodgingSrc.filter((h: any) => h && (h.name || h.priceTotal || h.total)).map((h: any) => ({
     name: String(h.name ?? "Hotel"),
-    price: asPrice(h.price ?? h.total ?? h.rate ?? h.priceTotal),
+    // Headline what the CLIENT pays (cpmaxx clientPrice) when present, else the stay total.
+    price: asPrice(h.clientPrice ?? h.price ?? h.total ?? h.rate ?? h.priceTotal),
     stars: typeof h.stars === "number" ? h.stars : (typeof h.starRating === "number" ? h.starRating : undefined),
     area: h.location ?? h.area ?? undefined,
     nights: typeof h.nights === "number" ? h.nights : undefined,
@@ -138,6 +139,10 @@ export function tripToFolio(tripId: string, raw: any): FolioData {
     quoteUrl: typeof h.quoteUrl === "string" && h.quoteUrl ? h.quoteUrl
       : typeof h.hotelSheetUrl === "string" && h.hotelSheetUrl ? h.hotelSheetUrl
       : typeof h.url === "string" && h.url ? h.url : undefined,
+    // Context so the (real, premium) rate reads sanely.
+    travelers: typeof h.travelers === "number" ? h.travelers : undefined,
+    allInclusive: h.allInclusive === true ? true : undefined,
+    clientPrice: typeof h.clientPrice === "number" ? h.clientPrice : undefined,
   }));
 
   const days = projectDays(t.itinerary);

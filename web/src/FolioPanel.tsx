@@ -26,7 +26,9 @@ function HotelCard({ h, advisor }: { h: FolioHotel; advisor: boolean }) {
   const meta = [
     h.area,
     typeof h.stars === "number" ? `${h.stars}★` : null,
+    h.allInclusive ? "All-inclusive" : null,
     typeof h.nights === "number" ? `${h.nights} nights` : null,
+    typeof h.travelers === "number" ? `${h.travelers} travelers` : null,
   ].filter(Boolean).join(" · ");
   return (
     <div className="card fade-in">

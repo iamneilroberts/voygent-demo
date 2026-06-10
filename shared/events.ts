@@ -1,6 +1,8 @@
 export interface FolioFlight {
   label: string; price?: string; carrier?: string; route?: string;
   date?: string; cabin?: string; stops?: number;
+  travelers?: number;      // party size (context for a party-total fare); passthrough when present
+  perPerson?: string;      // per-person fare, formatted; passthrough when present
 }
 export interface FolioHotel {
   name: string; price?: string; stars?: number;
@@ -9,6 +11,9 @@ export interface FolioHotel {
   commissionPct?: number;  // advisor commission percentage (same sourcing rule)
   image?: string;          // property photo (cpmaxx-sourced lodging only)
   quoteUrl?: string;       // credentialed quote-sheet / room-select deep link (cpmaxx hotel sheet)
+  travelers?: number;      // party size, for the "N travelers" context chip
+  allInclusive?: boolean;  // cpmaxx resort all-inclusive flag (context for the rate)
+  clientPrice?: number;    // what the client pays, USD (the headline)
 }
 export interface FolioActivity { time?: string; name: string; description?: string; url?: string }
 export interface FolioDining   { name: string; description?: string; cuisine?: string; url?: string }

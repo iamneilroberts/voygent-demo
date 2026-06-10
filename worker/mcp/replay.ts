@@ -158,13 +158,15 @@ function slimCpmaxxHotel(c: CpmaxxHotel, travelers: number) {
 // Synthesize the folio lodging card from a captured cpmaxx hotel. Shape matches what
 // tripToFolio reads (name/total/priceTotal/stars/area/location/nights/pricePerNight/
 // commission/commissionPct/image/quoteUrl) plus _candidateId so the patch is traceable.
-function synthCpmaxxLodging(c: CpmaxxHotel | undefined): Record<string, unknown> | undefined {
+function synthCpmaxxLodging(c: CpmaxxHotel | undefined, travelers: number): Record<string, unknown> | undefined {
   if (!c) return undefined;
   return {
     name: c.name,
     location: c.area ?? null,
     area: c.area ?? null,
     nights: c.nights ?? null,
+    travelers,
+    allInclusive: isAllInclusive(c),
     total: c.priceTotal ?? null,
     priceTotal: c.priceTotal ?? null,
     pricePerNight: c.pricePerNight ?? null,
@@ -478,7 +480,7 @@ export class FixtureReplay {
     const dropped: string[] = [];
     for (const sh of stagedHotels) {
       const cid = sh && typeof sh === "object" && typeof (sh as any)._candidateId === "string" ? (sh as any)._candidateId : "";
-      const cpmaxxCard = cid ? synthCpmaxxLodging(cpmaxxById.get(cid)) : undefined;
+      const cpmaxxCard = cid ? synthCpmaxxLodging(cpmaxxById.get(cid), fixture.route.adults) : undefined;
       const card = cpmaxxCard ?? (cid ? fixture.promotedLodgingById[cid] : undefined);
       // Fabrication guard: only candidate-id-backed hotels reach the folio.
       if (card) cards.push(card); else if (cid) dropped.push(cid);

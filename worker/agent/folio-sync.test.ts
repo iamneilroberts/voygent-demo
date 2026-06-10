@@ -73,6 +73,17 @@ describe("tripToFolio", () => {
     expect(fallback.hotels[0].quoteUrl).toBe("https://u");
   });
 
+  it("folio lodging headlines client price with all-inclusive/traveler context", () => {
+    const folio = tripToFolio("t1", { data: { lodging: [{
+      name: "Live Aqua", total: 4946, clientPrice: 5342, nights: 7, travelers: 2, allInclusive: true, stars: 5,
+    }] } });
+    // client price is the headline (asPrice has no separators, matching the existing convention)
+    expect(folio.hotels[0].price).toBe("$5342");
+    expect(folio.hotels[0].clientPrice).toBe(5342);
+    expect(folio.hotels[0].allInclusive).toBe(true);
+    expect(folio.hotels[0].travelers).toBe(2);
+  });
+
   it("maps the promoted { outbound, return } flights object (post promote_flights)", () => {
     const raw = {
       data: {
