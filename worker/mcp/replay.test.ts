@@ -243,6 +243,32 @@ describe("FixtureReplay measurement", () => {
   });
 });
 
+describe("FixtureReplay supplier fan-out", () => {
+  it("records two real sources (cpmaxx + serp) for a credentialed hotel search", async () => {
+    const r = new FixtureReplay("demo-fan");
+    const helpers = { readTrip: async () => ({}), patchTrip: async () => {} };
+    await r.handle("hotel_search", { location: "Cancún" }, helpers as any);
+    const fo = r.lastFanout();
+    expect(fo).toBeTruthy();
+    expect(fo!.tool).toBe("hotelSearch");
+    const ids = fo!.sources.map((s) => s.id);
+    expect(ids).toContain("cpmaxx");
+    expect(ids).toContain("serp");
+    expect(fo!.sources.find((s) => s.id === "cpmaxx")!.credentialed).toBe(true);
+    expect(fo!.sources.every((s) => s.count > 0)).toBe(true);
+    expect(fo!.shortlisted).toBeGreaterThan(0);
+  });
+
+  it("clears lastFanout on a non-hotel intercepted call", async () => {
+    const r = new FixtureReplay("demo-fan2");
+    const helpers = { readTrip: async () => ({}), patchTrip: async () => {} };
+    await r.handle("hotel_search", { location: "Cancún" }, helpers as any);
+    expect(r.lastFanout()).toBeTruthy();
+    await r.handle("flight_search", { origin: "MOB", destination: "DUB" }, helpers as any);
+    expect(r.lastFanout()).toBeNull();
+  });
+});
+
 // Minimal in-memory helpers: capture what patchTrip writes so we can assert the
 // fabrication guard wrote ONLY fixture-keyed objects.
 function makeHelpers() {

@@ -548,6 +548,14 @@ export class SessionDO {
           });
         }
       }
+      // Supplier fan-out: which adapters the consolidation layer aggregated for a hotel
+      // search/list. Out-of-band; the model payload is unchanged. Only set by replay hotel tools.
+      if (this.replay.isIntercepted(name)) {
+        const fo = this.replay.lastFanout();
+        if (fo && fo.sources.length) {
+          emit({ type: "inspector", kind: "fanout", exchangeId, tool: fo.tool, sources: fo.sources, shortlisted: fo.shortlisted });
+        }
+      }
       return out;
     };
 

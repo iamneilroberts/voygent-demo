@@ -244,6 +244,9 @@ export class FixtureReplay {
   private promotedFlights: unknown = null;
   private promotedLodging: Array<Record<string, unknown>> | null = null;
   private measurement: { tool: string; modelFacingTokens: number } | null = null;
+  // Supplier fan-out for the last hotel search/list: which provider adapters were queried
+  // (with their captured result counts) before distill. Out-of-band telemetry only.
+  private fanout: { tool: string; sources: { id: string; label: string; count: number; credentialed: boolean }[]; shortlisted: number } | null = null;
   private enrichRouteId: string | null = null;
   // Itinerary the enrichment steps have built so far (day -> day object), seeded
   // lazily from the fixture's day scaffold. Held in replay state (not re-read from
@@ -292,6 +295,20 @@ export class FixtureReplay {
 
   lastMeasurement(): { tool: string; modelFacingTokens: number } | null { return this.measurement; }
 
+  lastFanout(): { tool: string; sources: { id: string; label: string; count: number; credentialed: boolean }[]; shortlisted: number } | null { return this.fanout; }
+
+  // Record which supplier adapters a hotel search/list aggregated. cpmaxxCount>0 means the
+  // credentialed feed was captured for this route, so both it and serp/Google were queried.
+  private setHotelFanout(tool: string, cpmaxxCount: number, serpCount: number, shortlisted: number) {
+    const sources = cpmaxxCount > 0
+      ? [
+          { id: "cpmaxx", label: "CPMaxx (credentialed)", count: cpmaxxCount, credentialed: true },
+          { id: "serp", label: "Google / serp", count: serpCount, credentialed: false },
+        ]
+      : [{ id: "serp", label: "Google / serp", count: serpCount, credentialed: false }];
+    this.fanout = { tool, sources, shortlisted };
+  }
+
   currentFixture(): import("../fixtures/index").Fixture | null {
     const id = this.flightRouteId ?? this.hotelRouteId;
     return id ? this.fixtures[id] : null;
@@ -335,6 +352,7 @@ export class FixtureReplay {
 
   async handle(name: string, args: Record<string, any>, h: ReplayHelpers): Promise<string> {
     this.measurement = null;
+    this.fanout = null;
     switch (name) {
       case "flight_search": return this.flightSearch(args);
       case "flight_list": return this.flightList(args);
@@ -433,6 +451,7 @@ export class FixtureReplay {
         _next: "Present a few to the advisor (commission/profit are advisor-only). Stage up to 3 picks with patch_trip updates {hotels:[{_candidateId:'<id>'},...]}, then call promote_hotels_to_lodging.",
       });
       this.measurement = { tool: "hotelSearch", modelFacingTokens: estTokens(payload) };
+      this.setHotelFanout("hotelSearch", cpmaxx.length, fixture.hotels.length, candidates.length);
       return payload;
     }
     const candidates = fixture.hotels.map(slimHotel);
@@ -441,6 +460,7 @@ export class FixtureReplay {
       _next: "Stage 2-3 picks with patch_trip updates {hotels:[{_candidateId:'<id>'},...]}, then call promote_hotels_to_lodging.",
     });
     this.measurement = { tool: "hotelSearch", modelFacingTokens: estTokens(payload) };
+    this.setHotelFanout("hotelSearch", 0, fixture.hotels.length, candidates.length);
     return payload;
   }
 
@@ -457,11 +477,13 @@ export class FixtureReplay {
       const candidates = cpmaxx.map((h) => slimCpmaxxHotel(h, fixture.route.adults));
       const payload = JSON.stringify({ status: "ok", source: "cpmaxx", action: "list", tripId: this.tripId, count: candidates.length, version: 1, candidates });
       this.measurement = { tool: "hotelList", modelFacingTokens: estTokens(payload) };
+      this.setHotelFanout("hotelList", cpmaxx.length, fixture.hotels.length, candidates.length);
       return payload;
     }
     const candidates = fixture.hotels.map(slimHotel);
     const payload = JSON.stringify({ status: "ok", action: "list", tripId: this.tripId, count: candidates.length, version: 1, candidates });
     this.measurement = { tool: "hotelList", modelFacingTokens: estTokens(payload) };
+    this.setHotelFanout("hotelList", 0, fixture.hotels.length, candidates.length);
     return payload;
   }
 
