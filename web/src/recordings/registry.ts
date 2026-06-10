@@ -44,7 +44,7 @@ export const REELS: ReelEntry[] = [
     endCard: {
       eyebrow: "✓ Built together",
       title: "How a trip comes together",
-      blurb: "An advisor, the travellers, and Voygent shaping one trip in a single thread — the flight they pick, the hotel they choose with live pricing, the note that becomes the plan. The collaboration here is a scripted walk-through of the workflow; your own run pulls real live flights and hotels.",
+      blurb: "An advisor, the travellers, and Voygent shaping one trip in a single thread. They pick the flight, choose the hotel with live pricing, and leave the note that becomes the plan. The collaboration here is a scripted walk-through of the workflow, and your own run pulls real live flights and hotels.",
     },
   },
 ];

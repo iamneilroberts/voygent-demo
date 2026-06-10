@@ -159,10 +159,10 @@ export const dublinCollab = screenplay({ trip: "Dublin · collab", skin: "claude
   s.agent.says("Happy to. Who's travelling, and roughly when?");
   s.advisor.says("Two of them, a couple. Mid-range budget, and they love food and a bit of coastline.");
   s.agent.says("Got it. What dates are we working with?");
-  s.advisor.says("October 4 to 11. One more thing — keep them central, they don't want to be commuting in and out.");
+  s.advisor.says("October 4 to 11. One more thing, keep them central. They don't want to be commuting in and out.");
   s.agent.tool("save_trip", { summary: "Dublin · Oct 4-11 · 2 travelers · central, mid-range" });
   s.agent.says("Perfect. Dublin, October 4 to 11, two travellers, mid-range, central, food and coast. Setting that up now.");
-  s.spotlight({ eventType: "tool", where: { tool: "save_trip" }, nth: 1 }, { target: "tool-save_trip", eyebrow: "The brief", title: "A loose ask, made concrete", body: "The advisor starts with a sentence and a missing date. Voygent asks for what it needs, then opens a trip to work in." });
+  s.spotlight({ eventType: "tool", where: { tool: "save_trip" }, nth: 1 }, { target: "tool-save_trip", eyebrow: "The brief", title: "It starts with a rough idea", body: "The advisor gives a loose brief and forgets the dates. Voygent asks for what it needs and opens a trip to work in." });
 
   // Act 2 — Flights: search, a brief rec, the traveler picks their own flight.
   s.agent.tool("flight_search", { summary: "MOB→DUB · Oct 4-11 · 2 travelers" });
@@ -170,7 +170,7 @@ export const dublinCollab = screenplay({ trip: "Dublin · collab", skin: "claude
   s.agent.board("flight", "b-flight", flights);
   s.advisor.picks("b-flight", "serp:70wngy", "Aer Lingus · MOB→DUB · $3,180", withFlight);
   s.agent.says("Good call. Added it and locked the dates around it.");
-  s.spotlight({ interactionKind: "pick", nth: 1 }, { target: "board-flight", eyebrow: "Voygent recommends, the advisor decides", title: "Tagged, ranked, expandable", body: "Voygent badges the options — best value, cheapest, quickest — and each expands to the full routing, layovers and aircraft. The advisor takes the call." });
+  s.spotlight({ interactionKind: "pick", nth: 1 }, { target: "board-flight", eyebrow: "Voygent recommends", title: "Options, with a recommendation", body: "Voygent tags each flight with why it stands out, like best value or quickest. Open any of them for the full routing and aircraft. The advisor makes the call." });
 
   // Act 3 — Hotels: the advisor curates a shortlist for the traveler to choose from later.
   s.agent.tool("hotel_search", { summary: "Dublin · 7 nights · central · mid-range" });
@@ -178,17 +178,17 @@ export const dublinCollab = screenplay({ trip: "Dublin · collab", skin: "claude
   s.agent.board("hotel", "b-hotel", hotels);
   s.advisor.picksMany("b-hotel", HOTEL_SHORTLIST, "Shortlisted the Dean, Beckett Locke and the Mayson for them");
   s.agent.says("Three good ones, no chains. I'll put all three in front of the travellers so they can pick the feel they want.");
-  s.spotlight({ interactionKind: "pick", nth: 2 }, { target: "board-hotel", eyebrow: "The advisor curates", title: "A shortlist, not a single pick", body: "The advisor keeps three and drops the chain. The traveller will choose between them in their own view, with live pricing." });
+  s.spotlight({ interactionKind: "pick", nth: 2 }, { target: "board-hotel", eyebrow: "The advisor curates", title: "The advisor builds a shortlist", body: "The advisor keeps three hotels and drops the big chain. The travellers will choose the one they want later, in their own view, with live pricing." });
 
   // Act 4 — Itinerary: Voygent assembles the week and validates it against the brief.
   s.agent.tool("excursion_search", { summary: "Dublin + day trips · history-leaning" });
   s.agent.tool("validate_trip", { summary: "Goals met · pacing · step-free checks" });
   s.agent.says("Here's the week, day by day, with food worked in. I kept it history-leaning and stayed away from anything strenuous.");
   s.agent.folio(withDays);
-  s.spotlight({ eventType: "folio", nth: 2 }, { target: "folio-days", eyebrow: "The build", title: "Day by day", body: "Voygent assembles the week — sights, food, and the down moments — into one living folio, then validates it against the brief." });
+  s.spotlight({ eventType: "folio", nth: 2 }, { target: "folio-days", eyebrow: "The build", title: "The week, day by day", body: "Voygent lays out the whole week with sights, food and downtime, then checks it against the brief." });
   // Brief peek at the engineering view — the REAL tools called so far. No cost/token
   // numbers (those would be fabricated on a scripted reel); the footnote points to the
-  // interactive demo, where they're real. Open → spotlight → close.
+  // interactive demo, where they're real. Open, spotlight, then close.
   s.agent.engPanel({
     open: true,
     tools: [
@@ -199,28 +199,29 @@ export const dublinCollab = screenplay({ trip: "Dublin · collab", skin: "claude
       { name: "excursion_search", status: "done" },
       { name: "validate_trip", status: "done" },
     ],
-    footnote: "Full cost + context metrics live in the interactive demo.",
+    footnote: "Full cost and context metrics live in the interactive demo.",
   });
-  s.spotlight({ interactionKind: "engpanel", nth: 1 }, { target: "eng-panel", eyebrow: "Under the hood", title: "Every step is a real tool call", body: "Behind the chat, Voygent calls actual tools — search, save, validate — in order. The interactive demo opens the full engineering view: every call, its cost, and the context kept out of the model." });
+  s.spotlight({ interactionKind: "engpanel", nth: 1 }, { target: "eng-panel", eyebrow: "Under the hood", title: "Every step is a real tool call", body: "Behind the chat, Voygent is calling real tools in order. The interactive demo opens the full engineering view, with the cost of every call and the context it keeps out of the model." });
   s.agent.engPanel(null);
 
   // Act 5 — Refine: the advisor edits a single day in place, with a note on why.
   s.advisor.edits("days[2].activities[0]", { was: "Free morning in Temple Bar", now: "Cliffs of Moher day trip", tag: "Advisor edited" }, edited);
-  s.advisor.comments("days[3]", "Swapped the Howth cliff path for the village and harbour walk — keeping it step-free for them.", "thread-access");
+  s.advisor.comments("days[3]", "Swapped the Howth cliff path for the village and harbour walk, to keep it step-free for them.", "thread-access");
   s.agent.says("Updated Day 3 with the Cliffs of Moher day trip, and noted the Day 4 swap. The coach handles the driving so it stays easy.");
-  s.spotlight({ interactionKind: "edit", nth: 1 }, { target: "folio-day-2", eyebrow: "The advisor's touch", title: "Refined, not regenerated", body: "The advisor changes one day in place and leaves a note. The edit is attributed; the rest of the week is untouched." });
+  s.spotlight({ interactionKind: "edit", nth: 1 }, { target: "folio-day-2", eyebrow: "The advisor's touch", title: "The advisor edits one day", body: "The advisor changes a single day and leaves a note. The change is marked as theirs and the rest of the week stays as it was." });
 
   // Act 6 — What's included: a quick chooser the advisor curates into the folio.
   s.agent.tool("get_help", { summary: "Trip extras · tips, customs, weather" });
-  s.agent.says("Before it goes out, a few extras I can fold in — weather, getting around, customs, apps. Pick what's useful.");
+  s.agent.says("Before it goes out, here are a few extras I can fold in: weather, getting around, customs, apps. Pick what's useful.");
   s.agent.board("includes", "b-incl", includeCandidates);
   s.advisor.picksMany("b-incl", INCLUDE_KEEP, "Keep weather, transit, customs and apps");
   s.agent.folio(withIncludes);
-  s.spotlight({ interactionKind: "pick", nth: 3 }, { target: "board-includes", eyebrow: "The finishing pass", title: "What to include", body: "The advisor folds the useful extras into the folio so the travellers get the practical stuff, not boilerplate." });
+  s.spotlight({ interactionKind: "pick", nth: 3 }, { target: "board-includes", eyebrow: "The finishing pass", title: "What to include", body: "The advisor keeps the extras worth sending, so the travellers get useful notes on weather, getting around, and tipping." });
 
-  // Act 7 — Send: the advisor writes a line and sends the folio to the travelers.
-  s.advisor.sendsToClient({ subject: "Your Dublin trip is ready to look over", reply: "Pick your hotel and tell me what you think — no rush." });
-  s.spotlight({ interactionKind: "handoff", nth: 1 }, { target: "handoff-notice", eyebrow: "Out to the travellers", title: "Sent for review", body: "The advisor adds a personal line and sends. The folio goes to the travellers by email; their reply routes straight back to Voygent. Simulated here." });
+  // Act 7 — Send: the advisor adds a note and sends the folio to the travelers.
+  s.advisor.says("I'll add a quick note for them: pick your hotel and tell me what you think, no rush.");
+  s.advisor.sendsToClient({ subject: "Your Dublin trip is ready to look over" });
+  s.spotlight({ interactionKind: "handoff", nth: 1 }, { target: "handoff-notice", eyebrow: "Out to the travellers", title: "Sent for review", body: "The advisor adds a note and sends the folio. The travellers get it by email and can reply straight back into Voygent. Simulated here." });
 
   // Act 8 — The traveler's window: they pick a hotel and toggle an add-on; the price
   // recalcs live; then they leave a note and send it back.
@@ -229,13 +230,13 @@ export const dublinCollab = screenplay({ trip: "Dublin · collab", skin: "claude
   s.client.view(cvAddon);
   s.client.view(cvNote);
   s.client.view(cvClosed);
-  s.spotlight({ interactionKind: "clientview", nth: 1 }, { target: "client-view", eyebrow: "What the traveller sees", title: "Their view, their price", body: "The travellers open the folio in their own window, pick one of the three hotels, and toggle an add-on. The total recalculates live as they go." });
+  s.spotlight({ interactionKind: "clientview", nth: 1 }, { target: "client-view", eyebrow: "What the traveller sees", title: "The travellers' own view", body: "The travellers open the folio in their own window. As they choose a hotel and add an extra, the price updates live." });
 
   // Act 9 — Back in the thread: the note lands, Voygent makes the change, the trip is done.
-  s.advisor.says("They wrote back — they picked the Dean, and they'd love a food tour the last evening, like the one they did in Lisbon.");
+  s.advisor.says("They wrote back. They picked the Dean, and they'd love a food tour on the last evening, like the one they did in Lisbon.");
   s.client.comments("days[4]", "Could we add a food tour our last evening? We loved the one in Lisbon.", "thread-food");
   s.agent.tool("excursion_search", { summary: "Temple Bar food tour · evening" });
-  s.agent.says("Picking up the note. The Dean is locked in, and I've added a Temple Bar food tour to the last evening — checked against dinner, no conflict.");
+  s.agent.says("Picking up the note. The Dean is locked in, and I've added a Temple Bar food tour to the last evening. Checked it against dinner, no conflict.");
   s.agent.folio(finalFolio);
-  s.spotlight({ interactionKind: "comment", nth: 2 }, { target: "comment-thread-food", eyebrow: "Shaped together", title: "The traveller's note becomes the plan", body: "Their choice and their one request route back into the same thread. Voygent makes the change and the trip is done — built by all three." });
+  s.spotlight({ interactionKind: "comment", nth: 2 }, { target: "comment-thread-food", eyebrow: "Shaped together", title: "The note becomes the plan", body: "Their pick and their request land back in the same thread, Voygent makes the change, and the trip is done." });
 });

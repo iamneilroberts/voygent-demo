@@ -343,6 +343,9 @@
   /* pill bar visible; inline folio hidden (replaced by the Folio pill + sheet) */
   :root[data-skin="claude"] .cl-pillbar { display: flex; gap: 7px; padding: 6px 0 8px; flex-wrap: wrap; }
   :root[data-skin="claude"] .cl-folio-inline { display: none; }
+  /* during the reel, keep the folio inline so its guided callouts (day-by-day, edits,
+     send) can anchor to on-screen targets instead of the hidden Folio sheet */
+  :root[data-skin="claude"] .cl-folio-inline.in-reel { display: block; }
   /* fixed desktop chrome would overlap the composer — hidden on mobile (demo toggle lives in the pill bar) */
   .skin-switch, .watch-demo { display: none; }
   /* declutter: keep ONE disambiguation (the ribbon); drop the redundant composer
