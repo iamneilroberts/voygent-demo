@@ -502,6 +502,44 @@
 :root[data-skin="claude"] .cl-handoff-dot { width: 7px; height: 7px; flex: none; border-radius: 50%; background: var(--cl-actor-client); }
 :root[data-skin="claude"] .cl-handoff-arrow { font-size: 14px; }
 
+/* ---- R4: simulated client browser window (the traveler's view) ---- */
+:root[data-skin="claude"] .cl-cv-scrim { position: fixed; inset: 0; z-index: 55; display: flex; align-items: center; justify-content: center; background: rgba(31, 30, 28, .38); padding: 24px; }
+:root[data-skin="claude"] .cl-cv-window { width: min(440px, 100%); max-height: 88vh; overflow: auto; background: var(--cl-surface); border: 1px solid var(--cl-line); border-radius: 12px; box-shadow: 0 24px 60px rgba(0, 0, 0, .3); animation: cl-handoff-in .4s ease-out both; }
+:root[data-skin="claude"] .cl-cv-chrome { display: flex; align-items: center; gap: 10px; padding: 9px 12px; background: var(--cl-user-bubble); border-bottom: 1px solid var(--cl-line); border-radius: 12px 12px 0 0; }
+:root[data-skin="claude"] .cl-cv-dots { display: inline-flex; gap: 5px; }
+:root[data-skin="claude"] .cl-cv-dots i { width: 10px; height: 10px; border-radius: 50%; background: var(--cl-line); }
+:root[data-skin="claude"] .cl-cv-url { flex: 1; font: 500 12px/1 var(--cl-mono); color: var(--cl-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+:root[data-skin="claude"] .cl-cv-sim { font: 600 9px/1 var(--cl-mono); letter-spacing: .06em; text-transform: uppercase; color: var(--cl-muted); background: var(--cl-tool-bg); border: 1px solid var(--cl-line); border-radius: 999px; padding: 3px 7px; white-space: nowrap; }
+:root[data-skin="claude"] .cl-cv-body { padding: 16px 18px 18px; }
+:root[data-skin="claude"] .cl-cv-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+:root[data-skin="claude"] .cl-cv-title { font: 600 1.125rem/1.2 var(--cl-serif); margin: 0; }
+:root[data-skin="claude"] .cl-cv-total { font: 700 1.125rem/1 var(--cl-mono); color: var(--cl-actor-client); font-variant-numeric: tabular-nums; animation: cl-cv-pop .4s ease-out; }
+@keyframes cl-cv-pop { 0% { transform: scale(1.18); color: var(--cl-accent); } 100% { transform: scale(1); } }
+:root[data-skin="claude"] .cl-cv-progress { position: relative; height: 18px; margin: 12px 0; border-radius: 999px; background: var(--cl-tool-bg); overflow: hidden; display: flex; align-items: center; }
+:root[data-skin="claude"] .cl-cv-progress i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--cl-actor-client-soft); border-right: 2px solid var(--cl-actor-client); transition: width .5s ease; }
+:root[data-skin="claude"] .cl-cv-progress-l { position: relative; padding: 0 10px; font: 600 10px/1 var(--cl-mono); letter-spacing: .04em; text-transform: uppercase; color: var(--cl-actor-client); }
+:root[data-skin="claude"] .cl-cv-line { display: flex; justify-content: space-between; padding: 7px 0; border-top: 1px solid var(--cl-line); font-size: .875rem; font-variant-numeric: tabular-nums; }
+:root[data-skin="claude"] .cl-cv-group { margin: 6px 0; }
+:root[data-skin="claude"] .cl-cv-group-h { font: 600 .6875rem/1 var(--cl-mono); text-transform: uppercase; letter-spacing: .06em; color: var(--cl-muted); margin: 10px 0 4px; }
+:root[data-skin="claude"] .cl-cv-opt, :root[data-skin="claude"] .cl-cv-addon { display: flex; align-items: center; gap: 9px; padding: 8px 10px; border: 1px solid var(--cl-line); border-radius: 8px; margin: 4px 0; font-size: .875rem; }
+:root[data-skin="claude"] .cl-cv-opt.picked, :root[data-skin="claude"] .cl-cv-addon.on { border-color: var(--cl-actor-client); background: var(--cl-actor-client-soft); }
+:root[data-skin="claude"] .cl-cv-radio, :root[data-skin="claude"] .cl-cv-check { color: var(--cl-actor-client); font-size: .9375rem; }
+:root[data-skin="claude"] .cl-cv-opt-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+:root[data-skin="claude"] .cl-cv-opt-name { font-weight: 600; }
+:root[data-skin="claude"] .cl-cv-opt-meta { font-size: .75rem; color: var(--cl-muted); }
+:root[data-skin="claude"] .cl-cv-opt-price { font-variant-numeric: tabular-nums; white-space: nowrap; }
+:root[data-skin="claude"] .cl-cv-foot { display: flex; justify-content: flex-end; margin: 12px 0 4px; padding-top: 10px; border-top: 2px solid var(--cl-line); }
+:root[data-skin="claude"] .cl-cv-grand { font: 600 1rem/1 var(--cl-sans); }
+:root[data-skin="claude"] .cl-cv-grand b { font-family: var(--cl-mono); color: var(--cl-actor-client); margin-left: 6px; font-variant-numeric: tabular-nums; animation: cl-cv-pop .4s ease-out; }
+:root[data-skin="claude"] .cl-cv-note { margin: 12px 0; }
+:root[data-skin="claude"] .cl-cv-note-l { font: 600 .6875rem/1 var(--cl-mono); text-transform: uppercase; letter-spacing: .06em; color: var(--cl-muted); margin-bottom: 4px; }
+:root[data-skin="claude"] .cl-cv-note-box { background: var(--cl-tool-bg); border: 1px solid var(--cl-line); border-radius: 8px; padding: 9px 11px; font-size: .875rem; color: var(--cl-ink-2); }
+:root[data-skin="claude"] .cl-cv-send { width: 100%; margin-top: 10px; padding: 11px; border: none; border-radius: 8px; background: var(--cl-actor-client); color: #fff; font: 600 .875rem/1 var(--cl-sans); cursor: default; }
+@media (prefers-reduced-motion: reduce) {
+  :root[data-skin="claude"] .cl-cv-window, :root[data-skin="claude"] .cl-cv-total, :root[data-skin="claude"] .cl-cv-grand b { animation: none !important; }
+  :root[data-skin="claude"] .cl-cv-progress i { transition: none !important; }
+}
+
 /* Screen-reader-only utility */
 .cl-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 

@@ -29,6 +29,7 @@ import { selectReel } from "./recordings/registry";
 import { ReelIntro } from "./ReelIntro";
 import { ReelCallout } from "./ReelCallout";
 import { ReelHandoffNotice } from "./ReelHandoffNotice";
+import { ReelClientView } from "./ReelClientView";
 import { ReelEndCard } from "./ReelEndCard";
 import type { Highlight } from "./lib/highlights";
 import { isChatMessage, type TimelineItem, type BoardItem } from "./timeline";
@@ -446,6 +447,9 @@ export function App() {
           )}
           {skin === "claude" && mode === "auto" && reelPhase === "playing" && reelView.handoff?.sent && (
             <ReelHandoffNotice key={reelView.handoff.subject ?? "handoff"} handoff={reelView.handoff} />
+          )}
+          {skin === "claude" && mode === "auto" && reelPhase === "playing" && reelView.clientView?.open && (
+            <ReelClientView view={reelView.clientView} />
           )}
           {skin === "claude" && mode === "auto" && reelPhase === "playing" && (
             <div className="cl-reel-controls" role="group" aria-label="Playback controls">

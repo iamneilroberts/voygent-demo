@@ -29,6 +29,14 @@ describe("applyInteraction", () => {
     ]);
   });
 
+  it("clientview sets (and a null view closes) the simulated client window", () => {
+    const view = { open: true, url: "voygent.app/t/d", tripTitle: "Dublin", flightsPrice: 3180, activitiesPrice: 420, hotels: [], pickedHotelId: null, addons: [], question: null, progress: 0.6 };
+    let s = applyInteraction(emptyReelViewState(), { kind: "clientview", view }, "client");
+    expect(s.clientView).toBe(view);
+    s = applyInteraction(s, { kind: "clientview", view: null }, "client");
+    expect(s.clientView).toBeNull();
+  });
+
   it("handoff sets sent and routedBack when a reply is present", () => {
     const s = applyInteraction(emptyReelViewState(), { kind: "handoff", channel: "email", subject: "Your trip", reply: "Add a food tour?" }, "advisor");
     expect(s.handoff).toEqual({ sent: true, routedBack: true, subject: "Your trip", reply: "Add a food tour?" });

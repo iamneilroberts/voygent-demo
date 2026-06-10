@@ -82,6 +82,19 @@ describe("screenplay compiler", () => {
     expect(board.event.kind).toBe("includes");
   });
 
+  it("client.view lowers a clientview interaction frame (snapshot, attributed to the client)", () => {
+    const snap = { open: true, url: "voygent.app/t/d", tripTitle: "Dublin", flightsPrice: 3180, activitiesPrice: 420, hotels: [], pickedHotelId: null, addons: [], question: null, progress: 0.6 };
+    const { recording } = screenplay({ trip: "Dublin", skin: "claude" }, (s) => {
+      s.client.view(snap);
+      s.client.view(null); // close
+    });
+    const inters = recording.frames.filter((f) => f.kind === "interaction") as any[];
+    expect(inters).toHaveLength(2);
+    expect(inters[0].actor).toBe("client");
+    expect(inters[0].interaction).toMatchObject({ kind: "clientview", view: { open: true } });
+    expect(inters[1].interaction).toEqual({ kind: "clientview", view: null });
+  });
+
   it("assigns stable beatIds and collects spotlights into the highlight track", () => {
     const { highlights } = screenplay({ trip: "Dublin", skin: "claude" }, (s) => {
       s.agent.board("flight", "b1", cands);

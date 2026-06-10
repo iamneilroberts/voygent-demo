@@ -4,12 +4,31 @@ import { resolveHighlightFrames, type Highlight } from "./highlights";
 
 export type Actor = "agent" | "advisor" | "client";
 
+// The client-facing view of the trip (R4): a simulated browser window the traveler
+// sees after the advisor sends the folio. Snapshot-based — each `clientview` beat
+// carries the full state, so consecutive beats animate the live price recalc.
+export interface ReelHotelOption { id: string; name: string; price: number; meta?: string }
+export interface ReelAddon { id: string; label: string; price: number; on: boolean }
+export interface ReelClientSession {
+  open: boolean;
+  url: string;            // simulated address-bar URL, e.g. voygent.app/t/dublin
+  tripTitle: string;
+  flightsPrice: number;
+  activitiesPrice: number;
+  hotels: ReelHotelOption[];     // the advisor's shortlist, as the client's single-choice
+  pickedHotelId: string | null;
+  addons: ReelAddon[];           // optional upgrades the client can toggle
+  question: string | null;       // the client's typed note (shown before Send)
+  progress: number;              // 0..1, "ready to book"
+}
+
 // Reel-only interaction payloads. NEVER a ServerEvent — the worker/live app never sees these.
 export type ReelInteraction =
   | { kind: "pick"; boardId: string; candidateIds: string[]; echo: string }
   | { kind: "edit"; path: string; was: string; now: string; tag: string }
   | { kind: "comment"; anchor: string; threadId: string; text: string }
-  | { kind: "handoff"; channel: "email"; subject: string; reply?: string };
+  | { kind: "handoff"; channel: "email"; subject: string; reply?: string }
+  | { kind: "clientview"; view: ReelClientSession | null };
 
 export type Frame =
   | { delayMs: number; kind: "user"; text: string; actor?: Actor; beatId?: string }

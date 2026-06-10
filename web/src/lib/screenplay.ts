@@ -1,5 +1,5 @@
 import type { ServerEvent, BoardCandidate, FolioData } from "../../../shared/events";
-import type { Recording, Frame, Actor } from "./recording";
+import type { Recording, Frame, Actor, ReelClientSession } from "./recording";
 import type { Highlight, HighlightMatch } from "./highlights";
 
 interface Meta { trip: string; skin: "claude" }
@@ -63,6 +63,11 @@ class Builder {
       },
       sendsToClient: (o: { subject: string; reply?: string }) => {
         this.add({ delayMs: 0, kind: "interaction", actor, interaction: { kind: "handoff", channel: "email", subject: o.subject, reply: o.reply }, beatId: this.beat() });
+      },
+      // R4: open/update/close the simulated client browser window. Snapshot-based — each
+      // call is one beat; pass null to close. Consecutive snapshots animate the price recalc.
+      view: (snapshot: ReelClientSession | null) => {
+        this.add({ delayMs: 0, kind: "interaction", actor, interaction: { kind: "clientview", view: snapshot }, beatId: this.beat() });
       },
     };
   }
