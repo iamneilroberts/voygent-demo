@@ -12,6 +12,7 @@ import { issueCookie, verifyCookie, newSid } from "./access/session";
 import { guardMutation, getCookieHeader, json, text } from "./access/http";
 import { handleAdmin, adminAuthed } from "./access/admin";
 import { handleOnboard } from "./access/onboard";
+import { handleProRequest } from "./access/pro-request-handler";
 
 interface Env {
   SESSION: DurableObjectNamespace;
@@ -137,6 +138,11 @@ export default {
     // --- Self-serve onboarding (public tier) ---
     if (url.pathname === "/onboard" && req.method === "POST") {
       return handleOnboard(req, env, db);
+    }
+
+    // --- Pro-access request (lead capture; Neil vets & grants manually) ---
+    if (url.pathname === "/pro-request" && req.method === "POST") {
+      return handleProRequest(req, env, db);
     }
 
     // --- Auth ---
