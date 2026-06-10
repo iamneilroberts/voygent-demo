@@ -8,8 +8,8 @@ import { BoardView } from "./BoardView";
 import { commissionLabel, commissionTotal, fmtUsd } from "./lib/advisor";
 import { safeHttpUrl } from "./lib/url";
 import { type MobileView, toggleMobileView } from "./lib/mobile-view";
-import { editForActivity, actorClass, actorLabel } from "./lib/reel-render";
-import type { ReelViewState, ReelEditMarker } from "./lib/interaction";
+import { editForActivity, actorClass, actorLabel, threadsForDay, actorInitial } from "./lib/reel-render";
+import type { ReelViewState, ReelEditMarker, ReelThread } from "./lib/interaction";
 
 // claude.ai-lookalike left pane. Deliberately close to claude.ai's layout
 // (centered column, user bubbles right, assistant prose on the page, inline
@@ -18,7 +18,60 @@ import type { ReelViewState, ReelEditMarker } from "./lib/interaction";
 // the whole pane a simulation. All classes are cl-* (scoped in skin-claude.css)
 // so nothing leaks into the amber board skin.
 
-function FolioArtifact({ folio, advisor, edits }: { folio: FolioData; advisor: boolean; edits: ReelEditMarker[] }) {
+// A collapsible advisor↔client comment thread pinned under a folio day. Renders as
+// a count-badge pin that pulses + auto-expands when a comment lands, then tucks back
+// down so the folio stays clean (the reel beat holds the dwell while it's open). A
+// manual click takes over and cancels the auto-collapse. Timers are abort-safe
+// (cleared on unmount / reel reset, which empties reelView.threads → count 0).
+function CommentThread({ thread, dayTitle }: { thread: ReelThread; dayTitle: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const [pulse, setPulse] = useState(false);
+  const manual = useRef(false);
+  const count = thread.comments.length;
+  useEffect(() => {
+    if (count === 0 || manual.current) return;
+    setExpanded(true);
+    setPulse(true);
+    // Cosmetic only (not the reel's pacing dwell). Re-armed on each new comment so the
+    // thread stays open across the client→advisor pair, then collapses. Soft-default; P2.4 calibrates.
+    const stopPulse = setTimeout(() => setPulse(false), 1200);
+    const collapse = setTimeout(() => setExpanded(false), 3500);
+    return () => { clearTimeout(stopPulse); clearTimeout(collapse); };
+  }, [count]);
+  if (count === 0) return null;
+  const lead = thread.comments[0].actor;
+  return (
+    <div className="cl-thread-wrap">
+      <button
+        type="button"
+        className={`cl-thread-pin ${actorClass(lead)}${pulse ? " pulsing" : ""}`}
+        aria-expanded={expanded}
+        data-reel-target={`comment-${thread.threadId}`}
+        onClick={() => { manual.current = true; setExpanded((e) => !e); }}
+      >
+        <span aria-hidden="true">💬</span>
+        <span className="cl-thread-ct">{count}</span>
+        <span className="cl-thread-on">on {dayTitle}</span>
+        <span className="cl-thread-caret" aria-hidden="true">{expanded ? "▾" : "▸"}</span>
+      </button>
+      {expanded && (
+        <div className="cl-thread" role="group" aria-label={`Comments on ${dayTitle}`}>
+          {thread.comments.map((c, i) => (
+            <div key={i} className={`cl-cmt ${actorClass(c.actor)}`}>
+              <span className="cl-cmt-av" aria-hidden="true">{actorInitial(c.actor)}</span>
+              <span className="cl-cmt-body">
+                <span className="cl-cmt-name">{actorLabel(c.actor)}</span>
+                <span className="cl-cmt-text">{c.text}</span>
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FolioArtifact({ folio, advisor, edits, threads }: { folio: FolioData; advisor: boolean; edits: ReelEditMarker[]; threads: ReelThread[] }) {
   const commTotal = advisor ? commissionTotal(folio.hotels) : null;
   // A title-only card (trip created, nothing promoted yet) is just noise inline.
   const hasDays = !!folio.days && folio.days.length > 0;
@@ -117,6 +170,9 @@ function FolioArtifact({ folio, advisor, edits }: { folio: FolioData; advisor: b
                 </div>
               )}
               {d.stay && <div className="cl-day-stay">Stay: {d.stay}</div>}
+              {threadsForDay(threads, i).map((t) => (
+                <CommentThread key={t.threadId} thread={t} dayTitle={d.title} />
+              ))}
             </div>
           ))}
         </div>
@@ -217,7 +273,7 @@ export function ClaudeChatView(
             if (it.text) return <div key={i} className="cl-prose"><Prose text={it.text} /></div>;
             return busy && i === lastIdx ? <div key={i} className="cl-thinking" aria-label="Thinking"><span /></div> : null;
           })}
-          {folio && <div className="cl-folio-inline"><FolioArtifact folio={folio} advisor={advisor} edits={reelView.edits} /></div>}
+          {folio && <div className="cl-folio-inline"><FolioArtifact folio={folio} advisor={advisor} edits={reelView.edits} threads={reelView.threads} /></div>}
           <div ref={endRef} />
         </div>
       </div>
@@ -228,7 +284,7 @@ export function ClaudeChatView(
             <button type="button" className="cl-sheet-close" onClick={() => onMobileView("chat")} aria-label="Back to chat">✕ chat</button>
           </div>
           <div className="cl-sheet-body">
-            {folio ? <FolioArtifact folio={folio} advisor={advisor} edits={reelView.edits} /> : <p className="cl-day-desc">Your trip folio will build here as Voygent works.</p>}
+            {folio ? <FolioArtifact folio={folio} advisor={advisor} edits={reelView.edits} threads={reelView.threads} /> : <p className="cl-day-desc">Your trip folio will build here as Voygent works.</p>}
           </div>
         </div>
       )}

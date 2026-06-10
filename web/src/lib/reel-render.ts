@@ -1,5 +1,5 @@
 import type { Actor } from "./recording";
-import type { ReelEditMarker } from "./interaction";
+import type { ReelEditMarker, ReelThread } from "./interaction";
 
 // Scoped CSS class for an actor's color treatment (defined in skin-claude.css).
 export function actorClass(actor: Actor): string {
@@ -28,4 +28,18 @@ export function pickedActor(
 export function editForActivity(edits: ReelEditMarker[], dayIndex: number, activityIndex: number): ReelEditMarker | undefined {
   const want = `days[${dayIndex}].activities[${activityIndex}]`;
   return edits.find((e) => e.path === want);
+}
+
+// Comment threads anchored to a specific folio day. The screenplay's
+// `comments(anchor, ...)` lowers `anchor = days[i]`, so a thread renders as a pin
+// under day `dayIndex` when its anchor is exactly `days[${dayIndex}]`.
+export function threadsForDay(threads: ReelThread[], dayIndex: number): ReelThread[] {
+  const want = `days[${dayIndex}]`;
+  return threads.filter((t) => t.anchor === want);
+}
+
+// Single-letter avatar glyph for an actor ("Client" -> "C"). Reuses actorLabel so
+// the avatar and the inline attribution never drift.
+export function actorInitial(actor: Actor): string {
+  return actorLabel(actor).charAt(0);
 }

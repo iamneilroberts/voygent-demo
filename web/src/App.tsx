@@ -28,6 +28,7 @@ import { isPickTool, resolveBoardPickId } from "./lib/board-match";
 import { selectReel } from "./recordings/registry";
 import { ReelIntro } from "./ReelIntro";
 import { ReelCallout } from "./ReelCallout";
+import { ReelHandoffNotice } from "./ReelHandoffNotice";
 import { ReelEndCard } from "./ReelEndCard";
 import type { Highlight } from "./lib/highlights";
 import { isChatMessage, type TimelineItem, type BoardItem } from "./timeline";
@@ -395,6 +396,9 @@ export function App() {
               dwellMs={activeHighlight.dwellMs ?? 4000}
               onContinue={() => hlResolve.current?.()}
             />
+          )}
+          {skin === "claude" && mode === "auto" && reelPhase === "playing" && reelView.handoff?.sent && (
+            <ReelHandoffNotice key={reelView.handoff.subject ?? "handoff"} handoff={reelView.handoff} />
           )}
           {skin === "claude" && mode === "auto" && reelPhase === "playing" && (
             <div className="cl-reel-speed" role="group" aria-label="Playback speed">

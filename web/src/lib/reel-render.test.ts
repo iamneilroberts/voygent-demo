@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { actorClass, actorLabel, pickedActor, editForActivity } from "./reel-render";
-import type { ReelEditMarker } from "./interaction";
+import { actorClass, actorLabel, pickedActor, editForActivity, threadsForDay, actorInitial } from "./reel-render";
+import type { ReelEditMarker, ReelThread } from "./interaction";
 
 describe("actorClass / actorLabel", () => {
   it("maps actors to scoped classes and human labels", () => {
@@ -34,5 +34,31 @@ describe("editForActivity", () => {
     expect(editForActivity(edits, 1, 1)).toBeUndefined();
     expect(editForActivity(edits, 0, 0)).toBeUndefined();
     expect(editForActivity([], 1, 0)).toBeUndefined();
+  });
+});
+
+describe("threadsForDay", () => {
+  const threads: ReelThread[] = [
+    { threadId: "thread-day6", anchor: "days[2]", comments: [
+      { actor: "client", text: "Can we add a food tour this day?" },
+      { actor: "advisor", text: "Done, added the Temple Bar tasting." },
+    ] },
+    { threadId: "thread-day1", anchor: "days[0]", comments: [{ actor: "client", text: "Looks great." }] },
+  ];
+  it("returns threads anchored to the given day index", () => {
+    expect(threadsForDay(threads, 2).map((t) => t.threadId)).toEqual(["thread-day6"]);
+    expect(threadsForDay(threads, 0).map((t) => t.threadId)).toEqual(["thread-day1"]);
+  });
+  it("returns [] for a day with no thread (and matches anchor exactly, not by prefix)", () => {
+    expect(threadsForDay(threads, 1)).toEqual([]);
+    expect(threadsForDay([], 2)).toEqual([]);
+  });
+});
+
+describe("actorInitial", () => {
+  it("is the first letter of the actor label", () => {
+    expect(actorInitial("client")).toBe("C");
+    expect(actorInitial("advisor")).toBe("A");
+    expect(actorInitial("agent")).toBe("A");
   });
 });
