@@ -86,9 +86,54 @@ function FunnelView({ ctx }: { ctx: DrillContext }) {
   );
 }
 
+// ---- View 2: Counterfactual Cost Simulator ----
+
+export interface CostScenario { label: string; usd: number; mult: number; actual?: boolean }
+
+/** Actual routed spend vs the single-tier counterfactuals already on the client.
+ *  no-cache / no-distill scenarios are deferred (need server-side repricing). */
+export function costScenarios(ctx: DrillContext): CostScenario[] {
+  const base = ctx.actualCost > 0 ? ctx.actualCost : 1;
+  return [
+    { label: "Actual (routed)", usd: ctx.actualCost, mult: 1, actual: true },
+    { label: "All Sonnet", usd: ctx.cost.sonnet, mult: ctx.cost.sonnet / base },
+    { label: "All Opus", usd: ctx.cost.opus, mult: ctx.cost.opus / base },
+  ];
+}
+
+function usd(n: number): string { return `$${n < 0.01 ? n.toFixed(4) : n.toFixed(2)}`; }
+
+function CostSimView({ ctx }: { ctx: DrillContext }) {
+  const rows = costScenarios(ctx);
+  const max = Math.max(...rows.map((r) => r.usd), 0.0001);
+  if (ctx.actualCost <= 0) {
+    return <p className="ins-note">Cost scenarios appear once the first priced turn completes.</p>;
+  }
+  return (
+    <div className="ins-costsim">
+      <p className="ins-note">
+        What this exact session would have cost under one model for every turn, vs the routed
+        actual. Cache-disabled and distill-disabled scenarios are coming (they need server-side
+        repricing, kept off the client).
+      </p>
+      {rows.map((r) => (
+        <div className={`ins-costsim-row ${r.actual ? "actual" : ""}`} key={r.label}>
+          <span className="ins-costsim-label">{r.label}</span>
+          <span className="ins-costsim-bar" aria-hidden="true">
+            <span style={{ width: `${Math.max(2, (r.usd / max) * 100)}%` }} />
+          </span>
+          <span className="ins-costsim-usd">{usd(r.usd)}{!r.actual && r.mult > 1 ? ` · ${r.mult.toFixed(1)}×` : ""}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export const DRILLS: Drill[] = [
   { id: "funnel", title: "Token elimination funnel", trigger: { kind: "stat", statKey: "contextKeptOut" },
     render: (ctx) => <FunnelView ctx={ctx} /> },
+  { id: "costSim", title: "Counterfactual cost simulator", trigger: { kind: "stat", statKey: "observedCost" },
+    render: (ctx) => <CostSimView ctx={ctx} /> },
 ];
 
 export function drillForStat(statKey: string): Drill | undefined {
