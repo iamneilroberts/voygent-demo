@@ -40,7 +40,7 @@ describe("computeDelay", () => {
 
 describe("interactionDwell (post-apply hold)", () => {
   const kinds: Array<[ReelInteraction["kind"], number]> = [
-    ["pick", 3500], ["edit", 3200], ["comment", 4200], ["handoff", 5200],
+    ["pick", 3500], ["edit", 3200], ["comment", 4200], ["handoff", 5200], ["clientview", 4200],
   ];
   it("applies the per-kind floor at 1x", () => {
     for (const [kind, ms] of kinds) expect(interactionDwell(kind, { speed: 1 })).toBe(ms);

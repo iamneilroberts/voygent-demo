@@ -19,7 +19,7 @@ export function ReelEndCard(
         <h2 className="cl-reel-h">{title ?? DEFAULT_TITLE}</h2>
         <p className="cl-reel-p">{blurb ?? DEFAULT_BLURB}</p>
         <div className="cl-reel-recap">{chips.map((r) => <span key={r}>{r}</span>)}</div>
-        <button type="button" className="cl-reel-btn cl-reel-btn-primary" onClick={onTryYourself}>Try it yourself →</button>
+        <button type="button" className="cl-reel-btn cl-reel-btn-primary" onClick={onTryYourself}>Build your own trip →</button>
         <button type="button" className="cl-reel-btn cl-reel-btn-secondary" onClick={onReplay}>↺ Replay the demo</button>
       </div>
     </div>

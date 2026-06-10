@@ -32,11 +32,11 @@ export const REELS: ReelEntry[] = [
   {
     id: "collab",
     title: "A trip, built together",
-    blurb: "Watch the advisor and traveler shape a Dublin trip with Voygent.",
-    durationLabel: "~3 min",
+    blurb: "Watch an advisor, a traveller, and Voygent shape a whole Dublin trip end to end.",
+    durationLabel: "~4 min",
     recording: dublinCollab.recording,
     highlights: dublinCollab.highlights,
-    recap: ["👥 advisor + traveler", "✦ picked flights + hotel", "🗓 day-by-day", "✎ advisor refines", "✉ sent to client", "💬 client shaped it"],
+    recap: ["👥 advisor + traveller", "✈ traveller picks the flight", "🏨 advisor shortlists 3 hotels", "🗓 day-by-day + extras", "✎ advisor refines", "💷 traveller picks + live price", "💬 their note becomes the plan"],
     intro: {
       eyebrow: "▶ Built together",
       note: "The collaboration here is a scripted walk-through of the workflow.",
@@ -44,7 +44,7 @@ export const REELS: ReelEntry[] = [
     endCard: {
       eyebrow: "✓ Built together",
       title: "How a trip comes together",
-      blurb: "An advisor, the traveler, and Voygent shaping one trip in a single thread. The collaboration here is a scripted walk-through of the workflow; your own run pulls real live flights and hotels.",
+      blurb: "An advisor, the travellers, and Voygent shaping one trip in a single thread — the flight they pick, the hotel they choose with live pricing, the note that becomes the plan. The collaboration here is a scripted walk-through of the workflow; your own run pulls real live flights and hotels.",
     },
   },
 ];
