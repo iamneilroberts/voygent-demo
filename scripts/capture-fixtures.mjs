@@ -22,7 +22,7 @@
 // url still resolves (HEAD/GET, follow redirects). Warns on dead links by default;
 // --strict-urls aborts the route, --no-url-check skips the pass.
 
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, writeFile, readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -43,6 +43,9 @@ const ONLY = (process.argv.find((a) => a.startsWith("--only=")) || "").slice("--
 // aborts the route on a hard-dead link. --no-url-check skips the pass entirely.
 const STRICT_URLS = process.argv.includes("--strict-urls");
 const SKIP_URL_CHECK = process.argv.includes("--no-url-check");
+// Credentialed cpmaxx hotel capture is OPT-IN (Kim's creds, a few paced calls per
+// run). Default OFF so a routine serp re-capture never touches the advisor portal.
+const CAPTURE_CPMAXX = process.argv.includes("--cpmaxx");
 const URL_CHECK_UA = "Mozilla/5.0 (compatible; VoygentFixtureBot/1.0)";
 
 // --- curated demo routes (confirmed 2026-06-05). These double as Phase-2b preset chips. ---
@@ -257,6 +260,62 @@ function hotelCandidateToStaging(c) {
   };
 }
 
+// Slim a raw cpmaxx ranked hotel (hotel_search source=cpmaxx) to the demo's
+// advisor-network shape: the fields the board + price ladder render. Keeps the
+// "couldn't come from Google" signals — commission, profit score, quote-sheet
+// deep link, property photo, blurb, OTA comparison.
+function slimCpmaxxHotel(c, r) {
+  const otaPrices = Array.isArray(c.ota_prices)
+    ? c.ota_prices.filter((o) => o && (o.name || o.price_per_night != null))
+        .map((o) => ({ name: o.name ?? "—", pricePerNight: numOrNull(o.price_per_night) }))
+    : [];
+  return {
+    id: String(c.id ?? ""),
+    source: "cpmaxx",
+    name: c.name ?? "(unnamed hotel)",
+    stars: numOrNull(c.stars),
+    area: typeof c.area === "string" ? c.area : null,
+    pricePerNight: numOrNull(c.price_per_night),
+    priceTotal: numOrNull(c.price_total),
+    nights: daysBetween(r.depart, r.ret),
+    currency: "USD",
+    commission: numOrNull(c.commission),
+    commissionPct: numOrNull(c.commission_pct),
+    clientPrice: numOrNull(c.client_price),
+    marginPct: numOrNull(c.margin_pct),
+    profitScore: numOrNull(c.profit_score),
+    hotelSheetUrl: typeof c.hotel_sheet_url === "string" ? c.hotel_sheet_url : null,
+    image: typeof c.image === "string" ? c.image : null,
+    marketingBlurb: typeof c.marketing_blurb === "string" ? c.marketing_blurb.slice(0, 320) : null,
+    pictureCount: numOrNull(c.picture_count),
+    otaPrices: otaPrices.length ? otaPrices : null,
+  };
+}
+
+// Stage a slim cpmaxx hotel for promote_hotels_to_lodging, carrying the advisor
+// deep link + image + blurb through so the promoted lodging card keeps them.
+function cpmaxxHotelToStaging(h, r) {
+  return {
+    _candidateId: h.id,
+    name: h.name,
+    area: h.area,
+    address: h.area,
+    checkIn: r.depart,
+    checkOut: r.ret,
+    nights: h.nights,
+    starRating: h.stars,
+    priceTotal: h.priceTotal,
+    pricePerNight: h.pricePerNight,
+    currency: "USD",
+    source: "cpmaxx",
+    quoteUrl: h.hotelSheetUrl,
+    url: h.hotelSheetUrl,
+    image: h.image,
+    description: h.marketingBlurb,
+    commissionPct: h.commissionPct,
+  };
+}
+
 async function captureRoute(r) {
   const tripId = `demo-cap-${r.id}`;
   const steps = [];
@@ -459,12 +518,78 @@ async function captureRoute(r) {
   };
 }
 
+// Non-destructive cpmaxx hotel capture: spin up a throwaway trip, pull the
+// credentialed ranked hotels, stage+promote to capture the lodging cards, then
+// MERGE the two new fields into the existing fixture — leaving the curated
+// flights/serp-hotels/excursions/dining/day-scaffold untouched. This is the
+// --cpmaxx mode; it never re-runs the full serp capture.
+async function captureCpmaxxOnly(r) {
+  const tripId = `demo-cap-cpmaxx-${r.id}`;
+  log(`\n=== ${r.id} (cpmaxx hotels) ===`);
+  await callTool("save_trip", {
+    tripId,
+    data: { meta: { title: `${r.label} (cpmaxx capture)`, destination: r.city, dates: `${r.depart} – ${r.ret}` }, flights: [], lodging: [], hotels: [] },
+  });
+  const out = await callTool("hotel_search", {
+    source: "cpmaxx", trip_id: tripId,
+    destination: r.city, location: r.city,
+    check_in: r.depart, check_out: r.ret,
+    travelers: { adults: r.adults }, adults: r.adults,
+    sort_by: "profit", top_n: 8,
+  });
+  // cpmaxx may double-wrap (proxied envelope) — unwrap to reach {hotels:[...]}.
+  let body = out.json;
+  for (let i = 0; i < 3 && body && Array.isArray(body.content) && body.content[0]?.type === "text"; i++) {
+    try { body = JSON.parse(body.content[0].text); } catch { break; }
+  }
+  const raw = Array.isArray(body?.hotels) ? body.hotels : [];
+  const cpmaxxHotels = raw.map((c) => slimCpmaxxHotel(c, r)).filter((h) => h.id && h.name);
+  log(`  hotel_search cpmaxx: ${cpmaxxHotels.length} ranked (commission/profit/sheet)`);
+  if (cpmaxxHotels.length === 0) {
+    const note = body?.note ? ` note: ${String(body.note).slice(0, 200)}` : "";
+    log(`  ⚠ no cpmaxx hotels for ${r.city} — status=${body?.status ?? "?"}.${note}`);
+  }
+  const promotedCpmaxxLodgingById = {};
+  if (cpmaxxHotels.length > 0) {
+    const staged = cpmaxxHotels.map((h) => cpmaxxHotelToStaging(h, r));
+    await callTool("patch_trip", { tripId, updates: { hotels: staged, lodging: [] } });
+    await callTool("promote_hotels_to_lodging", { tripId });
+    const rt = await callTool("read_trip", { tripId, raw: true });
+    const lodging = Array.isArray(rt.json?.data?.lodging) ? rt.json.data.lodging : [];
+    for (const card of lodging) { const cid = card._candidateId ?? null; if (cid) promotedCpmaxxLodgingById[cid] = card; }
+    log(`  promoted cpmaxx lodging: ${Object.keys(promotedCpmaxxLodgingById).length}/${cpmaxxHotels.length}`);
+  }
+  if (!KEEP) {
+    try { await callTool("delete_trip", { tripId }); } catch { /* manual cleanup */ }
+  }
+  // Merge into the existing fixture (read → add two fields → write back).
+  const fixPath = resolve(FIX_DIR, `${r.id}.json`);
+  let fixture;
+  try { fixture = JSON.parse(await readFile(fixPath, "utf8")); }
+  catch (e) { throw new Error(`cannot read existing fixture ${r.id}.json to merge cpmaxx (run a full capture first): ${e.message}`); }
+  fixture.cpmaxxHotels = cpmaxxHotels;
+  fixture.promotedCpmaxxLodgingById = promotedCpmaxxLodgingById;
+  await writeFile(fixPath, JSON.stringify(fixture, null, 2));
+  log(`  merged cpmaxxHotels + promotedCpmaxxLodgingById into ${r.id}.json`);
+  return { id: r.id, cpmaxxHotels: cpmaxxHotels.length, cpmaxxPromoted: Object.keys(promotedCpmaxxLodgingById).length };
+}
+
 async function main() {
   await mkdir(RAW_DIR, { recursive: true });
   await mkdir(FIX_DIR, { recursive: true });
   const todo = ONLY ? ROUTES.filter((r) => r.id === ONLY) : ROUTES;
   if (todo.length === 0) { console.error(`No route matches --only=${ONLY}`); process.exit(1); }
   const summary = [];
+  if (CAPTURE_CPMAXX) {
+    // Merge-only credentialed mode: add cpmaxx hotels to existing fixtures.
+    for (const r of todo) {
+      try { summary.push(await captureCpmaxxOnly(r)); }
+      catch (e) { log(`  ROUTE ${r.id} cpmaxx FAILED: ${String(e.message).split(MCP_URL).join("<MCP_URL>")}`); summary.push({ id: r.id, error: e.message }); }
+    }
+    log(`\n=== cpmaxx summary ===`);
+    for (const s of summary) log(`  ${s.id}: ${s.error ? "ERROR " + s.error : `${s.cpmaxxHotels} cpmaxx hotels (${s.cpmaxxPromoted} promoted)`}`);
+    return;
+  }
   for (const r of todo) {
     try { summary.push(await captureRoute(r)); }
     catch (e) { log(`  ROUTE ${r.id} FAILED: ${e.message}`); summary.push({ id: r.id, error: e.message }); }
