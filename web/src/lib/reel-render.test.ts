@@ -8,7 +8,7 @@ describe("actorClass / actorLabel", () => {
     expect(actorClass("client")).toBe("cl-actor-client");
     expect(actorLabel("advisor")).toBe("Advisor");
     expect(actorLabel("client")).toBe("Client");
-    expect(actorLabel("agent")).toBe("Agent");
+    expect(actorLabel("agent")).toBe("Voygent"); // never "Agent" — confusing in a travel context
   });
 });
 
@@ -59,6 +59,6 @@ describe("actorInitial", () => {
   it("is the first letter of the actor label", () => {
     expect(actorInitial("client")).toBe("C");
     expect(actorInitial("advisor")).toBe("A");
-    expect(actorInitial("agent")).toBe("A");
+    expect(actorInitial("agent")).toBe("V"); // Voygent
   });
 });

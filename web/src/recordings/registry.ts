@@ -32,7 +32,7 @@ export const REELS: ReelEntry[] = [
   {
     id: "collab",
     title: "A trip, built together",
-    blurb: "Watch the advisor and traveler shape a Dublin trip with the agent.",
+    blurb: "Watch the advisor and traveler shape a Dublin trip with Voygent.",
     durationLabel: "~3 min",
     recording: dublinCollab.recording,
     highlights: dublinCollab.highlights,
@@ -44,7 +44,7 @@ export const REELS: ReelEntry[] = [
     endCard: {
       eyebrow: "✓ Built together",
       title: "How a trip comes together",
-      blurb: "An advisor, the traveler, and the agent shaping one trip in a single thread. The collaboration here is a scripted walk-through of the workflow; your own run pulls real live flights and hotels.",
+      blurb: "An advisor, the traveler, and Voygent shaping one trip in a single thread. The collaboration here is a scripted walk-through of the workflow; your own run pulls real live flights and hotels.",
     },
   },
 ];

@@ -46,7 +46,7 @@ function HotelCard({ h, advisor }: { h: FolioHotel; advisor: boolean }) {
 }
 
 export function FolioPanel({ folio, advisor }: { folio: FolioData | null; advisor: boolean }) {
-  if (!folio) return <aside className="folio empty">Your trip-folio will build here as the agent works…</aside>;
+  if (!folio) return <aside className="folio empty">Your trip-folio will build here as Voygent works…</aside>;
   const commTotal = advisor ? commissionTotal(folio.hotels) : null;
   return (
     <aside className="folio">

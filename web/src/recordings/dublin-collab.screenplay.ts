@@ -43,7 +43,7 @@ export const dublinCollab = screenplay({ trip: "Dublin · collab", skin: "claude
   s.advisor.says("Plan a week in Dublin in October, two people, mid-range. They love food and a bit of coast.");
   s.agent.tool("save_trip", { summary: "Dublin · Oct 4-11 · 2 travelers" });
   s.agent.says("On it. A week in Dublin in October for two, mid-range, food and coast. Let me pull flights first.");
-  s.spotlight({ eventType: "tool", nth: 1 }, { target: "tool-save_trip", eyebrow: "The brief", title: "It starts with intent", body: "The advisor says what the travelers want and the agent opens a trip to work in." });
+  s.spotlight({ eventType: "tool", nth: 1 }, { target: "tool-save_trip", eyebrow: "The brief", title: "It starts with intent", body: "The advisor says what the travelers want and Voygent opens a trip to work in." });
 
   // Act 2 — Flights: search, the traveler picks.
   s.agent.tool("flight_search", { summary: "MOB→DUB · Oct 4-11" });
@@ -51,7 +51,7 @@ export const dublinCollab = screenplay({ trip: "Dublin · collab", skin: "claude
   s.agent.board("flight", "b-flight", flights);
   s.client.picks("b-flight", "serp:70wngy", "Aer Lingus · MOB→DUB · $3,180", withFlight);
   s.agent.says("Good call. Added it and locked the dates around it.");
-  s.spotlight({ interactionKind: "pick", nth: 1 }, { target: "board-flight", eyebrow: "The traveler picks", title: "Their flight, their call", body: "The traveler weighs the options and chooses; the agent builds the trip around it." });
+  s.spotlight({ interactionKind: "pick", nth: 1 }, { target: "board-flight", eyebrow: "The traveler picks", title: "Their flight, their call", body: "The traveler weighs the options and chooses; Voygent builds the trip around it." });
 
   // Act 3 — Hotels: same flow for the stay.
   s.agent.tool("hotel_search", { summary: "Dublin · 7 nights · mid-range" });
@@ -65,7 +65,7 @@ export const dublinCollab = screenplay({ trip: "Dublin · collab", skin: "claude
   s.agent.tool("excursion_search", { summary: "Dublin + day trips" });
   s.agent.says("Here is the week, day by day, with food worked in.");
   s.agent.folio(withDays);
-  s.spotlight({ eventType: "folio", nth: 3 }, { target: "folio-days", eyebrow: "The build", title: "Day by day", body: "The agent assembles the week, activities and dining, into one living folio." });
+  s.spotlight({ eventType: "folio", nth: 3 }, { target: "folio-days", eyebrow: "The build", title: "Day by day", body: "Voygent assembles the week, activities and dining, into one living folio." });
 
   // Act 5 — Refine: the advisor edits a single day in place.
   s.advisor.edits("days[2].activities[0]", { was: "Free morning in Temple Bar", now: "Cliffs of Moher day trip", tag: "Advisor edited" }, edited);
@@ -74,12 +74,12 @@ export const dublinCollab = screenplay({ trip: "Dublin · collab", skin: "claude
 
   // Act 6 — Review: out to the client, reply routed back.
   s.advisor.sendsToClient({ subject: "Your Dublin trip is ready to review", reply: "Can we add a food tour on the last evening?" });
-  s.spotlight({ interactionKind: "handoff", nth: 1 }, { target: "handoff-notice", eyebrow: "The round trip", title: "Out to the client, back to the agent", body: "The folio goes to the traveler by email and their reply routes straight back to the agent. Simulated here." });
+  s.spotlight({ interactionKind: "handoff", nth: 1 }, { target: "handoff-notice", eyebrow: "The round trip", title: "Out to the client, back to Voygent", body: "The folio goes to the traveler by email and their reply routes straight back to Voygent. Simulated here." });
 
   // Act 7 — Finalize: the client's note lands and the trip is done.
   s.client.comments("days[4]", "Can we add a food tour on the last evening? We loved the one in Lisbon.", "thread-day6");
   s.advisor.comments("days[4]", "Done. Added a Temple Bar food tour that evening.", "thread-day6");
   s.agent.says("Picking up the note. Added a Temple Bar food tour to Day 6 and checked it against dinner, no conflict.");
   s.agent.folio(withFinal);
-  s.spotlight({ interactionKind: "comment", nth: 1 }, { target: "comment-thread-day6", eyebrow: "Shaped together", title: "The client's note lands", body: "The traveler's comment becomes the agent's next action, and the trip is done." });
+  s.spotlight({ interactionKind: "comment", nth: 1 }, { target: "comment-thread-day6", eyebrow: "Shaped together", title: "The client's note lands", body: "The traveler's comment becomes Voygent's next action, and the trip is done." });
 });

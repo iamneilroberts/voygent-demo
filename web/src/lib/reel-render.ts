@@ -7,8 +7,11 @@ export function actorClass(actor: Actor): string {
 }
 
 // Human-readable actor label for inline attribution ("Client chose this").
+// The assistant actor is "Voygent", never "Agent" (confusing in a travel context,
+// where an agent is a person). advisor/client capitalize normally.
+const ACTOR_LABELS: Record<Actor, string> = { agent: "Voygent", advisor: "Advisor", client: "Client" };
 export function actorLabel(actor: Actor): string {
-  return actor.charAt(0).toUpperCase() + actor.slice(1);
+  return ACTOR_LABELS[actor] ?? (actor.charAt(0).toUpperCase() + actor.slice(1));
 }
 
 // The actor who reel-picked this candidate, or null if `entry` isn't this candidate's pick.

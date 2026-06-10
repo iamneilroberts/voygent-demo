@@ -402,7 +402,7 @@ export function App() {
     <div className="app">
       {skin === "board" && (
         <header>
-          <span className="brand"><strong>Voygent</strong> <span className="sub">AI travel-planning agent</span></span>
+          <span className="brand"><strong>Voygent</strong> <span className="sub">AI travel-planning assistant</span></span>
           <span className="by">built by Neil Roberts</span>
           <ModelSwitch mode={modelMode} enabled={enabledModels} onPick={setModelMode} onTweaks={() => setTweaksOpen(true)} />
           <AdvisorSwitch on={advisor} onToggle={setAdvisor} />

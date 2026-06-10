@@ -39,7 +39,7 @@ export function ReelHandoffNotice({ handoff }: { handoff: ReelHandoff }) {
           </div>
           <div className="cl-handoff-route">
             <span className="cl-handoff-dot" aria-hidden="true" /> client&#39;s note
-            <span className="cl-handoff-arrow" aria-hidden="true"> → </span> routed back to the agent
+            <span className="cl-handoff-arrow" aria-hidden="true"> → </span> routed back to Voygent
           </div>
         </>
       )}
