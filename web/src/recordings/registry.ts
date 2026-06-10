@@ -33,10 +33,10 @@ export const REELS: ReelEntry[] = [
     id: "collab",
     title: "A trip, built together",
     blurb: "Watch the advisor and traveler shape a Dublin trip with the agent.",
-    durationLabel: "~2 min",
+    durationLabel: "~3 min",
     recording: dublinCollab.recording,
     highlights: dublinCollab.highlights,
-    recap: ["👥 advisor + traveler", "✦ picked together", "✎ advisor edits", "✉ sent to client", "💬 client commented"],
+    recap: ["👥 advisor + traveler", "✦ picked flights + hotel", "🗓 day-by-day", "✎ advisor refines", "✉ sent to client", "💬 client shaped it"],
     intro: {
       eyebrow: "▶ Built together",
       note: "The collaboration here is a scripted walk-through of the workflow.",
