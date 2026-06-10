@@ -124,7 +124,7 @@ export interface ModelRoutingUi {
 }
 
 export function Inspector(
-  { state, onToggleCollapse, tools, turns, summaries, savings, overhead, headExtra, routing, stats, stores, validations, phases, busy }:
+  { state, onToggleCollapse, tools, turns, summaries, savings, overhead, headExtra, routing, stats, stores, validations, phases, fanouts, busy }:
   { state: EngState; onToggleCollapse: () => void; tools: InsTool[]; turns: InsTurn[]; summaries: InsSummary[]; savings: InsSavings[]; overhead: InsOverhead[];
     // True while a turn is actively streaming (live send or reel replay). Drives the
     // "pipeline resting" settle so the packet stops once work actually stops.
@@ -142,7 +142,10 @@ export function Inspector(
     // Phase-machine trail: emitted when the server-side phase machine is active (flag-on).
     // Each entry is one phase transition. Absent when the flag is off — the block simply
     // doesn't render (guarded by phases?.length).
-    phases?: { phase: string; via: string }[] },
+    phases?: { phase: string; via: string }[];
+    // Supplier fan-out events: which adapters each consolidated hotel call aggregated.
+    // Empty until a hotel search runs; drives the Supplier Fan-Out drill.
+    fanouts?: InsFanout[] },
 ) {
   const [showCost, setShowCost] = useState(true);  // cost shown by default (Neil 2026-06-07)
   // The tool log is a fixed-height scroll pane (so it never pushes the sections

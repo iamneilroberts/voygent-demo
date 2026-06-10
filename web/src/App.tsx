@@ -7,7 +7,7 @@ import { ClaudeChatView } from "./ClaudeChatView";
 import { FolioPanel } from "./FolioPanel";
 import type { ServerEvent, FolioData, BoardCandidate, StatsResponse } from "../../shared/events";
 import { toolChipTitle } from "../../shared/tool-chip-title";
-import { Inspector, type InsTool, type InsTurn, type InsSummary, type InsSavings, type InsOverhead, type InsValidation } from "./Inspector";
+import { Inspector, type InsTool, type InsTurn, type InsSummary, type InsSavings, type InsOverhead, type InsValidation, type InsFanout } from "./Inspector";
 import { type InsStore } from "./StoreOpsWidget";
 import { ThemeSwitch } from "./ThemeSwitch";
 import { SkinSwitch } from "./SkinSwitch";
@@ -71,6 +71,7 @@ export function App() {
   const [insTurns, setInsTurns] = useState<InsTurn[]>([]);
   const [insSummaries, setInsSummaries] = useState<InsSummary[]>([]);
   const [insSavings, setInsSavings] = useState<InsSavings[]>([]);
+  const [insFanouts, setInsFanouts] = useState<InsFanout[]>([]);
   const [insOverhead, setInsOverhead] = useState<InsOverhead[]>([]);
   const [insStores, setInsStores] = useState<InsStore[]>([]);
   const [insValidations, setInsValidations] = useState<InsValidation[]>([]);
@@ -321,6 +322,7 @@ export function App() {
       else if (e.kind === "store") setInsStores((s) => [...s, e]);
       else if (e.kind === "validation") setInsValidations((v) => [...v, e]);
       else if (e.kind === "phase") setInsPhases((p) => [...p, { phase: e.phase, via: e.via }]);
+      else if (e.kind === "fanout") setInsFanouts((f) => [...f, e]);
     }
   }
 
@@ -332,7 +334,7 @@ export function App() {
   function resetReelState() {
     setItems([]); setTools([]); setFolio(null); setBusy(false);
     setInsTools([]); setInsTurns([]); setInsSummaries([]); setInsSavings([]);
-    setInsOverhead([]); setInsStores([]); setInsValidations([]); setInsPhases([]);
+    setInsOverhead([]); setInsStores([]); setInsValidations([]); setInsPhases([]); setInsFanouts([]);
     stagedBlob.current = "";   // forget prior picks so a Replay re-resolves cleanly
     setPaused(false); pausedRef.current = false; flushResume(); setReelProg({ done: 0, total: 0 });
     // Clear any in-flight callout so a Replay never starts under a stale spotlight (Codex review).
@@ -514,7 +516,7 @@ export function App() {
             onToggleCollapse={() => setExpanded((x) => !x)}
             tools={insTools} turns={insTurns} summaries={insSummaries}
             savings={insSavings} overhead={insOverhead} stats={stats}
-            stores={insStores} validations={insValidations} phases={insPhases} busy={busy}
+            stores={insStores} validations={insValidations} phases={insPhases} fanouts={insFanouts} busy={busy}
             headExtra={skin === "claude" ? <><ModelSwitch mode={modelMode} enabled={enabledModels} onPick={setModelMode} onTweaks={() => setTweaksOpen(true)} /><AdvisorSwitch on={advisor} onToggle={setAdvisor} /><ThemeSwitch /></> : undefined}
             routing={{ mode: modelMode, enabledModels, smartMap, activePhase, onMode: setModelMode, onSmartMap: setSmartMap }}
           />
