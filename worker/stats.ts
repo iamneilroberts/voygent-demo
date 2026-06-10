@@ -30,6 +30,7 @@ export interface StatsCtx {
   boardsMode: boolean;
   liveMode: boolean;
   routing: ModelRouting;
+  codeId?: string;   // access code that ran this exchange (links stats → who, in admin)
 }
 
 // Column order for the INSERT — the bind tuple from statsRowFromSummary must
@@ -40,7 +41,7 @@ export const STATS_COLUMNS = [
   "turns", "tool_calls", "exposed_tools", "full_tools",
   "in_tok", "out_tok", "cache_read", "cache_write",
   "actual_cost_usd", "actual_haiku", "actual_sonnet", "actual_opus",
-  "cost_haiku", "cost_sonnet", "cost_opus", "saved_tokens",
+  "cost_haiku", "cost_sonnet", "cost_opus", "saved_tokens", "code_id",
 ] as const;
 
 // INSERT OR IGNORE so a retry / double-finalization on the same (session,exchange)
@@ -105,7 +106,7 @@ export function statsRowFromSummary(
     summary.inputTokens, summary.outputTokens, summary.cacheReadTokens, summary.cacheCreationTokens,
     summary.actualCostUsd, actual.haiku, actual.sonnet, actual.opus,
     summary.costByModel.haiku, summary.costByModel.sonnet, summary.costByModel.opus,
-    Math.max(0, Math.round(savedTokens)),
+    Math.max(0, Math.round(savedTokens)), ctx.codeId ?? null,
   ];
 }
 
