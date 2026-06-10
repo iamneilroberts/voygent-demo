@@ -45,4 +45,19 @@ describe("admin API", () => {
     expect(res.headers.get("content-type")).toContain("text/html");
     expect(await res.text()).toContain("Voygent Demo — Admin");
   });
+
+  it("returns a per-code dashboard joining codes + meta", async () => {
+    const db = makeTestDb();
+    await handleAdmin(adminReq("/admin/codes", "POST",
+      { id: "self-1", label: "Jo", view: "default", dailyUsd: 2, totalUsd: 20 }), env(), db);
+    await db.run(
+      "INSERT INTO code_meta (code_id, owner_name, owner_email, role, note, source, ip_hash, created_at) VALUES (?,?,?,?,?,?,?,?)",
+      ["self-1", "Jo", "jo@x.com", "travel-pro", "", "self-serve", "IP", "2026-06-10T00:00:00Z"]);
+    const res = await handleAdmin(adminReq("/admin/dashboard", "GET"), env(), db);
+    expect(res.status).toBe(200);
+    const body = await res.json<{ rows: any[] }>();
+    const row = body.rows.find((r) => r.id === "self-1");
+    expect(row.owner_email).toBe("jo@x.com");
+    expect(row.tier).toBe("public");
+  });
 });

@@ -38,6 +38,24 @@ export async function handleAdmin(req: Request, env: AdminEnv, db: Db): Promise<
     return json({ codes: await listCodes(db) });
   }
 
+  // Per-code dashboard: who they are (code_meta) + runs/spend (spend_events),
+  // joined in DEMO_DB. Engineering token/tool sums (STATS_DB) are a separate
+  // per-code drill-down; this rollup answers "who's using the demo".
+  if (url.pathname === "/admin/dashboard" && req.method === "GET") {
+    const rows = await db.all(
+      `SELECT c.id, c.label, c.tier, c.view, c.daily_micros, c.total_micros,
+              c.day_spent, c.lifetime_spent, c.expires_at, c.revoked, c.created_at,
+              m.owner_name, m.owner_email, m.role, m.note, m.source,
+              COALESCE(s.runs, 0) AS runs, COALESCE(s.actual, 0) AS actual_micros_total
+         FROM codes c
+         LEFT JOIN code_meta m ON m.code_id = c.id
+         LEFT JOIN (SELECT code_id, COUNT(*) AS runs, SUM(actual_micros) AS actual
+                      FROM spend_events GROUP BY code_id) s ON s.code_id = c.id
+        ORDER BY c.created_at DESC`,
+    );
+    return json({ rows });
+  }
+
   // Create code.
   if (url.pathname === "/admin/codes" && req.method === "POST") {
     const bad = guardMutation(req, env.APP_ORIGIN); if (bad) return bad;
