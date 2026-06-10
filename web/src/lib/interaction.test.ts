@@ -3,9 +3,14 @@ import { emptyReelViewState, applyInteraction } from "./interaction";
 
 describe("applyInteraction", () => {
   it("pick records the selected candidate with its actor, never touching folio", () => {
-    const s = applyInteraction(emptyReelViewState(), { kind: "pick", boardId: "b1", candidateId: "serp:70wngy", echo: "Aer Lingus" }, "client");
-    expect(s.selected.b1).toEqual({ candidateId: "serp:70wngy", actor: "client" });
+    const s = applyInteraction(emptyReelViewState(), { kind: "pick", boardId: "b1", candidateIds: ["serp:70wngy"], echo: "Aer Lingus" }, "client");
+    expect(s.selected.b1).toEqual({ candidateIds: ["serp:70wngy"], actor: "client" });
     expect("folio" in s).toBe(false); // reducer owns NO folio data
+  });
+
+  it("pick records ALL candidate ids for a multi-select board (e.g. an advisor hotel shortlist)", () => {
+    const s = applyInteraction(emptyReelViewState(), { kind: "pick", boardId: "b-hotel", candidateIds: ["serp:h1", "serp:h2", "serp:h3"], echo: "Shortlisted 3" }, "advisor");
+    expect(s.selected["b-hotel"]).toEqual({ candidateIds: ["serp:h1", "serp:h2", "serp:h3"], actor: "advisor" });
   });
 
   it("edit appends an unreconciled overlay marker (no folio mutation)", () => {
@@ -31,7 +36,7 @@ describe("applyInteraction", () => {
 
   it("is pure — does not mutate the input state", () => {
     const s0 = emptyReelViewState();
-    applyInteraction(s0, { kind: "pick", boardId: "b1", candidateId: "c1", echo: "x" }, "client");
+    applyInteraction(s0, { kind: "pick", boardId: "b1", candidateIds: ["c1"], echo: "x" }, "client");
     expect(s0.selected).toEqual({});
   });
 });

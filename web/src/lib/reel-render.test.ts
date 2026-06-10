@@ -13,13 +13,18 @@ describe("actorClass / actorLabel", () => {
 });
 
 describe("pickedActor", () => {
-  const entry = { candidateId: "serp:70wngy", actor: "client" as const };
-  it("returns the actor when this candidate is the reel-selected one", () => {
+  const entry = { candidateIds: ["serp:70wngy"], actor: "client" as const };
+  it("returns the actor when this candidate is in the selection", () => {
     expect(pickedActor(entry, "serp:70wngy")).toBe("client");
   });
   it("returns null for a non-selected candidate or when there's no entry", () => {
     expect(pickedActor(entry, "serp:other")).toBeNull();
     expect(pickedActor(undefined, "serp:70wngy")).toBeNull();
+  });
+  it("matches any member of a multi-select board", () => {
+    const multi = { candidateIds: ["serp:h1", "serp:h2", "serp:h3"], actor: "advisor" as const };
+    expect(pickedActor(multi, "serp:h2")).toBe("advisor");
+    expect(pickedActor(multi, "serp:h9")).toBeNull();
   });
 });
 

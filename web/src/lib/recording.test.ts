@@ -94,7 +94,7 @@ describe("replayChat highlights + speed", () => {
 describe("replayChat interaction frames", () => {
   it("applies the interaction BEFORE the post-apply dwell wait", async () => {
     const rec: Recording = { skin: "claude", trip: "t", frames: [
-      { delayMs: 0, kind: "interaction", actor: "client", interaction: { kind: "pick", boardId: "b1", candidateId: "c1", echo: "x" } },
+      { delayMs: 0, kind: "interaction", actor: "client", interaction: { kind: "pick", boardId: "b1", candidateIds: ["c1"], echo: "x" } },
       { delayMs: 0, kind: "turn-end" },
     ] };
     const order: string[] = [];
@@ -129,7 +129,7 @@ describe("replayChat interaction frames", () => {
 
   it("does NOT fire the plain interaction dwell when the frame is spotlighted (no double-dwell)", async () => {
     const rec: Recording = { skin: "claude", trip: "t", frames: [
-      { delayMs: 0, kind: "interaction", actor: "client", interaction: { kind: "pick", boardId: "b1", candidateId: "c1", echo: "x" }, beatId: "pick1" },
+      { delayMs: 0, kind: "interaction", actor: "client", interaction: { kind: "pick", boardId: "b1", candidateIds: ["c1"], echo: "x" }, beatId: "pick1" },
       { delayMs: 0, kind: "turn-end" },
     ] };
     const waits: number[] = [];

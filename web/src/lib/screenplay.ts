@@ -32,7 +32,7 @@ class Builder {
   readonly agent = {
     says: (text: string) => this.event({ type: "text", delta: text }),
     tool: (tool: string, o?: { summary?: string }) => { this.event({ type: "tool", tool, phase: "start" }); this.event({ type: "tool", tool, phase: "done", summary: o?.summary }); },
-    board: (kind: "flight" | "hotel", boardId: string, candidates: BoardCandidate[]) => {
+    board: (kind: "flight" | "hotel" | "includes", boardId: string, candidates: BoardCandidate[]) => {
       this.boards.set(boardId, new Set(candidates.map((c) => c.id)));
       this.event({ type: "board", kind, boardId, tripId: "t", candidates });
     },
@@ -45,13 +45,13 @@ class Builder {
   private makeHuman(actor: Actor) {
     return {
       says: (text: string) => this.add({ delayMs: 0, kind: "user", text, actor, beatId: this.beat() }),
-      picks: (boardId: string, candidateId: string, echo: string, resultingFolio: FolioData) => {
-        const board = this.boards.get(boardId);
-        if (!board) throw new Error(`screenplay: pick references board "${boardId}" before it was emitted`);
-        if (!board.has(candidateId)) throw new Error(`screenplay: pick references candidate "${candidateId}" not on board "${boardId}"`);
-        this.add({ delayMs: 0, kind: "interaction", actor, interaction: { kind: "pick", boardId, candidateId, echo }, beatId: this.beat() });
-        this.agent.folio(resultingFolio); // compiler emits the folio event carrying the promotion
-      },
+      // Single pick (flights): one candidate + the resulting folio carrying the promotion.
+      picks: (boardId: string, candidateId: string, echo: string, resultingFolio: FolioData) =>
+        this.pickMany(actor, boardId, [candidateId], echo, resultingFolio),
+      // Multi-select (hotel shortlist, includes): several candidates; folio is optional
+      // (a hotel shortlist changes no folio yet — the client picks one of them later).
+      picksMany: (boardId: string, candidateIds: string[], echo: string, resultingFolio?: FolioData) =>
+        this.pickMany(actor, boardId, candidateIds, echo, resultingFolio),
       edits: (path: string, o: { was: string; now: string; tag: string }, resultingFolio?: FolioData) => {
         if (!pathExists(this.folio, path)) throw new Error(`screenplay: edit path "${path}" does not exist in the current folio`);
         this.add({ delayMs: 0, kind: "interaction", actor, interaction: { kind: "edit", path, was: o.was, now: o.now, tag: o.tag }, beatId: this.beat() });
@@ -65,6 +65,17 @@ class Builder {
         this.add({ delayMs: 0, kind: "interaction", actor, interaction: { kind: "handoff", channel: "email", subject: o.subject, reply: o.reply }, beatId: this.beat() });
       },
     };
+  }
+
+  private pickMany(actor: Actor, boardId: string, candidateIds: string[], echo: string, resultingFolio?: FolioData): void {
+    const board = this.boards.get(boardId);
+    if (!board) throw new Error(`screenplay: pick references board "${boardId}" before it was emitted`);
+    if (!candidateIds.length) throw new Error(`screenplay: pick on "${boardId}" needs at least one candidate`);
+    for (const id of candidateIds) {
+      if (!board.has(id)) throw new Error(`screenplay: pick references candidate "${id}" not on board "${boardId}"`);
+    }
+    this.add({ delayMs: 0, kind: "interaction", actor, interaction: { kind: "pick", boardId, candidateIds, echo }, beatId: this.beat() });
+    if (resultingFolio) this.agent.folio(resultingFolio); // explicit folio event for any data change
   }
 
   spotlight(match: HighlightMatch, card: { target: string; eyebrow: string; title: string; body: string; dwellMs?: number }): void {

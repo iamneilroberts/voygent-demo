@@ -11,11 +11,11 @@ import { actorClass, actorLabel, pickedActor } from "./lib/reel-render";
 // reply) the board locks: the pick stays highlighted, siblings dim.
 export function BoardView(
   { board, busy, advisor, onPick, selectedCandidate }:
-  { board: BoardItem; busy: boolean; advisor: boolean; onPick: (board: BoardItem, c: BoardCandidate) => void; selectedCandidate?: { candidateId: string; actor: Actor } },
+  { board: BoardItem; busy: boolean; advisor: boolean; onPick: (board: BoardItem, c: BoardCandidate) => void; selectedCandidate?: { candidateIds: string[]; actor: Actor } },
 ) {
-  const reelSelectedId = selectedCandidate?.candidateId;
-  const locked = board.resolved || !!board.resolvedId || !!reelSelectedId;
-  const title = board.kind === "flight" ? "Select a flight" : "Choose a hotel";
+  const hasReelSelection = (selectedCandidate?.candidateIds.length ?? 0) > 0;
+  const locked = board.resolved || !!board.resolvedId || hasReelSelection;
+  const title = board.kind === "flight" ? "Select a flight" : board.kind === "includes" ? "Choose what to include" : "Choose a hotel";
   return (
     <div className="cl-board" role="group" aria-label={title} data-reel-target={`board-${board.kind}`}>
       <div className="cl-board-title">{title}</div>

@@ -7,7 +7,7 @@ import type { ChatMessage } from "./ChatView";
 export interface BoardItem {
   role: "board";
   boardId: string;
-  kind: "flight" | "hotel";
+  kind: "flight" | "hotel" | "includes";
   tripId: string;
   candidates: BoardCandidate[];
   resolvedId?: string;   // the card the viewer clicked

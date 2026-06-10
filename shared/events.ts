@@ -42,7 +42,7 @@ export type ServerEvent =
   | { type: "text"; delta: string }
   | { type: "tool"; tool: string; phase: "start" | "done"; summary?: string }
   | { type: "folio"; folio: FolioData }
-  | { type: "board"; kind: "flight" | "hotel"; boardId: string; tripId: string; candidates: BoardCandidate[] }
+  | { type: "board"; kind: "flight" | "hotel" | "includes"; boardId: string; tripId: string; candidates: BoardCandidate[] }
   | { type: "turn-complete" }
   | { type: "error"; message: string }
   | InspectorEvent;

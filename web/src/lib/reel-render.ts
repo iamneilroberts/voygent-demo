@@ -14,14 +14,14 @@ export function actorLabel(actor: Actor): string {
   return ACTOR_LABELS[actor] ?? (actor.charAt(0).toUpperCase() + actor.slice(1));
 }
 
-// The actor who reel-picked this candidate, or null if `entry` isn't this candidate's pick.
-// Takes the already-sliced selection entry (reelView.selected[boardId]) — the BoardView
-// render loop has the slice in scope, not the whole map.
+// The actor who reel-picked this candidate, or null if this candidate isn't in the
+// board's selection. Takes the already-sliced selection entry (reelView.selected[boardId]).
+// Multi-select boards list several candidateIds; any member counts as picked.
 export function pickedActor(
-  entry: { candidateId: string; actor: Actor } | undefined,
+  entry: { candidateIds: string[]; actor: Actor } | undefined,
   candidateId: string,
 ): Actor | null {
-  return entry && entry.candidateId === candidateId ? entry.actor : null;
+  return entry && entry.candidateIds.includes(candidateId) ? entry.actor : null;
 }
 
 // The edit (if any) targeting a specific day's activity by index. Exact-path match

@@ -8,7 +8,9 @@ export interface ReelHandoff { sent: boolean; routedBack: boolean; subject?: str
 // Reel-only presentation state. Deliberately holds NO folio data — the canonical
 // folio is owned exclusively by the ServerEvent "folio" reducer (applyEvent).
 export interface ReelViewState {
-  selected: Record<string, { candidateId: string; actor: Actor }>;
+  // Per board: which candidate id(s) are chosen + who chose. Multiple ids = a
+  // multi-select board (e.g. the advisor shortlisting hotels, or picking includes).
+  selected: Record<string, { candidateIds: string[]; actor: Actor }>;
   edits: ReelEditMarker[];
   threads: ReelThread[];
   handoff: ReelHandoff | null;
@@ -21,7 +23,7 @@ export function emptyReelViewState(): ReelViewState {
 export function applyInteraction(state: ReelViewState, i: ReelInteraction, actor: Actor): ReelViewState {
   switch (i.kind) {
     case "pick":
-      return { ...state, selected: { ...state.selected, [i.boardId]: { candidateId: i.candidateId, actor } } };
+      return { ...state, selected: { ...state.selected, [i.boardId]: { candidateIds: i.candidateIds, actor } } };
     case "edit":
       return { ...state, edits: [...state.edits, { path: i.path, was: i.was, now: i.now, tag: i.tag, actor, reconciled: false }] };
     case "comment": {

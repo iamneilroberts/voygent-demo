@@ -35,7 +35,7 @@ describe("resolveHighlightFrames", () => {
 
 describe("highlight matching for interaction frames + multi-per-frame", () => {
   const frames: Frame[] = [
-    { delayMs: 0, kind: "interaction", actor: "client", interaction: { kind: "pick", boardId: "b1", candidateId: "c1", echo: "x" }, beatId: "pick1" },
+    { delayMs: 0, kind: "interaction", actor: "client", interaction: { kind: "pick", boardId: "b1", candidateIds: ["c1"], echo: "x" }, beatId: "pick1" },
     { delayMs: 0, kind: "event", event: { type: "folio", folio: { tripId: "t", title: "T", flights: [], hotels: [] } } as any },
   ];
 

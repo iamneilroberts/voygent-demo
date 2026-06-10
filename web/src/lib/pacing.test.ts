@@ -55,7 +55,7 @@ describe("interactionDwell (post-apply hold)", () => {
 
 describe("computeDelay for interaction frames", () => {
   it("gives an interaction frame a short pre-beat, not a long dwell", () => {
-    const f = { delayMs: 0, kind: "interaction", actor: "client", interaction: { kind: "pick", boardId: "b", candidateId: "c", echo: "x" } } as const;
+    const f: Frame = { delayMs: 0, kind: "interaction", actor: "client", interaction: { kind: "pick", boardId: "b", candidateIds: ["c"], echo: "x" } };
     const d = computeDelay(f, null, { speed: 1 });
     expect(d).toBeLessThanOrEqual(700);   // it's a pre-beat; the real hold is interactionDwell
     expect(d).toBeGreaterThan(0);

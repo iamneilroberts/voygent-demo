@@ -6,7 +6,7 @@ export type Actor = "agent" | "advisor" | "client";
 
 // Reel-only interaction payloads. NEVER a ServerEvent — the worker/live app never sees these.
 export type ReelInteraction =
-  | { kind: "pick"; boardId: string; candidateId: string; echo: string }
+  | { kind: "pick"; boardId: string; candidateIds: string[]; echo: string }
   | { kind: "edit"; path: string; was: string; now: string; tag: string }
   | { kind: "comment"; anchor: string; threadId: string; text: string }
   | { kind: "handoff"; channel: "email"; subject: string; reply?: string };
