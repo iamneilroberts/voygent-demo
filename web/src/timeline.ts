@@ -19,6 +19,7 @@ export interface ToolChipItem {
   name: string;
   status: "running" | "done";
   summary?: string;
+  title?: string;   // human label ("Shortlisting hotels"); the raw `name` rides as a mono tag
 }
 
 export type TimelineItem = ChatMessage | BoardItem | ToolChipItem;

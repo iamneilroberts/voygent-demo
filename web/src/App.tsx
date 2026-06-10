@@ -6,6 +6,7 @@ import { ChatView, type ChatMessage, type Preset } from "./ChatView";
 import { ClaudeChatView } from "./ClaudeChatView";
 import { FolioPanel } from "./FolioPanel";
 import type { ServerEvent, FolioData, BoardCandidate, StatsResponse } from "../../shared/events";
+import { toolChipTitle } from "../../shared/tool-chip-title";
 import { Inspector, type InsTool, type InsTurn, type InsSummary, type InsSavings, type InsOverhead, type InsValidation } from "./Inspector";
 import { type InsStore } from "./StoreOpsWidget";
 import { ThemeSwitch } from "./ThemeSwitch";
@@ -269,7 +270,7 @@ export function App() {
     else if (e.type === "tool") {
       if (e.phase === "start") {
         setTools((t) => [...t, e.tool]);
-        if (claude) setItems((m) => [...m, { role: "toolchip", name: e.tool, status: "running" }]);
+        if (claude) setItems((m) => [...m, { role: "toolchip", name: e.tool, status: "running", title: e.title ?? toolChipTitle(e.tool) }]);
       } else if (claude) {
         setItems((m) => {
           const c = [...m];

@@ -3,6 +3,7 @@ import type { ServerEvent } from "../../shared/events";
 import { isTripMutating } from "./folio-sync";
 import { scrubArgs, scrubResultText } from "../inspector";
 import { summarizeToolResult } from "./tool-summary";
+import { toolChipTitle } from "../../shared/tool-chip-title";
 
 function visitorToolSummary(content: string, ok: boolean, friendlyOnFail: boolean): string {
   if (!friendlyOnFail) return summarizeToolResult(content); // default path unchanged (byte-identical)
@@ -115,7 +116,7 @@ export async function runAgentLoop(args: AgentLoopArgs): Promise<void> {
     };
     const resultTexts: string[] = [];
     for (const t of pendingTools) {
-      emit({ type: "tool", tool: t.name, phase: "start" });
+      emit({ type: "tool", tool: t.name, phase: "start", title: toolChipTitle(t.name, t.input as Record<string, any>) });
       const t0 = Date.now();
       let content: string;
       let ok = true;

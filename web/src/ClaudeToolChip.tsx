@@ -38,7 +38,9 @@ export function ClaudeToolChip({ item }: { item: ToolChipItem }) {
           {running ? <span className="cl-spinner" /> : <span className="cl-check">✓</span>}
         </span>
         <span className="cl-tool-label">
-          Using <strong>Voygent</strong> <code>{item.name}</code>
+          {item.title
+            ? <><strong className="cl-tool-doing">{item.title}</strong> <code>{item.name}</code></>
+            : <>Using <strong>Voygent</strong> <code>{item.name}</code></>}
         </span>
         <span className="cl-tool-state" aria-live="polite">{stateText}</span>
         <span className="cl-tool-chev" aria-hidden="true">{open ? "⌄" : "›"}</span>
