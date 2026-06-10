@@ -27,6 +27,25 @@ blow in `docs/worktree-journal.md` `## Coordination` (newest first, 2026-06-10).
   to the trailing summary (`ClaudeChatView.tsx` scroll `useEffect`, scrolls to last
   `[data-reel-target^="board-"]` when a board is unresolved).
 
+## STATUS UPDATE 2026-06-10 (afternoon, session 2) — #1,#2,#3,#5 SHIPPED+DEPLOYED
+Commit `e6ac9e3`, prod bundle `index-Det13j_t.js`, 405 tests, tsc clean (worker+web).
+- **#1+#2 DONE.** Fixtures already carried real captured `segments` (times/aircraft/
+  layover). Threaded them into `slimFlight` as `FlightLeg[]` (Neil: advisor wants the
+  full data, don't keep flights slim) → every board flight gets the collapsible
+  "Routing & aircraft ▼". Expand is a separate button from the pick (was already), so
+  exploring no longer locks the choice (#2). Added total duration to the meta line.
+  Guarded the flight_search distill chip so it doesn't show "0 saved" now that slim≈raw.
+- **#3 DONE.** serp fixtures expose NO hotel url/quote-sheet (confirmed in capture +
+  voygent-lite: only cpmaxx `hotel_sheet_url` / expedia `source_url` do). Mirrored
+  voygent-lite's `googleFallbackUrl` → "search ↗" google-by-name+area link for serp;
+  real deep links preferred when present. Surfaced review SCALE (/5) + stay total.
+  New `BoardCandidate.detailLabel`. (Future option: re-capture cpmaxx fixtures for real
+  sheet URLs + photos + amenities — needs creds/browser proxy, deferred.)
+- **#5 DONE.** Tail "Voygent is working" indicator now fills the model-thinking gaps
+  between enrichment tool batches (busy + last item not an empty-assistant placeholder
+  and not a running tool chip). Out of the reel.
+- **REMAINING: only #4 (hotel multi-select)** — still needs UX design with Neil first.
+
 ## THE BACKLOG (todo) — Neil's exact asks
 
 ### 1. Flight options: collapsible detail (airline, times, stops, layover, equipment)
