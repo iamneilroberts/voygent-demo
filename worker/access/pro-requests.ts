@@ -4,8 +4,12 @@ export interface NewProRequest {
   id: string; name: string; email: string; company: string; role: string;
   useCase: string; note: string; ipHash: string; createdAt: string;
 }
-export interface ProRequestRow extends NewProRequest {
-  status: string; reviewed_at: string | null; granted_code_id: string | null;
+/** Shape of a `SELECT * FROM pro_requests` row — DB columns are snake_case. */
+export interface ProRequestRow {
+  id: string; name: string; email: string; company: string; role: string;
+  use_case: string; note: string; status: string;
+  ip_hash: string; created_at: string;
+  reviewed_at: string | null; granted_code_id: string | null;
 }
 
 export async function insertProRequest(db: Db, r: NewProRequest): Promise<void> {

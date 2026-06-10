@@ -1,13 +1,17 @@
 import type { Db } from "./db";
 import { json, text, guardMutation } from "./http";
-import { createCode, listCodes, revokeCode, usageForCode } from "./codes";
+import { createCode, generateCode, listCodes, revokeCode, usageForCode } from "./codes";
 import { usdToMicros } from "./money";
+import { insertCodeMeta } from "./meta";
+import { listPending, getRequest, markGranted, markDenied } from "./pro-requests";
+import { sendEmail, proGrantedEmail } from "../email/resend";
 import { ADMIN_HTML } from "./admin-page";
 
 export interface AdminEnv {
   CODE_HASH_KEY: string;
   APP_ORIGIN: string;
   ADMIN_TOKEN?: string;
+  RESEND_API_KEY?: string;
 }
 
 /**
@@ -82,6 +86,41 @@ export async function handleAdmin(req: Request, env: AdminEnv, db: Db): Promise<
   if (use && req.method === "GET") {
     const since = url.searchParams.get("since") ?? "1970-01-01T00:00:00Z";
     return json({ events: await usageForCode(db, decodeURIComponent(use[1]), since) });
+  }
+
+  // List pending pro requests.
+  if (url.pathname === "/admin/requests" && req.method === "GET") {
+    return json({ requests: await listPending(db) });
+  }
+
+  // Grant a pro request → create a pro code + meta, mark granted, email requester.
+  const grant = url.pathname.match(/^\/admin\/requests\/([^/]+)\/grant$/);
+  if (grant && req.method === "POST") {
+    const bad = guardMutation(req, env.APP_ORIGIN); if (bad) return bad;
+    const reqRow = await getRequest(db, decodeURIComponent(grant[1]));
+    if (!reqRow || reqRow.status !== "pending") return text("not found", 404);
+    const b = await req.json<{ dailyUsd: number; totalUsd: number; expiresAt?: string | null }>();
+    const nowIso = new Date().toISOString();
+    const id = "pro-" + generateCode().replace(/-/g, "").slice(0, 12);
+    const { code } = await createCode(db, {
+      id, label: `${reqRow.name} <${reqRow.email}>`, view: "default", tier: "pro",
+      dailyMicros: usdToMicros(b.dailyUsd), totalMicros: usdToMicros(b.totalUsd),
+      expiresAt: b.expiresAt ?? null,
+    }, env.CODE_HASH_KEY, nowIso);
+    await insertCodeMeta(db, { codeId: id, ownerName: reqRow.name, ownerEmail: reqRow.email,
+      role: reqRow.role, note: reqRow.note, source: "pro-grant", ipHash: reqRow.ip_hash ?? "", createdAt: nowIso });
+    await markGranted(db, reqRow.id, id, nowIso);
+    const tpl = proGrantedEmail(code, env.APP_ORIGIN);
+    await sendEmail(env, { to: reqRow.email, subject: tpl.subject, html: tpl.html, text: tpl.text });
+    return json({ ok: true, code, link: `${env.APP_ORIGIN}/?mode=live#code=${code}` });
+  }
+
+  // Deny a pro request.
+  const deny = url.pathname.match(/^\/admin\/requests\/([^/]+)\/deny$/);
+  if (deny && req.method === "POST") {
+    const bad = guardMutation(req, env.APP_ORIGIN); if (bad) return bad;
+    await markDenied(db, decodeURIComponent(deny[1]), new Date().toISOString());
+    return json({ ok: true });
   }
 
   return text("not found", 404);
