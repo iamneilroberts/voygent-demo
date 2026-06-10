@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { funnelRows, costScenarios, type DrillContext } from "./inspector-drills";
-import type { InsSavings } from "../Inspector";
+import { funnelRows, costScenarios, ganttBars, type DrillContext } from "./inspector-drills";
+import type { InsSavings, InsTool } from "../Inspector";
 
 function savings(partial: Partial<InsSavings>): InsSavings {
   return {
@@ -47,5 +47,26 @@ describe("costScenarios", () => {
   it("guards divide-by-zero when actual cost is 0", () => {
     const rows = costScenarios({ actualCost: 0, cost: { haiku: 0, sonnet: 0.1, opus: 0.2 } } as unknown as DrillContext);
     expect(rows.every((r) => Number.isFinite(r.mult))).toBe(true);
+  });
+});
+
+function tool(name: string, latencyMs: number): InsTool {
+  return { type: "inspector", kind: "tool", exchangeId: "x", turn: 0, name, args: {}, result: "", latencyMs, ok: true };
+}
+
+describe("ganttBars", () => {
+  it("lays tool calls end-to-end with cumulative offsets and a stage per call", () => {
+    const ctx = { tools: [tool("hotel_search", 400), tool("hotel_list", 100), tool("patch_trip", 50)] } as unknown as DrillContext;
+    const bars = ganttBars(ctx);
+    expect(bars).toHaveLength(3);
+    expect(bars[0]).toMatchObject({ name: "hotel_search", stage: "search", offsetPct: 0 });
+    // second bar starts after the first (400 / 550 total)
+    expect(bars[1].offsetPct).toBeCloseTo((400 / 550) * 100, 1);
+    expect(bars[1].stage).toBe("distill");
+    expect(bars[2].stage).toBe("stage");
+  });
+
+  it("returns [] for no tools", () => {
+    expect(ganttBars({ tools: [] } as unknown as DrillContext)).toEqual([]);
   });
 });

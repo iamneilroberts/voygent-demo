@@ -129,11 +129,81 @@ function CostSimView({ ctx }: { ctx: DrillContext }) {
   );
 }
 
+// ---- View 3: Per-Phase Critical-Path Waterfall ----
+
+export type GanttStage = "create" | "search" | "distill" | "stage" | "promote" | "render" | "other";
+
+// Self-contained stage mapping (mirrors STAGES in Inspector.tsx + stageForTool in
+// worker/inspector.ts) so the drill module pulls in no server code.
+function stageForToolName(name: string): GanttStage {
+  if (name === "save_trip") return "create";
+  if (name === "flight_search" || name === "hotel_search") return "search";
+  if (name === "flight_list" || name === "hotel_list") return "distill";
+  if (name === "patch_trip") return "stage";
+  if (name === "promote_flights" || name === "promote_hotels_to_lodging") return "promote";
+  return "other";
+}
+
+export interface GanttBar { name: string; stage: GanttStage; latencyMs: number; offsetPct: number; widthPct: number }
+
+/** Cumulative end-to-end layout of every tool call (we have durations, not wall-clock
+ *  timestamps — so this is a sequential approximation, labeled as such in the view). */
+export function ganttBars(ctx: DrillContext): GanttBar[] {
+  const total = ctx.tools.reduce((a, t) => a + t.latencyMs, 0);
+  if (total <= 0) return [];
+  let acc = 0;
+  return ctx.tools.map((t) => {
+    const bar: GanttBar = {
+      name: t.name, stage: stageForToolName(t.name), latencyMs: t.latencyMs,
+      offsetPct: (acc / total) * 100, widthPct: (t.latencyMs / total) * 100,
+    };
+    acc += t.latencyMs;
+    return bar;
+  });
+}
+
+const STAGE_COLOR: Record<GanttStage, string> = {
+  create: "#6b8cce", search: "#d6a35c", distill: "#7fb069", stage: "#b07fb0",
+  promote: "#5cc6c6", render: "#c96442", other: "#888",
+};
+
+function ms(n: number): string { return n >= 1000 ? `${(n / 1000).toFixed(1)}s` : `${n} ms`; }
+
+function WaterfallView({ ctx }: { ctx: DrillContext }) {
+  const bars = ganttBars(ctx);
+  const total = ctx.tools.reduce((a, t) => a + t.latencyMs, 0);
+  if (bars.length === 0) {
+    return <p className="ins-note">The critical path appears once tool calls run.</p>;
+  }
+  return (
+    <div className="ins-gantt">
+      <p className="ins-note">
+        Every tool call on this run, laid end-to-end and colored by orchestration stage. We
+        record per-call durations (not wall-clock timestamps), so this is a sequential view —
+        the slow part is the supplier (MCP) upstream, not our instrumentation (≈0 added model tokens).
+      </p>
+      {bars.map((b, i) => (
+        <div className="ins-gantt-row" key={i}>
+          <span className="ins-gantt-name">{b.name}</span>
+          <span className="ins-gantt-track" aria-hidden="true">
+            <span className="ins-gantt-bar"
+              style={{ marginLeft: `${b.offsetPct}%`, width: `${Math.max(1, b.widthPct)}%`, background: STAGE_COLOR[b.stage] }} />
+          </span>
+          <span className="ins-gantt-ms">{ms(b.latencyMs)}</span>
+        </div>
+      ))}
+      <div className="ins-gantt-total">total tool time <b>{ms(total)}</b></div>
+    </div>
+  );
+}
+
 export const DRILLS: Drill[] = [
   { id: "funnel", title: "Token elimination funnel", trigger: { kind: "stat", statKey: "contextKeptOut" },
     render: (ctx) => <FunnelView ctx={ctx} /> },
   { id: "costSim", title: "Counterfactual cost simulator", trigger: { kind: "stat", statKey: "observedCost" },
     render: (ctx) => <CostSimView ctx={ctx} /> },
+  { id: "waterfall", title: "Per-phase critical path", trigger: { kind: "pipeline" },
+    render: (ctx) => <WaterfallView ctx={ctx} /> },
 ];
 
 export function drillForStat(statKey: string): Drill | undefined {

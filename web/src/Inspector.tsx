@@ -8,7 +8,7 @@ import type { StatsResponse } from "../../shared/events";
 import { StoreOpsWidget, type InsStore } from "./StoreOpsWidget";
 import { storeOpsForTool } from "../../worker/storeops";
 import { buildStats, railStats, deepDiveLinks } from "./lib/inspector-stats";
-import { DRILLS, drillForStat, type DrillContext, type DrillId } from "./lib/inspector-drills";
+import { DRILLS, drillForStat, pipelineDrill, type DrillContext, type DrillId } from "./lib/inspector-drills";
 
 // Engineering stories moved out of the panel (task 6c) — the tab keeps live
 // stats; the narratives live on worker-served /info pages.
@@ -359,6 +359,26 @@ export function Inspector(
             </span>
           ))}
         </div>
+
+        {(() => {
+          const wf = pipelineDrill();
+          if (!wf) return null;
+          const active = openDrill === wf.id;
+          return (
+            <>
+              <button className="ins-pipe-drill" aria-expanded={active}
+                onClick={() => setOpenDrill(active ? null : wf.id)}>
+                {active ? "▾" : "▸"} view critical path
+              </button>
+              {active && (
+                <div className="ins-drill" role="region" aria-label={wf.title}>
+                  <h4 className="ins-drill-title">{wf.title}</h4>
+                  {wf.render(drillCtx)}
+                </div>
+              )}
+            </>
+          );
+        })()}
 
         {/* Stats sit directly under the pipe (at the top of the section); the tool
             log scrolls in its own fixed pane below so it never pushes these down. */}

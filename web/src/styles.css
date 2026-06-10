@@ -351,3 +351,15 @@ button.ins-rail:hover { color: var(--ink); }
 .ins-costsim-bar span { display: block; height: 100%; background: var(--term-amber, #d6a35c); }
 .ins-costsim-row.actual .ins-costsim-bar span { background: var(--term-green, #7fb069); }
 .ins-costsim-usd { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Critical-path waterfall */
+.ins-pipe-drill { margin-top: 8px; background: none; border: none; color: var(--term-dim, #888);
+  font: inherit; font-size: 11px; cursor: pointer; padding: 2px 0; }
+.ins-pipe-drill:hover { color: var(--term-amber, #d6a35c); }
+.ins-gantt-row { display: grid; grid-template-columns: 120px 1fr 56px; align-items: center;
+  gap: 8px; margin: 4px 0; font-size: 11px; }
+.ins-gantt-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ins-gantt-track { background: var(--term-line, #2a2a2a); border-radius: 3px; height: 10px; }
+.ins-gantt-bar { display: block; height: 100%; border-radius: 3px; }
+.ins-gantt-ms { text-align: right; font-variant-numeric: tabular-nums; opacity: .8; }
+.ins-gantt-total { margin-top: 8px; font-size: 11px; opacity: .85; }
