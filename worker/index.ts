@@ -191,7 +191,7 @@ export default {
       const id = env.SESSION.idFromName(claims.sid);
       const forward = new Request(req.url, {
         method: "POST",
-        headers: { "content-type": "application/json", "x-code-id": claims.codeId, "x-est-micros": String(est) },
+        headers: { "content-type": "application/json", "x-code-id": claims.codeId, "x-code-tier": claims.tier, "x-est-micros": String(est) },
         body: req.body,
         // duplex is required in Node.js when forwarding a streaming body
         ...(req.body ? { duplex: "half" } : {}),

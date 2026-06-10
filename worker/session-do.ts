@@ -19,11 +19,13 @@ import type { ConversationMessage, TokenUsage } from "./llm/provider";
 import type { ServerEvent } from "../shared/events";
 import { D1Db } from "./access/db";
 import { reconcile } from "./access/codes";
+import { pickBearer, type Tier } from "./access/tier";
 
 interface Env {
   ANTHROPIC_API_KEY: string;
   VOYGENT_MCP_URL: string;
-  VOYGENT_MCP_BEARER: string;
+  VOYGENT_MCP_BEARER: string;               // credential-free (public tier) Voygent identity
+  VOYGENT_MCP_BEARER_PRO?: string;          // real-credential (pro tier) identity; pro fails closed when unset
   SESSION: DurableObjectNamespace;        // self-namespace; a reserved instance is the budget ledger
   LLM_MODEL?: string;                     // default/fallback model; per-turn routing overrides per call
   BUDGET_DAILY_USD?: string;              // global daily spend cap (default 5)
@@ -355,6 +357,14 @@ export class SessionDO {
     // access-control: per-code reconciliation headers, set by the worker's admission gate.
     const codeId = req.headers.get("x-code-id");
     const estForReconcile = Number(req.headers.get("x-est-micros") ?? "0");
+    // Credential tier → which Voygent MCP bearer this session uses. Pro fails closed
+    // (no bearer) so a public code can never reach real creds and a misconfigured pro
+    // code can never silently fall back to credential-free access.
+    const tier: Tier = req.headers.get("x-code-tier") === "pro" ? "pro" : "public";
+    const mcpBearer = pickBearer(tier, this.env);
+    if (!mcpBearer) {
+      return new Response("Pro access isn't enabled yet — contact Neil.", { status: 503 });
+    }
     // Read the request body exactly once (it carries message/mode + optional model-routing).
     const body = await req.json<{ message: string; mode?: string; model?: unknown; routing?: { discovery?: unknown; enrichment?: unknown }; faithful?: boolean }>();
     const { message, mode } = body;
@@ -385,7 +395,7 @@ export class SessionDO {
     // on each read rather than snapshotting. Directives carry no trip facts — the
     // model fills <destination city>/<departure_date> from the conversation.
     const buildPhaseCtx = (): PhaseCtx => ({ boardsMode: this.boardsMode, liveMode: this.liveMode });
-    const mcp = new McpClient(this.env.VOYGENT_MCP_URL, this.env.VOYGENT_MCP_BEARER);
+    const mcp = new McpClient(this.env.VOYGENT_MCP_URL, mcpBearer);
     if (faithful && isFirstTurn) {
       try {
         await mcp.initialize();
