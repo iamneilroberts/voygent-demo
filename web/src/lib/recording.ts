@@ -22,13 +22,24 @@ export interface ReelClientSession {
   progress: number;              // 0..1, "ready to book"
 }
 
+// A brief peek at the engineering view (reel): a small panel that slides in to show
+// the REAL tools the assistant has called so far (no cost/token data — those would be
+// fabricated on a scripted reel), framed as "full metrics in the interactive demo".
+export interface ReelEngTool { name: string; status: "done" | "running" }
+export interface ReelEngPanel {
+  open: boolean;
+  tools: ReelEngTool[];   // the real tool sequence so far
+  footnote?: string;      // pointer to the live demo for the full metrics
+}
+
 // Reel-only interaction payloads. NEVER a ServerEvent — the worker/live app never sees these.
 export type ReelInteraction =
   | { kind: "pick"; boardId: string; candidateIds: string[]; echo: string }
   | { kind: "edit"; path: string; was: string; now: string; tag: string }
   | { kind: "comment"; anchor: string; threadId: string; text: string }
   | { kind: "handoff"; channel: "email"; subject: string; reply?: string }
-  | { kind: "clientview"; view: ReelClientSession | null };
+  | { kind: "clientview"; view: ReelClientSession | null }
+  | { kind: "engpanel"; view: ReelEngPanel | null };
 
 export type Frame =
   | { delayMs: number; kind: "user"; text: string; actor?: Actor; beatId?: string }

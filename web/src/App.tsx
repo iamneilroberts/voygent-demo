@@ -30,6 +30,7 @@ import { ReelIntro } from "./ReelIntro";
 import { ReelCallout } from "./ReelCallout";
 import { ReelHandoffNotice } from "./ReelHandoffNotice";
 import { ReelClientView } from "./ReelClientView";
+import { ReelEngPanel } from "./ReelEngPanel";
 import { ReelEndCard } from "./ReelEndCard";
 import type { Highlight } from "./lib/highlights";
 import { isChatMessage, type TimelineItem, type BoardItem } from "./timeline";
@@ -450,6 +451,9 @@ export function App() {
           )}
           {skin === "claude" && mode === "auto" && reelPhase === "playing" && reelView.clientView?.open && (
             <ReelClientView view={reelView.clientView} />
+          )}
+          {skin === "claude" && mode === "auto" && reelPhase === "playing" && reelView.engPanel?.open && (
+            <ReelEngPanel view={reelView.engPanel} />
           )}
           {skin === "claude" && mode === "auto" && reelPhase === "playing" && (
             <div className="cl-reel-controls" role="group" aria-label="Playback controls">

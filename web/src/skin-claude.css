@@ -574,6 +574,29 @@
   :root[data-skin="claude"] .cl-cv-progress i { transition: none !important; }
 }
 
+/* ===== Engineering-view peek (reel): small panel sliding in from the right ===== */
+:root[data-skin="claude"] .cl-eng-peek {
+  position: fixed; top: 50%; right: 22px; transform: translateY(-50%);
+  z-index: 61; width: 244px; background: #1f1e1c; color: #e9e7df;
+  border: 1px solid #3a3934; border-radius: 12px; padding: 13px 15px;
+  box-shadow: 0 12px 34px rgba(0,0,0,.4); font: 400 .8125rem/1.4 var(--cl-sans);
+  animation: cl-eng-peek-in .32s cubic-bezier(.2,.8,.3,1) 1;
+}
+@keyframes cl-eng-peek-in { from { opacity: 0; transform: translate(18px, -50%); } to { opacity: 1; transform: translate(0, -50%); } }
+:root[data-skin="claude"] .cl-eng-peek-head { display: flex; align-items: center; gap: 7px; }
+:root[data-skin="claude"] .cl-eng-peek-dot { color: #2f8f50; }
+:root[data-skin="claude"] .cl-eng-peek-title { font-weight: 600; font-size: .875rem; }
+:root[data-skin="claude"] .cl-eng-peek-tag { margin-left: auto; font: 600 9px/1 var(--cl-mono); letter-spacing: .08em; text-transform: uppercase; color: #8de0a3; background: #18341f; border: 1px solid #2c5236; border-radius: 999px; padding: 3px 7px; }
+:root[data-skin="claude"] .cl-eng-peek-sub { margin: 7px 0 9px; font-size: .75rem; color: #9b988f; }
+:root[data-skin="claude"] .cl-eng-peek-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+:root[data-skin="claude"] .cl-eng-peek-row { display: flex; align-items: center; gap: 8px; }
+:root[data-skin="claude"] .cl-eng-peek-row code { font-family: var(--cl-mono); font-size: .75rem; color: #d7d4cb; }
+:root[data-skin="claude"] .cl-eng-peek-mark { color: #2f8f50; width: 12px; }
+:root[data-skin="claude"] .cl-eng-peek-row.running .cl-eng-peek-mark { color: var(--cl-accent); }
+:root[data-skin="claude"] .cl-eng-peek-foot { margin-top: 11px; padding-top: 9px; border-top: 1px solid #3a3934; font-size: .6875rem; color: #9b988f; }
+@media (prefers-reduced-motion: reduce) { :root[data-skin="claude"] .cl-eng-peek { animation: none; } }
+@media (max-width: 760px) { :root[data-skin="claude"] .cl-eng-peek { right: 50%; transform: translate(50%, -50%); } @keyframes cl-eng-peek-in { from { opacity: 0; } to { opacity: 1; } } }
+
 /* Screen-reader-only utility */
 .cl-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 

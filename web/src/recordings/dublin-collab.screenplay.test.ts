@@ -19,8 +19,8 @@ describe("dublin-collab full reel (grounding)", () => {
   const kinds = interactions.map((i) => i.kind);
   const clientViews = interactions.flatMap((i) => i.kind === "clientview" && i.view ? [i.view as ReelClientSession] : []);
 
-  it("exercises all five interaction kinds", () => {
-    expect(new Set(kinds)).toEqual(new Set(["pick", "edit", "comment", "handoff", "clientview"]));
+  it("exercises every interaction kind, including the engineering-panel peek", () => {
+    expect(new Set(kinds)).toEqual(new Set(["pick", "edit", "comment", "handoff", "clientview", "engpanel"]));
   });
 
   it("has a multi-select shortlist (advisor picks >1 hotel) and a single flight pick", () => {

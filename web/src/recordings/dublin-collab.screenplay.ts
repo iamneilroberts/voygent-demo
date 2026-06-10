@@ -185,11 +185,24 @@ export const dublinCollab = screenplay({ trip: "Dublin · collab", skin: "claude
   s.agent.tool("validate_trip", { summary: "Goals met · pacing · step-free checks" });
   s.agent.says("Here's the week, day by day, with food worked in. I kept it history-leaning and stayed away from anything strenuous.");
   s.agent.folio(withDays);
-  // One peek under the hood — anchored on the in-chat tool chips (the engineering
-  // inspector pane isn't in the reel's single-pane layout). The chips ARE the real
-  // tool calls; honest framing keeps to the orchestration, not cost/token claims.
-  s.spotlight({ eventType: "tool", where: { tool: "validate_trip" }, nth: 1 }, { target: "tool-validate_trip", eyebrow: "Under the hood", title: "Real tool calls, in order", body: "These steps aren't canned text. Each one — search, save, validate — is a real tool the assistant calls, in the order it runs them. In a live run they execute against real suppliers." });
   s.spotlight({ eventType: "folio", nth: 2 }, { target: "folio-days", eyebrow: "The build", title: "Day by day", body: "Voygent assembles the week — sights, food, and the down moments — into one living folio, then validates it against the brief." });
+  // Brief peek at the engineering view — the REAL tools called so far. No cost/token
+  // numbers (those would be fabricated on a scripted reel); the footnote points to the
+  // interactive demo, where they're real. Open → spotlight → close.
+  s.agent.engPanel({
+    open: true,
+    tools: [
+      { name: "start_trip_interview", status: "done" },
+      { name: "save_trip", status: "done" },
+      { name: "flight_search", status: "done" },
+      { name: "hotel_search", status: "done" },
+      { name: "excursion_search", status: "done" },
+      { name: "validate_trip", status: "done" },
+    ],
+    footnote: "Full cost + context metrics live in the interactive demo.",
+  });
+  s.spotlight({ interactionKind: "engpanel", nth: 1 }, { target: "eng-panel", eyebrow: "Under the hood", title: "Every step is a real tool call", body: "Behind the chat, Voygent calls actual tools — search, save, validate — in order. The interactive demo opens the full engineering view: every call, its cost, and the context kept out of the model." });
+  s.agent.engPanel(null);
 
   // Act 5 — Refine: the advisor edits a single day in place, with a note on why.
   s.advisor.edits("days[2].activities[0]", { was: "Free morning in Temple Bar", now: "Cliffs of Moher day trip", tag: "Advisor edited" }, edited);

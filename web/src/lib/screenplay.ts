@@ -1,5 +1,5 @@
 import type { ServerEvent, BoardCandidate, FolioData } from "../../../shared/events";
-import type { Recording, Frame, Actor, ReelClientSession } from "./recording";
+import type { Recording, Frame, Actor, ReelClientSession, ReelEngPanel } from "./recording";
 import type { Highlight, HighlightMatch } from "./highlights";
 
 interface Meta { trip: string; skin: "claude" }
@@ -37,6 +37,11 @@ class Builder {
       this.event({ type: "board", kind, boardId, tripId: "t", candidates });
     },
     folio: (folio: FolioData) => { this.folio = folio; this.event({ type: "folio", folio }); },
+    // Brief engineering-view peek: open/update/close a small panel showing the real
+    // tools called so far. Pass null to close. One beat per call (like client.view).
+    engPanel: (snapshot: ReelEngPanel | null) => {
+      this.add({ delayMs: 0, kind: "interaction", actor: "agent", interaction: { kind: "engpanel", view: snapshot }, beatId: this.beat() });
+    },
   };
 
   readonly advisor = this.makeHuman("advisor");

@@ -1,4 +1,4 @@
-import type { Actor, ReelInteraction, ReelClientSession } from "./recording";
+import type { Actor, ReelInteraction, ReelClientSession, ReelEngPanel } from "./recording";
 
 export interface ReelEditMarker { path: string; was: string; now: string; tag: string; actor: Actor; reconciled: boolean }
 export interface ReelComment { actor: Actor; text: string }
@@ -15,10 +15,11 @@ export interface ReelViewState {
   threads: ReelThread[];
   handoff: ReelHandoff | null;
   clientView: ReelClientSession | null;   // R4: the simulated client browser window
+  engPanel: ReelEngPanel | null;          // brief engineering-view peek
 }
 
 export function emptyReelViewState(): ReelViewState {
-  return { selected: {}, edits: [], threads: [], handoff: null, clientView: null };
+  return { selected: {}, edits: [], threads: [], handoff: null, clientView: null, engPanel: null };
 }
 
 export function applyInteraction(state: ReelViewState, i: ReelInteraction, actor: Actor): ReelViewState {
@@ -38,6 +39,8 @@ export function applyInteraction(state: ReelViewState, i: ReelInteraction, actor
       return { ...state, handoff: { sent: true, routedBack: i.reply != null, subject: i.subject, reply: i.reply } };
     case "clientview":
       return { ...state, clientView: i.view };
+    case "engpanel":
+      return { ...state, engPanel: i.view };
   }
 }
 

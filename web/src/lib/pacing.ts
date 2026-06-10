@@ -17,7 +17,9 @@ const REDUCED = 90;
 // on screen; this is how long the reel HOLDS so the viewer can read it (flash + buffer).
 // clientview snapshots hold longer so the live price recalc reads (the total animates
 // between consecutive snapshots); the closing snapshot (open:false) shares the floor.
-const INTERACTION_DWELL: Record<string, number> = { pick: 3500, edit: 3200, comment: 4200, handoff: 5200, clientview: 4200 };
+// engpanel's open beat is held by its callout; the only un-spotlit engpanel beat is the
+// close (panel already gone), so keep that short — a long floor there is just dead air.
+const INTERACTION_DWELL: Record<string, number> = { pick: 3500, edit: 3200, comment: 4200, handoff: 5200, clientview: 4200, engpanel: 600 };
 const INTERACTION_PREBEAT = 320;       // small delay BEFORE an interaction frame appears
 const INTERACTION_REDUCED_DWELL = 1500; // reduced-motion still needs reading time
 

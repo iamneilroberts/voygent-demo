@@ -8,7 +8,7 @@ export interface HighlightMatch {
   kind?: string;                          // inspector kind or board kind
   where?: Record<string, string>;         // field equality on the event (stringified), e.g. { status: "repaired" }
   nth?: number;                           // 1-based; default 1
-  interactionKind?: "pick" | "edit" | "comment" | "handoff" | "clientview"; // interaction-frame match
+  interactionKind?: "pick" | "edit" | "comment" | "handoff" | "clientview" | "engpanel"; // interaction-frame match
   beatId?: string;                        // exact compiler-assigned frame id (most stable)
 }
 
