@@ -146,12 +146,12 @@ export default {
       try { code = (await req.json<{ code?: string }>()).code ?? ""; } catch { /* uniform 401 below */ }
       const hit = code ? await lookupByCode(db, code, env.CODE_HASH_KEY, new Date().toISOString()) : null;
       if (!hit) return text("this code isn't valid", 401); // uniform — no oracle
-      const setCookie = await issueCookie({ sid: newSid(), codeId: hit.id }, env.SESSION_SIGN_KEY, COOKIE_TTL_SEC, secure);
-      return json({ ok: true, view: hit.view }, 200, { "set-cookie": setCookie });
+      const setCookie = await issueCookie({ sid: newSid(), codeId: hit.id, tier: hit.tier }, env.SESSION_SIGN_KEY, COOKIE_TTL_SEC, secure);
+      return json({ ok: true, view: hit.view, tier: hit.tier }, 200, { "set-cookie": setCookie });
     }
     if (url.pathname === "/auth/me" && req.method === "GET") {
       const claims = await verifyCookie(getCookieHeader(req), env.SESSION_SIGN_KEY);
-      return claims ? json({ ok: true }) : text("no session", 401);
+      return claims ? json({ ok: true, tier: claims.tier }) : text("no session", 401);
     }
 
     // --- Admin (Cloudflare Access in front; ADMIN_TOKEN fallback inside) ---

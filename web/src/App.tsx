@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { streamChat, UnauthorizedError } from "./sse-client";
 import { Gate } from "./Gate";
-import { readCodeFromHash, authenticate, hasSession } from "./lib/gate";
-import { effectiveMode, gateOnGoLive } from "./lib/access";
+import { readCodeFromHash, authenticate, sessionInfo } from "./lib/gate";
+import { effectiveMode, gateOnGoLive, showPublicDisclaimer, type Tier } from "./lib/access";
 import { ChatView, type ChatMessage, type Preset } from "./ChatView";
 import { ClaudeChatView } from "./ClaudeChatView";
 import { FolioPanel } from "./FolioPanel";
@@ -59,6 +59,7 @@ export function App() {
   // to cross into the live demo — that crossing flips showOnboard on (Phase A
   // renders the existing Gate; Phase B swaps in the self-serve OnboardingForm).
   const [showOnboard, setShowOnboard] = useState(false);
+  const [tier, setTier] = useState<Tier | null>(null);
   const [collapsed, setCollapsed] = useState(false);
   const [skin, setSkin] = useState<SkinId>(() => {
     if (resolveInitialMode() === "auto") {
@@ -241,10 +242,14 @@ export function App() {
     const code = readCodeFromHash(window.location, window.history);
     (async () => {
       let sess = false;
-      if (code && (await authenticate(API_BASE, code))) { sess = true; }
-      else {
-        if (code) setPendingCode(code);
-        sess = await hasSession(API_BASE);
+      if (code) {
+        const r = await authenticate(API_BASE, code);
+        if (r.ok) { sess = true; setTier(r.tier); }
+        else { setPendingCode(code); }
+      }
+      if (!sess) {
+        const me = await sessionInfo(API_BASE);
+        sess = me.ok; setTier(me.tier);
       }
       setAuthed(sess);
       // Unauthed visitors always land on the reel, even if localStorage persisted "live".
@@ -421,13 +426,21 @@ export function App() {
   // session (showOnboard), or after a mid-session expiry. Phase B replaces this
   // <Gate> with the self-serve <OnboardingForm>.
   if (!authed && showOnboard) return <Gate initialCode={pendingCode} onSubmit={async (c) => {
-    const ok = await authenticate(API_BASE, c);
-    if (ok) { setAuthed(true); setShowOnboard(false); }
-    return ok;
+    const r = await authenticate(API_BASE, c);
+    if (r.ok) { setAuthed(true); setTier(r.tier); setShowOnboard(false); }
+    return r.ok;
   }} />;
 
   return (
     <div className="app">
+      {showPublicDisclaimer(tier, mode) && (
+        <div className="public-source-banner" role="note"
+          style={{ padding: ".5rem 1rem", background: "#fff7e6", borderBottom: "1px solid #f0d9a8", fontSize: ".85rem", textAlign: "center" }}>
+          Results are from public sources.{" "}
+          {/* D4 swaps this mailto for the in-app ProAccessForm. */}
+          <a href="mailto:support@voygent.ai?subject=Voygent%20pro%20access">Request pro access →</a>
+        </div>
+      )}
       {skin === "board" && (
         <header>
           <span className="brand"><strong>Voygent</strong> <span className="sub">AI travel-planning assistant</span></span>

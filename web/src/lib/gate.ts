@@ -10,19 +10,30 @@ export function readCodeFromHash(
   return code;
 }
 
-export async function authenticate(apiBase: string, code: string): Promise<boolean> {
+import type { Tier } from "./access";
+
+export async function authenticate(apiBase: string, code: string): Promise<{ ok: boolean; tier: Tier | null }> {
   const res = await fetch(`${apiBase}/auth`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     credentials: "include",
     body: JSON.stringify({ code }),
   });
-  return res.ok;
+  if (!res.ok) return { ok: false, tier: null };
+  const b = await res.json<{ tier?: Tier }>().catch(() => ({} as { tier?: Tier }));
+  return { ok: true, tier: b.tier ?? "public" };
 }
 
-export async function hasSession(apiBase: string): Promise<boolean> {
+export async function sessionInfo(apiBase: string): Promise<{ ok: boolean; tier: Tier | null }> {
   try {
     const res = await fetch(`${apiBase}/auth/me`, { credentials: "include" });
-    return res.ok;
-  } catch { return false; }
+    if (!res.ok) return { ok: false, tier: null };
+    const b = await res.json<{ tier?: Tier }>().catch(() => ({} as { tier?: Tier }));
+    return { ok: true, tier: b.tier ?? "public" };
+  } catch { return { ok: false, tier: null }; }
+}
+
+/** Thin boolean wrapper for call sites that only need presence. */
+export async function hasSession(apiBase: string): Promise<boolean> {
+  return (await sessionInfo(apiBase)).ok;
 }
