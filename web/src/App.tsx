@@ -32,6 +32,7 @@ import { ReelHandoffNotice } from "./ReelHandoffNotice";
 import { ReelClientView } from "./ReelClientView";
 import { ReelEngPanel } from "./ReelEngPanel";
 import { ReelEndCard } from "./ReelEndCard";
+import { ReelExplore } from "./ReelExplore";
 import type { Highlight } from "./lib/highlights";
 import { isChatMessage, type TimelineItem, type BoardItem } from "./timeline";
 
@@ -478,13 +479,17 @@ export function App() {
             </div>
           )}
           {skin === "claude" && mode === "auto" && reelPhase === "ended" && (
-            <ReelEndCard
-              onTryYourself={tryYourself} onReplay={startReel}
-              recap={selectedReel.recap}
-              eyebrow={selectedReel.endCard?.eyebrow}
-              title={selectedReel.endCard?.title}
-              blurb={selectedReel.endCard?.blurb}
-            />
+            reelView.clientView
+              // Reels with a priced client-view (collab) end on an interactive folio the
+              // viewer can experiment with; others keep the static end card.
+              ? <ReelExplore view={reelView.clientView} onLiveDemo={tryYourself} onReplay={startReel} />
+              : <ReelEndCard
+                  onTryYourself={tryYourself} onReplay={startReel}
+                  recap={selectedReel.recap}
+                  eyebrow={selectedReel.endCard?.eyebrow}
+                  title={selectedReel.endCard?.title}
+                  blurb={selectedReel.endCard?.blurb}
+                />
           )}
         </section>
         <section className="engineering" data-eng={eng}>
