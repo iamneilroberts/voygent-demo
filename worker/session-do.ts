@@ -349,19 +349,28 @@ export class SessionDO {
     const codeId = req.headers.get("x-code-id");
     const estForReconcile = Number(req.headers.get("x-est-micros") ?? "0");
     // Read the request body exactly once (it carries message/mode + optional model-routing).
-    const body = await req.json<{ message: string; mode?: string; model?: unknown; routing?: { discovery?: unknown; enrichment?: unknown } }>();
+    const body = await req.json<{ message: string; mode?: string; model?: unknown; routing?: { discovery?: unknown; enrichment?: unknown }; faithful?: boolean }>();
     const { message, mode } = body;
     const fallbackModel = (this.env.LLM_MODEL || DEFAULT_MODEL) as ModelId;
     const model = fallbackModel; // ClaudeProvider default + cost fallback; per-turn routing overrides per call
     // Server-coerce the visitor's model choice through the enabled allowlist (the real Opus gate).
     const enabled = enabledModels({ opus: !!this.env.DEMO_OPUS_ENABLED, deepseek: deepseekEnabled(this.env), ollama: ollamaEnabled(this.env) });
     this.routing = buildRouting({ model: body.model, routing: body.routing }, enabled, fallbackModel);
-    // Effective FAITHFUL gate (Decision A5): lone FAITHFUL only affects test/admin runs;
-    // public passcodes additionally require FAITHFUL_PUBLIC_OK so a single mis-set secret
-    // can't bill real supplier spend to the public (Task 6 budget gate).
-    const faithfulEnv = !!this.env.FAITHFUL && (isTest || !!this.env.FAITHFUL_PUBLIC_OK);
+    // Effective FAITHFUL gate. The client now drives this per-session via a URL param
+    // (?faithful=1), defaulting OFF so the public demo gives the orchestrated experience
+    // (replayed featured trips, boards, stepping, real savings stats); off-menu trips
+    // still latch live. The public-safety gate stays: a requested faithful run is only
+    // honored for test/admin runs or when FAITHFUL_PUBLIC_OK is set, so a public viewer
+    // can't bill real supplier spend unless the operator has enabled it. When the client
+    // sends no `faithful` field (older clients, tests), fall back to the env default so
+    // existing behavior is preserved.
+    const publicFaithfulOk = isTest || !!this.env.FAITHFUL_PUBLIC_OK;
+    const faithfulEnvDefault = !!this.env.FAITHFUL && publicFaithfulOk;
+    const faithfulEff = body.faithful !== undefined
+      ? (body.faithful === true && publicFaithfulOk)
+      : faithfulEnvDefault;
     const isFirstTurn = this.messages.length === 0;
-    if (isFirstTurn) this.faithful = faithfulEnv;  // latch for the whole session (Decision A4)
+    if (isFirstTurn) this.faithful = faithfulEff;  // latch for the whole session (Decision A4)
     const faithful = this.faithful;                // latched (turn 1) or hydrated (turn 2+) value
     const phaseMachine = !!this.env.DEMO_PHASE_MACHINE && !faithful;
     // ctx is just the two mode flags. They change DURING an exchange (liveMode

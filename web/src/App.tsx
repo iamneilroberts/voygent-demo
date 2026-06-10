@@ -153,6 +153,10 @@ export function App() {
   // folio handler reads the latest value regardless of the stream/replay closure.
   const stagedBlob = useRef("");
   const postReel = (() => { try { return new URLSearchParams(window.location.search).get("greet") === "reel"; } catch { return false; } })();
+  // Faithful (fully-live) mode is opt-in via ?faithful=1; default OFF gives the
+  // orchestrated experience (replayed featured trips + boards + stepping). Sent on
+  // every /chat so the worker latches the right mode on turn 1.
+  const faithful = (() => { try { const v = new URLSearchParams(window.location.search).get("faithful"); return v === "1" || v === "true"; } catch { return false; } })();
   useEffect(() => { persistMode(mode); }, [mode]);
 
   // Skin is React state (component trees differ) AND a data attribute (CSS scoping).
@@ -359,7 +363,7 @@ export function App() {
     recorder?.recordUser(text);
     setBusy(true);
     try {
-      await streamChat(API_BASE, text, (e) => { recorder?.recordEvent(e); applyEvent(e, claude); }, claude ? "boards" : undefined, routingBody(modelMode, smartMap));
+      await streamChat(API_BASE, text, (e) => { recorder?.recordEvent(e); applyEvent(e, claude); }, claude ? "boards" : undefined, { ...routingBody(modelMode, smartMap), faithful });
     } catch (err) {
       if (err instanceof UnauthorizedError) { setAuthed(false); return; }
       showError((err as Error).message);
