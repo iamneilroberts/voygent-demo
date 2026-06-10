@@ -25,6 +25,11 @@ describe("buildStats", () => {
       if (s.deepDive) expect(s.deepDive).toMatch(/^[a-z-]+$/);
     }
   });
+  it("tags the funnel and cost-sim tiles with their drill id", () => {
+    const byKey = Object.fromEntries(buildStats(input).map((s) => [s.key, s]));
+    expect(byKey.contextKeptOut.drill).toBe("funnel");
+    expect(byKey.observedCost.drill).toBe("costSim");
+  });
 });
 
 describe("railStats", () => {

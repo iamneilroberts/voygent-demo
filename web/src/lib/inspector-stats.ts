@@ -11,6 +11,7 @@ export interface InspectorStat {
   rail?: number;                       // present = eligible for the rail; lower = higher priority
   bar?: number;                        // optional 0..1 fill (e.g. tokens-saved proportion)
   deepDive?: string;                   // /info slug this stat links to
+  drill?: "funnel" | "costSim" | "waterfall";   // expandable detail view this stat opens
 }
 
 // The metrics the Inspector already computes, passed in as plain values so this stays
@@ -38,8 +39,8 @@ export function buildStats(i: StatInput): InspectorStat[] {
     { key: "mcpToolsExposed", value: fmtInt(i.mcpToolsExposed), label: "MCP tools exposed", rail: 3, deepDive: "production-system" },
     { key: "distinctTools", value: fmtInt(i.distinctTools), label: "distinct tools", deepDive: "production-system" },
     { key: "persistedWrites", value: fmtInt(i.persistedWrites), label: "persisted writes", deepDive: "data-stores" },
-    { key: "contextKeptOut", value: fmtInt(i.contextKeptOut), label: "context kept out", tone: "good", rail: 1, bar: i.contextKeptOutBar, deepDive: "context-economics" },
-    { key: "observedCost", value: fmtUsd(i.observedCostUsd), label: "observed cost", tone: "good", rail: 2, deepDive: "cost-engineering" },
+    { key: "contextKeptOut", value: fmtInt(i.contextKeptOut), label: "context kept out", tone: "good", rail: 1, bar: i.contextKeptOutBar, deepDive: "context-economics", drill: "funnel" },
+    { key: "observedCost", value: fmtUsd(i.observedCostUsd), label: "observed cost", tone: "good", rail: 2, deepDive: "cost-engineering", drill: "costSim" },
     { key: "cacheHitRate", value: `${Math.round(i.cacheHitRate * 100)}%`, label: "cache hit rate", deepDive: "cost-engineering" },
   ];
 }
