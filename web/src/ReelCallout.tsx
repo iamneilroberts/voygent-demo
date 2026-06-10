@@ -22,7 +22,13 @@ export function ReelCallout(
   useLayoutEffect(() => {
     const el = findTarget(highlight.target);
     if (!el) { setRect(null); return; }
-    try { el.scrollIntoView({ block: "nearest", inline: "nearest" }); } catch { /* ignore */ }
+    // A target taller than the viewport (e.g. the full flight board) would land on its
+    // bottom edge with "nearest", scrolling the chosen option at the top out of view —
+    // so align such targets to their TOP. Short targets keep "nearest".
+    try {
+      const tall = el.getBoundingClientRect().height > window.innerHeight * 0.78;
+      el.scrollIntoView({ block: tall ? "start" : "nearest", inline: "nearest" });
+    } catch { /* ignore */ }
     const measure = () => {
       const r = el.getBoundingClientRect();
       const vh = window.innerHeight, vw = window.innerWidth;
@@ -62,10 +68,12 @@ export function ReelCallout(
     } else {
       const cardW = Math.min(CARD_W, vw - 2 * MARGIN);
       const left = Math.round((vw - cardW) / 2);
-      // Place high only when the target sits in the bottom third (e.g. a send button);
-      // otherwise place low so the target's top stays uncovered.
+      // A tall target is top-aligned (above), so its key content is up top → card low.
+      // A short target: place on the opposite half of its center; only go high when the
+      // target itself sits in the bottom third (e.g. a send button).
+      const tall = rect.height > vh * 0.7;
       const targetMid = rect.top + rect.height / 2;
-      const top = targetMid > vh * 0.62 ? MARGIN : Math.round(vh * 0.62);
+      const top = (!tall && targetMid > vh * 0.62) ? MARGIN : Math.round(vh * 0.62);
       cardStyle = { position: "fixed", left, top, width: cardW };
     }
   } else {
