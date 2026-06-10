@@ -34,6 +34,25 @@ describe("createBoardBuilder", () => {
     }
   });
 
+  it("carries real per-leg routing detail on featured flight candidates", () => {
+    const build = createBoardBuilder();
+    const ev = build("flight_search", flightSearchPayload(), TRIP);
+    if (ev?.type !== "board") throw new Error("expected board event");
+    const first = ev.candidates[0];
+    // Real captured Dublin flight: MOB→IAD→DUB, two legs.
+    expect(first.legs && first.legs.length).toBeGreaterThanOrEqual(2);
+    const [a, b] = first.legs!;
+    expect(a.from).toBe("MOB");
+    expect(b.to).toBe("DUB");
+    expect(a.flightNo).toBeTruthy();
+    expect(a.aircraft).toBeTruthy();
+    expect(a.depart).toMatch(/\d/);
+    // The connecting leg names its layover so the routing detail can call it out.
+    expect(b.layoverAfter).toBeTruthy();
+    // Total duration now shows on the meta line.
+    expect(first.meta).toMatch(/\dh/);
+  });
+
   it("formats flight price as whole USD with separators", () => {
     const build = createBoardBuilder();
     const ev = build("flight_list", JSON.stringify({
@@ -54,6 +73,20 @@ describe("createBoardBuilder", () => {
     expect(ev.candidates).toHaveLength(DUBLIN.hotels.length);
     expect(ev.candidates.map((c) => c.id)).toEqual(DUBLIN.hotels.map((h) => h.id));
     expect(ev.candidates[0].title).toBe(DUBLIN.hotels[0].name);
+  });
+
+  it("enriches serp hotel candidates with review scale, stay total, and a google search link", () => {
+    const build = createBoardBuilder();
+    const ev = build("hotel_search", hotelSearchPayload(), TRIP);
+    if (ev?.type !== "board") throw new Error("expected board event");
+    const first = ev.candidates[0];
+    // Google-by-name fallback (serp exposes no deep link) — mirrors voygent-lite.
+    expect(first.detailUrl).toMatch(/^https:\/\/www\.google\.com\/search\?q=/);
+    expect(first.detailLabel).toBe("search ↗");
+    // Review scale disambiguates the score (Google Hotels is /5).
+    expect(first.meta).toMatch(/\/5/);
+    // Stay total shows next to the nightly rate.
+    expect(first.meta).toMatch(/total/);
   });
 
   it("returns null for non-board tools", () => {

@@ -532,10 +532,16 @@ export class SessionDO {
         const fx = this.replay.currentFixture();
         const metaKey = m?.tool as ("flightSearch" | "flightList" | "hotelSearch" | "hotelList" | undefined);
         const meta = metaKey && fx?.meta ? fx.meta[metaKey] : undefined;
-        if (m && meta) {
+        // Only surface a distill chip when the slim payload is a real win. Flight
+        // candidates now carry full per-leg routing (the advisor wants it), so a
+        // flight_search payload can roughly match its raw prod size — emitting a
+        // "0 tokens saved" chip there would read as a broken mechanism. The hotel
+        // and flight_list distills stay comfortably positive.
+        const saved = m ? meta!.rawTokensEst - m.modelFacingTokens : 0;
+        if (m && meta && saved > 0) {
           emit({
             type: "inspector", kind: "savings", exchangeId, mechanism: "searchDistill",
-            tokensSaved: Math.max(0, meta.rawTokensEst - m.modelFacingTokens),
+            tokensSaved: saved,
             basis: "chars/4", scope: "aggregate",
             detail: `prod ${m.tool} returned ~${meta.rawTokensEst} tok → model saw ~${m.modelFacingTokens} tok`,
           });

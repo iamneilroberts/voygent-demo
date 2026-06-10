@@ -87,7 +87,7 @@ export function BoardView(
                     </button>
                   )}
                   {detail && (
-                    <a className="cl-option-detail" href={detail} target="_blank" rel="noopener noreferrer">details ↗</a>
+                    <a className="cl-option-detail" href={detail} target="_blank" rel="noopener noreferrer">{c.detailLabel ?? "details ↗"}</a>
                   )}
                 </div>
               )}

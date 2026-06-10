@@ -303,6 +303,16 @@ export function ClaudeChatView(
   }, [items, busy]);
 
   const lastIdx = items.length - 1;
+  // Enrichment runs a long batch of tools (itinerary, excursions, dining) with
+  // model-thinking gaps in between. The inline indicator (below) only covers an
+  // empty trailing assistant placeholder, and a running tool chip carries its own
+  // progress UI — so the gaps between batches would otherwise show nothing. Fill
+  // them with a tail "working" line whenever we're busy and neither of those is
+  // already on screen. Out of the reel (scripted beats pace themselves).
+  const last = items[lastIdx];
+  const lastIsRunningChip = last?.role === "toolchip" && last.status === "running";
+  const lastIsEmptyAssistant = !!last && last.role !== "toolchip" && last.role !== "board" && last.role !== "user" && !last.text;
+  const showTailWorking = busy && !reelMode && !lastIsRunningChip && !lastIsEmptyAssistant;
   return (
     <main className="cl-pane">
       <header className="cl-header">
@@ -331,6 +341,7 @@ export function ClaudeChatView(
             if (it.text) return <div key={i} className="cl-prose"><Prose text={it.text} /></div>;
             return busy && i === lastIdx ? <WorkingIndicator key={i} live={!reelMode} /> : null;
           })}
+          {showTailWorking && <WorkingIndicator live={!reelMode} />}
           {folio && <div className={`cl-folio-inline${reelMode ? " in-reel" : ""}`}><FolioArtifact folio={folio} advisor={advisor} edits={reelView.edits} threads={reelView.threads} showSend={reelMode} sent={!!reelView.handoff?.sent} /></div>}
           <div ref={endRef} />
         </div>

@@ -6,7 +6,7 @@
 // The builder is stateful (per exchange): search-then-list returns the same
 // candidate set, so identical consecutive boards are deduped by kind + id set.
 
-import type { ServerEvent, BoardCandidate } from "../../shared/events";
+import type { ServerEvent, BoardCandidate, FlightLeg } from "../../shared/events";
 
 const FLIGHT_TOOLS = new Set(["flight_search", "flight_list"]);
 const HOTEL_TOOLS = new Set(["hotel_search", "hotel_list", "hotel_search_and_rank"]);
@@ -20,26 +20,75 @@ function stopsLabel(stops: number | null | undefined): string | null {
   return stops === 0 ? "nonstop" : stops === 1 ? "1 stop" : `${stops} stops`;
 }
 
+function durationLabel(min: number | null | undefined): string | null {
+  if (typeof min !== "number" || !Number.isFinite(min) || min <= 0) return null;
+  const h = Math.floor(min / 60), m = min % 60;
+  return h > 0 ? (m > 0 ? `${h}h ${m}m` : `${h}h`) : `${m}m`;
+}
+
+// Copy the slim payload's legs through verbatim — they already arrive in FlightLeg
+// shape (formatted times) from the replay layer. Only `from`/`to` are required.
+function legsFrom(raw: unknown): FlightLeg[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const legs = raw
+    .filter((l): l is Record<string, any> => !!l && typeof l === "object" && typeof l.from === "string" && typeof l.to === "string")
+    .map((l) => {
+      const leg: FlightLeg = { from: l.from, to: l.to };
+      for (const k of ["depart", "arrive", "carrier", "flightNo", "aircraft", "duration", "layoverAfter"] as const) {
+        if (typeof l[k] === "string" && l[k]) leg[k] = l[k];
+      }
+      return leg;
+    });
+  return legs.length ? legs : undefined;
+}
+
 function flightCandidate(c: Record<string, any>): BoardCandidate | null {
   if (typeof c.id !== "string" || !c.id) return null;
   const title = typeof c.route === "string" && c.route ? c.route : c.id;
-  const meta = [c.airline, stopsLabel(c.stops), c.cabin].filter(Boolean).join(" · ") || undefined;
+  const meta = [c.airline, stopsLabel(c.stops), durationLabel(c.durationMinutes), c.cabin].filter(Boolean).join(" · ") || undefined;
   const price = usd(c.price);
   const summary = [title, c.airline, stopsLabel(c.stops), price].filter(Boolean).join(", ");
-  return { id: c.id, title, price, meta, summary };
+  const out: BoardCandidate = { id: c.id, title, price, meta, summary };
+  const legs = legsFrom(c.legs);
+  if (legs) out.legs = legs;
+  return out;
+}
+
+// A Google-by-name+area link for hotels whose source exposes no deep link (serp).
+// Mirrors voygent-lite's googleFallbackUrl so the demo's "search ↗" lands the same
+// place the real renderer would — honest (a real search for a real property), and
+// no fabricated supplier inventory.
+function googleHotelUrl(name: string, area: unknown): string {
+  const q = [name, typeof area === "string" ? area : null].filter(Boolean).join(" ");
+  return `https://www.google.com/search?q=${encodeURIComponent(q)}`;
 }
 
 function hotelCandidate(c: Record<string, any>): BoardCandidate | null {
   if (typeof c.id !== "string" || !c.id || typeof c.name !== "string" || !c.name) return null;
   const stars = typeof c.starRating === "number" ? `${c.starRating}★` : null;
+  // Show the review scale (Google Hotels is /5) so "5" doesn't read as ambiguous.
+  const scale = typeof c.reviewScoreScale === "number" && c.reviewScoreScale > 0 ? c.reviewScoreScale : null;
   const review = typeof c.reviewScore === "number"
-    ? `${c.reviewScore}${typeof c.reviewCount === "number" ? ` (${c.reviewCount.toLocaleString("en-US")})` : ""}`
+    ? `${c.reviewScore}${scale ? `/${scale}` : ""}${typeof c.reviewCount === "number" ? ` (${c.reviewCount.toLocaleString("en-US")})` : ""}`
     : null;
-  const meta = [c.area, stars, review].filter(Boolean).join(" · ") || undefined;
   const perNight = usd(c.pricePerNight);
-  const price = perNight ? `${perNight}/night` : usd(c.priceTotal);
+  const total = usd(c.priceTotal);
+  // Surface the stay total alongside the nightly rate (the advisor's real number).
+  const totalLabel = perNight && total ? `${total} total` : null;
+  const meta = [c.area, stars, review, totalLabel].filter(Boolean).join(" · ") || undefined;
+  const price = perNight ? `${perNight}/night` : total;
   const summary = [c.name, c.area, price].filter(Boolean).join(", ");
-  return { id: c.id, title: c.name, price, meta, summary };
+  const out: BoardCandidate = { id: c.id, title: c.name, price, meta, summary };
+  // Prefer a real deep link the source exposed; else the Google-by-name fallback.
+  const real = typeof c.websiteUrl === "string" && c.websiteUrl ? c.websiteUrl
+    : typeof c.url === "string" && c.url ? c.url : null;
+  if (real) {
+    out.detailUrl = real;
+  } else {
+    out.detailUrl = googleHotelUrl(c.name, c.area);
+    out.detailLabel = "search ↗";
+  }
+  return out;
 }
 
 // cpmaxx hotel_search_and_rank shape ({hotels:[{id, name, stars, area, price_per_night,

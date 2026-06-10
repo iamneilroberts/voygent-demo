@@ -15,6 +15,17 @@ export interface FixtureRoute {
   depart: string; ret: string; adults: number;
 }
 
+// One captured leg of a flight candidate (real prod segment data: times, equipment,
+// layover). The demo surfaces these to the advisor and renders them as the board's
+// collapsible routing detail — see slimFlight (replay) and FlightLegs (BoardView).
+export interface FlightSegment {
+  origin: string; destination: string;
+  depart?: string | null; arrive?: string | null;   // "2026-10-12 12:53" (local)
+  carrier?: string | null; flightNumber?: string | null;
+  cabin?: string | null; durationMinutes?: number | null;
+  layover?: string | null; equipment?: string | null; overnight?: boolean | null;
+}
+
 // Subset of the real FlightCandidate shape the demo uses (full object is in the JSON).
 export interface FlightCandidate {
   id: string; source: string;
@@ -22,11 +33,12 @@ export interface FlightCandidate {
   validatingCarrier?: string | null; airlines?: string[] | null;
   cabin?: string | null; stops?: number | null; durationMinutes?: number | null;
   route?: string | null; flightNumbers?: string[] | null;
+  segments?: FlightSegment[] | null;
 }
 
 export interface HotelCandidate {
   id: string; source: string; name: string;
-  starRating?: number | null; reviewScore?: number | null; reviewCount?: number | null;
+  starRating?: number | null; reviewScore?: number | null; reviewScoreScale?: number | null; reviewCount?: number | null;
   pricePerNight?: number | null; priceTotal?: number | null; nights?: number | null;
   currency?: string | null; area?: string | null;
   stay?: { location?: string; checkIn?: string; checkOut?: string } | null;

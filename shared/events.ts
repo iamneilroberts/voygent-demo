@@ -49,6 +49,7 @@ export interface BoardCandidate {
   meta?: string;    // "United · 1 stop · Economy" / "Temple Bar · 4★ · 8.9 (1,203)"
   summary: string;  // one-liner echoed back to the agent on selection
   detailUrl?: string;      // supplier detail page (e.g. cpmaxx hotel sheet) — renders as a "details" link
+  detailLabel?: string;    // link text override, e.g. "search ↗" for a Google-by-name fallback (default "details ↗")
   commission?: number;     // advisor commission for the stay, USD (cpmaxx-sourced candidates only)
   commissionPct?: number;  // advisor commission percentage (cpmaxx-sourced candidates only)
   legs?: FlightLeg[];      // flight itinerary detail — when present, the option expands to show it
