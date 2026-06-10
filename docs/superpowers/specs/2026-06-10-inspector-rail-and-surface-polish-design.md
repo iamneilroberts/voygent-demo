@@ -44,9 +44,14 @@ engState(toolCount, expanded):
 ```
 
 - `expanded` is App state, default `false`, toggled by clicking the rail or the
-  panel's `✕ collapse`. Persist last choice in `localStorage`
-  (`voygent-demo-eng-open`) so a technical viewer who expands stays expanded across
-  turns this session; default collapsed on a fresh load.
+  panel's `✕ collapse`. **Always start collapsed** (no persistence) — the rail is
+  visible and live, so collapsed is not "hidden".
+- **First-reveal attention beat:** when the first tool fires and the rail transitions
+  `idle → peek`, it plays a one-time draw-attention animation — a brief widen/bump
+  (~96px → ~120px → settle), a glow on the live dot, and a one-shot "click to expand ⤢"
+  hint that fades after a few seconds (or on first interaction). Respect
+  `prefers-reduced-motion` (no bump; show the hint statically, then fade). This makes the
+  expand affordance discoverable without stealing the screen.
 - The old `collapsed` boolean is replaced by `expanded` (inverted). The old `live`
   CSS state is renamed `open`; `peek` reuses the narrow-grid column but with live content.
 
@@ -127,10 +132,10 @@ live registry (deduped, in registry order). Each link reads
 `<STAT> — <subject blurb> ↗` so the relevance is explicit
 (e.g. `230 KEPT OUT — How context economics keeps tokens out of the model ↗`).
 
-A "More stats and stories land here as the system grows." footnote signals the section
-will grow with the registry. Subjects with no active stat (e.g. `bot-defeat`,
-`subagents`) can still be listed under a secondary "More on the engineering" group, or
-deferred — decide in the plan. Primary requirement: the bottom links track the stats.
+Subjects with no active stat yet (e.g. `bot-defeat`, `subagents`) go under a secondary
+**"More on the engineering"** group below the stat-linked primary links (Neil confirmed),
+so every deep dive stays reachable while the stat-tied ones lead. A "More stats and
+stories land here as the system grows." footnote signals the section grows with the registry.
 
 ---
 
@@ -205,6 +210,88 @@ Keep the model-facing slim payload unchanged where possible (travelers/nights ar
 ints; `allInclusive` is a bool); the heavy enrichment stays out-of-band as today.
 
 ---
+
+## Part 6 — Expanded-panel drill-down telemetry (wow the engineers)
+
+Goal (Neil): the chat wows regular folks; the expanded engineering panel wows tech
+people. Add deep drill-down, favoring views derivable from data we already emit
+(tokens, latency, tool calls, models, savings, phases). All new views are stat-registry
+entries and/or click-to-expand details — the panel stays extensible.
+
+**Interaction model:** the panel becomes drillable, not just a readout.
+- Click a **stat tile** → expands an inline detail (sparkline / breakdown) + its deep-dive link.
+- Click a **pipeline node** → filters the tool log to that stage's calls.
+- Expand a **tool row** → raw-vs-slim payload + tokens/latency attributable to it.
+- Expand a **turn** → that turn's token mix, cost, and model.
+
+### Context economics (the headline wow)
+- **Distill ledger (v1)** — per search tool: `raw 1067 tok → slim 283 tok (−73%)` with a
+  mini bar. Expanding shows the **raw result vs the slim model-facing payload side by side**
+  (the actual JSON the model received vs the full tool output). This is the single most
+  convincing "context kept out" artifact. Data: fixture `meta.*.rawTokensEst` + replay
+  `measurement.modelFacingTokens`.
+- **Per-turn token waterfall (v1)** — stacked bar per turn: cacheRead / input / cacheWrite /
+  output. Makes prompt caching visible (huge cacheRead, tiny fresh input). Data: `turns[]`.
+- **Context-window occupancy** — a bar of tokens-in-window vs the Pro/1M window, with
+  "kept out" shown as the slice that never entered. Data: cost-weighted tokens + `PLAN_TIERS`.
+
+### Cost engineering
+- **Cost timeline + counterfactual (v1)** — per-turn cost, with the all-Opus counterfactual
+  ghosted above and a cumulative `routed $0.41 vs all-Opus $2.07`. Data: `summaries` costByModel + actualCost.
+- **Model-routing timeline (v1)** — one lane per turn showing which model ran
+  (Haiku/Sonnet/Opus), so "cheap model for enrichment, Sonnet for search" is legible.
+  Data: `turns[].model`.
+- **Cache-hit sparkline** — hit rate across turns. Data: `usage`.
+
+### Orchestration
+- **Tool-call gantt (v1)** — a latency timeline of every tool call, grouped/colored by
+  phase. Shows the orchestration shape and that the slow part is the MCP upstream, not our
+  overhead. Data: `tools[].latencyMs` + phase mapping.
+- **Phase-machine trail** — the real transitions with their trigger tool
+  (`→ HOTEL_PICK via promote_hotels`). Data: `phases[]`.
+- **Tool-catalog withheld** — `72 tools exist · 6 used · 66 schemas withheld each turn = N tok/turn`.
+  Data: `summary.exposedToolCount/fullToolCount` + the toolCatalog savings event.
+
+### Integrity / trust
+- **Fabrication-guard ledger (v1)** — `N candidate ids validated against captured results,
+  0 invented accepted`. Makes the record/replay guarantee visible. Needs a small new guard
+  event from the replay layer (it already drops unknown ids — just emit the tally).
+- **Result provenance** — each flight/hotel tagged "served from fixture, captured 2026-06-05".
+  Data: fixture `meta.capturedAt`.
+- **Trip-integrity checks** — already present; keep, with self-heal detail.
+
+### Infra projection / latency
+- **Latency breakdown (v1)** — wall-clock split: model think vs tool (MCP) vs render/stream,
+  plus time-to-first-token; highlights that our own instrumentation overhead is ~0 added model
+  tokens. Data: `overhead` (instrumentationMs, addedModelTokens:0) + tool latencies.
+- **KV/D1 op projection** — already present (`stores`); could break down by op type.
+- **Anti-bot verdict** — "edge challenge passed in N ms" (ties to the bot-defeat deep dive).
+
+### Codex-contributed framings (merged from `/codex-review`)
+Codex independently proposed most of the above and sharpened these — adopt the framings:
+- **Token Elimination Funnel** (codex top pick) — upgrade the Distill ledger into a
+  **Sankey/funnel**: raw supplier tokens → distilled payload → model-visible context →
+  rendered folio bytes, with the dropped slices labeled (raw search, tool catalog, patch
+  diffs, templates, server-rendered UI). Makes "context kept out" visually undeniable.
+- **Counterfactual Cost Simulator** (codex #2) — broaden the cost view beyond all-Opus to a
+  grouped bar of scenarios: actual mixed-model vs **all-Sonnet / all-Opus / no-cache /
+  no-distill / model-renders-folio**. Turns architecture decisions into visible dollars.
+- **Per-Phase Critical Path Waterfall** (codex #3) — the tool-call gantt with **nested spans
+  per phase** (model time / MCP time / server compute / replay lookup / integrity), giving
+  a real distributed-tracing feel.
+- **Cache Thermodynamics panel** — cache write/read tokens, hit rate, avoided cost, cache age
+  per turn (a richer cache-hit view).
+- **Savings Pareto** — the savings events as a Pareto chart with a cumulative-savings curve
+  (ranked optimizations by impact).
+- **Context Budget Heatmap** — per-turn window occupancy by category (user request, trip
+  state, distilled search, system/dev instructions, withheld catalog/diffs).
+- **Replay Provenance Ledger** — audit table: capture id, prod timestamp, candidate ids used,
+  fabricated ids rejected (extends the fabrication-guard ledger).
+
+**v1 picks (high wow-per-effort, mostly existing data):** Token Elimination Funnel (distill
+ledger first, Sankey later), per-turn token waterfall, Counterfactual Cost Simulator,
+model-routing timeline, Per-Phase Critical Path Waterfall (gantt), fabrication-guard ledger,
+latency breakdown. The rest land as later registry entries — codex's top-3 match these.
 
 ## Out of scope / non-goals
 
