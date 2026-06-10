@@ -11,6 +11,7 @@ import { lookupByCode, admit, admissionReason } from "./access/codes";
 import { issueCookie, verifyCookie, newSid } from "./access/session";
 import { guardMutation, getCookieHeader, json, text } from "./access/http";
 import { handleAdmin, adminAuthed } from "./access/admin";
+import { handleOnboard } from "./access/onboard";
 
 interface Env {
   SESSION: DurableObjectNamespace;
@@ -29,6 +30,12 @@ interface Env {
   ADMIN_TOKEN?: string;
   APP_ORIGIN: string;
   EST_EXCHANGE_MICROS?: string;
+  // tier / onboarding / pro-access
+  VOYGENT_MCP_BEARER_PRO?: string;
+  RESEND_API_KEY?: string;
+  ONBOARD_IP_DAILY_CAP?: string;
+  NEIL_NOTIFY_EMAIL?: string;
+  DEMO_PUBLIC_LIVE_ENABLED?: string;
   __db?: Db; // test seam: inject an in-memory Db
 }
 
@@ -125,6 +132,11 @@ export default {
       // Public cumulative engineering-stats — aggregates only, no per-exchange
       // rows. Edge-cached so D1 sees ~1 read/60s regardless of visitor volume.
       return handleStats(req, env);
+    }
+
+    // --- Self-serve onboarding (public tier) ---
+    if (url.pathname === "/onboard" && req.method === "POST") {
+      return handleOnboard(req, env, db);
     }
 
     // --- Auth ---

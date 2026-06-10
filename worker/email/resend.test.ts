@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, afterEach } from "vitest";
 import { sendEmail } from "./resend";
 
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => { vi.restoreAllMocks(); });
 
 describe("sendEmail", () => {
   it("no-ops when RESEND_API_KEY is unset", async () => {
