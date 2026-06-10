@@ -24,6 +24,21 @@ export interface FolioData {
   includes?: FolioInclude[];  // NEW — boilerplate "what's included / tips"
 }
 
+// One segment of a flight itinerary — the expandable detail behind a flight option.
+// Optional throughout: a real flight search may only know some of these; the board
+// renders whatever is present.
+export interface FlightLeg {
+  from: string;            // origin airport code, e.g. "MOB"
+  to: string;              // destination airport code, e.g. "JFK"
+  depart?: string;         // local departure time, e.g. "3:30p"
+  arrive?: string;         // local arrival time, e.g. "8:35a +1"
+  carrier?: string;        // marketing/operating carrier, e.g. "Aer Lingus"
+  flightNo?: string;       // e.g. "EI 106"
+  aircraft?: string;       // equipment, e.g. "A330-300"
+  duration?: string;       // in-air time for this leg, e.g. "6h 40m"
+  layoverAfter?: string;   // layover at `to` before the next leg, e.g. "2h 10m"
+}
+
 // One clickable option on an inline chooser board (claude-skin boards mode).
 // Built from the same slim candidate fields the model sees — id is always a
 // real fixture candidate id, so a clicked pick passes the promote_* guard.
@@ -36,6 +51,8 @@ export interface BoardCandidate {
   detailUrl?: string;      // supplier detail page (e.g. cpmaxx hotel sheet) — renders as a "details" link
   commission?: number;     // advisor commission for the stay, USD (cpmaxx-sourced candidates only)
   commissionPct?: number;  // advisor commission percentage (cpmaxx-sourced candidates only)
+  legs?: FlightLeg[];      // flight itinerary detail — when present, the option expands to show it
+  badge?: string;          // Voygent's editorial tag for this option, e.g. "Best value" / "Cheapest" / "Quickest"
 }
 
 export type ServerEvent =

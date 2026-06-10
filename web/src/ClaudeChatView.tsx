@@ -77,35 +77,48 @@ function FolioArtifact({ folio, advisor, edits, threads, showSend, sent }: { fol
   const hasDays = !!folio.days && folio.days.length > 0;
   const hasIncludes = !!folio.includes && folio.includes.length > 0;
   if (folio.flights.length === 0 && folio.hotels.length === 0 && !hasDays && !hasIncludes) return null;
+  // Glanceable summary chips — the panel leads with the trip at a glance, then the
+  // detail sits below in a compact form (so it stops eating real estate when long).
+  const flightChip = folio.flights.length === 1 ? (folio.flights[0].route ?? folio.flights[0].label) : folio.flights.length > 1 ? `${folio.flights.length} flights` : null;
+  const hotelChip = folio.hotels.length === 1 ? folio.hotels[0].name : folio.hotels.length > 1 ? `${folio.hotels.length} hotels` : null;
+  const summaryChips: Array<[string, string]> = [];
+  if (flightChip) summaryChips.push(["✈", flightChip]);
+  if (hotelChip) summaryChips.push(["🏨", hotelChip]);
+  if (hasDays) summaryChips.push(["🗓", `${folio.days!.length} days`]);
+  if (hasIncludes) summaryChips.push(["ℹ", `${folio.includes!.length} notes`]);
   return (
     <div className="cl-artifact" role="group" aria-label="Trip folio">
       <div className="cl-artifact-head">
-        <span className="cl-artifact-kicker">Trip folio</span>
-        <span className="cl-artifact-title">{folio.title}</span>
+        <span className="cl-artifact-titlerow">
+          <span className="cl-artifact-kicker">Folio</span>
+          <span className="cl-artifact-title">{folio.title}</span>
+          {commTotal != null && <span className="cl-artifact-comm cl-artifact-headcomm">{fmtUsd(commTotal)} comm.</span>}
+        </span>
+        {summaryChips.length > 0 && (
+          <span className="cl-artifact-summary">
+            {summaryChips.map(([icon, label]) => (
+              <span key={label} className="cl-artifact-chip"><span aria-hidden="true">{icon}</span> {label}</span>
+            ))}
+          </span>
+        )}
       </div>
-      {folio.flights.length > 0 && (
+      {(folio.flights.length > 0 || folio.hotels.length > 0) && (
         <div className="cl-artifact-sec">
-          <h4>Flights</h4>
           {folio.flights.map((f, i) => (
-            <div key={i} className="cl-artifact-row">
+            <div key={`f${i}`} className="cl-artifact-row">
               <span className="cl-artifact-main">
                 <span className="cl-artifact-name">{f.route ?? f.label}</span>
-                <span className="cl-artifact-meta">{[f.carrier, f.date, f.cabin].filter(Boolean).join(" · ")}</span>
+                <span className="cl-artifact-meta">{["Flight", f.carrier, f.date, f.cabin].filter(Boolean).join(" · ")}</span>
               </span>
               {f.price && <span className="cl-artifact-price">{f.price}</span>}
             </div>
           ))}
-        </div>
-      )}
-      {folio.hotels.length > 0 && (
-        <div className="cl-artifact-sec">
-          <h4>Hotels</h4>
           {folio.hotels.map((h, i) => (
-            <div key={i} className="cl-artifact-row">
+            <div key={`h${i}`} className="cl-artifact-row">
               <span className="cl-artifact-main">
                 <span className="cl-artifact-name">{h.name}</span>
                 <span className="cl-artifact-meta">
-                  {[h.area, typeof h.stars === "number" ? `${h.stars}★` : null, typeof h.nights === "number" ? `${h.nights} nights` : null].filter(Boolean).join(" · ")}
+                  {["Hotel", h.area, typeof h.stars === "number" ? `${h.stars}★` : null, typeof h.nights === "number" ? `${h.nights} nights` : null].filter(Boolean).join(" · ")}
                 </span>
               </span>
               <span className="cl-artifact-price">
@@ -116,16 +129,10 @@ function FolioArtifact({ folio, advisor, edits, threads, showSend, sent }: { fol
               </span>
             </div>
           ))}
-          {commTotal != null && (
-            <div className="cl-artifact-row cl-artifact-totalrow">
-              <span className="cl-artifact-main"><span className="cl-artifact-name">Trip commission</span></span>
-              <span className="cl-artifact-comm cl-artifact-total">{fmtUsd(commTotal)}</span>
-            </div>
-          )}
         </div>
       )}
       {hasDays && (
-        <div className="cl-artifact-sec" data-reel-target="folio-days">
+        <div className="cl-artifact-sec cl-artifact-days" data-reel-target="folio-days">
           <h4>Day by day</h4>
           {folio.days!.map((d, i) => (
             <div key={i} className="cl-day" data-reel-target={`folio-day-${i}`}>
@@ -134,12 +141,12 @@ function FolioArtifact({ folio, advisor, edits, threads, showSend, sent }: { fol
                 {d.date && <span className="cl-day-date">{d.date}</span>}
               </div>
               {d.activities.length > 0 && (
-                <ul className="cl-day-list">
+                <div className="cl-day-acts">
                   {d.activities.map((a, j) => {
                     const au = safeHttpUrl(a.url);
                     const edit = editForActivity(edits, i, j);
                     return (
-                      <li key={j} className={edit ? `cl-day-edited ${actorClass(edit.actor)}${edit.reconciled ? " reconciled" : ""}` : undefined}>
+                      <span key={j} className={`cl-day-act${edit ? ` cl-day-edited ${actorClass(edit.actor)}${edit.reconciled ? " reconciled" : ""}` : ""}`}>
                         {edit && (
                           <span className="cl-edit-marker">
                             <span className="cl-sr-only">Changed from </span>
@@ -149,27 +156,25 @@ function FolioArtifact({ folio, advisor, edits, threads, showSend, sent }: { fol
                           </span>
                         )}
                         {au ? <a href={au} target="_blank" rel="noopener noreferrer">{a.name}</a> : a.name}
-                        {a.description && <span className="cl-day-desc"> — {a.description}</span>}
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-              {d.dining.length > 0 && (
-                <div className="cl-day-dining">
-                  <span className="cl-day-dining-label">Local picks:</span>{" "}
-                  {d.dining.map((m, j) => {
-                    const mu = safeHttpUrl(m.url);
-                    return (
-                      <span key={j} className="cl-dining-item">
-                        {mu ? <a href={mu} target="_blank" rel="noopener noreferrer">{m.name}</a> : m.name}
-                        {m.cuisine ? ` (${m.cuisine})` : ""}{j < d.dining.length - 1 ? ", " : ""}
                       </span>
                     );
                   })}
                 </div>
               )}
-              {d.stay && <div className="cl-day-stay">Stay: {d.stay}</div>}
+              {d.dining.length > 0 && (
+                <div className="cl-day-dining">
+                  <span className="cl-day-dining-label">Dining:</span>{" "}
+                  {d.dining.map((m, j) => {
+                    const mu = safeHttpUrl(m.url);
+                    return (
+                      <span key={j} className="cl-dining-item">
+                        {mu ? <a href={mu} target="_blank" rel="noopener noreferrer">{m.name}</a> : m.name}
+                        {j < d.dining.length - 1 ? ", " : ""}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
               {threadsForDay(threads, i).map((t) => (
                 <CommentThread key={t.threadId} thread={t} dayTitle={d.title} />
               ))}
@@ -179,13 +184,12 @@ function FolioArtifact({ folio, advisor, edits, threads, showSend, sent }: { fol
       )}
       {hasIncludes && (
         <div className="cl-artifact-sec" data-reel-target="folio-includes">
-          <h4>What&#39;s included &amp; good to know</h4>
-          {folio.includes!.map((inc) => (
-            <div key={inc.key} className="cl-include">
-              <span className="cl-include-title">{inc.title}</span>
-              <span className="cl-include-body">{inc.body}</span>
-            </div>
-          ))}
+          <h4>Good to know</h4>
+          <div className="cl-include-list">
+            {folio.includes!.map((inc) => (
+              <span key={inc.key} className="cl-include"><span className="cl-include-title">{inc.title}</span></span>
+            ))}
+          </div>
         </div>
       )}
       {showSend && (

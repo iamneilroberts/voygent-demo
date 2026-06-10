@@ -36,7 +36,7 @@ export const REELS: ReelEntry[] = [
     durationLabel: "~4 min",
     recording: dublinCollab.recording,
     highlights: dublinCollab.highlights,
-    recap: ["👥 advisor + traveller", "✈ traveller picks the flight", "🏨 advisor shortlists 3 hotels", "🗓 day-by-day + extras", "✎ advisor refines", "💷 traveller picks + live price", "💬 their note becomes the plan"],
+    recap: ["👥 advisor + traveller", "✈ badged, expandable flights", "🏨 advisor shortlists 3 hotels", "🗓 day-by-day + extras", "✎ advisor refines", "💷 traveller picks + live price", "💬 their note becomes the plan"],
     intro: {
       eyebrow: "▶ Built together",
       note: "The collaboration here is a scripted walk-through of the workflow.",

@@ -17,22 +17,69 @@ import type { ReelClientSession } from "../lib/recording";
 // (terracotta) — drives the chat, curates, refines, sends. Traveler = s.client
 // (slate-teal) — picks the flight, then acts in their own client window + leaves a note.
 
-// ── Flights: six real-looking options, MOB→DUB, Oct 4-11. ────────────────────────────
+// ── Flights: six options, MOB→DUB, Oct 4-11. Each carries full routing (legs +
+//    layovers + aircraft) that expands on the board, and a Voygent editorial badge. ────
 const flights: BoardCandidate[] = [
-  { id: "serp:70wngy", title: "Aer Lingus · MOB→DUB", price: "$3,180", meta: "1 stop · Economy · 12h 05m",  summary: "Aer Lingus MOB→DUB $3,180" },
-  { id: "serp:d1",     title: "Delta · MOB→DUB",      price: "$2,980", meta: "2 stops · Economy · 14h 40m", summary: "Delta MOB→DUB $2,980" },
-  { id: "serp:u1",     title: "United · MOB→DUB",      price: "$3,426", meta: "1 stop · Economy · 11h 20m",  summary: "United MOB→DUB $3,426" },
-  { id: "serp:af1",    title: "Air France · MOB→DUB",  price: "$3,290", meta: "1 stop (CDG) · Economy · 13h 30m", summary: "Air France MOB→DUB $3,290" },
-  { id: "serp:aa1",    title: "American · MOB→DUB",    price: "$3,540", meta: "1 stop · Economy · 12h 45m",  summary: "American MOB→DUB $3,540" },
-  { id: "serp:ba1",    title: "British Airways · MOB→DUB", price: "$3,610", meta: "1 stop (LHR) · Economy · 13h 10m", summary: "British Airways MOB→DUB $3,610" },
+  {
+    id: "serp:70wngy", title: "Aer Lingus · MOB→DUB", price: "$3,180", badge: "Best value",
+    meta: "1 stop (JFK) · Economy · 12h 05m", summary: "Aer Lingus MOB→DUB $3,180",
+    legs: [
+      { from: "MOB", to: "JFK", depart: "3:30p", arrive: "6:45p", carrier: "JetBlue", flightNo: "B6 1402", aircraft: "A220-300", duration: "3h 15m", layoverAfter: "2h 10m" },
+      { from: "JFK", to: "DUB", depart: "8:55p", arrive: "8:35a +1", carrier: "Aer Lingus", flightNo: "EI 106", aircraft: "A330-300", duration: "6h 40m" },
+    ],
+  },
+  {
+    id: "serp:d1", title: "Delta · MOB→DUB", price: "$2,980", badge: "Cheapest",
+    meta: "2 stops (ATL, JFK) · Economy · 14h 40m", summary: "Delta MOB→DUB $2,980",
+    legs: [
+      { from: "MOB", to: "ATL", depart: "5:55a", arrive: "7:00a", carrier: "Delta", flightNo: "DL 1533", aircraft: "717-200", duration: "1h 05m", layoverAfter: "1h 30m" },
+      { from: "ATL", to: "JFK", depart: "8:30a", arrive: "10:50a", carrier: "Delta", flightNo: "DL 2210", aircraft: "757-200", duration: "2h 20m", layoverAfter: "3h 45m" },
+      { from: "JFK", to: "DUB", depart: "2:35p", arrive: "3:25a +1", carrier: "Delta", flightNo: "DL 410", aircraft: "A330-200", duration: "6h 50m" },
+    ],
+  },
+  {
+    id: "serp:u1", title: "United · MOB→DUB", price: "$3,426", badge: "Quickest",
+    meta: "1 stop (EWR) · Economy · 11h 20m", summary: "United MOB→DUB $3,426",
+    legs: [
+      { from: "MOB", to: "EWR", depart: "12:40p", arrive: "4:30p", carrier: "United", flightNo: "UA 1623", aircraft: "737-800", duration: "2h 50m", layoverAfter: "1h 25m" },
+      { from: "EWR", to: "DUB", depart: "5:55p", arrive: "6:00a +1", carrier: "United", flightNo: "UA 23", aircraft: "757-200", duration: "6h 30m" },
+    ],
+  },
+  {
+    id: "serp:af1", title: "Air France · MOB→DUB", price: "$3,290",
+    meta: "2 stops (ATL, CDG) · Economy · 14h 05m", summary: "Air France MOB→DUB $3,290",
+    legs: [
+      { from: "MOB", to: "ATL", depart: "5:55a", arrive: "7:00a", carrier: "Delta", flightNo: "AF 8501", aircraft: "717-200", duration: "1h 05m", layoverAfter: "2h 00m" },
+      { from: "ATL", to: "CDG", depart: "9:00a", arrive: "11:30p", carrier: "Air France", flightNo: "AF 685", aircraft: "A350-900", duration: "8h 30m", layoverAfter: "1h 40m" },
+      { from: "CDG", to: "DUB", depart: "1:10p +1", arrive: "2:45p +1", carrier: "Air France", flightNo: "AF 1216", aircraft: "A320", duration: "1h 35m" },
+    ],
+  },
+  {
+    id: "serp:aa1", title: "American · MOB→DUB", price: "$3,540",
+    meta: "1 stop (PHL) · Economy · 12h 45m", summary: "American MOB→DUB $3,540",
+    legs: [
+      { from: "MOB", to: "PHL", depart: "1:05p", arrive: "5:25p", carrier: "American", flightNo: "AA 1622", aircraft: "A319", duration: "2h 40m", layoverAfter: "1h 50m" },
+      { from: "PHL", to: "DUB", depart: "7:15p", arrive: "6:50a +1", carrier: "American", flightNo: "AA 722", aircraft: "A330-200", duration: "6h 35m" },
+    ],
+  },
+  {
+    id: "serp:ba1", title: "British Airways · MOB→DUB", price: "$3,610",
+    meta: "2 stops (CLT, LHR) · Economy · 13h 10m", summary: "British Airways MOB→DUB $3,610",
+    legs: [
+      { from: "MOB", to: "CLT", depart: "2:15p", arrive: "4:55p", carrier: "American", flightNo: "BA 6128", aircraft: "A320", duration: "1h 40m", layoverAfter: "1h 30m" },
+      { from: "CLT", to: "LHR", depart: "6:25p", arrive: "7:50a +1", carrier: "British Airways", flightNo: "BA 216", aircraft: "777-200", duration: "7h 25m", layoverAfter: "2h 05m" },
+      { from: "LHR", to: "DUB", depart: "9:55a +1", arrive: "11:20a +1", carrier: "British Airways", flightNo: "BA 832", aircraft: "A320", duration: "1h 25m" },
+    ],
+  },
 ];
 
-// ── Hotels: four mid-range options; the advisor shortlists the three non-chain ones. ──
+// ── Hotels: four mid-range options with Voygent badges; the advisor shortlists the
+//    three non-chain ones (drops the Hilton). ──────────────────────────────────────────
 const hotels: BoardCandidate[] = [
-  { id: "serp:h1", title: "The Dean Dublin", price: "$168/night", meta: "Camden St · 4★ · boutique",   summary: "The Dean Dublin $168/night" },
-  { id: "serp:h2", title: "Beckett Locke",   price: "$137/night", meta: "Docklands · aparthotel",       summary: "Beckett Locke $137/night" },
-  { id: "serp:h3", title: "The Mayson",       price: "$159/night", meta: "North Quays · waterfront",      summary: "The Mayson $159/night" },
-  { id: "serp:h4", title: "Hilton Garden Inn", price: "$182/night", meta: "O'Connell St · chain",         summary: "Hilton Garden Inn $182/night" },
+  { id: "serp:h1", title: "The Dean Dublin", price: "$168/night", badge: "Best location", meta: "Camden St · 4★ · boutique",   summary: "The Dean Dublin $168/night" },
+  { id: "serp:h2", title: "Beckett Locke",   price: "$137/night", badge: "Best value",    meta: "Docklands · aparthotel",       summary: "Beckett Locke $137/night" },
+  { id: "serp:h3", title: "The Mayson",       price: "$159/night", badge: "Waterfront",    meta: "North Quays · waterfront",      summary: "The Mayson $159/night" },
+  { id: "serp:h4", title: "Hilton Garden Inn", price: "$182/night",                        meta: "O'Connell St · chain",         summary: "Hilton Garden Inn $182/night" },
 ];
 const HOTEL_SHORTLIST = ["serp:h1", "serp:h2", "serp:h3"]; // the three the advisor sends the traveler
 
@@ -119,11 +166,11 @@ export const dublinCollab = screenplay({ trip: "Dublin · collab", skin: "claude
 
   // Act 2 — Flights: search, a brief rec, the traveler picks their own flight.
   s.agent.tool("flight_search", { summary: "MOB→DUB · Oct 4-11 · 2 travelers" });
-  s.agent.says("Six that fit the dates, Mobile to Dublin. Delta is cheapest but it's two stops and a long day. The Aer Lingus is the best value: one stop, shortest of the one-stop options, and only $200 over the floor.");
+  s.agent.says("Six that fit the dates, Mobile to Dublin. Delta is the cheapest but it's two stops and a long day. United is the quickest at 11h 20. I'd flag the Aer Lingus as best value: one stop, and only $200 over the floor. Tap any of them for the full routing.");
   s.agent.board("flight", "b-flight", flights);
-  s.client.picks("b-flight", "serp:70wngy", "Aer Lingus · MOB→DUB · $3,180", withFlight);
+  s.advisor.picks("b-flight", "serp:70wngy", "Aer Lingus · MOB→DUB · $3,180", withFlight);
   s.agent.says("Good call. Added it and locked the dates around it.");
-  s.spotlight({ interactionKind: "pick", nth: 1 }, { target: "board-flight", eyebrow: "The traveller picks", title: "Their flight, their call", body: "Voygent lays out six and says which it would take and why. The traveller weighs them and chooses; the trip builds around it." });
+  s.spotlight({ interactionKind: "pick", nth: 1 }, { target: "board-flight", eyebrow: "Voygent recommends, the advisor decides", title: "Tagged, ranked, expandable", body: "Voygent badges the options — best value, cheapest, quickest — and each expands to the full routing, layovers and aircraft. The advisor takes the call." });
 
   // Act 3 — Hotels: the advisor curates a shortlist for the traveler to choose from later.
   s.agent.tool("hotel_search", { summary: "Dublin · 7 nights · central · mid-range" });
