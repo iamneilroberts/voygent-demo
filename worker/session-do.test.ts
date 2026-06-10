@@ -21,6 +21,13 @@ describe("buildFaithfulSeed", () => {
     expect(buildFaithfulSeed(CORE, { boardsMode: true })).toContain("option cards render");
     expect(buildFaithfulSeed(CORE, { boardsMode: false })).not.toContain("option cards render");
   });
+
+  it("steers the faithful model off list_render (which needs an advisor subdomain) toward the in-chat search tools", () => {
+    const seed = buildFaithfulSeed(CORE, { boardsMode: true });
+    expect(seed).toContain("Do NOT call list_render");
+    expect(seed).toContain("flight_list");
+    expect(seed).toContain("hotel_search_and_rank");
+  });
 });
 
 describe("faithfulGates", () => {

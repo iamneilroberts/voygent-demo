@@ -131,8 +131,11 @@ const FAITHFUL_ADDENDUM =
   "for that route and offer to try different dates or another destination.";
 
 const FAITHFUL_BOARDS_NOTE =
-  "PRESENTATION: when a search returns flight or hotel candidates, the option cards render beside your " +
-  "message — present the choice in one short sentence and let the traveler pick; do not enumerate the options in text.";
+  "PRESENTATION (demo): the flight and hotel option cards render in-chat automatically from your search results — " +
+  "present the choice in one short sentence and let the traveler pick; do not enumerate the options in text. " +
+  "Do NOT call list_render: it builds a hosted page on an advisor subdomain this demo does not use, so the traveler " +
+  "would see nothing. Populate the in-chat cards by running flight_search then flight_list { tripId, action:'list' } " +
+  "for flights, and hotel_search_and_rank (or hotel_search) for hotels; then stop and let the traveler pick before staging.";
 
 export function buildFaithfulSeed(instructions: string | null, opts: { boardsMode: boolean }): string {
   const core = instructions ?? FAITHFUL_FALLBACK_CORE;
