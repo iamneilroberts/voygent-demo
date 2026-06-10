@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { streamChat, UnauthorizedError } from "./sse-client";
 import { Gate } from "./Gate";
 import { readCodeFromHash, authenticate, hasSession } from "./lib/gate";
+import { effectiveMode, gateOnGoLive } from "./lib/access";
 import { ChatView, type ChatMessage, type Preset } from "./ChatView";
 import { ClaudeChatView } from "./ClaudeChatView";
 import { FolioPanel } from "./FolioPanel";
@@ -54,6 +55,10 @@ export function App() {
   const recorder = useRef(recordParam && resolveInitialSkin() === "claude" ? createRecorder("dublin-oct") : null).current;
   const [authed, setAuthed] = useState<boolean | null>(null); // null = checking
   const [pendingCode, setPendingCode] = useState("");
+  // The reel is public: unauthed visitors are NOT blocked. Auth is required only
+  // to cross into the live demo — that crossing flips showOnboard on (Phase A
+  // renders the existing Gate; Phase B swaps in the self-serve OnboardingForm).
+  const [showOnboard, setShowOnboard] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
   const [skin, setSkin] = useState<SkinId>(() => {
     if (resolveInitialMode() === "auto") {
@@ -78,7 +83,7 @@ export function App() {
   // sessions" panel section. Fetched once on mount, like /presets.
   const [stats, setStats] = useState<StatsResponse | null>(null);
 
-  const [mode] = useState<ModeId>(resolveInitialMode);
+  const [mode, setMode] = useState<ModeId>(resolveInitialMode);
   // Advisor view: commission per item + trip total (real supplier data only).
   const [advisor, setAdvisor] = useState<boolean>(resolveInitialAdvisor);
   useEffect(() => { persistAdvisor(advisor); }, [advisor]);
@@ -235,9 +240,15 @@ export function App() {
       .catch(() => { /* section just stays hidden when stats are unavailable */ });
     const code = readCodeFromHash(window.location, window.history);
     (async () => {
-      if (code && (await authenticate(API_BASE, code))) { setAuthed(true); return; }
-      if (code) setPendingCode(code);
-      setAuthed(await hasSession(API_BASE));
+      let sess = false;
+      if (code && (await authenticate(API_BASE, code))) { sess = true; }
+      else {
+        if (code) setPendingCode(code);
+        sess = await hasSession(API_BASE);
+      }
+      setAuthed(sess);
+      // Unauthed visitors always land on the reel, even if localStorage persisted "live".
+      setMode((m) => effectiveMode(m, sess));
     })();
   }, []);
 
@@ -353,6 +364,8 @@ export function App() {
 
   // Switch to live mode via a clean reload (re-latches the session), optionally flagged post-reel.
   function goLive(greet: boolean) {
+    // Crossing into live requires a session — show the onboarding/gate when absent.
+    if (gateOnGoLive(authed === true)) { setShowOnboard(true); return; }
     persistMode("live");
     try {
       const u = new URL(window.location.href);
@@ -370,7 +383,7 @@ export function App() {
     try {
       await streamChat(API_BASE, text, (e) => { recorder?.recordEvent(e); applyEvent(e, claude); }, claude ? "boards" : undefined, { ...routingBody(modelMode, smartMap), faithful });
     } catch (err) {
-      if (err instanceof UnauthorizedError) { setAuthed(false); return; }
+      if (err instanceof UnauthorizedError) { setAuthed(false); setShowOnboard(true); return; }
       showError((err as Error).message);
     } finally {
       setBusy(false);
@@ -402,11 +415,14 @@ export function App() {
   }
   const demoLabel = mode === "auto" ? "● build your own" : "▶ watch the demo";
 
-  // access-control gate: block the app shell until a valid session exists.
+  // Reel is public — only block while we're still checking the session.
   if (authed === null) return <div style={{ margin: "12vh auto", textAlign: "center", color: "#888" }}>Loading…</div>;
-  if (!authed) return <Gate initialCode={pendingCode} onSubmit={async (c) => {
+  // The gate appears only when the visitor crosses into the live demo without a
+  // session (showOnboard), or after a mid-session expiry. Phase B replaces this
+  // <Gate> with the self-serve <OnboardingForm>.
+  if (!authed && showOnboard) return <Gate initialCode={pendingCode} onSubmit={async (c) => {
     const ok = await authenticate(API_BASE, c);
-    if (ok) setAuthed(true);
+    if (ok) { setAuthed(true); setShowOnboard(false); }
     return ok;
   }} />;
 
