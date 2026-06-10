@@ -386,6 +386,7 @@ export function App() {
           {skin === "claude" && mode === "auto" && reelPhase === "intro" && (
             <ReelIntro
               title={selectedReel.title} blurb={selectedReel.blurb} durationLabel={selectedReel.durationLabel}
+              eyebrow={selectedReel.intro?.eyebrow} note={selectedReel.intro?.note}
               onWatch={startReel} onPlanYourOwn={planYourOwn}
             />
           )}
@@ -407,7 +408,13 @@ export function App() {
             </div>
           )}
           {skin === "claude" && mode === "auto" && reelPhase === "ended" && (
-            <ReelEndCard onTryYourself={tryYourself} onReplay={startReel} />
+            <ReelEndCard
+              onTryYourself={tryYourself} onReplay={startReel}
+              recap={selectedReel.recap}
+              eyebrow={selectedReel.endCard?.eyebrow}
+              title={selectedReel.endCard?.title}
+              blurb={selectedReel.endCard?.blurb}
+            />
           )}
         </section>
         <section className="engineering" data-eng={eng}>

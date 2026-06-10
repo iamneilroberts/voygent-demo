@@ -30,4 +30,18 @@ describe("collab reel registration", () => {
     // it actually contains interaction frames (the whole point of P2)
     expect(entry.recording.frames.some((f) => f.kind === "interaction")).toBe(true);
   });
+
+  it("carries its own honest framing (not the 'real session' copy) since it is scripted", () => {
+    const entry = pickReel(REELS, "collab", 0);
+    expect(entry.recap?.length).toBeGreaterThan(0);
+    expect(entry.intro?.note).toMatch(/scripted/i);
+    expect(entry.endCard?.blurb).toMatch(/scripted walk-through/i);
+  });
+
+  it("dublin-oct keeps the default end card (it is a real recording)", () => {
+    const entry = pickReel(REELS, "dublin-oct", 0);
+    expect(entry.recap).toBeUndefined();
+    expect(entry.endCard).toBeUndefined();
+    expect(entry.intro).toBeUndefined();
+  });
 });

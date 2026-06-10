@@ -12,6 +12,12 @@ export interface ReelEntry {
   durationLabel: string; // e.g. "~2 min"
   recording: Recording;
   highlights: Highlight[];
+  // End-card overrides (per reel). Absent → the default "real session" end card,
+  // which is honest for dublin-oct (a real recording) but NOT for the scripted
+  // collab walk-through — so collab supplies its own honest framing + recap chips.
+  recap?: string[];
+  endCard?: { eyebrow: string; title: string; blurb: string };
+  intro?: { eyebrow: string; note: string };
 }
 
 export const REELS: ReelEntry[] = [
@@ -30,6 +36,16 @@ export const REELS: ReelEntry[] = [
     durationLabel: "~2 min",
     recording: dublinCollab.recording,
     highlights: dublinCollab.highlights,
+    recap: ["👥 advisor + traveler", "✦ picked together", "✎ advisor edits", "✉ sent to client", "💬 client commented"],
+    intro: {
+      eyebrow: "▶ Built together",
+      note: "The collaboration here is a scripted walk-through of the workflow.",
+    },
+    endCard: {
+      eyebrow: "✓ Built together",
+      title: "How a trip comes together",
+      blurb: "An advisor, the traveler, and the agent shaping one trip in a single thread. The collaboration here is a scripted walk-through of the workflow; your own run pulls real live flights and hotels.",
+    },
   },
 ];
 
