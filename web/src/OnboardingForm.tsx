@@ -6,10 +6,11 @@ const field: React.CSSProperties = {
   border: "1px solid #ccc", borderRadius: 8, boxSizing: "border-box",
 };
 
-export function OnboardingForm({ apiBase, onAuthed, onHaveCode }: {
+export function OnboardingForm({ apiBase, onAuthed, onHaveCode, onWantPro }: {
   apiBase: string;
   onAuthed: (tier: Tier) => void;
   onHaveCode: () => void;
+  onWantPro: () => void;
 }) {
   const [name, setName] = useState(""); const [email, setEmail] = useState("");
   const [role, setRole] = useState(""); const [note, setNote] = useState("");
@@ -63,6 +64,8 @@ export function OnboardingForm({ apiBase, onAuthed, onHaveCode }: {
       </p>
       <p style={{ fontSize: ".85rem" }}>
         <a href="#" onClick={(e) => { e.preventDefault(); onHaveCode(); }}>Already have a code?</a>
+        {" · "}
+        <a href="#" onClick={(e) => { e.preventDefault(); onWantPro(); }}>Want full credentialed access?</a>
       </p>
     </div>
   );

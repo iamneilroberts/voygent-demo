@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { streamChat, UnauthorizedError } from "./sse-client";
 import { Gate } from "./Gate";
 import { OnboardingForm } from "./OnboardingForm";
+import { ProAccessForm } from "./ProAccessForm";
 import { readCodeFromHash, authenticate, sessionInfo } from "./lib/gate";
 import { effectiveMode, gateOnGoLive, showPublicDisclaimer, type Tier } from "./lib/access";
 import { ChatView, type ChatMessage, type Preset } from "./ChatView";
@@ -61,6 +62,7 @@ export function App() {
   // renders the existing Gate; Phase B swaps in the self-serve OnboardingForm).
   const [showOnboard, setShowOnboard] = useState(false);
   const [forceGate, setForceGate] = useState(false); // "already have a code?" → passcode entry
+  const [showProForm, setShowProForm] = useState(false); // "request pro access" → credentialed-access request form
   const [tier, setTier] = useState<Tier | null>(null);
   const [collapsed, setCollapsed] = useState(false);
   const [skin, setSkin] = useState<SkinId>(() => {
@@ -434,6 +436,10 @@ export function App() {
   // The gate appears only when the visitor crosses into the live demo without a
   // session. Default to the self-serve onboarding form; "already have a code?"
   // (forceGate) switches to the passcode entry.
+  // Pro-access request form — a full takeover reachable from the public-source
+  // banner (live UI) or from the onboarding form. Guard ahead of the normal render.
+  if (showProForm) return <ProAccessForm apiBase={API_BASE} onDone={() => setShowProForm(false)} />;
+
   if (!authed && showOnboard) {
     if (forceGate) return <Gate initialCode={pendingCode} onSubmit={async (c) => {
       const r = await authenticate(API_BASE, c);
@@ -444,6 +450,7 @@ export function App() {
       apiBase={API_BASE}
       onAuthed={(t) => { setAuthed(true); setTier(t); setShowOnboard(false); enterLive(true); }}
       onHaveCode={() => setForceGate(true)}
+      onWantPro={() => setShowProForm(true)}
     />;
   }
 
@@ -453,8 +460,7 @@ export function App() {
         <div className="public-source-banner" role="note"
           style={{ padding: ".5rem 1rem", background: "#fff7e6", borderBottom: "1px solid #f0d9a8", fontSize: ".85rem", textAlign: "center" }}>
           Results are from public sources.{" "}
-          {/* D4 swaps this mailto for the in-app ProAccessForm. */}
-          <a href="mailto:support@voygent.ai?subject=Voygent%20pro%20access">Request pro access →</a>
+          <a href="#" onClick={(e) => { e.preventDefault(); setShowProForm(true); }}>Request pro access →</a>
         </div>
       )}
       {skin === "board" && (
