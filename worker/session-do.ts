@@ -19,13 +19,14 @@ import type { ConversationMessage, TokenUsage } from "./llm/provider";
 import type { ServerEvent } from "../shared/events";
 import { D1Db } from "./access/db";
 import { reconcile } from "./access/codes";
-import { pickBearer, type Tier } from "./access/tier";
+import { resolveLiveBearer, type Tier } from "./access/tier";
 
 interface Env {
   ANTHROPIC_API_KEY: string;
   VOYGENT_MCP_URL: string;
   VOYGENT_MCP_BEARER: string;               // credential-free (public tier) Voygent identity
   VOYGENT_MCP_BEARER_PRO?: string;          // real-credential (pro tier) identity; pro fails closed when unset
+  DEMO_PUBLIC_LIVE_ENABLED?: string;        // gate: unset ⇒ public-tier LIVE refused (fail closed)
   SESSION: DurableObjectNamespace;        // self-namespace; a reserved instance is the budget ledger
   LLM_MODEL?: string;                     // default/fallback model; per-turn routing overrides per call
   BUDGET_DAILY_USD?: string;              // global daily spend cap (default 5)
@@ -361,10 +362,11 @@ export class SessionDO {
     // (no bearer) so a public code can never reach real creds and a misconfigured pro
     // code can never silently fall back to credential-free access.
     const tier: Tier = req.headers.get("x-code-tier") === "pro" ? "pro" : "public";
-    const mcpBearer = pickBearer(tier, this.env);
-    if (!mcpBearer) {
-      return new Response("Pro access isn't enabled yet — contact Neil.", { status: 503 });
+    const live = resolveLiveBearer(tier, this.env);
+    if (!live.ok) {
+      return new Response(live.message, { status: 503 });
     }
+    const mcpBearer = live.bearer;
     // Read the request body exactly once (it carries message/mode + optional model-routing).
     const body = await req.json<{ message: string; mode?: string; model?: unknown; routing?: { discovery?: unknown; enrichment?: unknown }; faithful?: boolean }>();
     const { message, mode } = body;
