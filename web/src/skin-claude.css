@@ -90,6 +90,12 @@
   background: var(--cl-accent); animation: cl-pulse 1.2s ease-in-out infinite;
 }
 @keyframes cl-pulse { 0%, 100% { opacity: .35; transform: scale(.85); } 50% { opacity: 1; transform: scale(1); } }
+/* Live working indicator: dot + elapsed counter + reassurance, so a long run reads as
+   busy rather than hung. */
+:root[data-skin="claude"] .cl-thinking-live { display: flex; align-items: center; gap: 9px; padding: 6px 2px; }
+:root[data-skin="claude"] .cl-thinking-dot { flex: 0 0 auto; width: 10px; height: 10px; border-radius: 50%; background: var(--cl-accent); animation: cl-pulse 1.2s ease-in-out infinite; }
+:root[data-skin="claude"] .cl-thinking-label { font-size: .8125rem; color: var(--cl-muted); }
+:root[data-skin="claude"] .cl-thinking-sub { display: block; font-size: .75rem; color: var(--cl-muted); opacity: .8; }
 
 /* ---- tool-use pill ("Using Voygent — flight_search") ---- */
 :root[data-skin="claude"] .cl-tool { align-self: stretch; }
@@ -346,6 +352,10 @@
   /* during the reel, keep the folio inline so its guided callouts (day-by-day, edits,
      send) can anchor to on-screen targets instead of the hidden Folio sheet */
   :root[data-skin="claude"] .cl-folio-inline.in-reel { display: block; }
+  /* the "{Actor} chose this" mark overflows the narrow option card — drop it to its own
+     full-width line under the option instead of running off the right edge */
+  :root[data-skin="claude"] .cl-option { flex-wrap: wrap; }
+  :root[data-skin="claude"] .cl-option-wrap.picked .cl-option-mark { flex: 1 0 100%; width: auto; order: 9; margin-top: 5px; text-align: left; white-space: normal; }
   /* fixed desktop chrome would overlap the composer — hidden on mobile (demo toggle lives in the pill bar) */
   .skin-switch, .watch-demo { display: none; }
   /* declutter: keep ONE disambiguation (the ribbon); drop the redundant composer

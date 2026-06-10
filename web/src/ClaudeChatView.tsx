@@ -71,6 +71,29 @@ function CommentThread({ thread, dayTitle }: { thread: ReelThread; dayTitle: str
   );
 }
 
+// While the assistant is working with no content yet, a bare pulsing dot reads as hung
+// on a long live run. In live mode show an elapsed counter and, after a few seconds, a
+// reassurance line. In the reel (quick scripted beats) keep the plain dot.
+function WorkingIndicator({ live }: { live: boolean }) {
+  const [secs, setSecs] = useState(0);
+  useEffect(() => {
+    if (!live) return;
+    const t0 = performance.now();
+    const id = setInterval(() => setSecs(Math.floor((performance.now() - t0) / 1000)), 1000);
+    return () => clearInterval(id);
+  }, [live]);
+  if (!live) return <div className="cl-thinking" aria-label="Thinking"><span /></div>;
+  return (
+    <div className="cl-thinking cl-thinking-live" aria-live="polite" aria-label="Working">
+      <i className="cl-thinking-dot" aria-hidden="true" />
+      <span className="cl-thinking-label">
+        Voygent is working{secs >= 1 ? ` · ${secs}s` : "…"}
+        {secs >= 5 && <span className="cl-thinking-sub">running live searches, this can take up to a minute</span>}
+      </span>
+    </div>
+  );
+}
+
 function FolioArtifact({ folio, advisor, edits, threads, showSend, sent }: { folio: FolioData; advisor: boolean; edits: ReelEditMarker[]; threads: ReelThread[]; showSend?: boolean; sent?: boolean }) {
   const commTotal = advisor ? commissionTotal(folio.hotels) : null;
   // A title-only card (trip created, nothing promoted yet) is just noise inline.
@@ -286,7 +309,7 @@ export function ClaudeChatView(
             if (it.role === "board") return <BoardView key={it.boardId} board={it} busy={busy} advisor={advisor} onPick={onPick} selectedCandidate={reelView.selected[it.boardId]} />;
             if (it.role === "user") return <div key={i} className="cl-msg-user">{it.text}</div>;
             if (it.text) return <div key={i} className="cl-prose"><Prose text={it.text} /></div>;
-            return busy && i === lastIdx ? <div key={i} className="cl-thinking" aria-label="Thinking"><span /></div> : null;
+            return busy && i === lastIdx ? <WorkingIndicator key={i} live={!reelMode} /> : null;
           })}
           {folio && <div className={`cl-folio-inline${reelMode ? " in-reel" : ""}`}><FolioArtifact folio={folio} advisor={advisor} edits={reelView.edits} threads={reelView.threads} showSend={reelMode} sent={!!reelView.handoff?.sent} /></div>}
           <div ref={endRef} />

@@ -708,7 +708,15 @@ export class SessionDO {
     })();
 
     return new Response(mux.readable, {
-      headers: { "content-type": "text/event-stream", "cache-control": "no-cache", "access-control-allow-origin": "*" },
+      headers: {
+        "content-type": "text/event-stream",
+        // no-transform stops the edge from buffering/compressing the stream, and
+        // x-accel-buffering: no disables proxy buffering — without these the SSE can
+        // arrive all at once at the end of a long agent run instead of incrementally.
+        "cache-control": "no-cache, no-transform",
+        "x-accel-buffering": "no",
+        "access-control-allow-origin": "*",
+      },
     });
   }
 }
