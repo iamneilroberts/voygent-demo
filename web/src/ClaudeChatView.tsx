@@ -342,7 +342,10 @@ export function ClaudeChatView(
           {engHasContent && (
             <button type="button" className={`cl-pill ${mobileView === "engineering" ? "on" : ""}`} onClick={() => onMobileView(toggleMobileView(mobileView, "engineering"))}>⚙ Engineering</button>
           )}
-          <button type="button" className="cl-pill" onClick={onToggleDemo}>{demoLabel}</button>
+          {/* No mid-reel "build your own" shortcut — the flow is reel → get auth → live
+              demo via the end-of-reel CTA. Keep the toggle in live mode (it reads
+              "watch the demo"), matching the desktop button. */}
+          {!reelMode && <button type="button" className="cl-pill" onClick={onToggleDemo}>{demoLabel}</button>}
         </div>
         <form
           className="cl-composer"
