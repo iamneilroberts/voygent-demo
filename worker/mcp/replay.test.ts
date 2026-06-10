@@ -154,6 +154,21 @@ describe("credentialed cpmaxx hotel replay", () => {
     expect(first).not.toHaveProperty("marketingBlurb");
   });
 
+  it("cpmaxx slim payload carries travelers + allInclusive (cheap context, no heavy fields)", () => {
+    const r = new FixtureReplay("demo-x");
+    const out = JSON.parse(r["hotelSearch"]({ location: "Cancun" }));
+    const first = out.candidates[0];
+    expect(first.travelers).toBe(CANCUN.route.adults); // 2
+    expect(first.nights).toBe(cpmaxxHotelsFor(CANCUN)[0].nights);
+    expect(typeof first.allInclusive).toBe("boolean");
+    // a Cancun resort whose blurb says all-inclusive flags true
+    const dreams = out.candidates.find((c: any) => c.id === "497758");
+    expect(dreams.allInclusive).toBe(true);
+    // heavy fields stay OUT of the model payload
+    expect(first).not.toHaveProperty("hotelSheetUrl");
+    expect(first).not.toHaveProperty("marketingBlurb");
+  });
+
   it("hotel_list replays the same cpmaxx set after a search", () => {
     const r = new FixtureReplay("demo-x");
     r["hotelSearch"]({ location: "Cancun" });

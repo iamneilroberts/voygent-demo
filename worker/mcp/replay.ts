@@ -121,13 +121,20 @@ function otaFrom(c: CpmaxxHotel): number | null {
   return vals.length ? Math.min(...vals) : null;
 }
 
+// True when the captured marketing blurb describes an all-inclusive resort. Derived
+// from the blurb (which we DON'T ship) so the board/folio can show the context chip
+// without the blurb bloating the model payload.
+function isAllInclusive(c: CpmaxxHotel): boolean {
+  return /all[-\s]?inclusive/i.test(c.marketingBlurb ?? "");
+}
+
 // Slim, model-facing cpmaxx hotel. Deliberately LIGHT: the heavy out-of-band
 // fields the human board/folio want (photo, the long base64 hotel-sheet URL,
 // marketing blurb) are NOT here — the board enriches those from the fixture by id
 // (cpmaxxHotelById) and the folio synthesizes from the fixture in promoteHotels.
 // So the credentialed advisor data (commission, profit, client price) rides in a
 // tiny payload — the whole "couldn't come from Google, and it's slim" wow.
-function slimCpmaxxHotel(c: CpmaxxHotel) {
+function slimCpmaxxHotel(c: CpmaxxHotel, travelers: number) {
   return {
     id: c.id,
     source: "cpmaxx" as const,
@@ -138,6 +145,8 @@ function slimCpmaxxHotel(c: CpmaxxHotel) {
     priceTotal: c.priceTotal ?? null,
     nights: c.nights ?? null,
     currency: c.currency ?? "USD",
+    travelers,
+    allInclusive: isAllInclusive(c),
     commission: c.commission ?? null,
     commissionPct: c.commissionPct ?? null,
     clientPrice: c.clientPrice ?? null,
@@ -416,7 +425,7 @@ export class FixtureReplay {
     // advisor-network view (commission, profit, quote-sheet) is the whole point.
     const cpmaxx = cpmaxxHotelsFor(fixture);
     if (cpmaxx.length) {
-      const candidates = cpmaxx.map(slimCpmaxxHotel);
+      const candidates = cpmaxx.map((h) => slimCpmaxxHotel(h, fixture.route.adults));
       const payload = JSON.stringify({
         status: "ok", source: "cpmaxx", tripId: this.tripId, count: candidates.length, candidates,
         _next: "Present a few to the advisor (commission/profit are advisor-only). Stage up to 3 picks with patch_trip updates {hotels:[{_candidateId:'<id>'},...]}, then call promote_hotels_to_lodging.",
@@ -443,7 +452,7 @@ export class FixtureReplay {
     }
     const cpmaxx = cpmaxxHotelsFor(fixture);
     if (cpmaxx.length) {
-      const candidates = cpmaxx.map(slimCpmaxxHotel);
+      const candidates = cpmaxx.map((h) => slimCpmaxxHotel(h, fixture.route.adults));
       const payload = JSON.stringify({ status: "ok", source: "cpmaxx", action: "list", tripId: this.tripId, count: candidates.length, version: 1, candidates });
       this.measurement = { tool: "hotelList", modelFacingTokens: estTokens(payload) };
       return payload;
