@@ -44,15 +44,30 @@ export function ReelCallout(
     return () => clearTimeout(t);
   }, [dwellMs, onContinue, paused]);
 
-  // Card placement: prefer left of the target (stats sit on the right pane); else right; clamp to viewport.
+  // Card placement: beside the target when there's horizontal room (desktop). On a
+  // narrow screen a full-width target leaves no side room, so the card would cover it —
+  // instead drop to the opposite vertical half (default low, so the TOP of a tall target
+  // like the flight board, where the chosen option sits, stays visible).
   const CARD_W = 272, GAP = 14, MARGIN = 12;
   let cardStyle: CSSProperties;
   if (rect) {
     const vw = window.innerWidth, vh = window.innerHeight;
-    let left = rect.left >= CARD_W + GAP + MARGIN ? rect.left - CARD_W - GAP : rect.left + rect.width + GAP;
-    left = Math.max(MARGIN, Math.min(left, vw - CARD_W - MARGIN));
-    let top = Math.max(MARGIN, Math.min(rect.top + rect.height / 2 - 60, vh - 170));
-    cardStyle = { position: "fixed", left, top, width: CARD_W };
+    const rectRight = rect.left + rect.width;
+    const roomLeft = rect.left >= CARD_W + GAP + MARGIN;
+    const roomRight = (vw - rectRight) >= CARD_W + GAP + MARGIN;
+    if (roomLeft || roomRight) {
+      const left = Math.max(MARGIN, Math.min(roomLeft ? rect.left - CARD_W - GAP : rectRight + GAP, vw - CARD_W - MARGIN));
+      const top = Math.max(MARGIN, Math.min(rect.top + rect.height / 2 - 60, vh - 170));
+      cardStyle = { position: "fixed", left, top, width: CARD_W };
+    } else {
+      const cardW = Math.min(CARD_W, vw - 2 * MARGIN);
+      const left = Math.round((vw - cardW) / 2);
+      // Place high only when the target sits in the bottom third (e.g. a send button);
+      // otherwise place low so the target's top stays uncovered.
+      const targetMid = rect.top + rect.height / 2;
+      const top = targetMid > vh * 0.62 ? MARGIN : Math.round(vh * 0.62);
+      cardStyle = { position: "fixed", left, top, width: cardW };
+    }
   } else {
     cardStyle = { position: "fixed", left: "50%", top: "28%", width: CARD_W, transform: "translateX(-50%)" };
   }
