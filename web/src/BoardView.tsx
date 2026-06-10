@@ -96,12 +96,11 @@ export function BoardView(
                   {advisor && typeof c.commission === "number" && (
                     <span className="cl-option-comm">{commissionLabel(c.commission, c.commissionPct)}</span>
                   )}
-                  {advisor && (typeof c.otaFrom === "number" || typeof c.clientPrice === "number") && (
-                    <span className="cl-option-ladder">
-                      {typeof c.otaFrom === "number" && <>public {fmtUsd(c.otaFrom)}/nt</>}
-                      {typeof c.otaFrom === "number" && typeof c.clientPrice === "number" && " · "}
-                      {typeof c.clientPrice === "number" && <>client {fmtUsd(c.clientPrice)}</>}
-                    </span>
+                  {board.kind === "flight" && typeof c.perPerson === "number" && (
+                    <span className="cl-option-ladder">{fmtUsd(c.perPerson)} each</span>
+                  )}
+                  {advisor && typeof c.otaFrom === "number" && typeof c.nights === "number" && (
+                    <span className="cl-option-ladder">below public {fmtUsd(c.otaFrom * c.nights)}</span>
                   )}
                 </span>
                 <span className="cl-option-mark" aria-hidden={reelActor || liveHi ? undefined : "true"}>
