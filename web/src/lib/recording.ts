@@ -37,6 +37,11 @@ export interface ReplayOpts {
   signal?: AbortSignal;
   speed?: () => number;                  // current speed multiplier (>=1); read each frame
   highlights?: Highlight[];              // sidecar callouts for this recording
+  // Playback control: awaited before each frame; resolves immediately when not paused,
+  // otherwise when the viewer resumes. Raced against abort so a restart never hangs.
+  pauseGate?: () => Promise<void>;
+  // Progress tick: (framesDone, framesTotal) before each frame and once at the end.
+  onProgress?: (done: number, total: number) => void;
 }
 
 function sleep(ms: number, signal?: AbortSignal): Promise<void> {
@@ -66,6 +71,9 @@ export async function replayChat(rec: Recording, h: ReplayHandlers, opts: Replay
   for (let i = 0; i < rec.frames.length; i++) {
     const f = rec.frames[i];
     if (opts.signal?.aborted) return;
+    // Hold here while paused (abort-safe). When not paused this resolves immediately.
+    if (opts.pauseGate) { await Promise.race([opts.pauseGate(), waitForAbort(opts.signal)]); if (opts.signal?.aborted) return; }
+    opts.onProgress?.(i, rec.frames.length);
     await wait(computeDelay(f, prev, { speed: getSpeed(), reducedMotion: opts.reducedMotion }));
     if (opts.signal?.aborted) return;
     if (f.kind === "user") { h.pushUser(f.text); h.setBusy(true); }
@@ -90,4 +98,5 @@ export async function replayChat(rec: Recording, h: ReplayHandlers, opts: Replay
       }
     }
   }
+  opts.onProgress?.(rec.frames.length, rec.frames.length);
 }

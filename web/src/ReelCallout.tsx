@@ -13,8 +13,8 @@ function findTarget(target: string): HTMLElement | null {
 interface Rect { top: number; left: number; width: number; height: number }
 
 export function ReelCallout(
-  { highlight, dwellMs, onContinue }:
-  { highlight: Highlight; dwellMs: number; onContinue: () => void },
+  { highlight, dwellMs, onContinue, paused }:
+  { highlight: Highlight; dwellMs: number; onContinue: () => void; paused?: boolean },
 ) {
   // rect = the target's viewport rect when it's on-screen; null => no/offscreen target (centered fallback).
   const [rect, setRect] = useState<Rect | null>(null);
@@ -35,12 +35,14 @@ export function ReelCallout(
     return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", measure); };
   }, [highlight.target]);
 
-  // Auto-resume after dwell (reduced-motion = instant).
+  // Auto-resume after dwell (reduced-motion = instant). While paused, no timer is
+  // armed (only the Continue button advances); resuming re-arms a fresh dwell.
   useEffect(() => {
+    if (paused) return;
     const reduced = (() => { try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; } })();
     const t = setTimeout(onContinue, reduced ? 0 : dwellMs);
     return () => clearTimeout(t);
-  }, [dwellMs, onContinue]);
+  }, [dwellMs, onContinue, paused]);
 
   // Card placement: prefer left of the target (stats sit on the right pane); else right; clamp to viewport.
   const CARD_W = 272, GAP = 14, MARGIN = 12;
@@ -65,7 +67,7 @@ export function ReelCallout(
         <h4 className="cl-reel-callout-h">{highlight.title}</h4>
         <p className="cl-reel-callout-b">{highlight.body}</p>
         <div className="cl-reel-callout-bar">
-          <span className="cl-reel-prog"><i style={{ animationDuration: `${dwellMs}ms` }} /></span>
+          <span className="cl-reel-prog"><i style={{ animationDuration: `${dwellMs}ms`, animationPlayState: paused ? "paused" : "running" }} /></span>
           <button type="button" className="cl-reel-continue" onClick={onContinue}>Continue ▶</button>
         </div>
       </div>

@@ -107,6 +107,15 @@ export function App() {
   const [speed, setSpeed] = useState<number>(2);          // default 2x
   const speedRef = useRef(speed); useEffect(() => { speedRef.current = speed; }, [speed]);
   const [activeHighlight, setActiveHighlight] = useState<Highlight | null>(null);
+  // Playback transport: pause/resume gate (a ref so the replay closure reads the live
+  // value) + waiters resolved on resume; progress = (framesDone, framesTotal).
+  const [paused, setPaused] = useState(false);
+  const pausedRef = useRef(false);
+  const resumeWaiters = useRef<Array<() => void>>([]);
+  const [reelProg, setReelProg] = useState<{ done: number; total: number }>({ done: 0, total: 0 });
+  function flushResume() { const ws = resumeWaiters.current; resumeWaiters.current = []; ws.forEach((r) => r()); }
+  function pauseGate(): Promise<void> { return pausedRef.current ? new Promise<void>((res) => resumeWaiters.current.push(res)) : Promise.resolve(); }
+  function togglePause() { setPaused((p) => { const next = !p; pausedRef.current = next; if (!next) flushResume(); return next; }); }
   // Reel interaction view-state; consumed by ClaudeChatView render.
   const [reelView, setReelView] = useState<ReelViewState>(emptyReelViewState);
   const hlResolve = useRef<(() => void) | null>(null);
@@ -156,12 +165,16 @@ export function App() {
       signal: ac.signal,
       speed: () => speedRef.current,
       highlights: selectedReel.highlights,
+      pauseGate,
+      onProgress: (done, total) => setReelProg({ done, total }),
     }).then(() => { if (!ac.signal.aborted) setReelPhase("ended"); });
     return () => {
       ac.abort();
       // Settle any paused callout so the replayChat loop's Promise.race resolves and
       // no stale spotlight survives a restart/mode-switch (Codex review).
       hlResolve.current?.(); hlResolve.current = null; setActiveHighlight(null);
+      // Release a paused gate so the aborted loop's Promise.race can resolve.
+      flushResume();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, reelPhase]);
@@ -281,6 +294,7 @@ export function App() {
     setInsTools([]); setInsTurns([]); setInsSummaries([]); setInsSavings([]);
     setInsOverhead([]); setInsStores([]); setInsValidations([]); setInsPhases([]);
     stagedBlob.current = "";   // forget prior picks so a Replay re-resolves cleanly
+    setPaused(false); pausedRef.current = false; flushResume(); setReelProg({ done: 0, total: 0 });
     // Clear any in-flight callout so a Replay never starts under a stale spotlight (Codex review).
     hlResolve.current?.(); hlResolve.current = null; setActiveHighlight(null);
     setReelView(emptyReelViewState());   // P2: clear picks/edits/threads/handoff
@@ -395,6 +409,7 @@ export function App() {
               key={activeHighlight.title}
               highlight={activeHighlight}
               dwellMs={activeHighlight.dwellMs ?? 4000}
+              paused={paused}
               onContinue={() => hlResolve.current?.()}
             />
           )}
@@ -402,9 +417,16 @@ export function App() {
             <ReelHandoffNotice key={reelView.handoff.subject ?? "handoff"} handoff={reelView.handoff} />
           )}
           {skin === "claude" && mode === "auto" && reelPhase === "playing" && (
-            <div className="cl-reel-speed" role="group" aria-label="Playback speed">
-              <button type="button" aria-pressed={speed === 1} onClick={() => setSpeed(1)}>1×</button>
-              <button type="button" aria-pressed={speed === 2} onClick={() => setSpeed(2)}>2×</button>
+            <div className="cl-reel-controls" role="group" aria-label="Playback controls">
+              <button type="button" className="cl-reel-ctl" aria-pressed={paused} aria-label={paused ? "Play" : "Pause"} onClick={togglePause}>{paused ? "▶" : "❚❚"}</button>
+              <button type="button" className="cl-reel-ctl" aria-label="Restart" onClick={startReel}>↺</button>
+              <div className="cl-reel-track" role="progressbar" aria-label="Playback progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={reelProg.total ? Math.round((reelProg.done / reelProg.total) * 100) : 0}>
+                <i style={{ width: `${reelProg.total ? Math.round((reelProg.done / reelProg.total) * 100) : 0}%` }} />
+              </div>
+              <div className="cl-reel-speed">
+                <button type="button" aria-pressed={speed === 1} onClick={() => setSpeed(1)}>1×</button>
+                <button type="button" aria-pressed={speed === 2} onClick={() => setSpeed(2)}>2×</button>
+              </div>
             </div>
           )}
           {skin === "claude" && mode === "auto" && reelPhase === "ended" && (

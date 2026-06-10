@@ -149,3 +149,42 @@ describe("replayChat interaction frames", () => {
     expect(waits.some((w) => w >= 3000)).toBe(false);
   });
 });
+
+describe("replayChat transport (pause + progress)", () => {
+  it("holds at the pause gate until it resolves, then continues", async () => {
+    const rec: Recording = { skin: "claude", trip: "t", frames: [
+      { delayMs: 1, kind: "event", event: { type: "text", delta: "a" } as ServerEvent },
+      { delayMs: 1, kind: "event", event: { type: "text", delta: "b" } as ServerEvent },
+      { delayMs: 1, kind: "turn-end" },
+    ] };
+    const applied: string[] = [];
+    let release!: () => void;
+    let calls = 0;
+    const done = replayChat(rec, {
+      applyEvent: (e) => applied.push((e as { delta?: string }).delta ?? e.type),
+      pushUser: () => {},
+      setBusy: () => {},
+    }, {
+      wait: async () => {},
+      // pause the gate on the 2nd frame; resolve immediately otherwise.
+      pauseGate: () => { calls++; return calls === 2 ? new Promise<void>((r) => { release = r; }) : Promise.resolve(); },
+    });
+    await new Promise((r) => setTimeout(r, 0));
+    expect(applied).toEqual(["a"]);   // held before the 2nd frame applies
+    release();
+    await done;
+    expect(applied).toEqual(["a", "b"]);
+  });
+
+  it("reports progress per frame and a final tick at the total", async () => {
+    const rec: Recording = { skin: "claude", trip: "t", frames: [
+      { delayMs: 1, kind: "event", event: { type: "text", delta: "a" } as ServerEvent },
+      { delayMs: 1, kind: "turn-end" },
+    ] };
+    const prog: Array<[number, number]> = [];
+    await replayChat(rec, { applyEvent: () => {}, pushUser: () => {}, setBusy: () => {} },
+      { wait: async () => {}, onProgress: (d, t) => prog.push([d, t]) });
+    expect(prog[0]).toEqual([0, 2]);
+    expect(prog.at(-1)).toEqual([2, 2]);   // final tick at 100%
+  });
+});

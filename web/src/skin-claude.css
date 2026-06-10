@@ -383,13 +383,20 @@
 @keyframes cl-reel-fill { from { width: 0 } to { width: 100% } }
 :root[data-skin="claude"] .cl-reel-continue { background: none; border: none; color: var(--cl-accent); font: 600 .6875rem/1 var(--cl-mono); cursor: pointer; }
 
-/* Speed toggle — absolutely positioned in the top-right of .product while playing.
-   MUST be positioned (Codex review): as a plain inline-flex child it would push the layout. */
-:root[data-skin="claude"] .cl-reel-speed {
+/* Playback transport — absolutely positioned in the top-right of .product while
+   playing. MUST be positioned (Codex review): a plain inline child would push layout. */
+:root[data-skin="claude"] .cl-reel-controls {
   position: absolute; top: 12px; right: 16px; z-index: 60;
-  display: inline-flex; gap: 2px; background: var(--cl-surface);
-  border: 1px solid var(--cl-line); border-radius: 8px; padding: 2px;
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--cl-surface); border: 1px solid var(--cl-line); border-radius: 10px; padding: 4px 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
 }
+:root[data-skin="claude"] .cl-reel-ctl { background: none; border: none; padding: 4px 6px; border-radius: 6px; font: 600 .75rem/1 var(--cl-mono); color: var(--cl-ink-2); cursor: pointer; min-width: 22px; }
+:root[data-skin="claude"] .cl-reel-ctl:hover { background: var(--cl-tool-bg); }
+:root[data-skin="claude"] .cl-reel-ctl[aria-pressed="true"] { color: var(--cl-accent); }
+:root[data-skin="claude"] .cl-reel-track { width: 88px; height: 4px; border-radius: 2px; background: var(--cl-line); overflow: hidden; }
+:root[data-skin="claude"] .cl-reel-track i { display: block; height: 100%; background: var(--cl-accent); transition: width .25s linear; }
+:root[data-skin="claude"] .cl-reel-speed { display: inline-flex; gap: 2px; }
 :root[data-skin="claude"] .cl-reel-speed button { background: none; border: none; padding: 4px 8px; border-radius: 6px; font: 600 .6875rem/1 var(--cl-mono); color: var(--cl-muted); cursor: pointer; }
 :root[data-skin="claude"] .cl-reel-speed button[aria-pressed="true"] { background: var(--cl-accent); color: var(--cl-accent-ink); }
 
