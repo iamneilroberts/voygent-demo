@@ -25,20 +25,37 @@ function FlightLegs({ legs }: { legs: FlightLeg[] }) {
   );
 }
 
-// Inline chooser board — the claude.ai "MCP app" moment. Candidates render as
-// clickable option cards; a click sends the selection back to the agent as the
-// next user turn. Once resolved (clicked, or the agent promoted after a typed
-// reply) the board locks: the pick stays highlighted, siblings dim.
+// Inline chooser board — the claude.ai "MCP app" moment. In live (interactive)
+// mode a click only HIGHLIGHTS an option (and opens its detail) — nothing is
+// committed until the explicit "Confirm" button, so the advisor can explore
+// without locking the trip. In the reel (scripted) a click keeps the legacy
+// immediate-pick path; reel picks are driven by `selectedCandidate`. Once
+// resolved the board locks: the pick stays highlighted, siblings dim.
 export function BoardView(
-  { board, busy, advisor, onPick, selectedCandidate }:
-  { board: BoardItem; busy: boolean; advisor: boolean; onPick: (board: BoardItem, c: BoardCandidate) => void; selectedCandidate?: { candidateIds: string[]; actor: Actor } },
+  { board, busy, advisor, onPick, selectedCandidate, reelMode }:
+  { board: BoardItem; busy: boolean; advisor: boolean; onPick: (board: BoardItem, c: BoardCandidate) => void; selectedCandidate?: { candidateIds: string[]; actor: Actor }; reelMode?: boolean },
 ) {
   // Per-candidate expand state for the routing detail. Undefined = follow the default
-  // (the picked option auto-expands so the chosen routing is visible); a click overrides.
+  // (the highlighted/picked option auto-expands so the routing is visible); a click overrides.
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  // Live highlight: the option the advisor is considering, not yet committed.
+  const [highlighted, setHighlighted] = useState<string | null>(null);
   const hasReelSelection = (selectedCandidate?.candidateIds.length ?? 0) > 0;
   const locked = board.resolved || !!board.resolvedId || hasReelSelection;
+  const interactive = !reelMode; // live driving = highlight, then confirm
+  const kindWord = board.kind === "flight" ? "flight" : board.kind === "hotel" ? "hotel" : "option";
   const title = board.kind === "flight" ? "Select a flight" : board.kind === "includes" ? "Choose what to include" : "Choose a hotel";
+
+  function rowClick(c: BoardCandidate) {
+    if (locked || busy) return;
+    if (interactive) { setHighlighted((h) => (h === c.id ? null : c.id)); return; }
+    onPick(board, c); // reel/auto path keeps the immediate-pick behavior
+  }
+  function confirm() {
+    const c = board.candidates.find((x) => x.id === highlighted);
+    if (c) onPick(board, c);
+  }
+
   return (
     <div className="cl-board" role="group" aria-label={title} data-reel-target={`board-${board.kind}`}>
       <div className="cl-board-title">{title}</div>
@@ -46,16 +63,18 @@ export function BoardView(
         {board.candidates.map((c) => {
           const reelActor = pickedActor(selectedCandidate, c.id);
           const picked = board.resolvedId === c.id || reelActor != null;
+          const liveHi = interactive && !locked && highlighted === c.id;
           const detail = safeHttpUrl(c.detailUrl);
           const hasLegs = !!c.legs && c.legs.length > 0;
-          const open = c.id in expanded ? expanded[c.id] : (picked && hasLegs);
+          const open = c.id in expanded ? expanded[c.id] : ((liveHi || picked) && hasLegs);
           return (
-            <div key={c.id} className={`cl-option-wrap ${picked ? "picked" : ""} ${picked && reelActor ? actorClass(reelActor) : ""} ${locked && !picked ? "dimmed" : ""}`}>
+            <div key={c.id} className={`cl-option-wrap ${picked ? "picked" : ""} ${liveHi ? "selected" : ""} ${picked && reelActor ? actorClass(reelActor) : ""} ${locked && !picked ? "dimmed" : ""}`}>
               <button
                 type="button"
                 className="cl-option"
                 disabled={locked || busy}
-                onClick={() => onPick(board, c)}
+                aria-pressed={interactive ? liveHi : undefined}
+                onClick={() => rowClick(c)}
               >
                 <span className="cl-option-main">
                   <span className="cl-option-titlerow">
@@ -70,8 +89,8 @@ export function BoardView(
                     <span className="cl-option-comm">{commissionLabel(c.commission, c.commissionPct)}</span>
                   )}
                 </span>
-                <span className="cl-option-mark" aria-hidden={reelActor ? undefined : "true"}>
-                  {picked ? (reelActor ? `✓ ${actorLabel(reelActor)} chose this` : "✓") : ""}
+                <span className="cl-option-mark" aria-hidden={reelActor || liveHi ? undefined : "true"}>
+                  {picked ? (reelActor ? `✓ ${actorLabel(reelActor)} chose this` : "✓") : (liveHi ? "●" : "")}
                 </span>
               </button>
               {(hasLegs || detail) && (
@@ -96,7 +115,15 @@ export function BoardView(
           );
         })}
       </div>
-      {!locked && <div className="cl-board-hint">Tap an option, or just tell me what you prefer.</div>}
+      {interactive && !locked && (
+        <div className="cl-board-actions">
+          <button type="button" className="cl-board-confirm" disabled={!highlighted || busy} onClick={confirm}>
+            {board.kind === "flight" ? "Confirm flight →" : board.kind === "hotel" ? "Choose this hotel →" : "Confirm →"}
+          </button>
+          {!highlighted && <span className="cl-board-hint">Tap a {kindWord} to see details, or just tell me what you prefer.</span>}
+        </div>
+      )}
+      {!interactive && !locked && <div className="cl-board-hint">Tap an option, or just tell me what you prefer.</div>}
     </div>
   );
 }

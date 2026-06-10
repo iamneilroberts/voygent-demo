@@ -166,7 +166,19 @@
 }
 :root[data-skin="claude"] .cl-option:hover:not(:disabled) { border-color: var(--cl-accent); box-shadow: 0 1px 4px rgba(201, 100, 66, .15); }
 :root[data-skin="claude"] .cl-option:disabled { cursor: default; }
+/* Live highlight: considering this option, not yet committed (distinct from picked). */
+:root[data-skin="claude"] .cl-option-wrap.selected .cl-option { border-color: var(--cl-accent); box-shadow: 0 0 0 2px rgba(201, 100, 66, .18); }
+:root[data-skin="claude"] .cl-option-wrap.selected .cl-option-mark { color: var(--cl-accent); }
 :root[data-skin="claude"] .cl-option-wrap.picked .cl-option { border-color: var(--cl-accent); background: #fdf6f2; }
+:root[data-skin="claude"] .cl-board-actions { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+:root[data-skin="claude"] .cl-board-actions .cl-board-hint { margin-top: 0; }
+:root[data-skin="claude"] .cl-board-confirm {
+  font: 600 .8125rem/1 var(--cl-sans); color: var(--cl-accent-ink); background: var(--cl-accent);
+  border: 0; border-radius: 8px; padding: 9px 16px; cursor: pointer; white-space: nowrap;
+  transition: filter .15s, opacity .15s;
+}
+:root[data-skin="claude"] .cl-board-confirm:hover:not(:disabled) { filter: brightness(1.06); }
+:root[data-skin="claude"] .cl-board-confirm:disabled { opacity: .4; cursor: default; }
 
 /* Reel pick: actor color overrides the default accent on the picked option. */
 :root[data-skin="claude"] .cl-option-wrap.picked.cl-actor-client .cl-option { border-color: var(--cl-actor-client); background: var(--cl-actor-client-soft); }

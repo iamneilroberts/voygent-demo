@@ -336,7 +336,7 @@ export function ClaudeChatView(
           {firstRun && <Welcome presets={presets} geoCity={geoCity} onSend={onSend} busy={busy} postReel={postReel} />}
           {items.map((it, i) => {
             if (it.role === "toolchip") return <ClaudeToolChip key={i} item={it} />;
-            if (it.role === "board") return <BoardView key={it.boardId} board={it} busy={busy} advisor={advisor} onPick={onPick} selectedCandidate={reelView.selected[it.boardId]} />;
+            if (it.role === "board") return <BoardView key={it.boardId} board={it} busy={busy} advisor={advisor} onPick={onPick} selectedCandidate={reelView.selected[it.boardId]} reelMode={reelMode} />;
             if (it.role === "user") return <div key={i} className="cl-msg-user">{it.text}</div>;
             if (it.text) return <div key={i} className="cl-prose"><Prose text={it.text} /></div>;
             return busy && i === lastIdx ? <WorkingIndicator key={i} live={!reelMode} /> : null;
