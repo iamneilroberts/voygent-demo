@@ -120,6 +120,9 @@ export function App() {
   const scrubbingRef = useRef(false);
   const scrubValRef = useRef(0);
   const [scrubPct, setScrubPct] = useState<number | null>(null);
+  // Frame-number readout (off by default; persisted) — lets us refer to an exact spot.
+  const [showFrameNum, setShowFrameNum] = useState<boolean>(() => { try { return localStorage.getItem("voygent-reel-frameno") === "1"; } catch { return false; } });
+  function toggleFrameNum() { setShowFrameNum((s) => { const n = !s; try { localStorage.setItem("voygent-reel-frameno", n ? "1" : "0"); } catch { /* ignore */ } return n; }); }
   function flushResume() { const ws = resumeWaiters.current; resumeWaiters.current = []; ws.forEach((r) => r()); }
   function pauseGate(): Promise<void> { return pausedRef.current ? new Promise<void>((res) => resumeWaiters.current.push(res)) : Promise.resolve(); }
   function togglePause() { setPaused((p) => { const next = !p; pausedRef.current = next; if (!next) flushResume(); return next; }); }
@@ -461,6 +464,8 @@ export function App() {
                 <button type="button" aria-pressed={speed === 1} onClick={() => setSpeed(1)}>1×</button>
                 <button type="button" aria-pressed={speed === 2} onClick={() => setSpeed(2)}>2×</button>
               </div>
+              <button type="button" className="cl-reel-ctl" aria-pressed={showFrameNum} aria-label="Toggle frame number" title="Frame number" onClick={toggleFrameNum}>#</button>
+              {showFrameNum && <span className="cl-reel-frameno" aria-live="off">{reelProg.done}/{reelProg.total}</span>}
             </div>
           )}
           {skin === "claude" && mode === "auto" && reelPhase === "ended" && (

@@ -400,6 +400,7 @@
 :root[data-skin="claude"] .cl-reel-track i::after { content: ""; position: absolute; right: -4px; top: 50%; transform: translateY(-50%); width: 10px; height: 10px; border-radius: 50%; background: var(--cl-accent); }
 :root[data-skin="claude"] .cl-reel-seek { position: absolute; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: pointer; }
 :root[data-skin="claude"] .cl-reel-track:focus-within { outline: 2px solid var(--cl-accent); outline-offset: 3px; border-radius: 3px; }
+:root[data-skin="claude"] .cl-reel-frameno { font: 600 .6875rem/1 var(--cl-mono); color: var(--cl-muted); font-variant-numeric: tabular-nums; padding: 0 2px; min-width: 38px; text-align: center; }
 :root[data-skin="claude"] .cl-reel-speed { display: inline-flex; gap: 2px; }
 :root[data-skin="claude"] .cl-reel-speed button { background: none; border: none; padding: 4px 8px; border-radius: 6px; font: 600 .6875rem/1 var(--cl-mono); color: var(--cl-muted); cursor: pointer; }
 :root[data-skin="claude"] .cl-reel-speed button[aria-pressed="true"] { background: var(--cl-accent); color: var(--cl-accent-ink); }
