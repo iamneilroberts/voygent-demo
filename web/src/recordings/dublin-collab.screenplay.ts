@@ -185,6 +185,9 @@ export const dublinCollab = screenplay({ trip: "Dublin · collab", skin: "claude
   s.agent.tool("validate_trip", { summary: "Goals met · pacing · step-free checks" });
   s.agent.says("Here's the week, day by day, with food worked in. I kept it history-leaning and stayed away from anything strenuous.");
   s.agent.folio(withDays);
+  // One peek under the hood — the engineering panel is live; the tool count is real
+  // even on this scripted walk-through (cost/token stats are not, so we don't claim them).
+  s.spotlight({ eventType: "tool", where: { tool: "validate_trip" }, nth: 1 }, { target: "stat:distinctTools", eyebrow: "Under the hood", title: "Real tool calls, in order", body: "The panel on the right is live: it tracks every distinct tool the assistant calls — search, save, validate — as the trip takes shape. In a real run each one executes for real." });
   s.spotlight({ eventType: "folio", nth: 2 }, { target: "folio-days", eyebrow: "The build", title: "Day by day", body: "Voygent assembles the week — sights, food, and the down moments — into one living folio, then validates it against the brief." });
 
   // Act 5 — Refine: the advisor edits a single day in place, with a note on why.
