@@ -113,6 +113,13 @@
 }
 @keyframes cl-spin { to { transform: rotate(360deg); } }
 :root[data-skin="claude"] .cl-check { color: #2f8f50; font-weight: 700; }
+/* Live "working" feedback for a running tool: an indeterminate sweep bar + a
+   reassurance line once a call runs long, so slow tool calls don't read as hung. */
+:root[data-skin="claude"] .cl-tool-progress { height: 3px; margin: 4px 2px 0; border-radius: 999px; background: var(--cl-line); overflow: hidden; }
+:root[data-skin="claude"] .cl-tool-progress i { display: block; height: 100%; width: 40%; border-radius: 999px; background: var(--cl-accent); animation: cl-tool-sweep 1.3s ease-in-out infinite; }
+@keyframes cl-tool-sweep { 0% { transform: translateX(-110%); } 100% { transform: translateX(320%); } }
+:root[data-skin="claude"] .cl-tool-wait { margin: 4px 2px 0; font-size: .75rem; color: var(--cl-muted); }
+@media (prefers-reduced-motion: reduce) { :root[data-skin="claude"] .cl-tool-progress i { animation: none; width: 100%; opacity: .5; } }
 :root[data-skin="claude"] .cl-tool-body {
   margin-top: 6px; padding: 8px 12px; background: var(--cl-surface);
   border: 1px solid var(--cl-line); border-radius: 10px;
