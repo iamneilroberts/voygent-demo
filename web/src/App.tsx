@@ -55,7 +55,7 @@ export function App() {
   const recorder = useRef(recordParam && resolveInitialSkin() === "claude" ? createRecorder("dublin-oct") : null).current;
   const [authed, setAuthed] = useState<boolean | null>(null); // null = checking
   const [pendingCode, setPendingCode] = useState("");
-  const [collapsed, setCollapsed] = useState(false);
+  const [expanded, setExpanded] = useState(false); // Inspector: false = live skinny rail, true = full panel
   const [skin, setSkin] = useState<SkinId>(() => {
     if (resolveInitialMode() === "auto") {
       // Auto mode always plays in the claude skin. Set data-skin synchronously
@@ -386,7 +386,7 @@ export function App() {
     void send(`I'll take the ${board.kind} option ${c.id} (${c.summary}).`);
   }
 
-  const eng = engState(insTools.length, collapsed);
+  const eng = engState(insTools.length, expanded);
   const chatMessages = items.filter(isChatMessage) as ChatMessage[];
   const reelPct = reelProg.total ? Math.round((reelProg.done / reelProg.total) * 100) : 0;
   const reelSeekPct = scrubPct ?? reelPct;   // show the dragged position while scrubbing
@@ -511,7 +511,7 @@ export function App() {
             state={eng}
             // Manual collapse only applies once live; toggling during the pre-trip idle rail is a
             // no-op so a stray click can't latch `collapsed` and suppress the first-tool reveal.
-            onToggleCollapse={() => { if (insTools.length > 0) setCollapsed((c) => !c); }}
+            onToggleCollapse={() => setExpanded((x) => !x)}
             tools={insTools} turns={insTurns} summaries={insSummaries}
             savings={insSavings} overhead={insOverhead} stats={stats}
             stores={insStores} validations={insValidations} phases={insPhases} busy={busy}

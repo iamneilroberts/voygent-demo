@@ -7,6 +7,7 @@ import type { SelectorMode } from "./lib/model";
 import type { StatsResponse } from "../../shared/events";
 import { StoreOpsWidget, type InsStore } from "./StoreOpsWidget";
 import { storeOpsForTool } from "../../worker/storeops";
+import { buildStats, railStats, deepDiveLinks } from "./lib/inspector-stats";
 
 // Engineering stories moved out of the panel (task 6c) — the tab keeps live
 // stats; the narratives live on worker-served /info pages.
@@ -142,26 +143,8 @@ export function Inspector(
   const timelineRef = useRef<HTMLDivElement>(null);
   useEffect(() => { const el = timelineRef.current; if (el) el.scrollTop = el.scrollHeight; }, [tools.length]);
 
-  // Quiet rail: idle (pre-trip) or manually collapsed → render a thin vertical
-  // affordance instead of the full panel. Idle renders nothing interactive; the
-  // heavy body (and its focusable controls) is not in the tab order until live.
-  if (state !== "live") {
-    return (
-      <aside className="inspector term crt collapsed" role="complementary" aria-label="Engineering inspector">
-        {state === "idle" ? (
-          <div className="ins-rail" aria-hidden="true">
-            <span className="ins-rail-label">Engineering</span>
-          </div>
-        ) : (
-          <button className="ins-rail" onClick={onToggleCollapse} aria-label="Expand engineering inspector">
-            <span className="ins-rail-label">Engineering</span>
-            <span className="ins-rail-caret" aria-hidden="true">▸</span>
-          </button>
-        )}
-      </aside>
-    );
-  }
-
+  // Derivations run for ALL states now: the live "peek" rail needs the same stats +
+  // pipeline as the open panel (just rendered compactly). Only the final render branches.
   const firedTools = new Set(tools.map((t) => t.name));
   const hasFolio = tools.some((t) => t.name.startsWith("promote_"));
   // Distill rarely fires a distinct tool (the recording goes search → promote),
@@ -224,6 +207,56 @@ export function Inspector(
   const valTotal = vals.length;
   const valOk = vals.filter((v) => v.status === "pass" || v.status === "repaired").length;
   const valFail = vals.some((v) => v.status === "fail");
+
+  // Registry-driven stats (single source for the rail, the panel, and the deep dives).
+  // Named regStats to avoid the cross-session `stats` prop above.
+  const regStats = buildStats({
+    mcpToolsExposed: latest ? latest.exposedToolCount : 0,
+    distinctTools: firedTools.size,
+    persistedWrites,
+    contextKeptOut: savedHeadline,
+    observedCostUsd: actualCost,
+    cacheHitRate: hitRate ?? 0,
+  });
+  // Active phase for the rail: the phase trail's last entry, else the latest lit stage.
+  const activePhase = phases && phases.length ? phases[phases.length - 1].phase
+    : ([...STAGES].reverse().find(stageActive)?.label ?? "Working");
+
+  // ---- Resting states: idle (dim, pre-trip) and peek (LIVE skinny rail) ----
+  if (state !== "open") {
+    if (state === "idle") {
+      return (
+        <aside className="inspector term crt collapsed" role="complementary" aria-label="Engineering inspector">
+          <div className="ins-rail" aria-hidden="true"><span className="ins-rail-label">Engineering</span></div>
+        </aside>
+      );
+    }
+    // peek: clickable live rail — phase, pipeline dots, top stats. Never auto-expands.
+    return (
+      <aside className="inspector term crt ins-peek" role="complementary" aria-label="Engineering inspector">
+        <button className="ins-peekbtn" onClick={onToggleCollapse} aria-label="Expand engineering inspector">
+          <span className="ins-peek-hint" aria-hidden="true">click to expand ⤢</span>
+          <span className="ins-peek-label">Engineering</span>
+          <span className="ins-peek-live"><span className="ins-peek-dot" aria-hidden="true" /> live</span>
+          <span className="ins-peek-phase">{activePhase}</span>
+          <span className="ins-peek-dots" aria-hidden="true">
+            {STAGES.map((s) => (
+              <span key={s.key} className={`ins-peek-pip ${stageActive(s) ? (pipelineDone ? "done" : "cur") : ""}`} />
+            ))}
+          </span>
+          <span className="ins-peek-metrics">
+            {railStats(regStats, 3).map((st) => (
+              <span key={st.key} className="ins-peek-m">
+                <span className={`ins-peek-v ${st.tone === "good" ? "good" : ""}`}>{st.value}</span>
+                <span className="ins-peek-k">{st.label}</span>
+              </span>
+            ))}
+          </span>
+          <span className="ins-peek-grow" aria-hidden="true">⤢</span>
+        </button>
+      </aside>
+    );
+  }
 
   return (
     <aside className="inspector term crt" role="complementary" aria-label="Engineering inspector">
@@ -406,15 +439,37 @@ export function Inspector(
         );
       })()}
 
-      <section className="ins-region">
-        <h3>Deep dives</h3>
-        <p className="ins-note">The numbers above are live from this session. The engineering stories behind them:</p>
-        <ul className="ins-links">
-          {INFO_LINKS.map((l) => (
-            <li key={l.slug}><a href={`/info/${l.slug}`} target="_blank" rel="noreferrer">{l.label} →</a>{l.comingSoon && <span className="ins-soon">soon</span>} <span className="ins-note">{l.blurb}</span></li>
-          ))}
-        </ul>
-      </section>
+      {(() => {
+        // Primary: deep dives tied to the stats actually shown this session (registry
+        // order). Secondary: every other story, so nothing's unreachable.
+        const primary = deepDiveLinks(regStats);
+        const primarySlugs = new Set(primary.map((p) => p.slug));
+        const bySlug = Object.fromEntries(INFO_LINKS.map((l) => [l.slug, l]));
+        const secondary = INFO_LINKS.filter((l) => !primarySlugs.has(l.slug));
+        return (
+          <section className="ins-region ins-dig">
+            <h3>Dig deeper</h3>
+            <ul className="ins-links ins-links-stat">
+              {primary.map((p) => {
+                const info = bySlug[p.slug];
+                return (
+                  <li key={p.slug}>
+                    <span className="ins-dig-stat">{p.statLabel}</span>
+                    <a href={`/info/${p.slug}`} target="_blank" rel="noreferrer">{info?.blurb ?? info?.label ?? p.slug} →</a>
+                  </li>
+                );
+              })}
+            </ul>
+            <h4 className="ins-dig-more">More on the engineering</h4>
+            <ul className="ins-links">
+              {secondary.map((l) => (
+                <li key={l.slug}><a href={`/info/${l.slug}`} target="_blank" rel="noreferrer">{l.label} →</a>{l.comingSoon && <span className="ins-soon">soon</span>} <span className="ins-note">{l.blurb}</span></li>
+              ))}
+            </ul>
+            <p className="ins-note ins-dig-foot">More stats and stories land here as the system grows.</p>
+          </section>
+        );
+      })()}
     </aside>
   );
 }
