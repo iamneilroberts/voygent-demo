@@ -323,3 +323,22 @@ button.ins-rail:hover { color: var(--ink); }
 .tweaks-group.is-disabled { opacity: .5; }
 .tweaks-group.is-disabled button[disabled] { cursor: not-allowed; }
 .tweaks-note { font: 500 .75rem/1.5 ui-monospace, monospace; color: var(--muted); margin: 4px 0 0; }
+
+/* Phase D — drillable tiles + drill detail panel */
+.ins-stat-drill { cursor: pointer; background: none; border: none; text-align: left;
+  font: inherit; color: inherit; position: relative; padding-right: 16px; }
+.ins-stat-drill:hover { background: var(--term-line, rgba(255,255,255,.04)); border-radius: 6px; }
+.ins-stat-drill.active { background: var(--term-line, rgba(255,255,255,.06)); border-radius: 6px; }
+.ins-stat-caret { position: absolute; top: 2px; right: 4px; font-size: 9px; opacity: .6; }
+.ins-drill { margin-top: 10px; padding: 12px; border: 1px solid var(--term-line, #2a2a2a);
+  border-radius: 8px; background: rgba(0,0,0,.18); }
+.ins-drill-title { margin: 0 0 8px; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; opacity: .8; }
+
+/* Funnel */
+.ins-funnel-row { margin: 10px 0; }
+.ins-funnel-head { display: flex; justify-content: space-between; font-size: 12px; gap: 8px; }
+.ins-funnel-bar { height: 12px; border-radius: 3px; background: var(--term-line, #2a2a2a);
+  overflow: hidden; margin-top: 4px; }
+.ins-funnel-slim { display: block; height: 100%; background: var(--term-green, #7fb069); }
+.ins-funnel-payload { margin-top: 5px; }
+.ins-funnel-payload summary { font-size: 11px; opacity: .75; cursor: pointer; }
