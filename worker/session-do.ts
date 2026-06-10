@@ -726,7 +726,7 @@ export class SessionDO {
             ? this.env.STATS_DB.prepare(STATS_INSERT_SQL)
                 .bind(...statsRowFromSummary(
                   summary,
-                  { sessionId, exchangeId, tripId: this.tripId, boardsMode: this.boardsMode, liveMode: this.liveMode, routing: this.routing },
+                  { sessionId, exchangeId, tripId: this.tripId, boardsMode: this.boardsMode, liveMode: this.liveMode, routing: this.routing, codeId: codeId ?? undefined },
                   savedTokens, exchangeTs,
                 ))
                 .run()
