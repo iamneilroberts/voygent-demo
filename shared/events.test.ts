@@ -31,6 +31,26 @@ describe("encodeSse", () => {
     const decoded = JSON.parse(encodeSse(ev).slice("data: ".length).trim());
     expect(decoded).toEqual(ev);
   });
+
+  it("round-trips a searchDistill savings event with raw/slim token fields", () => {
+    const ev: ServerEvent = {
+      type: "inspector", kind: "savings", exchangeId: "x1", mechanism: "searchDistill",
+      tokensSaved: 852, basis: "chars/4", scope: "aggregate",
+      detail: "prod hotelSearch returned ~1195 tok → model saw ~343 tok",
+      rawTokens: 1195, slimTokens: 343, tool: "hotelSearch",
+    };
+    const decoded = JSON.parse(encodeSse(ev).slice("data: ".length).trim());
+    expect(decoded).toEqual(ev);
+  });
+
+  it("still accepts a savings event without the optional raw/slim fields", () => {
+    const ev: ServerEvent = {
+      type: "inspector", kind: "savings", exchangeId: "x1", mechanism: "patch",
+      tokensSaved: 120, basis: "chars/4", scope: "aggregate", detail: "patch diff",
+    };
+    const decoded = JSON.parse(encodeSse(ev).slice("data: ".length).trim());
+    expect(decoded).toEqual(ev);
+  });
 });
 
 describe("FolioData enrichment shape", () => {

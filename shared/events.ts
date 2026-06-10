@@ -93,7 +93,11 @@ export type InspectorEvent =
       costUsd: number; model?: string }
   | { type: "inspector"; kind: "savings"; exchangeId: string;
       mechanism: "patch" | "template" | "toolCatalog" | "searchDistill";
-      tokensSaved: number; basis: "chars/4"; scope: "perTurn" | "perRender" | "aggregate"; detail: string }
+      tokensSaved: number; basis: "chars/4"; scope: "perTurn" | "perRender" | "aggregate"; detail: string;
+      // searchDistill only: the raw prod payload size vs the slim model-facing size, as
+      // structured numbers so the Token Elimination Funnel can draw per-search bars.
+      // Optional + additive: older recordings without them fall back to the aggregate-only funnel.
+      rawTokens?: number; slimTokens?: number; tool?: string }
   | { type: "inspector"; kind: "overhead"; exchangeId: string;
       instrumentationMs: number | null; instrumentationBytes: number; addedModelTokens: 0;
       folioReprojectMs?: number | null; note?: string }

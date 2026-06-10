@@ -44,6 +44,7 @@ export interface InsSavings {
   type: "inspector"; kind: "savings"; exchangeId: string;
   mechanism: "patch" | "template" | "toolCatalog" | "searchDistill";
   tokensSaved: number; basis: "chars/4"; scope: "perTurn" | "perRender" | "aggregate"; detail: string;
+  rawTokens?: number; slimTokens?: number; tool?: string;
 }
 export interface InsOverhead {
   type: "inspector"; kind: "overhead"; exchangeId: string;
