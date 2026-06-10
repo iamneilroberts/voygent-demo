@@ -544,6 +544,7 @@ export class SessionDO {
             tokensSaved: saved,
             basis: "chars/4", scope: "aggregate",
             detail: `prod ${m.tool} returned ~${meta.rawTokensEst} tok → model saw ~${m.modelFacingTokens} tok`,
+            rawTokens: meta.rawTokensEst, slimTokens: m.modelFacingTokens, tool: m.tool,
           });
         }
       }
