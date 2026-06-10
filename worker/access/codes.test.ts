@@ -163,3 +163,22 @@ describe("reconcile", () => {
     expect(row?.day_spent).toBe(0); // 200k - 200k + 0
   });
 });
+
+describe("code tier", () => {
+  it("defaults to public and round-trips a pro tier on lookup", async () => {
+    const db = makeTestDb();
+    const { code: pubCode } = await createCode(db, {
+      id: "pub", label: "Public", view: "default",
+      dailyMicros: 2_000_000, totalMicros: 20_000_000, expiresAt: null,
+    }, HASH_KEY, "2026-06-10T00:00:00Z");
+    const { code: proCode } = await createCode(db, {
+      id: "pro", label: "Pro", view: "default", tier: "pro",
+      dailyMicros: 10_000_000, totalMicros: 50_000_000, expiresAt: null,
+    }, HASH_KEY, "2026-06-10T00:00:00Z");
+
+    const pub = await lookupByCode(db, pubCode, HASH_KEY, "2026-06-10T01:00:00Z");
+    const pro = await lookupByCode(db, proCode, HASH_KEY, "2026-06-10T01:00:00Z");
+    expect(pub?.tier).toBe("public");
+    expect(pro?.tier).toBe("pro");
+  });
+});
