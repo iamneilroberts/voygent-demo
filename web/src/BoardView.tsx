@@ -2,7 +2,7 @@ import { Fragment, useState } from "react";
 import type { BoardCandidate, FlightLeg } from "../../shared/events";
 import type { BoardItem } from "./timeline";
 import type { Actor } from "./lib/recording";
-import { commissionLabel } from "./lib/advisor";
+import { commissionLabel, fmtUsd } from "./lib/advisor";
 import { safeHttpUrl } from "./lib/url";
 import { actorClass, actorLabel, pickedActor } from "./lib/reel-render";
 
@@ -76,6 +76,14 @@ export function BoardView(
                 aria-pressed={interactive ? liveHi : undefined}
                 onClick={() => rowClick(c)}
               >
+                {c.image && (
+                  <span className="cl-option-thumb">
+                    <img src={c.image} alt="" loading="lazy" referrerPolicy="no-referrer" />
+                    {typeof c.photoCount === "number" && c.photoCount > 0 && (
+                      <span className="cl-option-photos">📷 {c.photoCount.toLocaleString("en-US")}</span>
+                    )}
+                  </span>
+                )}
                 <span className="cl-option-main">
                   <span className="cl-option-titlerow">
                     <span className="cl-option-title">{c.title}</span>
@@ -87,6 +95,13 @@ export function BoardView(
                   {c.price && <span className="cl-option-price">{c.price}</span>}
                   {advisor && typeof c.commission === "number" && (
                     <span className="cl-option-comm">{commissionLabel(c.commission, c.commissionPct)}</span>
+                  )}
+                  {advisor && (typeof c.otaFrom === "number" || typeof c.clientPrice === "number") && (
+                    <span className="cl-option-ladder">
+                      {typeof c.otaFrom === "number" && <>public {fmtUsd(c.otaFrom)}/nt</>}
+                      {typeof c.otaFrom === "number" && typeof c.clientPrice === "number" && " · "}
+                      {typeof c.clientPrice === "number" && <>client {fmtUsd(c.clientPrice)}</>}
+                    </span>
                   )}
                 </span>
                 <span className="cl-option-mark" aria-hidden={reelActor || liveHi ? undefined : "true"}>

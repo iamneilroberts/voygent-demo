@@ -30,9 +30,15 @@ function HotelCard({ h, advisor }: { h: FolioHotel; advisor: boolean }) {
   ].filter(Boolean).join(" · ");
   return (
     <div className="card fade-in">
+      {h.image && (
+        <img className="card-thumb" src={h.image} alt="" loading="lazy" referrerPolicy="no-referrer" />
+      )}
       <div className="card-main">
         <div className="card-title">{h.name}</div>
         {meta && <div className="card-meta">{meta}</div>}
+        {h.quoteUrl && (
+          <a className="card-link" href={h.quoteUrl} target="_blank" rel="noopener noreferrer">view rooms ↗</a>
+        )}
       </div>
       <div className="card-price">
         {h.price ?? ""}

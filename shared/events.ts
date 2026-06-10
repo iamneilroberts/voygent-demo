@@ -7,6 +7,8 @@ export interface FolioHotel {
   area?: string; nights?: number; perNight?: string;
   commission?: number;     // advisor commission USD (cpmaxx-sourced lodging only; absent elsewhere)
   commissionPct?: number;  // advisor commission percentage (same sourcing rule)
+  image?: string;          // property photo (cpmaxx-sourced lodging only)
+  quoteUrl?: string;       // credentialed quote-sheet / room-select deep link (cpmaxx hotel sheet)
 }
 export interface FolioActivity { time?: string; name: string; description?: string; url?: string }
 export interface FolioDining   { name: string; description?: string; cuisine?: string; url?: string }
@@ -52,6 +54,10 @@ export interface BoardCandidate {
   detailLabel?: string;    // link text override, e.g. "search ↗" for a Google-by-name fallback (default "details ↗")
   commission?: number;     // advisor commission for the stay, USD (cpmaxx-sourced candidates only)
   commissionPct?: number;  // advisor commission percentage (cpmaxx-sourced candidates only)
+  clientPrice?: number;    // what the client pays for the stay, USD (cpmaxx price ladder)
+  otaFrom?: number;        // cheapest public OTA per-night the credentialed search beat (cpmaxx price ladder)
+  image?: string;          // property photo thumbnail (cpmaxx-sourced candidates only)
+  photoCount?: number;     // how many property photos the supplier sheet carries (cpmaxx only)
   legs?: FlightLeg[];      // flight itinerary detail — when present, the option expands to show it
   badge?: string;          // Voygent's editorial tag for this option, e.g. "Best value" / "Cheapest" / "Quickest"
 }

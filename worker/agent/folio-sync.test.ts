@@ -53,6 +53,26 @@ describe("tripToFolio", () => {
     expect(folio.hotels[2].commissionPct).toBeUndefined();
   });
 
+  it("passes through the property photo + quote-sheet link on synthesized cpmaxx lodging", () => {
+    const raw = {
+      data: {
+        meta: { title: "Cancún Escape" },
+        lodging: [{
+          name: "Dreams Playa Mujeres", total: 9655.54, stars: 4, location: "Punta Sam",
+          image: "https://i.travelapi.com/lodging/x_b.jpg",
+          quoteUrl: "https://cpmaxx.example/HotelSheets/497758",
+          commission: 2896.66, commissionPct: 30,
+        }],
+      },
+    };
+    const folio = tripToFolio("t1", raw);
+    expect(folio.hotels[0].image).toBe("https://i.travelapi.com/lodging/x_b.jpg");
+    expect(folio.hotels[0].quoteUrl).toBe("https://cpmaxx.example/HotelSheets/497758");
+    // Falls back to a bare `url` when quoteUrl/hotelSheetUrl are absent.
+    const fallback = tripToFolio("t2", { data: { lodging: [{ name: "H", total: 1, url: "https://u" }] } });
+    expect(fallback.hotels[0].quoteUrl).toBe("https://u");
+  });
+
   it("maps the promoted { outbound, return } flights object (post promote_flights)", () => {
     const raw = {
       data: {

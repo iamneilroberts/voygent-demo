@@ -211,6 +211,12 @@
 :root[data-skin="claude"] .cl-option-econ { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; }
 :root[data-skin="claude"] .cl-option-comm,
 :root[data-skin="claude"] .cl-artifact-comm { display: block; font-weight: 600; font-size: .75rem; color: #1a7f37; white-space: nowrap; font-variant-numeric: tabular-nums; }
+/* Credentialed cpmaxx hotel card: property photo thumbnail + photo count, and the
+   advisor-only price ladder (public OTA rate the credentialed search beat → client price). */
+:root[data-skin="claude"] .cl-option-thumb { position: relative; flex: 0 0 auto; width: 56px; height: 56px; border-radius: 8px; overflow: hidden; background: var(--cl-tool-bg); }
+:root[data-skin="claude"] .cl-option-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+:root[data-skin="claude"] .cl-option-photos { position: absolute; left: 3px; bottom: 3px; font: 600 .5625rem/1 var(--cl-sans); color: #fff; background: rgba(0, 0, 0, .55); border-radius: 5px; padding: 2px 4px; }
+:root[data-skin="claude"] .cl-option-ladder { font-size: .6875rem; color: var(--cl-muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
 :root[data-skin="claude"] .cl-artifact-total { font-size: .875rem; }
 :root[data-skin="claude"] .cl-artifact-totalrow { border-top: 1px dashed #d9d2c5; margin-top: 4px; padding-top: 6px; }
 :root[data-skin="claude"] .cl-option-mark { width: 18px; color: var(--cl-accent); font-weight: 700; }

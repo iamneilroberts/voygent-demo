@@ -87,9 +87,12 @@ html, body, #root { height: 100%; margin: 0; }
   padding: var(--s3) var(--s4); border: 1px solid var(--line); border-radius: var(--r); margin-bottom: var(--s2);
   background: var(--board); font-size: var(--t-15);
 }
+.card-thumb { flex: 0 0 auto; width: 52px; height: 52px; border-radius: var(--r); object-fit: cover; background: var(--line); }
 .card-main { flex: 1; min-width: 0; }
 .card-title { font-weight: 600; color: var(--ink); }
 .card-meta { margin-top: 3px; font-size: var(--t-13); color: var(--muted); }
+.card-link { display: inline-block; margin-top: 3px; font-size: var(--t-12); color: var(--amber-hi); text-decoration: none; }
+.card-link:hover { text-decoration: underline; }
 .card-price { text-align: right; font: 700 var(--t-15)/1 var(--mono); color: var(--amber-hi); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .card-sub { display: block; font-weight: 400; font-size: var(--t-12); color: var(--muted); margin-top: 2px; }
 .fade-in { animation: fadeIn .4s ease both; }

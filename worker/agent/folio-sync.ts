@@ -133,6 +133,11 @@ export function tripToFolio(tripId: string, raw: any): FolioData {
     commission: typeof h.commission === "number" && Number.isFinite(h.commission) ? h.commission : undefined,
     commissionPct: typeof h.commissionPct === "number" ? h.commissionPct
       : typeof h.commission_pct === "number" ? h.commission_pct : undefined,
+    // Credentialed cpmaxx extras: property photo + the quote-sheet / room-select link.
+    image: typeof h.image === "string" && h.image ? h.image : undefined,
+    quoteUrl: typeof h.quoteUrl === "string" && h.quoteUrl ? h.quoteUrl
+      : typeof h.hotelSheetUrl === "string" && h.hotelSheetUrl ? h.hotelSheetUrl
+      : typeof h.url === "string" && h.url ? h.url : undefined,
   }));
 
   const days = projectDays(t.itinerary);

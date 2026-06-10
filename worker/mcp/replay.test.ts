@@ -1,8 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { FixtureReplay, type ReplayHelpers } from "./replay";
-import { FIXTURE_BY_ID, matchFlightFixture, matchHotelFixture, type Fixture } from "../fixtures/index";
+import { FIXTURE_BY_ID, matchFlightFixture, matchHotelFixture, cpmaxxHotelsFor, type Fixture } from "../fixtures/index";
 
 const DUBLIN = FIXTURE_BY_ID["dublin-oct"];
+const CANCUN = FIXTURE_BY_ID["cancun-beach"];
+const NYC = FIXTURE_BY_ID["nyc-weekend"];
 
 // A fake staging trip backing the live readTrip/patchTrip helpers.
 function fakeHelpers(initial: Record<string, any> = {}) {
@@ -130,6 +132,74 @@ describe("promote_hotels_to_lodging fabrication guard", () => {
     const out = JSON.parse(await r["promoteHotels"](helpers));
     expect(out.ok).toBe(false);
     expect(out.error.code).toBe("no_staged_candidates");
+  });
+});
+
+describe("credentialed cpmaxx hotel replay", () => {
+  it("serves cpmaxx hotels (source:cpmaxx) for a featured route, not serp", () => {
+    const r = new FixtureReplay("demo-x");
+    const out = JSON.parse(r["hotelSearch"]({ location: "Cancun" }));
+    expect(out.status).toBe("ok");
+    expect(out.source).toBe("cpmaxx");
+    const cpmaxx = cpmaxxHotelsFor(CANCUN);
+    expect(out.count).toBe(cpmaxx.length);
+    expect(out.candidates.map((c: any) => c.id)).toEqual(cpmaxx.map((h) => h.id));
+    // Slim, model-facing: credentialed numbers ride through, heavy fields do NOT.
+    const first = out.candidates[0];
+    expect(first.source).toBe("cpmaxx");
+    expect(first.commission).toBe(cpmaxx[0].commission);
+    expect(first.clientPrice).toBe(cpmaxx[0].clientPrice);
+    expect(first).not.toHaveProperty("hotelSheetUrl");
+    expect(first).not.toHaveProperty("image");
+    expect(first).not.toHaveProperty("marketingBlurb");
+  });
+
+  it("hotel_list replays the same cpmaxx set after a search", () => {
+    const r = new FixtureReplay("demo-x");
+    r["hotelSearch"]({ location: "Cancun" });
+    const out = JSON.parse(r["hotelList"]({ action: "list" }));
+    expect(out.source).toBe("cpmaxx");
+    expect(out.candidates.map((c: any) => c.id)).toEqual(cpmaxxHotelsFor(CANCUN).map((h) => h.id));
+  });
+
+  it("price-sanity filter drops the NYC mis-parsed outlier ($8,499/nt Royalton)", () => {
+    const served = cpmaxxHotelsFor(NYC);
+    expect(served.every((h) => (h.pricePerNight ?? 0) < 8000)).toBe(true);
+    // Exactly one hotel dropped from the captured eight.
+    expect(served.length).toBe((NYC.cpmaxxHotels ?? []).length - 1);
+    // And the model never sees it in the search payload.
+    const out = JSON.parse(new FixtureReplay("demo-x")["hotelSearch"]({ location: "New York" }));
+    expect(out.candidates.some((c: any) => c.pricePerNight >= 8000)).toBe(false);
+  });
+
+  it("synthesizes folio lodging cards from staged cpmaxx ids (multi-select, up to 3)", async () => {
+    const r = new FixtureReplay("demo-x");
+    r["hotelSearch"]({ location: "Cancun" });
+    const cpmaxx = cpmaxxHotelsFor(CANCUN);
+    const picks = cpmaxx.slice(0, 3);
+    const { patches, helpers } = fakeHelpers({ hotels: picks.map((h) => ({ _candidateId: h.id })) });
+    const out = JSON.parse(await r["promoteHotels"](helpers));
+    expect(out.ok).toBe(true);
+    expect(out.promoted).toBe(3);
+    // Cards are synthesized (prod has none for cpmaxx) with the credentialed fields.
+    const card = out.lodging[0];
+    expect(card.name).toBe(picks[0].name);
+    expect(card.total).toBe(picks[0].priceTotal);
+    expect(card.commission).toBe(picks[0].commission);
+    expect(card.image).toBe(picks[0].image);
+    expect(card.quoteUrl).toBe(picks[0].hotelSheetUrl);
+    expect(card._candidateId).toBe(picks[0].id);
+    expect((patches[0].lodging as any[]).length).toBe(3);
+  });
+
+  it("still drops an invented id when synthesizing cpmaxx lodging (fabrication guard)", async () => {
+    const r = new FixtureReplay("demo-x");
+    r["hotelSearch"]({ location: "Cancun" });
+    const realId = cpmaxxHotelsFor(CANCUN)[0].id;
+    const { helpers } = fakeHelpers({ hotels: [{ _candidateId: realId }, { _candidateId: "cpmaxx:FAKE" }] });
+    const out = JSON.parse(await r["promoteHotels"](helpers));
+    expect(out.promoted).toBe(1);
+    expect(out.droppedUnknownCandidates).toContain("cpmaxx:FAKE");
   });
 });
 

@@ -7,6 +7,7 @@
 // candidate set, so identical consecutive boards are deduped by kind + id set.
 
 import type { ServerEvent, BoardCandidate, FlightLeg } from "../../shared/events";
+import { cpmaxxHotelById } from "../fixtures/index";
 
 const FLIGHT_TOOLS = new Set(["flight_search", "flight_list"]);
 const HOTEL_TOOLS = new Set(["hotel_search", "hotel_list", "hotel_search_and_rank"]);
@@ -91,22 +92,60 @@ function hotelCandidate(c: Record<string, any>): BoardCandidate | null {
   return out;
 }
 
-// cpmaxx hotel_search_and_rank shape ({hotels:[{id, name, stars, area, price_per_night,
-// price_total, commission, commission_pct, hotel_sheet_url, ...}]}) — live trips only.
+// First numeric field present across camelCase / snake_case spellings.
+function num(...vals: unknown[]): number | undefined {
+  for (const v of vals) if (typeof v === "number" && Number.isFinite(v)) return v;
+  return undefined;
+}
+function str(...vals: unknown[]): string | undefined {
+  for (const v of vals) if (typeof v === "string" && v) return v;
+  return undefined;
+}
+
+// Credentialed cpmaxx hotel candidate. Reads BOTH the replay-slim camelCase shape
+// (source:"cpmaxx", light: no photo/sheet) AND the live snake_case shape that the
+// real proxied hotel_search/hotel_search_and_rank returns. For replay-slim, the
+// heavy human-facing fields (photo, sheet URL, photo count) are enriched out-of-band
+// from the fixture by id — so the model payload stays tiny while the board still
+// shows the photo + "view rooms" deep link. This is the advisor board: commission,
+// the price ladder (public OTA → client price → your cut) ride through.
 function cpmaxxHotelCandidate(c: Record<string, any>): BoardCandidate | null {
   const id = c.id != null ? String(c.id) : "";
   if (!id || typeof c.name !== "string" || !c.name) return null;
-  const stars = typeof c.stars === "number" ? `${c.stars}★` : null;
-  const area = typeof c.area === "string" && c.area ? c.area.split(",")[0].slice(0, 40) : null;
-  const meta = [area, stars].filter(Boolean).join(" · ") || undefined;
-  const perNight = usd(c.price_per_night);
-  const price = perNight ? `${perNight}/night` : usd(c.price_total);
-  const total = usd(c.price_total);
+  const fx = cpmaxxHotelById(id); // undefined for live (non-fixture) cpmaxx — fields then come inline
+  const stars = num(c.stars);
+  // cpmaxx area is a full street address; show the first comma segment, trimmed.
+  const areaRaw = str(c.area, fx?.area ?? undefined);
+  const area = areaRaw ? areaRaw.split(",")[0].slice(0, 40) : null;
+  const starLabel = typeof stars === "number" ? `${stars}★` : null;
+  const perNightN = num(c.pricePerNight, c.price_per_night, fx?.pricePerNight ?? undefined);
+  const totalN = num(c.priceTotal, c.price_total, fx?.priceTotal ?? undefined);
+  const perNight = usd(perNightN);
+  const total = usd(totalN);
+  const meta = [area, starLabel, total ? `${total} total` : null].filter(Boolean).join(" · ") || undefined;
+  const price = perNight ? `${perNight}/night` : total;
   const summary = [c.name, price, total ? `${total} total` : null].filter(Boolean).join(", ");
   const out: BoardCandidate = { id, title: c.name, price, meta, summary };
-  if (typeof c.hotel_sheet_url === "string" && c.hotel_sheet_url) out.detailUrl = c.hotel_sheet_url;
-  if (typeof c.commission === "number") out.commission = c.commission;
-  if (typeof c.commission_pct === "number") out.commissionPct = c.commission_pct;
+
+  const sheet = str(c.hotelSheetUrl, c.hotel_sheet_url, fx?.hotelSheetUrl ?? undefined);
+  if (sheet) { out.detailUrl = sheet; out.detailLabel = "view rooms ↗"; }
+  const image = str(c.image, fx?.image ?? undefined);
+  if (image) out.image = image;
+  const photoCount = num(c.pictureCount, c.picture_count, fx?.pictureCount ?? undefined);
+  if (typeof photoCount === "number") out.photoCount = photoCount;
+
+  const commission = num(c.commission, fx?.commission ?? undefined);
+  if (typeof commission === "number") out.commission = commission;
+  const commissionPct = num(c.commissionPct, c.commission_pct, fx?.commissionPct ?? undefined);
+  if (typeof commissionPct === "number") out.commissionPct = commissionPct;
+  const clientPrice = num(c.clientPrice, c.client_price, fx?.clientPrice ?? undefined);
+  if (typeof clientPrice === "number") out.clientPrice = clientPrice;
+  // otaFrom may arrive precomputed (replay-slim) or be derivable from the fixture's otaPrices.
+  const ota = num(c.otaFrom) ?? (() => {
+    const vals = (fx?.otaPrices ?? []).map((o) => o?.pricePerNight).filter((n): n is number => typeof n === "number" && n > 0);
+    return vals.length ? Math.min(...vals) : undefined;
+  })();
+  if (typeof ota === "number") out.otaFrom = ota;
   return out;
 }
 
@@ -138,9 +177,11 @@ export function createBoardBuilder(): BoardBuilder {
     // are the ADVISOR view, where cpmaxx commission is deliberately surfaced
     // (profitability toggle). The inspector trail still scrubs separately.
     const body = parsed as Record<string, any>;
-    // hotel_search_and_rank returns {hotels:[...]} (cpmaxx shape); everything else {candidates:[...]}.
-    const isCpmaxx = toolName === "hotel_search_and_rank";
-    const rawList = isCpmaxx ? body.hotels : body.candidates;
+    // cpmaxx results arrive two ways: the proxied hotel_search_and_rank ({hotels:[...]})
+    // and the replayed/live hotel_search|hotel_list that tags the envelope source:"cpmaxx"
+    // ({candidates:[...]}). Either way the candidate carries cpmaxx fields → cpmaxx mapper.
+    const isCpmaxx = toolName === "hotel_search_and_rank" || body.source === "cpmaxx";
+    const rawList = toolName === "hotel_search_and_rank" ? body.hotels : body.candidates;
     if (body.action === "clear" || !Array.isArray(rawList) || rawList.length === 0) return null;
 
     const candidates = rawList

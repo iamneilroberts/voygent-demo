@@ -14,8 +14,8 @@
 // invented flight/hotel data into the folio, even though it authors the staging step.
 
 import {
-  FIXTURE_BY_ID, matchFlightFixture, matchHotelFixture, presetRoutes,
-  type FlightCandidate, type FlightSegment, type HotelCandidate,
+  FIXTURE_BY_ID, matchFlightFixture, matchHotelFixture, presetRoutes, cpmaxxHotelsFor,
+  type FlightCandidate, type FlightSegment, type HotelCandidate, type CpmaxxHotel,
   type ExcursionCandidate, type DiningCandidate, type ItineraryDayScaffold,
 } from "../fixtures/index";
 import type { FlightLeg } from "../../shared/events";
@@ -109,6 +109,65 @@ function slimHotel(c: HotelCandidate) {
     reviewScore: c.reviewScore ?? null,
     reviewScoreScale: c.reviewScoreScale ?? null,
     reviewCount: c.reviewCount ?? null,
+  };
+}
+
+// The cheapest public OTA per-night this credentialed search beat (or matched) —
+// one number for the board's price ladder, not the whole otaPrices array.
+function otaFrom(c: CpmaxxHotel): number | null {
+  const vals = (c.otaPrices ?? [])
+    .map((o) => o?.pricePerNight)
+    .filter((n): n is number => typeof n === "number" && Number.isFinite(n) && n > 0);
+  return vals.length ? Math.min(...vals) : null;
+}
+
+// Slim, model-facing cpmaxx hotel. Deliberately LIGHT: the heavy out-of-band
+// fields the human board/folio want (photo, the long base64 hotel-sheet URL,
+// marketing blurb) are NOT here — the board enriches those from the fixture by id
+// (cpmaxxHotelById) and the folio synthesizes from the fixture in promoteHotels.
+// So the credentialed advisor data (commission, profit, client price) rides in a
+// tiny payload — the whole "couldn't come from Google, and it's slim" wow.
+function slimCpmaxxHotel(c: CpmaxxHotel) {
+  return {
+    id: c.id,
+    source: "cpmaxx" as const,
+    name: c.name,
+    stars: c.stars ?? null,
+    area: c.area ?? null,
+    pricePerNight: c.pricePerNight ?? null,
+    priceTotal: c.priceTotal ?? null,
+    nights: c.nights ?? null,
+    currency: c.currency ?? "USD",
+    commission: c.commission ?? null,
+    commissionPct: c.commissionPct ?? null,
+    clientPrice: c.clientPrice ?? null,
+    profitScore: c.profitScore ?? null,
+    otaFrom: otaFrom(c),
+  };
+}
+
+// Synthesize the folio lodging card from a captured cpmaxx hotel. Shape matches what
+// tripToFolio reads (name/total/priceTotal/stars/area/location/nights/pricePerNight/
+// commission/commissionPct/image/quoteUrl) plus _candidateId so the patch is traceable.
+function synthCpmaxxLodging(c: CpmaxxHotel | undefined): Record<string, unknown> | undefined {
+  if (!c) return undefined;
+  return {
+    name: c.name,
+    location: c.area ?? null,
+    area: c.area ?? null,
+    nights: c.nights ?? null,
+    total: c.priceTotal ?? null,
+    priceTotal: c.priceTotal ?? null,
+    pricePerNight: c.pricePerNight ?? null,
+    stars: c.stars ?? null,
+    image: c.image ?? null,
+    url: c.hotelSheetUrl ?? null,
+    quoteUrl: c.hotelSheetUrl ?? null,
+    description: c.marketingBlurb ?? null,
+    commission: c.commission ?? null,
+    commissionPct: c.commissionPct ?? null,
+    clientPrice: c.clientPrice ?? null,
+    _candidateId: c.id,
   };
 }
 
@@ -353,6 +412,18 @@ export class FixtureReplay {
       });
     }
     this.hotelRouteId = fixture.route.id;
+    // Credentialed cpmaxx hotels, when captured for this route, replace serp — the
+    // advisor-network view (commission, profit, quote-sheet) is the whole point.
+    const cpmaxx = cpmaxxHotelsFor(fixture);
+    if (cpmaxx.length) {
+      const candidates = cpmaxx.map(slimCpmaxxHotel);
+      const payload = JSON.stringify({
+        status: "ok", source: "cpmaxx", tripId: this.tripId, count: candidates.length, candidates,
+        _next: "Present a few to the advisor (commission/profit are advisor-only). Stage up to 3 picks with patch_trip updates {hotels:[{_candidateId:'<id>'},...]}, then call promote_hotels_to_lodging.",
+      });
+      this.measurement = { tool: "hotelSearch", modelFacingTokens: estTokens(payload) };
+      return payload;
+    }
     const candidates = fixture.hotels.map(slimHotel);
     const payload = JSON.stringify({
       status: "ok", source: "serp", tripId: this.tripId, count: candidates.length, candidates,
@@ -370,6 +441,13 @@ export class FixtureReplay {
     if (!fixture) {
       return JSON.stringify({ status: "ok", action: "list", tripId: this.tripId, count: 0, candidates: [], note: "Run hotel_search first." });
     }
+    const cpmaxx = cpmaxxHotelsFor(fixture);
+    if (cpmaxx.length) {
+      const candidates = cpmaxx.map(slimCpmaxxHotel);
+      const payload = JSON.stringify({ status: "ok", source: "cpmaxx", action: "list", tripId: this.tripId, count: candidates.length, version: 1, candidates });
+      this.measurement = { tool: "hotelList", modelFacingTokens: estTokens(payload) };
+      return payload;
+    }
     const candidates = fixture.hotels.map(slimHotel);
     const payload = JSON.stringify({ status: "ok", action: "list", tripId: this.tripId, count: candidates.length, version: 1, candidates });
     this.measurement = { tool: "hotelList", modelFacingTokens: estTokens(payload) };
@@ -383,11 +461,16 @@ export class FixtureReplay {
     }
     const trip = await h.readTrip();
     const stagedHotels = Array.isArray(trip.hotels) ? trip.hotels : [];
+    // For cpmaxx routes the folio lodging card is SYNTHESIZED here (prod's
+    // promote_hotels_to_lodging rejects cpmaxx ids), keyed by the real captured id —
+    // still fabrication-safe: only ids present in cpmaxxHotels become cards.
+    const cpmaxxById = new Map(cpmaxxHotelsFor(fixture).map((c) => [c.id, c]));
     const cards: Array<Record<string, unknown>> = [];
     const dropped: string[] = [];
     for (const sh of stagedHotels) {
       const cid = sh && typeof sh === "object" && typeof (sh as any)._candidateId === "string" ? (sh as any)._candidateId : "";
-      const card = cid ? fixture.promotedLodgingById[cid] : undefined;
+      const cpmaxxCard = cid ? synthCpmaxxLodging(cpmaxxById.get(cid)) : undefined;
+      const card = cpmaxxCard ?? (cid ? fixture.promotedLodgingById[cid] : undefined);
       // Fabrication guard: only candidate-id-backed hotels reach the folio.
       if (card) cards.push(card); else if (cid) dropped.push(cid);
     }

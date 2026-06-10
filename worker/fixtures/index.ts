@@ -73,6 +73,23 @@ export interface ItineraryDayScaffold {
   day: number; date: string; location: string; title: string;
 }
 
+// One credentialed cpmaxx hotel result, captured once from prod via
+// `hotel_search source=cpmaxx` (scripts/capture-fixtures.mjs --cpmaxx). This is
+// the advisor-network view a consumer Googling can't get: commission, profit
+// ranking, the quote-sheet deep link, property photos. camelCase (the capture
+// script lowerCamels prod's snake_case) — see the handoff for the shape.
+export interface CpmaxxHotel {
+  id: string; source: "cpmaxx"; name: string;
+  stars?: number | null; area?: string | null;
+  pricePerNight?: number | null; priceTotal?: number | null; nights?: number | null;
+  currency?: string | null;
+  commission?: number | null; commissionPct?: number | null;
+  clientPrice?: number | null; marginPct?: number | null; profitScore?: number | null;
+  hotelSheetUrl?: string | null; image?: string | null;
+  marketingBlurb?: string | null; pictureCount?: number | null;
+  otaPrices?: Array<{ name?: string; pricePerNight?: number | null }> | null;
+}
+
 export interface Fixture {
   route: FixtureRoute;
   flights: FlightCandidate[];
@@ -86,6 +103,14 @@ export interface Fixture {
   excursions?: ExcursionCandidate[];
   dining?: DiningCandidate[];
   itineraryDays?: ItineraryDayScaffold[];
+  // Credentialed cpmaxx hotels (non-destructive --cpmaxx merge). When present the
+  // replay serves THESE for the route's hotel search/list instead of serp `hotels`,
+  // and synthesizes the folio lodging card from them (prod's promote_hotels_to_lodging
+  // rejects cpmaxx ids, so the demo owns the synthesis — see replay.promoteHotels).
+  cpmaxxHotels?: CpmaxxHotel[];
+  // Reserved: prod-promoted lodging cards keyed by cpmaxx id. Currently empty ({})
+  // because prod's fabrication guard rejects cpmaxx ids; synthesis happens in replay.
+  promotedCpmaxxLodgingById?: Record<string, Record<string, unknown>>;
   meta?: {
     flightSearch?: { rawTokensEst: number; responseBytes: number; prodLatencyMs: number };
     flightList?: { rawTokensEst: number; responseBytes: number; prodLatencyMs: number };
@@ -152,4 +177,46 @@ export function matchHotelFixture(location: unknown): Fixture | null {
     if (matchesPlace(String(location), r.destination, r.city)) return f;
   }
   return null;
+}
+
+// Median of a numeric list (sorted-middle / mean-of-two-middles). [] -> 0.
+function median(nums: number[]): number {
+  if (nums.length === 0) return 0;
+  const s = [...nums].sort((a, b) => a - b);
+  const mid = Math.floor(s.length / 2);
+  return s.length % 2 ? s[mid] : (s[mid - 1] + s[mid]) / 2;
+}
+
+// Price-sanity guard for captured cpmaxx rates: cpmaxx occasionally returns one
+// wildly mis-parsed nightly rate (e.g. NYC's Royalton Park Avenue at $8,499/nt vs a
+// ~$660 peer median — a suite/parse artifact). Drop a hotel whose per-night is BOTH
+// a gross outlier (>4× the route median) AND above an absolute floor — so the model
+// never sees it, never quotes it, and it never reaches a board or the folio.
+function isPlausibleCpmaxx(h: CpmaxxHotel, routeMedian: number): boolean {
+  const ppn = h.pricePerNight;
+  if (typeof ppn !== "number" || !Number.isFinite(ppn) || ppn <= 0) return false;
+  if (routeMedian > 0 && ppn > routeMedian * 4 && ppn > 3000) return false;
+  return true;
+}
+
+/** The route's cpmaxx hotels, price-sanity filtered. Single source of truth for
+ *  what replay serves/promotes and what the board enriches from. */
+export function cpmaxxHotelsFor(fixture: Fixture | null | undefined): CpmaxxHotel[] {
+  const all = fixture?.cpmaxxHotels ?? [];
+  if (all.length === 0) return [];
+  const med = median(all.map((h) => h.pricePerNight ?? 0).filter((n) => n > 0));
+  return all.filter((h) => isPlausibleCpmaxx(h, med));
+}
+
+// All sanity-filtered cpmaxx hotels across every route, indexed by id — lets the
+// board mapper enrich a replay-slim candidate (which carries only light fields) with
+// the heavy out-of-band fields (photo, sheet URL, photo count) without bloating the
+// model-facing payload. cpmaxx ids are prod property ids (effectively unique).
+const CPMAXX_BY_ID: Record<string, CpmaxxHotel> = Object.fromEntries(
+  FIXTURES.flatMap((f) => cpmaxxHotelsFor(f).map((h) => [h.id, h] as const)),
+);
+
+/** Look up a sanity-filtered cpmaxx hotel by its candidate id, across all routes. */
+export function cpmaxxHotelById(id: string | null | undefined): CpmaxxHotel | undefined {
+  return id ? CPMAXX_BY_ID[id] : undefined;
 }

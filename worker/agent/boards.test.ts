@@ -1,9 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { createBoardBuilder } from "./boards";
 import { FixtureReplay } from "../mcp/replay";
-import { FIXTURE_BY_ID } from "../fixtures/index";
+import { FIXTURE_BY_ID, cpmaxxHotelsFor } from "../fixtures/index";
 
 const DUBLIN = FIXTURE_BY_ID["dublin-oct"];
+const CANCUN = FIXTURE_BY_ID["cancun-beach"];
 const TRIP = "demo-board-test";
 
 // Real replay payloads — the exact strings the loop hands to the builder.
@@ -11,9 +12,21 @@ function flightSearchPayload(): string {
   const r = new FixtureReplay(TRIP);
   return r["flightSearch"]({ origin: "MOB", destination: "DUB" });
 }
-function hotelSearchPayload(): string {
+// Featured routes now serve credentialed cpmaxx hotels (source:"cpmaxx"), not serp.
+function hotelSearchPayload(loc = "Cancun"): string {
   const r = new FixtureReplay(TRIP);
-  return r["hotelSearch"]({ location: "Dublin" });
+  return r["hotelSearch"]({ location: loc });
+}
+// A serp-shaped hotel payload (no cpmaxx route) for exercising the serp mapper directly.
+function serpHotelPayload(): string {
+  return JSON.stringify({
+    status: "ok", source: "serp", action: "list", count: 1, version: 1,
+    candidates: [{
+      id: "serp:h1", name: "The Dockland", area: "Docklands",
+      pricePerNight: 214, priceTotal: 1498, nights: 7,
+      reviewScore: 4.4, reviewScoreScale: 5, reviewCount: 1203, starRating: 4,
+    }],
+  });
 }
 
 describe("createBoardBuilder", () => {
@@ -65,19 +78,32 @@ describe("createBoardBuilder", () => {
     expect(ev.candidates[0].summary).toBe("MOB→DUB, United, 1 stop, $3,426");
   });
 
-  it("maps a hotel_search result to a hotel board", () => {
+  it("maps a featured hotel_search result to a credentialed cpmaxx board", () => {
     const build = createBoardBuilder();
-    const ev = build("hotel_search", hotelSearchPayload(), TRIP);
+    const ev = build("hotel_search", hotelSearchPayload("Cancun"), TRIP);
     if (ev?.type !== "board") throw new Error("expected board event");
     expect(ev.kind).toBe("hotel");
-    expect(ev.candidates).toHaveLength(DUBLIN.hotels.length);
-    expect(ev.candidates.map((c) => c.id)).toEqual(DUBLIN.hotels.map((h) => h.id));
-    expect(ev.candidates[0].title).toBe(DUBLIN.hotels[0].name);
+    const cpmaxx = cpmaxxHotelsFor(CANCUN);
+    expect(ev.candidates).toHaveLength(cpmaxx.length);
+    expect(ev.candidates.map((c) => c.id)).toEqual(cpmaxx.map((h) => h.id));
+    expect(ev.candidates[0].title).toBe(cpmaxx[0].name);
+    // Credentialed extras ride through (the "couldn't come from Google" wow): the
+    // first Cancun card carries commission, a quote-sheet link, photo + photo count.
+    const first = ev.candidates[0];
+    expect(first.commission).toBe(cpmaxx[0].commission);
+    expect(first.commissionPct).toBe(cpmaxx[0].commissionPct);
+    expect(first.detailUrl).toBe(cpmaxx[0].hotelSheetUrl);
+    expect(first.detailLabel).toBe("view rooms ↗");
+    expect(first.image).toBe(cpmaxx[0].image);
+    expect(first.photoCount).toBe(cpmaxx[0].pictureCount);
+    // Price ladder: client price + the public OTA per-night it beat/matched.
+    expect(first.clientPrice).toBe(cpmaxx[0].clientPrice);
+    expect(typeof first.otaFrom).toBe("number");
   });
 
   it("enriches serp hotel candidates with review scale, stay total, and a google search link", () => {
     const build = createBoardBuilder();
-    const ev = build("hotel_search", hotelSearchPayload(), TRIP);
+    const ev = build("hotel_list", serpHotelPayload(), TRIP);
     if (ev?.type !== "board") throw new Error("expected board event");
     const first = ev.candidates[0];
     // Google-by-name fallback (serp exposes no deep link) — mirrors voygent-lite.
