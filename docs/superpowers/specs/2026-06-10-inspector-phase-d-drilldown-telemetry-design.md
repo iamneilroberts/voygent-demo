@@ -127,6 +127,51 @@ truth, and says so in a one-line note.
 
 **Data.** `tools[].latencyMs` + stage mapping + `overhead`. All already on the client. No new event.
 
+## View 4 — Supplier Fan-Out (Stage 4)
+
+**Goal.** Make visible that one consolidated tool call (e.g. `hotel_search`) routes through the
+supplier-consolidation layer to multiple provider adapters, aggregates, then distills — the
+"~30 adapters / 119 tool registrations" production flex, told honestly with real per-source counts.
+Right now the chip says "Searching hotels in Cancún" and gives no hint that a fan-out happened.
+
+**Real, not illustrative.** For hotels the fixtures already carry BOTH `serp` and `cpmaxx` results
+per featured route (verified: `cancun-beach.json` has serp `hotels[]` AND `cpmaxxHotelsFor(fixture)`).
+Today's replay *replaces* serp with cpmaxx; for the fan-out we simply stop hiding that both were
+genuinely queried at capture time. **No new capture needed for hotels.**
+
+**Data flow — model payload unchanged.** Replay keeps sending the model only the slim distilled
+shortlist (exactly as today). Separately it emits a new out-of-band `fanout` inspector event
+recording what the consolidation layer returned at capture time, per source. The model never sees
+the extra candidates; the inspector side-channel carries the fan-out detail (same discipline as the
+funnel). New event variant in `shared/events.ts`:
+
+```
+| { type: "inspector"; kind: "fanout"; exchangeId: string; tool: string;
+    sources: { id: string; label: string; count: number; credentialed: boolean }[];
+    shortlisted: number }
+```
+
+Emitted (from `worker/session-do.ts`, beside the existing distill emit, using fixture data) for
+`hotel_search`/`hotel_list`: `sources` = the per-provider result counts genuinely in the capture
+(e.g. `cpmaxx` 8, `serp`/Google 22, `credentialed: true` for cpmaxx); `shortlisted` = the deduped
+count surfaced. Honest; the drill frames it "captured [date]".
+
+**The drill.** A `fanout` drill anchored to a new `suppliersQueried` stat tile (count of distinct
+providers lit this session). Renders one row per consolidated tool call — `hotel_search → [provider
+tiles] → deduped to N` — with logo-type provider icons:
+
+- **Lit / confirmed** = providers in this session's `fanout` events, with their real counts.
+- **Dimmed / "available in production"** = the rest of the supplier catalog (static reference
+  `SUPPLIER_CATALOG` in `web/src/inspector-data.ts`, same disclaimed register as `BTS_CARDS` —
+  "capabilities of the production system; the live panel shows only what THIS session did"). Click a
+  provider → a depth/breadth popup (catalog coverage, credentialed vs public).
+
+Narratively chains with the funnel: fan-out to N suppliers → distill collapses the aggregate → slim
+payload. This is the strongest single "what the consolidated call actually does" artifact.
+
+**Scope.** Hotels-first (real multi-source from existing data). Flights are serp-only today; genuine
+flight fan-out needs additional captures (Kiwi / lastminute / Expedia flight tools) and is deferred.
+
 ## Files touched
 
 | File | Action | What |
@@ -141,6 +186,18 @@ truth, and says so in a one-line note.
 | `shared/events.test.ts` | edit | new optional fields |
 | `worker/session-do.ts` | edit | emit the three new fields at the existing distill emit (`~:543`) |
 | `web/src/styles.css` (+ `skin-claude.css` if needed) | edit | `.ins-drill*`, funnel/cost/gantt CSS |
+
+**Stage 4 (Supplier Fan-Out) adds:**
+
+| File | Action | What |
+|------|--------|------|
+| `shared/events.ts` | edit | `+ fanout` inspector event variant |
+| `worker/session-do.ts` | edit | emit `fanout` (per-source counts from the fixture) beside the distill emit |
+| `web/src/inspector-data.ts` | edit | `+ SUPPLIER_CATALOG` reference data (provider id/label/coverage/credentialed) + disclaimer |
+| `web/src/lib/inspector-stats.ts` | edit | `+ suppliersQueried` stat tagged `drill: "fanout"` |
+| `web/src/lib/inspector-drills.tsx` | edit | `+ fanout` transform + `FanoutView` + registry entry |
+| `web/src/Inspector.tsx` | edit | thread `fanout[]` events into `DrillContext` (new prop) |
+| `web/src/styles.css` | edit | provider tiles + depth/breadth popup CSS |
 
 ## Testing
 
@@ -159,6 +216,9 @@ truth, and says so in a one-line note.
    registry-driven drillable tiles (C5) + the funnel render. The headline view.
 2. **Cost simulator** — pure client; the `costSim` drill on the "observed cost" tile.
 3. **Waterfall** — pure client; the `pipeline` drill under the pipe block.
+4. **Supplier Fan-Out** — the `fanout` replay event + `SUPPLIER_CATALOG` reference data + the fan-out
+   drill (lit-real + dimmed-catalog providers). Hotels-first. Its own deploy + Neil smoke. Detailed
+   tasks authored once Stage 1's drill registry shape is locked (Stage 4 extends `DrillContext`).
 
 Optional: deploy a throwaway waterfall mockup (`web/public/mockups/inspector-waterfall.html`) before
 wiring stage 3, if Neil wants to eyeball the gantt first. Funnel + cost-sim are already visualized in
@@ -171,6 +231,9 @@ wiring stage 3, if Neil wants to eyeball the gantt first. Funnel + cost-sim are 
 - No chart library, no Sankey (deferred), no client-side pricing (the no-cache/no-distill scenarios
   stay deferred to a server-emitted cost event — tracked, not dropped).
 - No new `/info` deep-dive pages; existing deep-dive links are unchanged.
+- Supplier fan-out is hotels-only for now; flight fan-out (needs Kiwi/lastminute/Expedia captures)
+  is deferred. The `fanout` event still keeps the model payload slim — only the inspector
+  side-channel gains it; what the model sees is unchanged from today.
 - The remaining Part 6 views (per-turn token waterfall, model-routing swimlane, fabrication-guard
   ledger, latency breakdown, cache thermodynamics, etc.) land as later registry/drill entries — the
   drill registry this introduces is the seam they slot into.
