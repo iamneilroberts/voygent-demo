@@ -98,6 +98,12 @@ export type InspectorEvent =
       // structured numbers so the Token Elimination Funnel can draw per-search bars.
       // Optional + additive: older recordings without them fall back to the aggregate-only funnel.
       rawTokens?: number; slimTokens?: number; tool?: string }
+  | { type: "inspector"; kind: "fanout"; exchangeId: string; tool: string;
+      // One consolidated tool call fans out to N supplier adapters, aggregates, then distills.
+      // `sources` = the providers genuinely queried at capture time with their result counts;
+      // `shortlisted` = the deduped count surfaced to the model. Out-of-band; model payload unchanged.
+      sources: { id: string; label: string; count: number; credentialed: boolean }[];
+      shortlisted: number }
   | { type: "inspector"; kind: "overhead"; exchangeId: string;
       instrumentationMs: number | null; instrumentationBytes: number; addedModelTokens: 0;
       folioReprojectMs?: number | null; note?: string }

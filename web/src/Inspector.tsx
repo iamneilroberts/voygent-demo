@@ -56,6 +56,11 @@ export interface InsValidation {
   type: "inspector"; kind: "validation"; exchangeId: string;
   check: string; label: string; status: "pass" | "repaired" | "fail"; detail?: string;
 }
+export interface InsFanout {
+  type: "inspector"; kind: "fanout"; exchangeId: string; tool: string;
+  sources: { id: string; label: string; count: number; credentialed: boolean }[];
+  shortlisted: number;
+}
 
 const STAGES: { key: string; label: string; tools: string[] }[] = [
   { key: "create",  label: "Create",  tools: ["save_trip"] },

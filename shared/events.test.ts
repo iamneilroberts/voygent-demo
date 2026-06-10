@@ -51,6 +51,19 @@ describe("encodeSse", () => {
     const decoded = JSON.parse(encodeSse(ev).slice("data: ".length).trim());
     expect(decoded).toEqual(ev);
   });
+
+  it("round-trips a fanout event with per-source counts", () => {
+    const ev: ServerEvent = {
+      type: "inspector", kind: "fanout", exchangeId: "x1", tool: "hotel_search",
+      sources: [
+        { id: "cpmaxx", label: "CPMaxx (credentialed)", count: 8, credentialed: true },
+        { id: "serp", label: "Google / serp", count: 22, credentialed: false },
+      ],
+      shortlisted: 8,
+    };
+    const decoded = JSON.parse(encodeSse(ev).slice("data: ".length).trim());
+    expect(decoded).toEqual(ev);
+  });
 });
 
 describe("FolioData enrichment shape", () => {
