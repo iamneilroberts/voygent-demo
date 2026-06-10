@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { actorClass, actorLabel, pickedActor, editForActivity, threadsForDay, actorInitial } from "./reel-render";
+import { actorClass, actorLabel, pickedActor, editForActivity, threadsForDay, actorInitial, sendButtonLabel } from "./reel-render";
 import type { ReelEditMarker, ReelThread } from "./interaction";
 
 describe("actorClass / actorLabel", () => {
@@ -65,5 +65,12 @@ describe("actorInitial", () => {
     expect(actorInitial("client")).toBe("C");
     expect(actorInitial("advisor")).toBe("A");
     expect(actorInitial("agent")).toBe("V"); // Voygent
+  });
+});
+
+describe("sendButtonLabel", () => {
+  it("flips from a call-to-action to a confirmation once sent", () => {
+    expect(sendButtonLabel(false)).toBe("Send to client");
+    expect(sendButtonLabel(true)).toBe("✓ Sent to client");
   });
 });

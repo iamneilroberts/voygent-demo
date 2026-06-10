@@ -420,6 +420,7 @@ export function App() {
               engHasContent={insTools.length > 0}
               postReel={postReel}
               reelView={reelView}
+              reelMode={mode === "auto"}
             />
           ) : (
             <>

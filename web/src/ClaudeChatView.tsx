@@ -8,7 +8,7 @@ import { BoardView } from "./BoardView";
 import { commissionLabel, commissionTotal, fmtUsd } from "./lib/advisor";
 import { safeHttpUrl } from "./lib/url";
 import { type MobileView, toggleMobileView } from "./lib/mobile-view";
-import { editForActivity, actorClass, actorLabel, threadsForDay, actorInitial } from "./lib/reel-render";
+import { editForActivity, actorClass, actorLabel, threadsForDay, actorInitial, sendButtonLabel } from "./lib/reel-render";
 import type { ReelViewState, ReelEditMarker, ReelThread } from "./lib/interaction";
 
 // claude.ai-lookalike left pane. Deliberately close to claude.ai's layout
@@ -71,7 +71,7 @@ function CommentThread({ thread, dayTitle }: { thread: ReelThread; dayTitle: str
   );
 }
 
-function FolioArtifact({ folio, advisor, edits, threads }: { folio: FolioData; advisor: boolean; edits: ReelEditMarker[]; threads: ReelThread[] }) {
+function FolioArtifact({ folio, advisor, edits, threads, showSend, sent }: { folio: FolioData; advisor: boolean; edits: ReelEditMarker[]; threads: ReelThread[]; showSend?: boolean; sent?: boolean }) {
   const commTotal = advisor ? commissionTotal(folio.hotels) : null;
   // A title-only card (trip created, nothing promoted yet) is just noise inline.
   const hasDays = !!folio.days && folio.days.length > 0;
@@ -188,6 +188,13 @@ function FolioArtifact({ folio, advisor, edits, threads }: { folio: FolioData; a
           ))}
         </div>
       )}
+      {showSend && (
+        <div className="cl-artifact-foot">
+          <span className={`cl-folio-send ${sent ? "sent" : ""}`} data-reel-target="folio-send" role="button" aria-disabled="true">
+            {sendButtonLabel(!!sent)}
+          </span>
+        </div>
+      )}
     </div>
   );
 }
@@ -215,7 +222,7 @@ function Welcome({ presets, geoCity, onSend, busy, postReel }: { presets: Preset
 }
 
 export function ClaudeChatView(
-  { items, folio, onSend, onPick, busy, presets, geoCity, advisor, mobileView, onMobileView, onToggleDemo, demoLabel, engHasContent, postReel, reelView }:
+  { items, folio, onSend, onPick, busy, presets, geoCity, advisor, mobileView, onMobileView, onToggleDemo, demoLabel, engHasContent, postReel, reelView, reelMode }:
   {
     items: TimelineItem[];
     folio: FolioData | null;
@@ -232,6 +239,7 @@ export function ClaudeChatView(
     engHasContent: boolean;
     postReel?: boolean;
     reelView: ReelViewState;
+    reelMode?: boolean;   // reel playback (mode=auto) — shows the folio "Send to client" affordance
   },
 ) {
   const [input, setInput] = useState("");
@@ -273,7 +281,7 @@ export function ClaudeChatView(
             if (it.text) return <div key={i} className="cl-prose"><Prose text={it.text} /></div>;
             return busy && i === lastIdx ? <div key={i} className="cl-thinking" aria-label="Thinking"><span /></div> : null;
           })}
-          {folio && <div className="cl-folio-inline"><FolioArtifact folio={folio} advisor={advisor} edits={reelView.edits} threads={reelView.threads} /></div>}
+          {folio && <div className="cl-folio-inline"><FolioArtifact folio={folio} advisor={advisor} edits={reelView.edits} threads={reelView.threads} showSend={reelMode} sent={!!reelView.handoff?.sent} /></div>}
           <div ref={endRef} />
         </div>
       </div>
@@ -284,7 +292,7 @@ export function ClaudeChatView(
             <button type="button" className="cl-sheet-close" onClick={() => onMobileView("chat")} aria-label="Back to chat">✕ chat</button>
           </div>
           <div className="cl-sheet-body">
-            {folio ? <FolioArtifact folio={folio} advisor={advisor} edits={reelView.edits} threads={reelView.threads} /> : <p className="cl-day-desc">Your trip folio will build here as Voygent works.</p>}
+            {folio ? <FolioArtifact folio={folio} advisor={advisor} edits={reelView.edits} threads={reelView.threads} showSend={reelMode} sent={!!reelView.handoff?.sent} /> : <p className="cl-day-desc">Your trip folio will build here as Voygent works.</p>}
           </div>
         </div>
       )}

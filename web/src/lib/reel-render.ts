@@ -46,3 +46,8 @@ export function threadsForDay(threads: ReelThread[], dayIndex: number): ReelThre
 export function actorInitial(actor: Actor): string {
   return actorLabel(actor).charAt(0);
 }
+
+// Label for the folio "Send to client" affordance, before and after it's sent.
+export function sendButtonLabel(sent: boolean): string {
+  return sent ? "✓ Sent to client" : "Send to client";
+}
