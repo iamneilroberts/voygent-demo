@@ -46,10 +46,17 @@ function legsFrom(raw: unknown): FlightLeg[] | undefined {
 function flightCandidate(c: Record<string, any>): BoardCandidate | null {
   if (typeof c.id !== "string" || !c.id) return null;
   const title = typeof c.route === "string" && c.route ? c.route : c.id;
-  const meta = [c.airline, stopsLabel(c.stops), durationLabel(c.durationMinutes), c.cabin].filter(Boolean).join(" · ") || undefined;
+  // The captured `price` is the total for the party; surface party size + per-person
+  // so a 2-traveler total doesn't read as one alarming fare.
+  const perPerson = typeof c.pricePerPerson === "number" && Number.isFinite(c.pricePerPerson) ? c.pricePerPerson : undefined;
+  const travelers = perPerson && typeof c.price === "number" && perPerson > 0 ? Math.round(c.price / perPerson) : undefined;
+  const meta = [c.airline, stopsLabel(c.stops), durationLabel(c.durationMinutes), c.cabin,
+    travelers && travelers > 1 ? `${travelers} travelers` : null].filter(Boolean).join(" · ") || undefined;
   const price = usd(c.price);
   const summary = [title, c.airline, stopsLabel(c.stops), price].filter(Boolean).join(", ");
   const out: BoardCandidate = { id: c.id, title, price, meta, summary };
+  if (typeof travelers === "number") out.travelers = travelers;
+  if (typeof perPerson === "number") out.perPerson = perPerson;
   const legs = legsFrom(c.legs);
   if (legs) out.legs = legs;
   return out;
@@ -120,12 +127,26 @@ function cpmaxxHotelCandidate(c: Record<string, any>): BoardCandidate | null {
   const starLabel = typeof stars === "number" ? `${stars}★` : null;
   const perNightN = num(c.pricePerNight, c.price_per_night, fx?.pricePerNight ?? undefined);
   const totalN = num(c.priceTotal, c.price_total, fx?.priceTotal ?? undefined);
-  const perNight = usd(perNightN);
-  const total = usd(totalN);
-  const meta = [area, starLabel, total ? `${total} total` : null].filter(Boolean).join(" · ") || undefined;
+  const nights = num(c.nights, fx?.nights ?? undefined);
+  const travelers = num(c.travelers);
+  const allInc = c.allInclusive === true;
+  const clientPrice = num(c.clientPrice, c.client_price, fx?.clientPrice ?? undefined);
+  // Headline = what the CLIENT pays; the per-night reconciles FROM the headline total
+  // (not the raw cpmaxx rate) so total and per-night always agree.
+  const headlineTotal = clientPrice ?? totalN;
+  const perNightVal = headlineTotal && nights ? Math.round(headlineTotal / nights) : perNightN;
+  const perNight = usd(perNightVal);
+  const total = usd(headlineTotal);
+  // Context chip so the (real, premium) rate reads sanely: all-inclusive · nts · travelers.
+  const ctx = [allInc ? "All-inclusive" : null, nights ? `${nights} nts` : null, travelers ? `${travelers} travelers` : null].filter(Boolean).join(" · ");
+  const meta = [area, starLabel, ctx || null].filter(Boolean).join(" · ") || undefined;
   const price = perNight ? `${perNight}/night` : total;
-  const summary = [c.name, price, total ? `${total} total` : null].filter(Boolean).join(", ");
+  const summary = [c.name, total, ctx || null].filter(Boolean).join(", ");
   const out: BoardCandidate = { id, title: c.name, price, meta, summary };
+  if (typeof nights === "number") out.nights = nights;
+  if (typeof travelers === "number") out.travelers = travelers;
+  if (allInc) out.allInclusive = true;
+  if (typeof clientPrice === "number") out.clientPrice = clientPrice;
 
   const sheet = str(c.hotelSheetUrl, c.hotel_sheet_url, fx?.hotelSheetUrl ?? undefined);
   if (sheet) { out.detailUrl = sheet; out.detailLabel = "view rooms ↗"; }
@@ -138,14 +159,17 @@ function cpmaxxHotelCandidate(c: Record<string, any>): BoardCandidate | null {
   if (typeof commission === "number") out.commission = commission;
   const commissionPct = num(c.commissionPct, c.commission_pct, fx?.commissionPct ?? undefined);
   if (typeof commissionPct === "number") out.commissionPct = commissionPct;
-  const clientPrice = num(c.clientPrice, c.client_price, fx?.clientPrice ?? undefined);
-  if (typeof clientPrice === "number") out.clientPrice = clientPrice;
-  // otaFrom may arrive precomputed (replay-slim) or be derivable from the fixture's otaPrices.
+  // Ladder honesty: only surface the public-OTA comparison when the client total is
+  // MATERIALLY below it (real savings). For the current data OTA ~= the cpmaxx rate, so
+  // this stays unset and we never imply a discount that isn't there.
   const ota = num(c.otaFrom) ?? (() => {
     const vals = (fx?.otaPrices ?? []).map((o) => o?.pricePerNight).filter((n): n is number => typeof n === "number" && n > 0);
     return vals.length ? Math.min(...vals) : undefined;
   })();
-  if (typeof ota === "number") out.otaFrom = ota;
+  const otaTotal = typeof ota === "number" && nights ? ota * nights : undefined;
+  if (typeof otaTotal === "number" && typeof clientPrice === "number" && clientPrice < otaTotal * 0.95) {
+    out.otaFrom = ota;
+  }
   return out;
 }
 

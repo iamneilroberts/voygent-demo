@@ -55,9 +55,13 @@ export interface BoardCandidate {
   commission?: number;     // advisor commission for the stay, USD (cpmaxx-sourced candidates only)
   commissionPct?: number;  // advisor commission percentage (cpmaxx-sourced candidates only)
   clientPrice?: number;    // what the client pays for the stay, USD (cpmaxx price ladder)
-  otaFrom?: number;        // cheapest public OTA per-night the credentialed search beat (cpmaxx price ladder)
+  otaFrom?: number;        // cheapest public OTA per-night the credentialed search beat — set ONLY on real savings (cpmaxx ladder)
   image?: string;          // property photo thumbnail (cpmaxx-sourced candidates only)
   photoCount?: number;     // how many property photos the supplier sheet carries (cpmaxx only)
+  nights?: number;         // stay length, for the "N nts" context chip (hotels)
+  travelers?: number;      // party size, for "for N travelers" / per-person framing
+  allInclusive?: boolean;  // cpmaxx resort all-inclusive flag (context for the rate)
+  perPerson?: number;      // flight per-person price, USD
   legs?: FlightLeg[];      // flight itinerary detail — when present, the option expands to show it
   badge?: string;          // Voygent's editorial tag for this option, e.g. "Best value" / "Cheapest" / "Quickest"
 }

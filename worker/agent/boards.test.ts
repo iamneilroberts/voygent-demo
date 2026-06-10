@@ -78,6 +78,19 @@ describe("createBoardBuilder", () => {
     expect(ev.candidates[0].summary).toBe("MOB→DUB, United, 1 stop, $3,426");
   });
 
+  it("flight candidate surfaces travelers + per-person from a 2-traveler total", () => {
+    const build = createBoardBuilder();
+    const ev = build("flight_list", JSON.stringify({
+      status: "ok", action: "list", count: 1, version: 1,
+      candidates: [{ id: "serp:f1", route: "ATL→CUN", airline: "Delta", price: 2954, pricePerPerson: 1477, stops: 0, cabin: "Economy" }],
+    }), TRIP);
+    if (ev?.type !== "board") throw new Error("expected board event");
+    const c = ev.candidates[0];
+    expect(c.travelers).toBe(2);
+    expect(c.perPerson).toBe(1477);
+    expect(c.meta).toMatch(/2 travelers/);
+  });
+
   it("maps a featured hotel_search result to a credentialed cpmaxx board", () => {
     const build = createBoardBuilder();
     const ev = build("hotel_search", hotelSearchPayload("Cancun"), TRIP);
@@ -96,9 +109,19 @@ describe("createBoardBuilder", () => {
     expect(first.detailLabel).toBe("view rooms ↗");
     expect(first.image).toBe(cpmaxx[0].image);
     expect(first.photoCount).toBe(cpmaxx[0].pictureCount);
-    // Price ladder: client price + the public OTA per-night it beat/matched.
-    expect(first.clientPrice).toBe(cpmaxx[0].clientPrice);
-    expect(typeof first.otaFrom).toBe("number");
+    // Client price is the headline; the per-night reconciles FROM it (client/nights),
+    // not the raw cpmaxx rate, so total and per-night always agree.
+    const cp = cpmaxx[0];
+    expect(first.clientPrice).toBe(cp.clientPrice);
+    expect(first.price).toBe(`$${Math.round(cp.clientPrice! / cp.nights!).toLocaleString("en-US")}/night`);
+    expect(first.nights).toBe(cp.nights);
+    expect(first.travelers).toBe(CANCUN.route.adults);
+    // Context chip rides on meta: all-inclusive + nights + travelers.
+    expect(first.meta).toMatch(/All-inclusive/);
+    expect(first.meta).toMatch(/7 nts/);
+    expect(first.meta).toMatch(/2 travelers/);
+    // Ladder NOT shown when OTA ~= client total (no fake savings to claim).
+    expect(first.otaFrom).toBeUndefined();
   });
 
   it("enriches serp hotel candidates with review scale, stay total, and a google search link", () => {
@@ -164,13 +187,13 @@ describe("hotel_search_and_rank (cpmaxx live) board mapping", () => {
     status: "success",
     hotels: [
       {
-        rank: 1, id: 537754, name: "Omni Cancun Villas", stars: 4,
+        rank: 1, id: 990114, name: "Omni Cancun Villas", stars: 4,
         area: "Boulevard Kukulcan KM 16.5 Cancun 77500, Zona Hotelera",
         price_total: 8122.3, price_per_night: 1160,
         commission: 2436.69, commission_pct: 30,
-        hotel_sheet_url: "https://cpmaxx.example/sheet/537754",
+        hotel_sheet_url: "https://cpmaxx.example/sheet/990114",
       },
-      { rank: 2, id: "537755", name: "JW Marriott Cancun", stars: 5, price_per_night: 437 },
+      { rank: 2, id: "990115", name: "JW Marriott Cancun", stars: 5, price_per_night: 437 },
     ],
   });
 
@@ -183,10 +206,10 @@ describe("hotel_search_and_rank (cpmaxx live) board mapping", () => {
     expect(board.kind).toBe("hotel");
     expect(board.candidates).toHaveLength(2);
     const [a, b] = board.candidates;
-    expect(a.id).toBe("537754");           // numeric id coerced to string
+    expect(a.id).toBe("990114");           // numeric id coerced to string
     expect(a.title).toBe("Omni Cancun Villas");
     expect(a.price).toBe("$1,160/night");
-    expect(a.detailUrl).toBe("https://cpmaxx.example/sheet/537754");
+    expect(a.detailUrl).toBe("https://cpmaxx.example/sheet/990114");
     expect(a.commission).toBe(2436.69);
     expect(a.commissionPct).toBe(30);
     expect(a.meta).toContain("4★");
