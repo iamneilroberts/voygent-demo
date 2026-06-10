@@ -188,3 +188,26 @@ describe("replayChat transport (pause + progress)", () => {
     expect(prog.at(-1)).toEqual([2, 2]);   // final tick at 100%
   });
 });
+
+describe("replayChat seek (fast-forward)", () => {
+  it("applies frames before seekTo instantly (no waits), then plays from the target", async () => {
+    const rec: Recording = { skin: "claude", trip: "t", frames: [
+      { delayMs: 5, kind: "event", event: { type: "text", delta: "a" } as ServerEvent },
+      { delayMs: 5, kind: "event", event: { type: "text", delta: "b" } as ServerEvent },
+      { delayMs: 5, kind: "event", event: { type: "text", delta: "c" } as ServerEvent },
+      { delayMs: 5, kind: "turn-end" },
+    ] };
+    const applied: string[] = [];
+    const waits: number[] = [];
+    const prog: number[] = [];
+    await replayChat(rec, {
+      applyEvent: (e) => applied.push((e as { delta?: string }).delta ?? e.type),
+      pushUser: () => {},
+      setBusy: () => {},
+    }, { wait: async (ms) => { waits.push(ms); }, onProgress: (d) => prog.push(d), seekTo: 2 });
+    expect(applied).toEqual(["a", "b", "c"]);   // ALL earlier frames applied (state rebuilt)
+    expect(waits.length).toBe(2);               // only the live frames [2,3] waited; [0,1) fast-forwarded
+    expect(prog[0]).toBe(2);                     // first progress tick is at the seek target
+    expect(prog.at(-1)).toBe(4);                 // final tick at the total
+  });
+});

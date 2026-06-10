@@ -42,6 +42,9 @@ export interface ReplayOpts {
   pauseGate?: () => Promise<void>;
   // Progress tick: (framesDone, framesTotal) before each frame and once at the end.
   onProgress?: (done: number, total: number) => void;
+  // Seek: apply frames [0, seekTo) instantly (state rebuild), then play normally from
+  // seekTo. Caller must reset state before re-invoking so the rebuild starts clean.
+  seekTo?: number;
 }
 
 function sleep(ms: number, signal?: AbortSignal): Promise<void> {
@@ -67,20 +70,28 @@ export async function replayChat(rec: Recording, h: ReplayHandlers, opts: Replay
   const wait = opts.wait ?? ((ms: number) => sleep(ms, opts.signal));
   const getSpeed = opts.speed ?? (() => 1);
   const hlMap = opts.highlights ? resolveHighlightFrames(rec.frames, opts.highlights) : null;
+  // Seek support: frames before `seekTo` are applied INSTANTLY (no delay, dwell, pause,
+  // or callout) to rebuild the accumulated state, then normal playback resumes at seekTo.
+  // The caller resets state first, so a seek is reset + fast-forward + play-on.
+  const startFrom = opts.seekTo && opts.seekTo > 0 ? opts.seekTo : 0;
   let prev: Frame | null = null;
   for (let i = 0; i < rec.frames.length; i++) {
     const f = rec.frames[i];
     if (opts.signal?.aborted) return;
-    // Hold here while paused (abort-safe). When not paused this resolves immediately.
-    if (opts.pauseGate) { await Promise.race([opts.pauseGate(), waitForAbort(opts.signal)]); if (opts.signal?.aborted) return; }
-    opts.onProgress?.(i, rec.frames.length);
-    await wait(computeDelay(f, prev, { speed: getSpeed(), reducedMotion: opts.reducedMotion }));
-    if (opts.signal?.aborted) return;
+    const live = i >= startFrom;   // false while fast-forwarding to the seek target
+    if (live) {
+      // Hold here while paused (abort-safe). When not paused this resolves immediately.
+      if (opts.pauseGate) { await Promise.race([opts.pauseGate(), waitForAbort(opts.signal)]); if (opts.signal?.aborted) return; }
+      opts.onProgress?.(i, rec.frames.length);
+      await wait(computeDelay(f, prev, { speed: getSpeed(), reducedMotion: opts.reducedMotion }));
+      if (opts.signal?.aborted) return;
+    }
     if (f.kind === "user") { h.pushUser(f.text); h.setBusy(true); }
     else if (f.kind === "event") h.applyEvent(f.event);
     else if (f.kind === "turn-end") h.setBusy(false);
     else if (f.kind === "interaction") h.applyInteraction?.(f.interaction, f.actor);
     prev = f;
+    if (!live) continue;   // fast-forward: skip dwell + callouts
     const hits = hlMap?.get(i);
     // Interactions HOLD after applying (post-apply dwell) unless a spotlight on this
     // same frame provides the hold (handled below) — avoids double-dwell.

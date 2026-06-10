@@ -113,9 +113,32 @@ export function App() {
   const pausedRef = useRef(false);
   const resumeWaiters = useRef<Array<() => void>>([]);
   const [reelProg, setReelProg] = useState<{ done: number; total: number }>({ done: 0, total: 0 });
+  // Scrubber: dragging seeks to a frame. seekFrameRef carries the target into the replay
+  // effect; replayNonce re-triggers it; scrubbing/scrubVal track an in-progress drag.
+  const seekFrameRef = useRef(0);
+  const [replayNonce, setReplayNonce] = useState(0);
+  const scrubbingRef = useRef(false);
+  const scrubValRef = useRef(0);
+  const [scrubPct, setScrubPct] = useState<number | null>(null);
   function flushResume() { const ws = resumeWaiters.current; resumeWaiters.current = []; ws.forEach((r) => r()); }
   function pauseGate(): Promise<void> { return pausedRef.current ? new Promise<void>((res) => resumeWaiters.current.push(res)) : Promise.resolve(); }
   function togglePause() { setPaused((p) => { const next = !p; pausedRef.current = next; if (!next) flushResume(); return next; }); }
+  // Reset + fast-forward to `target` (instant rebuild), then play on. resetReelState
+  // clears the accumulated timeline so the rebuild starts clean; the effect (keyed on
+  // replayNonce) reads seekFrameRef and passes it as replayChat's seekTo.
+  function seekToFrame(target: number) {
+    replayAbort.current?.abort();
+    resetReelState();
+    seekFrameRef.current = target;
+    setReplayNonce((n) => n + 1);
+  }
+  function commitSeek(pctVal: number) {
+    setScrubPct(null);
+    const total = reelProg.total;
+    if (!total) return;
+    const target = Math.min(total, Math.max(0, Math.round((pctVal / 100) * total)));
+    seekToFrame(target);
+  }
   // Reel interaction view-state; consumed by ClaudeChatView render.
   const [reelView, setReelView] = useState<ReelViewState>(emptyReelViewState);
   const hlResolve = useRef<(() => void) | null>(null);
@@ -154,6 +177,7 @@ export function App() {
     replayAbort.current?.abort();
     replayAbort.current = ac;
     const reduced = (() => { try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; } })();
+    const seekTo = seekFrameRef.current; seekFrameRef.current = 0;   // consume the seek target (0 = normal start)
     void replayChat(selectedReel.recording, {
       applyEvent: (e) => applyEvent(e, true),
       pushUser,
@@ -167,6 +191,7 @@ export function App() {
       highlights: selectedReel.highlights,
       pauseGate,
       onProgress: (done, total) => setReelProg({ done, total }),
+      seekTo,
     }).then(() => { if (!ac.signal.aborted) setReelPhase("ended"); });
     return () => {
       ac.abort();
@@ -177,7 +202,7 @@ export function App() {
       flushResume();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, reelPhase]);
+  }, [mode, reelPhase, replayNonce]);
 
   useEffect(() => {
     fetch(`${API_BASE}/presets`)
@@ -347,6 +372,8 @@ export function App() {
 
   const eng = engState(insTools.length, collapsed);
   const chatMessages = items.filter(isChatMessage) as ChatMessage[];
+  const reelPct = reelProg.total ? Math.round((reelProg.done / reelProg.total) * 100) : 0;
+  const reelSeekPct = scrubPct ?? reelPct;   // show the dragged position while scrubbing
 
   function toggleDemo() {
     const next: ModeId = mode === "auto" ? "live" : "auto";
@@ -420,8 +447,15 @@ export function App() {
             <div className="cl-reel-controls" role="group" aria-label="Playback controls">
               <button type="button" className="cl-reel-ctl" aria-pressed={paused} aria-label={paused ? "Play" : "Pause"} onClick={togglePause}>{paused ? "▶" : "❚❚"}</button>
               <button type="button" className="cl-reel-ctl" aria-label="Restart" onClick={startReel}>↺</button>
-              <div className="cl-reel-track" role="progressbar" aria-label="Playback progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={reelProg.total ? Math.round((reelProg.done / reelProg.total) * 100) : 0}>
-                <i style={{ width: `${reelProg.total ? Math.round((reelProg.done / reelProg.total) * 100) : 0}%` }} />
+              <div className="cl-reel-track">
+                <i style={{ width: `${reelSeekPct}%` }} />
+                <input
+                  type="range" className="cl-reel-seek" min={0} max={100} step={1}
+                  value={reelSeekPct} aria-label="Seek through the reel"
+                  onPointerDown={() => { scrubbingRef.current = true; }}
+                  onChange={(e) => { const v = Number(e.currentTarget.value); scrubValRef.current = v; setScrubPct(v); if (!scrubbingRef.current) commitSeek(v); }}
+                  onPointerUp={() => { if (scrubbingRef.current) { scrubbingRef.current = false; commitSeek(scrubValRef.current); } }}
+                />
               </div>
               <div className="cl-reel-speed">
                 <button type="button" aria-pressed={speed === 1} onClick={() => setSpeed(1)}>1×</button>
