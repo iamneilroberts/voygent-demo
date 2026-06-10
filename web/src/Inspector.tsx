@@ -8,6 +8,7 @@ import type { StatsResponse } from "../../shared/events";
 import { StoreOpsWidget, type InsStore } from "./StoreOpsWidget";
 import { storeOpsForTool } from "../../worker/storeops";
 import { buildStats, railStats, deepDiveLinks } from "./lib/inspector-stats";
+import { DRILLS, drillForStat, type DrillContext, type DrillId } from "./lib/inspector-drills";
 
 // Engineering stories moved out of the panel (task 6c) — the tab keeps live
 // stats; the narratives live on worker-served /info pages.
@@ -223,6 +224,13 @@ export function Inspector(
   const activePhase = phases && phases.length ? phases[phases.length - 1].phase
     : ([...STAGES].reverse().find(stageActive)?.label ?? "Working");
 
+  // Which drill is expanded in the open panel (single-open accordion). null = none.
+  const [openDrill, setOpenDrill] = useState<DrillId | null>(null);
+  const drillCtx: DrillContext = {
+    tools, turns, summaries, savings, phases: phases ?? [],
+    savedHeadline, cost, actualCost, actualByModel,
+  };
+
   // ---- Resting states: idle (dim, pre-trip) and peek (LIVE skinny rail) ----
   if (state !== "open") {
     if (state === "idle") {
@@ -267,30 +275,34 @@ export function Inspector(
       </div>
       {headExtra && <div className="ins-extra">{headExtra}</div>}
 
-      {/* 10-second read: the whole system at a glance. Detail stays in the sections below. */}
+      {/* 10-second read: registry-driven tiles. A tile whose stat has a drill is a button
+          that toggles its detail panel below the strip (single-open accordion). */}
       <section className="ins-region ins-summary" aria-label="Run summary">
         <div className="ins-strip">
-          <div className="ins-stat" data-stat="exposedTools">
-            <span className="ins-stat-n">{latest ? latest.exposedToolCount : "—"}</span>
-            <span className="ins-stat-l">MCP tools exposed</span>
-          </div>
-          <div className="ins-stat" data-stat="distinctTools">
-            <span className="ins-stat-n">{firedTools.size}</span>
-            <span className="ins-stat-l">distinct tools</span>
-            <span className="ins-stat-sub">{tools.length} call{tools.length === 1 ? "" : "s"}</span>
-          </div>
-          <div className="ins-stat" data-stat="persistedWrites">
-            <span className="ins-stat-n">{persistedWrites}</span>
-            <span className="ins-stat-l">persisted writes</span>
-          </div>
-          <div className="ins-stat" data-stat="contextKeptOut">
-            <span className="ins-stat-n">≈{fmt(savedHeadline)}</span>
-            <span className="ins-stat-l">context kept out</span>
-          </div>
-          <div className="ins-stat" data-stat="observedCost">
-            <span className="ins-stat-n ins-stat-cost">{usd(actualCost)}</span>
-            <span className="ins-stat-l">observed cost</span>
-          </div>
+          {regStats.map((st) => {
+            const drill = st.drill ? drillForStat(st.key) : undefined;
+            const active = drill && openDrill === drill.id;
+            const body = (
+              <>
+                <span className={`ins-stat-n ${st.tone === "good" ? "ins-stat-cost" : ""}`}>{st.value}</span>
+                <span className="ins-stat-l">{st.label}</span>
+              </>
+            );
+            return drill ? (
+              <button
+                key={st.key}
+                className={`ins-stat ins-stat-drill ${active ? "active" : ""}`}
+                data-stat={st.key}
+                aria-expanded={active}
+                onClick={() => setOpenDrill(active ? null : drill.id)}
+              >
+                {body}
+                <span className="ins-stat-caret" aria-hidden="true">{active ? "▾" : "▸"}</span>
+              </button>
+            ) : (
+              <div key={st.key} className="ins-stat" data-stat={st.key}>{body}</div>
+            );
+          })}
           {valTotal > 0 && (
             <div className="ins-stat" data-stat="validation">
               <span className={`ins-stat-n ${valFail ? "ins-stat-warn" : "ins-stat-ok"}`}>{valOk}/{valTotal}</span>
@@ -298,6 +310,15 @@ export function Inspector(
             </div>
           )}
         </div>
+        {openDrill && (() => {
+          const d = DRILLS.find((x) => x.id === openDrill);
+          return d ? (
+            <div className="ins-drill" role="region" aria-label={d.title}>
+              <h4 className="ins-drill-title">{d.title}</h4>
+              {d.render(drillCtx)}
+            </div>
+          ) : null;
+        })()}
       </section>
 
       {routing && (
