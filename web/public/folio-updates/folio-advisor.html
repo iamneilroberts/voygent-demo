@@ -1,0 +1,762 @@
+<!doctype html>
+<html lang="en" data-view="advisor"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Ryan &amp; Maya — Greece Honeymoon</title>
+<script>(function(){try{var k='voygent.folio.advisorTheme';var t=localStorage.getItem(k);if(t!=='dark'&&t!=='light'){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script><style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..600&family=Hanken+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+  :root{
+    --primary:#1f3a5f; --primary-dark:#152a45; --primary-light:#e7edf4;
+    --accent:#3f7d4f; --accent-dark:#2f6a40; --accent-light:#e6efe6;
+    --accent-flight:#c97e16; --accent-lodging:#a85d6b; --accent-port:#2f7d72;
+    --amber:#f5a623; --amber-deep:#c97e16; --white:#fff; --bg:#faf6ef; --panel:#fffdf8; --panel-2:#ffffff;
+    --bg-light:#f3ede1; --text:#2b2620; --text-light:#5c5346; --text-muted:#8a7f6f;
+    --line:#e8e1d4; --border:#e8e1d4; --border-strong:#d6ccb8;
+    --shadow:0 1px 2px rgba(43,38,32,.04),0 8px 24px rgba(43,38,32,.07); --radius:14px; --radius-sm:8px;
+    --success:#3f7d4f; --warning:#c87a1a; --danger:#b2483b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font:15px/1.55 'Hanken Grotesk',-apple-system,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-family:'Fraunces',Georgia,serif;font-weight:600;letter-spacing:-.01em}
+
+  /* ---- sticky top nav (server-rendered links; app scrolls to #anchor) ---- */
+  .fb-nav{position:sticky;top:0;z-index:20;display:flex;gap:14px;overflow-x:auto;
+    padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line)}
+  .fb-nav a{white-space:nowrap;color:var(--text);text-decoration:none;font-size:14px}
+  .fb-nav a:hover{color:var(--primary)}
+  @media print{.fb-nav{display:none}}
+
+  /* ---- layout ---- */
+  #fb-root{display:block}
+  .wrap{max-width:760px;margin:0 auto;padding:24px 18px 120px}
+  main#fb-root .wrap{padding-top:18px;padding-bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+
+  /* ---- header ---- */
+  .fb-head{text-align:center;margin:8px 0 18px}
+  .eyebrow{letter-spacing:.16em;text-transform:uppercase;font-size:11px;color:var(--text-muted)}
+  h1{font-size:30px;line-height:1.15;margin:6px 0 4px;font-weight:700}
+  .sub{color:var(--text-light);margin:0;font-size:14px}
+  /* quiet header-level "How this works" link that opens the help dialog */
+  .fb-howto{margin-top:10px;background:none;border:0;padding:6px 8px;cursor:pointer;
+    font-size:12.5px;color:var(--text-muted);text-decoration:underline;min-height:32px}
+  .fb-howto:hover{color:var(--primary)}
+  .fb-howto:before{content:"\24D8\00a0"}  /* circled i */
+
+  /* ---- quiet in-board intro (1-2 muted lines, not a banner) ---- */
+  .fb-intro{margin:0 0 20px;font-size:12.5px;line-height:1.6;color:var(--text-muted);text-align:center}
+  .fb-intro b{color:var(--text-light);font-weight:600}
+  .fb-advisor-banner{margin:0 0 14px;padding:8px 12px;border:1px solid var(--primary);border-left:4px solid var(--primary);
+    border-radius:var(--radius-sm,8px);background:var(--primary-light);color:#16364f;font-size:12px;line-height:1.45;text-align:left}
+  .fb-advisor-banner b{color:var(--primary-dark)}
+
+  /* ---- inline (?) help buttons ---- */
+  .help-q{position:relative;display:inline-flex;align-items:center;justify-content:center;
+    width:18px;height:18px;margin-left:6px;padding:0;border:1px solid var(--border-strong);
+    border-radius:50%;background:var(--panel-2);color:var(--text-muted);font-size:11px;font-weight:700;
+    line-height:1;cursor:pointer;vertical-align:middle;transition:border-color .15s ease,color .15s ease}
+  .help-q:hover{border-color:var(--primary);color:var(--primary)}
+  /* invisible 44px hit target centered on the 18px glyph (mobile touch) */
+  .help-q:after{content:"";position:absolute;top:50%;left:50%;width:44px;height:44px;
+    transform:translate(-50%,-50%)}
+
+  /* ---- progress strip / steps-to-book ---- */
+  .fb-progress{margin:0 0 22px;padding:14px 16px;background:var(--panel);
+    border:1px solid var(--line);border-radius:var(--radius-sm);transition:border-color .15s ease,background .15s ease}
+  .fb-progress .pbar{height:6px;border-radius:6px;background:var(--panel-2);overflow:hidden;margin-bottom:8px}
+  .fb-progress .pbar > span{display:block;height:100%;background:var(--accent);transition:width .25s}
+  .fb-progress .plabel{font-size:12.5px;color:var(--text-light);display:flex;justify-content:space-between;gap:10px}
+  .fb-progress .plabel b{color:var(--text)}
+  /* clickable chips for each still-open required decision (scroll-to-section) */
+  .fb-steps{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px}
+  .fb-steps .slabel{flex-basis:100%;font-size:11px;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--text-muted);margin-bottom:-2px}
+  .fb-step{display:inline-flex;align-items:center;gap:6px;min-height:32px;padding:6px 12px;
+    border:1px solid var(--border-strong);border-radius:20px;background:var(--panel-2);
+    color:var(--text);font-size:12.5px;font-weight:600;text-decoration:none;cursor:pointer;
+    transition:border-color .15s ease,background .15s ease,color .15s ease}
+  .fb-step:hover{border-color:var(--primary);color:var(--primary)}
+  .fb-step:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--warning);flex:none}
+  /* READY state: celebratory green wash + accent border once all required decisions are made */
+  .fb-progress.ready{border-color:var(--accent);
+    background:linear-gradient(180deg,rgba(59,175,42,.16),rgba(59,175,42,.03) 70%),var(--panel)}
+  .fb-progress.ready .pbar > span{background:var(--accent)}
+  .fb-ready-banner{display:flex;align-items:center;gap:8px;margin-top:10px;
+    font-size:13.5px;font-weight:700;color:var(--accent)}
+  .fb-ready-banner:before{content:"\2728";font-size:15px}
+  .fb-ready-banner .rb-sub{font-weight:500;color:var(--text-light)}
+
+  /* ---- section ---- */
+  .fb-section{margin:0 0 8px;scroll-margin-top:64px}
+  .sec-no{display:flex;align-items:center;gap:10px;letter-spacing:.1em;
+    text-transform:uppercase;font-size:15px;font-weight:700;color:var(--text-light);margin:0 0 14px}
+  .sec-no b{color:var(--primary);font-size:17px;font-weight:800}
+  .group-note{font-size:13px;color:var(--text-light);margin:0 0 14px;padding:10px 12px;
+    background:var(--panel);border-radius:var(--radius-sm);border-left:3px solid var(--primary)}
+  .rule{height:1px;background:var(--line);margin:26px 0}
+
+  /* ---- cards ---- */
+  .fb-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:16px 18px 16px 20px;margin-bottom:12px;position:relative;cursor:pointer;
+    transition:border-color .15s ease,box-shadow .15s ease,background .15s ease,transform .15s ease}
+  .fb-card:hover{border-color:var(--border-strong)}
+  /* Selected: bold 4px left accent bar + full primary ring + stronger tint, so the
+     chosen card pops at a glance. Title/price/summary stay full-contrast — recede
+     happens on unselected siblings (below), never by washing out the winner. */
+  .fb-card.sel{border-color:var(--primary);
+    box-shadow:inset 4px 0 0 0 var(--primary),0 0 0 2px var(--primary),var(--shadow);
+    background:linear-gradient(180deg,rgba(27,97,156,.20),rgba(27,97,156,.04) 70%),var(--panel)}
+  /* When a group has a winner, let the OTHERS recede by sinking their surface toward
+     the page background + a muted border — NOT opacity — so title/price/summary text
+     stays at full contrast (this is the washout we deliberately avoid). */
+  .fb-card.dim{border-color:var(--line);background:var(--bg)}
+  .fb-card.dim:hover{border-color:var(--border-strong);background:var(--panel)}
+  .fb-card.static{cursor:default}
+  .row{display:flex;justify-content:space-between;align-items:flex-start;gap:14px}
+  .ttl{font-weight:600;font-size:16px}
+  .summary{color:var(--text-light);font-size:13px;margin-top:3px}
+  .price{font-weight:700;font-size:18px;white-space:nowrap;padding-right:30px}
+  .price.range{font-size:15px}
+  .price.none{color:var(--text-muted);font-weight:600;font-size:13px}
+  .opt-note{font-size:12.5px;color:var(--text-muted);margin-top:8px}
+  .link{color:#6fb3e0;font-size:12.5px;text-decoration:none}
+  .link:hover{text-decoration:underline}
+
+  /* ---- badges ---- */
+  .tags{margin-top:9px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+  .tag{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:600;line-height:1.4}
+  .tag.quoted{background:rgba(67,196,99,.16);color:var(--success)}
+  .tag.est{background:rgba(245,166,35,.16);color:var(--warning)}
+  .tag.neutral{background:var(--panel-2);color:var(--text-light)}
+  .tag.rec{background:var(--primary-light);color:var(--primary-dark)}
+  .tag.sel-badge{background:rgba(27,97,156,.18);color:#6fb3e0}
+  /* the live client pick — solid primary fill so "Selected" reads as the ACTIVE choice,
+     clearly distinct from the advisor-locked green "Confirmed" pill */
+  .tag.picked{background:var(--primary);color:#fff;box-shadow:0 0 0 1px var(--primary)}
+  .tag.picked:before{content:"✓ "}
+  .tag.conf{background:rgba(67,196,99,.16);color:var(--success)}
+  .tag.alt{background:var(--panel-2);color:var(--text-muted)}
+  .tag.delta-up{background:rgba(229,86,76,.14);color:#f08a82}
+  .tag.delta-down{background:rgba(67,196,99,.16);color:var(--success)}
+  .tag.photo{background:var(--panel-2);color:var(--text-light)}
+  .tag.flag{background:rgba(245,166,35,.16);color:var(--warning)}
+  .ribbon{position:absolute;top:-9px;left:16px;background:var(--primary);color:#fff;
+    font-size:10.5px;font-weight:700;letter-spacing:.04em;padding:2px 10px;border-radius:20px}
+  .star{color:var(--warning)}
+
+  /* ---- pick indicator ---- */
+  .pick{position:absolute;top:14px;right:16px;width:22px;height:22px;border-radius:50%;
+    border:2px solid var(--border-strong);transition:border-color .15s ease,background .15s ease}
+  /* Selected single-choice: filled primary disc with a clear white ✓ (was an empty
+     filled dot before — the check makes "this is your pick" unmistakable). */
+  .fb-card.sel .pick{border-color:var(--primary);background:var(--primary)}
+  .fb-card.sel .pick:after{content:"✓";color:#fff;font-size:13px;font-weight:800;line-height:1;
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)}
+  .fb-card.sel .price{padding-right:32px}
+  /* Multi-choice keeps the rounded-square checkbox look but shares the ✓ glyph. */
+  .fb-card[data-multi="1"] .pick{border-radius:6px}
+
+  /* ---- locked group ---- */
+  .fb-card.locked,.fb-section.locked-section .fb-card{cursor:not-allowed;pointer-events:none;border-style:dashed}
+  .fb-card.locked .pick,.fb-section.locked-section .fb-card .pick{opacity:.35}
+  .lock-banner{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--warning);margin:0 0 14px;padding:10px 13px;
+    background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.32);border-radius:var(--radius-sm)}
+  .lock-banner:before{content:"\1F512";font-size:14px}
+
+  /* ---- island tablist ---- */
+  .tabs{display:flex;gap:8px;margin-bottom:14px}
+  .tab{flex:1;text-align:center;padding:11px;border:1px solid var(--line);border-radius:var(--radius-sm);
+    background:var(--panel);cursor:pointer;font-weight:600;transition:.15s;color:var(--text-light)}
+  .tab.on{border-color:var(--primary);color:var(--text);
+    background:linear-gradient(180deg,rgba(27,97,156,.16),transparent),var(--panel)}
+  .tab .ts{display:block;font-size:11.5px;font-weight:500;color:var(--text-muted);margin-top:2px}
+
+  /* ---- ask-advisor affordance ---- */
+  .ask-link{display:inline-block;margin-top:4px;font-size:12px;color:var(--text-muted);
+    background:none;border:0;cursor:pointer;padding:0;text-decoration:underline}
+  .ask-link:hover{color:var(--primary)}
+
+  /* ---- day-by-day itinerary (space-conserving accordion) ---- */
+  .fb-days{margin:0 0 8px}
+  .fb-day{border:1px solid var(--line,#e2e2e2);border-radius:10px;margin:10px 0;overflow:hidden}
+  .fb-day-row{display:flex;align-items:center;gap:8px;width:100%;background:none;border:0;padding:12px 14px;font:inherit;text-align:left;cursor:pointer}
+  .fb-day-chev{flex:0 0 auto;color:#888}
+  .fb-day-title{flex:1 1 auto;min-width:0;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  /* Advisor: action button rides the header line; the toggle row shrinks so the
+     title truncates instead of pushing the button onto its own line. */
+  .fb-day-head{display:flex;align-items:center;gap:6px;padding-right:8px}
+  .fb-day-head .fb-day-row{flex:1 1 auto;min-width:0}
+  .fb-day-head .fb-kebab{flex:0 0 auto}
+  .fb-day-chips{flex:0 0 auto;color:#666;font-size:.85em}
+  .fb-day-chip{white-space:nowrap}
+  .fb-day-body{display:none;padding:0 14px 14px}
+  .fb-day--open .fb-day-body{display:block}
+  .fb-day-loc{color:#666;font-size:.9em;margin:2px 0 8px}
+  .fb-day-narr{margin:0 0 10px}
+  .fb-day-acts,.fb-day-dining{margin:8px 0}
+  .fb-day-acts-label,.fb-day-dining-label{font-weight:600;font-size:.85em;text-transform:uppercase;letter-spacing:.03em;color:#777;margin-bottom:4px}
+  .fb-day-act{background:none;border:0;padding:0;font:inherit;color:#1a5;border-bottom:1px dotted #1a5;cursor:pointer}
+  .fb-day-act--static{color:#333}
+  .fb-day-act-link{text-decoration:none}
+  .fb-day-act-desc{display:none;color:#555;font-size:.92em;margin:4px 0 4px 0}
+  .fb-day-act-desc--on{display:block}
+  .fb-day-act-item + .fb-day-act-item::before{content:"· ";color:var(--text-muted)}
+  .fb-day-dining-item{margin:6px 0}
+  .fb-day-dining-name{font-weight:600;color:#1a5;text-decoration:none}
+  .fb-day-dining-cuisine{color:#888;font-size:.9em}
+  .fb-day-dining-desc{color:#555;font-size:.92em}
+  .fb-day-cond{margin:8px 0;padding-left:10px;border-left:2px solid #d8e8df}
+  .fb-day-cond-pending{color:#777;font-style:italic;font-size:.92em}
+  .fb-day-stay{margin-top:10px;color:#555;font-size:.92em;display:flex;align-items:center;gap:6px}
+  .fb-day-stay-link{background:none;border:0;padding:0;color:#1a5;cursor:pointer;font:inherit}
+  .fb-day-hint{color:#666;font-size:.9em;margin:6px 0}
+  .fb-day-showall{background:none;border:1px solid var(--line,#e2e2e2);border-radius:8px;padding:4px 10px;font:inherit;cursor:pointer;margin:4px 0 8px;color:#1a5}
+  @keyframes fbflash{0%,100%{background:transparent}50%{background:rgba(26,170,85,.18)}}
+  .fb-flash--on{animation:fbflash .6s ease-in-out 3;border-radius:6px}
+  .fb-flash--static{background:rgba(26,170,85,.12);border-radius:6px}
+  @media (prefers-reduced-motion: reduce){.fb-flash--on{animation:none;background:rgba(26,170,85,.12)}}
+  @media print{.fb-day-body{display:block !important}.fb-day-chev{display:none}.fb-day-act-desc{display:block !important}}
+  @media (min-width: 820px){
+    .fb-day--open .fb-day-act-desc{display:block;margin-left:14px}
+    .fb-day-acts-list{display:block}
+    .fb-day-act-item{display:block;margin:4px 0}
+    .fb-day-act-item + .fb-day-act-item::before{content:none}
+  }
+
+  /* ---- budget ---- */
+  .budget{background:var(--panel);border:1px solid var(--primary);border-radius:var(--radius);padding:6px 18px 14px}
+  .bhead{display:flex;justify-content:space-between;align-items:baseline;padding:14px 0 8px;border-bottom:1px solid var(--line)}
+  .bhead .bt{font-weight:700}
+  .bhead .bn{font-size:11.5px;color:var(--text-muted)}
+  .bline{display:flex;justify-content:space-between;padding:8px 0;font-size:13.5px;border-bottom:1px solid var(--line)}
+  .bline .bk{color:var(--text-light)}.bline .bv{font-weight:600;white-space:nowrap}
+  .bline.dim{opacity:.5}
+  .btot{display:flex;justify-content:space-between;padding:12px 0 4px;font-weight:700;font-size:16px}
+  .fb-addon-grp{margin:14px 0 4px;border-top:1px solid var(--line);padding-top:12px}
+  .fb-addon-head{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text-light);margin-bottom:4px}
+  .fb-addon-note{font-size:12px;color:var(--text-muted);margin-bottom:8px;line-height:1.45}
+  .fb-addon-row{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;
+    border:1px solid var(--line);border-radius:8px;padding:8px 12px;margin:6px 0;cursor:pointer;font:inherit;color:var(--text)}
+  .fb-addon-row:hover{border-color:var(--border-strong)}
+  .fb-addon-row.on{border-color:var(--primary);background:var(--primary-light)}
+  .fb-addon-check{flex:0 0 auto;width:20px;height:20px;border-radius:6px;border:1.5px solid var(--border-strong);
+    display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:var(--text-muted)}
+  .fb-addon-row.on .fb-addon-check{background:var(--primary);border-color:var(--primary);color:#fff}
+  .fb-addon-lb{flex:1 1 auto;min-width:0}
+  .fb-addon-pr{flex:0 0 auto;font-weight:700;font-size:13px;white-space:nowrap}
+
+  /* ---- includes ---- */
+  .fb-includes details{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius-sm);
+    padding:0 14px;margin-bottom:8px}
+  .fb-includes summary{cursor:pointer;font-weight:600;padding:12px 0;list-style:none}
+  .fb-includes summary::-webkit-details-marker{display:none}
+  .fb-includes summary:before{content:"▸ ";color:var(--primary)}
+  .fb-includes details[open] summary:before{content:"▾ "}
+  .fb-includes .ibody{font-size:13.5px;color:var(--text-light);padding:0 0 14px}
+
+  /* ---- next steps ---- */
+  .next-steps{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px}
+  .next-steps p{margin:0 0 10px;font-size:13.5px;color:var(--text-light)}
+  .btn{display:inline-block;background:var(--primary);color:#fff;border:0;border-radius:var(--radius-sm);
+    padding:11px 18px;font-size:14px;font-weight:600;cursor:pointer;transition:.15s}
+  .btn:hover{background:var(--primary-dark)}
+  .btn.ghost{background:transparent;border:1px solid var(--border-strong);color:var(--text)}
+  .btn.ghost:hover{border-color:var(--primary);color:var(--primary)}
+  /* before ready, the primary send CTA sits visibly secondary (ghost). Once every
+     required decision is made, .lit promotes it: solid accent fill + soft glow. */
+  .btn.lit{background:var(--accent);border:1px solid var(--accent);color:#fff;
+    box-shadow:0 0 0 3px rgba(59,175,42,.22),var(--shadow)}
+  .btn.lit:hover{background:var(--accent-dark);border-color:var(--accent-dark)}
+
+  /* ---- sticky total footer ---- */
+  .fb-sticky-total{position:fixed;left:0;right:0;bottom:0;z-index:15;padding:12px 18px;
+    background:linear-gradient(0deg,var(--bg) 70%,transparent);backdrop-filter:blur(4px)}
+  /* row 1 = total + send button (always visible); picklist wraps below on narrow */
+  .fb-sticky-total .inner{max-width:760px;margin:0 auto;background:var(--primary);color:#fff;
+    border-radius:var(--radius);padding:12px 16px;display:flex;flex-wrap:wrap;justify-content:space-between;
+    align-items:center;gap:10px 14px;box-shadow:var(--shadow)}
+  .fb-sticky-total .tot{flex:1 1 auto;min-width:0}
+  .fb-sticky-total .tl{font-size:12px;opacity:.85;letter-spacing:.05em;text-transform:uppercase}
+  .fb-sticky-total .tv{font-size:22px;font-weight:800;margin-top:1px}
+  .fb-sticky-total .tmeta{font-size:11px;opacity:.85;margin-top:2px}
+  /* the always-visible primary submit, living in the bar next to the total */
+  .fb-sticky-total .fb-send{flex:0 0 auto;white-space:nowrap;min-height:44px;
+    padding:11px 16px;max-width:55%;overflow:hidden;text-overflow:ellipsis}
+  /* Re-skin the send button's quiet/lit states for legibility on the primary fill:
+     ghost = subtle inset on the bar; lit = inverted (white) so it reads as the action. */
+  .fb-sticky-total .fb-send.ghost{background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.55);color:#fff}
+  .fb-sticky-total .fb-send.ghost:hover{background:rgba(255,255,255,.22);
+    border-color:#fff;color:#fff}
+  .fb-sticky-total .fb-send.lit{background:#fff;border:1px solid #fff;color:var(--primary-dark);
+    box-shadow:0 0 0 3px rgba(255,255,255,.28),var(--shadow)}
+  .fb-sticky-total .fb-send.lit:hover{background:#f2f6fb;border-color:#f2f6fb;color:var(--primary-dark)}
+  .fb-sticky-total .fb-send:focus-visible{outline:2px solid #fff;outline-offset:2px}
+  /* build-progress: collapsible per-decision "picked vs left" viz in the sticky total.
+     Collapsed by default (just total + send + this summary toggle) so the bar stays
+     small on a phone; tapping the summary reveals the chips + pricing detail. */
+  .fb-bp-summary{flex:1 1 100%;display:flex;align-items:center;justify-content:space-between;gap:8px;
+    background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.42);color:#fff;
+    font:inherit;font-size:12px;font-weight:600;padding:7px 12px;border-radius:8px;cursor:pointer}
+  .fb-bp-summary:hover{background:rgba(255,255,255,.18)}
+  .fb-bp-summary:focus-visible{outline:2px solid #fff;outline-offset:2px}
+  .fb-bp-chev{font-size:13px;opacity:.9;flex:0 0 auto}
+  .fb-buildprog{flex:1 1 100%;min-width:0;margin-top:6px}
+  .fb-sticky-total:not(.expanded) .fb-buildprog{display:none}
+  .fb-bp-asof{font-size:10.5px;opacity:.8;margin-top:8px}
+  /* COLLAPSED state = ONE slim line pinned flush to the very bottom edge:
+     tappable total · progress chip · Submit, all on a single non-wrapping row.
+     No outer gap, no rounded bottom, iOS safe-area aware. Expanded state keeps
+     the fuller floating layout. */
+  .fb-sticky-total:not(.expanded){padding:0;background:none;backdrop-filter:none}
+  .fb-sticky-total:not(.expanded) .inner{max-width:none;border-radius:0;
+    flex-wrap:nowrap;gap:8px 12px;padding:7px 14px;
+    padding-bottom:calc(7px + env(safe-area-inset-bottom,0px));
+    box-shadow:0 -2px 10px rgba(0,0,0,.28)}
+  .fb-sticky-total:not(.expanded) .tl{display:none}
+  /* Price keeps its full width (the headline number, never shrinks/overlaps);
+     the progress chip is the flexible element that truncates when space is tight. */
+  .fb-sticky-total:not(.expanded) .tot{flex:0 0 auto;order:1;overflow:hidden}
+  .fb-sticky-total:not(.expanded) .tv{font-size:17px;margin-top:0;white-space:nowrap}
+  .fb-sticky-total:not(.expanded) .fb-bp-summary{flex:1 1 auto;order:2;min-width:0;
+    font-size:11.5px;padding:6px 10px;border-radius:7px;overflow:hidden}
+  .fb-sticky-total:not(.expanded) .fb-bp-summary .fb-bp-sum-lb{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .fb-sticky-total:not(.expanded) .fb-send{order:3;min-height:36px;padding:7px 14px;font-size:14px;white-space:nowrap;max-width:none}
+  /* The total doubles as a tap target that jumps to the budget breakdown. A faint
+     dotted underline signals tappability (no hover on touch). */
+  .fb-tv-link{cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px;
+    text-decoration-color:rgba(255,255,255,.55)}
+  .fb-tv-link:hover{text-decoration-style:solid;text-decoration-color:#fff}
+  .fb-tv-link:focus-visible{outline:2px solid #fff;outline-offset:2px;border-radius:4px}
+  .fb-bp-chips{display:flex;flex-wrap:wrap;gap:6px}
+  .fb-bchip{display:inline-flex;align-items:center;gap:5px;max-width:47%;
+    font:inherit;font-size:11px;line-height:1;padding:5px 9px;border-radius:100px;
+    white-space:nowrap;overflow:hidden;cursor:pointer}
+  .fb-bchip .fb-bchip-lb{overflow:hidden;text-overflow:ellipsis}
+  .fb-bchip .fb-bchip-ic{font-weight:800;flex:0 0 auto}
+  .fb-bchip.todo{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.5);color:#fff;opacity:.92}
+  .fb-bchip.done{background:#fff;border:1px solid #fff;color:var(--primary-dark);font-weight:700}
+  .fb-bchip.addon{cursor:default;background:rgba(255,255,255,.16);border:1px dashed rgba(255,255,255,.6);color:#fff}
+  .fb-bchip:focus-visible{outline:2px solid #fff;outline-offset:2px}
+  @media (max-width:560px){
+    .fb-sticky-total .fb-send{max-width:none}
+    .fb-bchip{max-width:100%}
+    /* tighten the one-line collapsed bar so price + chip + Submit never collide */
+    .fb-sticky-total:not(.expanded) .tv{font-size:15px}
+    .fb-sticky-total:not(.expanded) .fb-send{font-size:13px;padding:7px 11px}
+    .fb-sticky-total:not(.expanded) .inner{gap:6px 8px;padding-left:10px;padding-right:10px}
+  }
+
+  /* ---- feedback dialog ---- */
+  #fb-feedback{border:1px solid var(--border-strong);border-radius:var(--radius);padding:0;max-width:440px;
+    width:92%;background:var(--panel);color:var(--text)}
+  #fb-feedback::backdrop{background:rgba(0,0,0,.55)}
+  .fb-dialog-in{padding:20px}
+  #fb-feedback h3{margin:0 0 4px;font-size:18px}
+  #fb-feedback .fb-dsub{margin:0 0 14px;font-size:13px;color:var(--text-light)}
+  #fb-feedback label{display:block;font-size:12px;color:var(--text-light);margin:10px 0 4px}
+  #fb-feedback input,#fb-feedback textarea{width:100%;background:var(--bg);color:var(--text);
+    border:1px solid var(--line);border-radius:var(--radius-sm);padding:9px 11px;font:inherit;font-size:14px}
+  #fb-feedback textarea{min-height:96px;resize:vertical}
+  .fb-dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
+  .fb-confirm{font-size:13px;color:var(--success);margin-top:10px}
+
+  /* ---- help dialog (reuses the feedback dialog chrome) ---- */
+  #fb-help{border:1px solid var(--border-strong);border-radius:var(--radius);padding:0;max-width:460px;
+    width:92%;background:var(--panel);color:var(--text)}
+  #fb-help::backdrop{background:rgba(0,0,0,.55)}
+  #fb-help h3{margin:0 0 12px;font-size:18px}
+  #fb-help dl{margin:0}
+  #fb-help dt{font-weight:700;font-size:13.5px;margin-top:14px;display:flex;align-items:center;gap:8px}
+  #fb-help dt:first-child{margin-top:0}
+  #fb-help dd{margin:5px 0 0;font-size:13px;color:var(--text-light);line-height:1.55}
+  #fb-help .help-tag{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:600;line-height:1.4}
+  #fb-help .help-tag.est{background:rgba(245,166,35,.16);color:var(--warning)}
+  #fb-help .help-tag.quoted{background:rgba(67,196,99,.16);color:var(--success)}
+
+  /* ---- partial-submit confirm dialog (reuses dialog chrome) ---- */
+  #fb-confirm-partial{border:1px solid var(--border-strong);border-radius:var(--radius);padding:0;max-width:420px;
+    width:92%;background:var(--panel);color:var(--text)}
+  #fb-confirm-partial::backdrop{background:rgba(0,0,0,.55)}
+  #fb-confirm-partial h3{margin:0 0 8px;font-size:18px}
+  #fb-confirm-partial .fb-dsub{margin:0 0 4px;font-size:13.5px;color:var(--text-light);line-height:1.55}
+  .fb-pickslist{margin:10px 0 4px;padding:0 0 0 18px;max-height:38vh;overflow-y:auto;
+    font-size:13.5px;color:var(--text);line-height:1.5}
+  .fb-pickslist li{margin:4px 0}
+  .fb-pickslist .fb-pickslist-empty{list-style:none;margin-left:-18px;color:var(--text-muted);font-style:italic}
+
+  /* ---- advisor notes ---- */
+  .fb-note{margin:0 0 14px;padding:12px 14px;border-radius:var(--radius-sm);
+    background:rgba(110,168,254,.08);border-left:3px solid var(--primary);}
+  .fb-note .fb-note-h{display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px;color:var(--text)}
+  .fb-note .fb-note-h:before{content:"\1F4CC";font-size:13px}
+  .fb-note .fb-note-body{margin-top:6px;font-size:13.5px;color:var(--text-light);white-space:pre-wrap}
+  .fb-note .fb-note-link{display:inline-block;margin-top:8px;font-size:12.5px;color:#6fb3e0;text-decoration:none}
+  .fb-note .fb-note-link:hover{text-decoration:underline}
+  .fb-note-chip{display:inline-flex;align-items:center;gap:6px;margin:0 0 12px;padding:6px 11px;
+    font-size:12px;font-weight:600;color:var(--text-light);background:var(--panel-2);
+    border:1px solid var(--line);border-radius:20px;cursor:pointer}
+  .fb-note-chip:before{content:"\1F4CC";font-size:12px;flex:0 0 auto}
+  .fb-note-chip-label{max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  @media print{.fb-note-chip{display:none}.fb-note{break-inside:avoid}}
+
+  /* ---- print ---- */
+  @media print{
+    .fb-nav,#fb-send-picks,#fb-send-picks-secondary,#fb-feedback,#fb-help,#fb-confirm-partial,.fb-sticky-total,
+    .fb-howto,.help-q,.fb-steps{display:none!important}
+    .fb-card{break-inside:avoid}
+    body{background:#fff;color:#000}
+  }
+
+  /* ---- reduced motion ---- */
+  @media (prefers-reduced-motion: reduce){*{transition:none!important}}
+
+  /* ---- focus rings ---- */
+  a:focus-visible,button:focus-visible,[role=radio]:focus-visible,[role=checkbox]:focus-visible,
+  [role=tab]:focus-visible{outline:2px solid var(--primary,#b08d57);outline-offset:2px}
+
+  /* ---- ✨ advisor per-item polish menu (advisor view only) ---- */
+  .fb-spark{position:relative;display:inline-block;margin-left:6px}
+  .fb-spark-btn{background:none;border:0;cursor:pointer;font-size:13px;line-height:1;padding:0 2px;opacity:.85}
+  .fb-spark-btn:hover{opacity:1}
+  .fb-spark-menu{position:absolute;z-index:20;left:0;top:100%;margin-top:4px;min-width:180px;max-width:min(240px, calc(100vw - 24px));
+    background:var(--panel-2);border:1px solid var(--border-strong);border-radius:8px;box-shadow:var(--shadow);padding:4px}
+  .fb-spark-menu[hidden]{display:none}
+  .fb-spark-item{display:block;width:100%;text-align:left;background:none;border:0;color:var(--text);
+    font:inherit;font-size:13px;padding:7px 10px;border-radius:6px;cursor:pointer}
+  .fb-spark-item:hover{background:var(--primary);color:#fff}
+
+  /* ---- ＋ add composer (advisor view only) — two modes: ask-the-assistant (B-queue
+         describe path) + I'll-type-it inline form (B-inline op:"add") ---- */
+  .fb-add{display:block;margin:8px 0}
+  .fb-add-btn{display:inline-block;background:none;border:1px dashed var(--border-strong);
+    color:var(--primary);font:inherit;font-size:13px;padding:6px 12px;border-radius:8px;cursor:pointer}
+  .fb-add-btn:hover{border-color:var(--primary);background:var(--primary-light)}
+  .fb-add-panel{display:block;margin:8px 0 4px;padding:10px;background:var(--panel-2);
+    border:1px solid var(--border-strong);border-radius:8px;width:100%}
+  .fb-add-mode{display:block;width:100%;text-align:left;background:none;border:1px solid var(--border-strong);
+    border-radius:7px;color:var(--text-light);font:inherit;font-size:13px;padding:7px 10px;margin:0 0 6px;cursor:pointer}
+  .fb-add-mode:hover{border-color:var(--primary);color:var(--text)}
+  .fb-add-form{display:block;margin:4px 0 0;padding:9px;background:var(--bg);
+    border:1px solid var(--line);border-radius:7px}
+  .fb-add-frow{display:block;margin:0 0 8px}
+  .fb-add-frow[hidden]{display:none}
+  .fb-add-flabel{display:block;font-size:11px;font-weight:700;color:var(--text-muted);
+    margin:0 0 3px;text-transform:uppercase;letter-spacing:.03em}
+  .fb-add-input{width:100%;background:var(--panel);color:var(--text);border:1px solid var(--line);
+    border-radius:6px;font:inherit;font-size:13px;padding:6px 8px}
+  textarea.fb-add-input{resize:vertical;min-height:40px}
+  .fb-add-radio{display:inline-flex;align-items:center;gap:3px;margin-right:14px;font-size:13px;color:var(--text-light);cursor:pointer}
+  .fb-add-hint{margin:0 0 7px;font-size:12px;color:var(--danger);font-weight:600}
+  .fb-add-hint[hidden]{display:none}
+  .fb-add-actions{display:flex;gap:6px;margin-top:4px}
+  .fb-add-submit{background:var(--primary);color:#fff;border:1px solid var(--primary);border-radius:6px;
+    font:inherit;font-size:12px;font-weight:600;padding:5px 14px;cursor:pointer}
+  .fb-add-submit:hover{background:var(--primary-dark)}
+  .fb-add-submit:disabled{opacity:.55;cursor:default}
+  .fb-add-cancel{background:none;color:var(--text-light);border:1px solid var(--border-strong);
+    border-radius:6px;font:inherit;font-size:12px;padding:5px 12px;cursor:pointer}
+  .fb-add-cancel:hover{color:var(--text);border-color:var(--text-light)}
+
+  /* ---- advisor inline-edit field editors — used by the "Edit text" dialog opened
+     from the action-sheet kebab (declutter). The per-field editor (lightTidy + the
+     edit_text op) is reused; the old always-on .fb-ictrl / .fb-ic-* cluster was
+     replaced by the kebab ☰ + drag handle ⠿ + action sheet. ---- */
+  .fb-ie-panel{display:block;margin:8px 0 4px;padding:10px;background:var(--panel-2);
+    border:1px solid var(--border-strong);border-radius:8px;width:100%}
+  .fb-ie-row{display:block;margin:0 0 10px}
+  .fb-ie-row:last-child{margin-bottom:0}
+  .fb-ie-label{display:block;font-size:11px;font-weight:700;color:var(--text-muted);margin:0 0 3px;text-transform:uppercase;letter-spacing:.03em}
+  .fb-ie-input{width:100%;background:var(--bg);color:var(--text);border:1px solid var(--line);
+    border-radius:6px;font:inherit;font-size:13px;padding:6px 8px}
+  textarea.fb-ie-input{resize:vertical;min-height:48px}
+  .fb-ie-status{margin:5px 0 0;font-size:12px;color:var(--text-light)}
+  .fb-ie-status[hidden]{display:none}
+  .fb-ie-tidied{color:var(--accent);font-weight:600}
+  .fb-ie-undo{background:none;border:0;color:var(--primary);font:inherit;font-size:12px;text-decoration:underline;cursor:pointer;padding:0}
+  .fb-ie-actions{display:flex;gap:6px;margin-top:7px}
+  .fb-ie-save{background:var(--primary);color:#fff;border:1px solid var(--primary);border-radius:6px;
+    font:inherit;font-size:12px;font-weight:600;padding:5px 12px;cursor:pointer}
+  .fb-ie-save:hover{background:var(--primary-dark)}
+  .fb-ie-save:disabled{opacity:.55;cursor:default}
+  .fb-ie-cancel{background:none;color:var(--text-light);border:1px solid var(--border-strong);
+    border-radius:6px;font:inherit;font-size:12px;padding:5px 12px;cursor:pointer}
+  .fb-ie-cancel:hover{color:var(--text);border-color:var(--text-light)}
+
+  /* hidden-from-client visual state: dim the item + a clear badge (advisor view only) */
+  .fb-hidden{opacity:.6}
+  .fb-card.fb-hidden{border-style:dashed}
+  .fb-day.fb-hidden{border-style:dashed}
+  .tag.fb-hidden-badge{background:var(--panel-2);color:var(--warning);border:1px solid var(--warning)}
+  .fb-day-ctrl-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 8px}
+  .group-note.fb-empty-prose{color:var(--text-muted);font-style:italic}
+
+  /* ---- Submit-to-AI button + summary dialog (advisor view only, B-queue commit) ---- */
+  /* The Submit-to-AI button lives INSIDE the sticky-total bar (reuses .fb-send.lit) —
+     one compact footer, no separate floating bar. The count badge rides the white
+     button, so it's a filled primary pill (white-on-white would vanish). */
+  .fb-submitai-badge{display:inline-flex;align-items:center;justify-content:center;min-width:19px;height:19px;
+    margin-left:8px;padding:0 6px;border-radius:100px;background:var(--primary);color:#fff;font-size:12px;font-weight:800}
+  .fb-submitai-badge[hidden]{display:none}
+  .fb-dialog{border:1px solid var(--border-strong);border-radius:var(--radius);padding:0;max-width:420px;width:92%;
+    background:var(--panel);color:var(--text)}
+  .fb-dialog::backdrop{background:rgba(0,0,0,.55)}
+  .fb-dialog .fb-dialog-in{padding:20px}
+  .fb-dialog .fb-dsub{margin:0 0 16px;font-size:14px;line-height:1.5;color:var(--text-light)}
+  .fb-dialog .fb-dialog-actions{display:flex;justify-content:flex-end}
+
+  /* ---- advisor action sheet (declutter: kebab ☰ + drag handle ⠿) — advisor view only ---- */
+  .fb-item-row{display:flex;align-items:flex-start;gap:8px;padding:8px 4px;border-radius:10px;
+    transition:background .12s,box-shadow .12s,opacity .12s}
+  .fb-item-row .fb-item-main{flex:1;min-width:0}
+  .fb-handle{flex:0 0 auto;width:30px;min-height:34px;display:inline-flex;align-items:center;justify-content:center;
+    color:var(--text-muted);font-size:18px;cursor:grab;touch-action:none;border-radius:8px;user-select:none;-webkit-user-select:none}
+  .fb-handle:active{cursor:grabbing;background:var(--panel-2)}
+  .fb-handle:focus-visible{outline:2px solid var(--primary);outline-offset:1px}
+  .fb-kebab{flex:0 0 auto;width:36px;height:36px;border:1px solid var(--border-strong);border-radius:9px;
+    background:var(--panel);color:var(--text-light);font-size:15px;line-height:1;cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center}
+  .fb-kebab:hover{border-color:var(--primary);color:var(--text)}
+  /* option cards keep their card chrome; the kebab floats top-right, the handle sits left */
+  .fb-card .fb-kebab{position:absolute;top:8px;right:8px}
+  .fb-card .fb-handle{position:absolute;top:6px;left:6px}
+  .fb-card.fb-has-adv-ctrl{position:relative;padding-left:34px}
+  .fb-item-row.fb-dragging,.fb-card.fb-dragging{background:#173456;color:#e7eef6;box-shadow:0 12px 28px rgba(0,0,0,.45);opacity:.98;outline:1px solid #3a7bd0}
+  @keyframes fbLandGlow{0%,68%{background:#173456}100%{background:transparent}}
+  .fb-item-row.fb-landed,.fb-card.fb-landed{animation:fbLandGlow 3s ease forwards}
+
+  .fb-scrim{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:opacity .18s}
+  .fb-scrim--on{opacity:1;pointer-events:auto}
+  .fb-sheet{position:fixed;left:8px;right:8px;bottom:8px;z-index:31;max-width:560px;margin:0 auto;
+    background:var(--panel);border:1px solid var(--border-strong);border-radius:20px;padding:8px;
+    transform:translateY(125%);transition:transform .22s cubic-bezier(.2,.8,.2,1)}
+  .fb-sheet--on{transform:translateY(0)}
+  .fb-grab{width:38px;height:5px;border-radius:3px;background:var(--border-strong);margin:7px auto 4px}
+  .fb-sheet-h{color:var(--text-muted);font-size:13px;text-align:center;padding:4px 8px 9px;
+    border-bottom:1px solid var(--line);margin-bottom:4px}
+  .fb-sheet-h b{color:var(--text)}
+  .fb-ai-box{display:flex;gap:8px;padding:10px 6px 12px;align-items:center}
+  .fb-ai-input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--border-strong);border-radius:10px;
+    color:var(--text);font:inherit;font-size:15px;padding:11px 12px;outline:none}
+  .fb-ai-input:focus{border-color:var(--primary)}
+  .fb-ai-input::placeholder{color:var(--text-muted)}
+  .fb-ai-send{flex:0 0 auto;background:var(--primary);color:#fff;border:1px solid var(--primary);border-radius:10px;
+    font:inherit;font-weight:700;font-size:14px;padding:11px 15px;cursor:pointer}
+  .fb-ai-send:hover{background:var(--primary-dark)}
+  .fb-srow{display:flex;align-items:center;gap:13px;width:100%;text-align:left;background:none;border:0;
+    padding:14px 12px;border-radius:11px;color:var(--text);font:inherit;font-size:16px;cursor:pointer}
+  .fb-srow:hover{background:var(--panel-2)}
+  .fb-srow-ico{width:22px;text-align:center;font-size:16px;flex:0 0 auto}
+  .fb-srow--danger{color:var(--danger)}
+  .fb-sep{height:1px;background:var(--line);margin:2px 10px}
+  .fb-cancel{display:block;width:100%;margin-top:8px;text-align:center;background:var(--panel-2);
+    color:var(--primary);border:0;border-radius:11px;font:inherit;font-size:16px;font-weight:600;padding:14px;cursor:pointer}
+  .fb-pane-days{display:none}
+  .fb-sheet--days .fb-pane-main{display:none}
+  .fb-sheet--days .fb-pane-days{display:block}
+  .fb-days-h{display:flex;align-items:center;gap:8px;padding:6px 4px 10px;border-bottom:1px solid var(--line);margin-bottom:4px}
+  .fb-days-back{background:none;border:0;color:var(--primary);font:inherit;font-size:15px;font-weight:600;padding:6px 8px;cursor:pointer}
+  .fb-days-title{color:var(--text-muted);font-size:13px}
+  .fb-daylist{max-height:54vh;overflow:auto;-webkit-overflow-scrolling:touch}
+  .fb-dayrow{display:flex;align-items:baseline;gap:12px;width:100%;text-align:left;background:none;border:0;
+    padding:14px 12px;border-radius:10px;color:var(--text);font:inherit;cursor:pointer}
+  .fb-dayrow:hover{background:var(--panel-2)}
+  .fb-dnum{color:var(--text-muted);font-size:13px;flex:0 0 auto;width:120px}
+  .fb-dttl{font-size:15px}
+  .fb-toast{position:fixed;left:50%;bottom:150px;transform:translateX(-50%) translateY(10px);z-index:40;
+    background:var(--panel-2);color:var(--text);border:1px solid var(--border-strong);border-radius:11px;
+    padding:10px 16px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;max-width:84%;text-align:center}
+  .fb-toast--on{opacity:1;transform:translateX(-50%) translateY(0)}
+  .fb-edit-dialog{max-width:480px}
+
+  /* ---- badges pane (mirrors pane-days pattern) ---- */
+  .fb-pane-badges{display:none}
+  .fb-sheet--badges .fb-pane-main{display:none}
+  .fb-sheet--badges .fb-pane-badges{display:block}
+  .fb-badges-h{display:flex;align-items:center;gap:8px;padding:6px 4px 10px;border-bottom:1px solid var(--line);margin-bottom:4px}
+  .fb-badges-back{background:none;border:0;color:var(--primary);font:inherit;font-size:15px;font-weight:600;padding:6px 8px;cursor:pointer}
+  .fb-badges-title{color:var(--text-muted);font-size:13px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .fb-badgebody{max-height:60vh;overflow:auto;-webkit-overflow-scrolling:touch}
+  .fb-badge-group{margin-bottom:4px}
+  .fb-badge-group-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+    color:var(--text-muted);padding:8px 12px 4px}
+  .fb-badgerow{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:0;
+    padding:12px 12px;border-radius:10px;color:var(--text);font:inherit;font-size:15px;cursor:pointer;
+    border-left:3px solid transparent}
+  .fb-badgerow:hover{background:var(--panel-2)}
+  .fb-badgerow--on{background:rgba(27,97,156,.12);border-left-color:var(--primary)}
+  .fb-badgerow--on:hover{background:rgba(27,97,156,.18)}
+  .fb-badgerow-ico{width:22px;text-align:center;flex:0 0 auto;font-size:15px}
+  .fb-badgerow-lbl{flex:1 1 auto;min-width:0}
+  .fb-badgerow-spacer{flex:1 1 auto;min-width:8px}
+  /* "+N more" overflow pill on the client card (soft cap = 4 badges) */
+  .fb-badge-more{cursor:pointer;font:inherit;font-weight:700}
+  /* custom-badge tone picker = color swatches in real pill colors */
+  .fb-tone-swatches{display:flex;flex-wrap:wrap;gap:6px;flex:1 1 auto}
+  .fb-tone-sw{width:26px;height:26px;border-radius:7px;cursor:pointer;padding:0;
+    border-width:2px;border-style:solid}
+  .fb-tone-sw--on{outline:2px solid var(--text);outline-offset:2px}
+  .fb-badgerow-chk{flex:0 0 auto;width:20px;text-align:right;font-weight:700;color:var(--primary);font-size:14px}
+  .fb-badgerow--custom{color:var(--primary);font-size:14px;border:1px dashed var(--border-strong);
+    border-radius:10px;margin:6px 0 4px;justify-content:center}
+  .fb-badgerow--custom:hover{background:var(--primary-light);border-color:var(--primary)}
+  .fb-custom-badge-form{padding:10px 12px 6px;background:var(--panel-2);border-radius:10px;margin-bottom:4px}
+  /* Sticky Save/Cancel footer for the buffered badge editor. Changes apply ONLY on Save. */
+  .fb-badges-actions{position:sticky;bottom:0;display:flex;align-items:center;gap:10px;
+    padding:10px 12px;margin-top:6px;background:var(--panel);border-top:1px solid var(--border-strong)}
+  .fb-badges-foot-hint{flex:1 1 auto;min-width:0;font-size:12px;color:var(--text-muted)}
+  .fb-badges-cancel{flex:0 0 auto;background:transparent;color:var(--text-light);
+    border:1px solid var(--border-strong);border-radius:8px;padding:9px 16px;font:inherit;cursor:pointer}
+  .fb-badges-cancel:hover{background:var(--panel-2)}
+  .fb-badges-save{flex:0 0 auto;background:var(--primary);color:#fff;border:1px solid var(--primary);
+    border-radius:8px;padding:9px 18px;font:inherit;font-weight:700;cursor:pointer}
+  .fb-badges-save:hover{background:var(--primary-dark);border-color:var(--primary-dark)}
+  .fb-badges-save:disabled{opacity:.5;cursor:default}
+
+  /* ---- desktop 1↔2-column toggle (advisor view only) ---- */
+  .fb-coltoggle{display:flex;justify-content:flex-end;gap:0;margin:-4px 0 12px}
+  .fb-coltoggle-b{background:var(--panel);color:var(--text-light);border:1px solid var(--border-strong);
+    font:inherit;font-size:12px;font-weight:700;padding:5px 12px;cursor:pointer}
+  .fb-coltoggle-b:first-child{border-radius:8px 0 0 8px;border-right:0}
+  .fb-coltoggle-b:last-child{border-radius:0 8px 8px 0}
+  .fb-coltoggle-b.on{background:var(--primary);color:#fff;border-color:var(--primary)}
+  .wrap.fb-cols-2{max-width:1180px}
+  .wrap.fb-cols-2 .fb-board-area{column-count:2;column-gap:24px}
+  .wrap.fb-cols-2 .fb-board-area > *{break-inside:avoid;-webkit-column-break-inside:avoid;
+    display:inline-block;width:100%}
+  @media (max-width:760px){
+    .wrap.fb-cols-2{max-width:760px}
+    .wrap.fb-cols-2 .fb-board-area{column-count:1}
+    .fb-coltoggle{display:none}
+  }
+  .fb-badges{display:inline-flex;flex-wrap:wrap;gap:5px;margin-left:6px;vertical-align:middle}
+  .fb-badge{font-size:11px;font-weight:700;border-radius:6px;padding:1px 7px;border:1px solid transparent;white-space:nowrap}
+  .fb-badge--gold{color:#b8860b;background:#fbf3da;border-color:#e6d28a}
+  .fb-badge--green{color:#2f8c22;background:#eaf7e8;border-color:#bfe6b6}
+  .fb-badge--blue{color:#1b619c;background:#e8f1f8;border-color:#bcd6ec}
+  .fb-badge--amber{color:#b9770a;background:#fdf2dd;border-color:#eccf8e}
+  .fb-badge--red{color:#c0392b;background:#fbe9e7;border-color:#eeb7af}
+  .fb-badge--purple{color:#7d4bbd;background:#f1eafb;border-color:#d6c2ef}
+  .fb-badge--pink{color:#c2497f;background:#fbe9f1;border-color:#efb9d2}
+  .fb-badge--neutral{color:var(--text-light);background:var(--panel-2);border-color:var(--border-strong)}
+  .fb-badge--adv{border-style:dashed;opacity:.9}
+  .fb-badge--adv::after{content:" · advisor";font-weight:500;opacity:.7}
+  /* ---- Trip Hero ---- */
+  #hero-root{position:relative;width:100%;overflow:hidden;background:var(--panel);height:clamp(220px,42vw,360px);transition:height .5s cubic-bezier(.4,0,.2,1)}
+  #hero-root.hero--collapsed{height:56px}
+  .hero-slides{position:absolute;inset:0}
+  .hero-slide{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0;transition:opacity 1.4s ease}
+  .hero-slide.on{opacity:1}
+  #hero-root.hero--animate .hero-slide.on{animation:heroKen 9s ease-in-out forwards}
+  @keyframes heroKen{from{transform:scale(1.0)}to{transform:scale(1.14) translate(-2%,-3%)}}
+  .hero-scrim{position:absolute;inset:0}
+  .hero--scrim-soft .hero-scrim{background:linear-gradient(to top,rgba(0,0,0,.55),rgba(0,0,0,.08) 45%,transparent 70%)}
+  .hero--scrim-strong .hero-scrim{background:linear-gradient(to top,rgba(0,0,0,.7),rgba(0,0,0,.3) 55%,rgba(0,0,0,.12))}
+  .hero--band .hero-scrim{background:none}
+  .hero-cap{position:absolute;left:18px;right:18px;bottom:16px;color:#fff;text-shadow:0 2px 14px rgba(0,0,0,.5)}
+  .hero--centered .hero-cap{top:50%;bottom:auto;transform:translateY(-50%);text-align:center}
+  .hero--band .hero-cap{background:rgba(15,28,45,.46);backdrop-filter:blur(7px);padding:12px 16px;border-radius:0}
+  .hero-ttl{font-size:clamp(20px,5vw,28px);font-weight:700;line-height:1.1}
+  .hero-dts{font-size:13px;opacity:.92}
+  .hero-credit{position:absolute;right:8px;top:8px;font-size:9px;color:rgba(255,255,255,.75);background:rgba(0,0,0,.25);padding:2px 6px;border-radius:5px;text-decoration:none}
+  .hero-dismiss{position:absolute;right:10px;bottom:12px}
+  .hero-pill{appearance:none;border:0;cursor:pointer;font:600 12px 'Hanken Grotesk',system-ui;color:#fff;background:rgba(0,0,0,.42);border-radius:100px;padding:6px 11px}
+  #hero-root.hero--collapsed .hero-scrim,#hero-root.hero--collapsed .hero-cap,#hero-root.hero--collapsed .hero-dismiss,#hero-root.hero--collapsed .hero-credit{display:none}
+  .hero-strip{position:absolute;inset:0;display:none;align-items:center;gap:10px;padding:0 12px;background:var(--primary-dark);color:#fff;cursor:pointer}
+  #hero-root.hero--collapsed .hero-strip{display:flex}
+  .hero-strip .hs-thumb{width:40px;height:40px;border-radius:8px;background-size:cover;background-position:center;flex:0 0 auto}
+  .hero-strip .hs-ttl{font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:1;min-width:0}
+  .hero-strip .hs-dts{font-size:11px;opacity:.8}
+  .hero-strip .hs-exp{font:600 12px 'Hanken Grotesk',system-ui;background:rgba(255,255,255,.16);border-radius:100px;padding:5px 10px}
+  .hero-advisor-flag{position:absolute;left:10px;top:10px;font:600 11px 'Hanken Grotesk',system-ui;color:#fff;background:rgba(245,166,35,.92);padding:3px 8px;border-radius:6px}
+  .hero-placeholder{padding:14px 16px;margin:0;background:var(--panel-2);color:var(--text-muted);border:1px dashed var(--border-strong);border-radius:var(--radius-sm);font-size:13px}
+  @media(prefers-reduced-motion:reduce){#hero-root.hero--animate .hero-slide.on{animation:none}#hero-root{transition:none}}
+
+  /* ===== Boarding-pass option cards — signature (.interface-design/system.md) ===== */
+  .fb-card{padding-left:64px;border-color:var(--border-strong);box-shadow:var(--shadow)}
+  .fb-card::before{content:"";position:absolute;left:48px;top:12px;bottom:12px;border-left:2px dashed var(--border-strong);opacity:.65;pointer-events:none}
+  .fb-card::after{content:"";position:absolute;left:41px;top:0;bottom:0;width:14px;pointer-events:none;background:radial-gradient(circle at 50% 0,var(--bg) 6.5px,transparent 7px),radial-gradient(circle at 50% 100%,var(--bg) 6.5px,transparent 7px);background-repeat:no-repeat}
+  .price{font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,monospace;font-variant-numeric:tabular-nums;font-weight:500;letter-spacing:-.02em}
+  .ribbon{background:var(--amber);color:var(--text)}
+  .fb-card.sel{border-color:var(--amber);box-shadow:var(--shadow),inset 0 0 0 1px var(--amber);background:linear-gradient(0deg,rgba(245,166,35,.07),rgba(245,166,35,.07)),var(--panel)}
+  .fb-card.sel .pick{border-color:var(--amber);background:var(--amber)}
+  .fb-card.sel .ttl::after{content:"SELECTED";display:inline-block;margin-left:8px;font:600 10px/1 'JetBrains Mono',monospace;letter-spacing:.1em;color:var(--amber-deep);border:1.5px solid var(--amber-deep);border-radius:4px;padding:2px 5px;transform:rotate(-3deg);vertical-align:middle;opacity:.92}
+  
+  .fb-card .stub{position:absolute;left:0;top:0;bottom:0;width:46px;display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;transform:rotate(180deg);font:600 9.5px/1 'JetBrains Mono',ui-monospace,monospace;letter-spacing:.2em;color:var(--text-muted);opacity:.7;pointer-events:none;white-space:nowrap}
+  /* ===== Advisor inspector view (.interface-design/system.md two-views) ===== */
+  [data-view=advisor]{--bg:#f4f2ee;--panel:#fbfaf7;--panel-2:#ffffff;--bg-light:#ebe8e2;--line:#e2dccf;--border:#e2dccf;--border-strong:#cfc6b4}
+  [data-view=advisor][data-theme=dark]{--bg:#16130e;--panel:#1e1a14;--panel-2:#262019;--bg-light:#120f0a;--text:#ece5d8;--text-light:#b3a994;--text-muted:#8a7f6b;--line:rgba(236,229,216,.10);--border:rgba(236,229,216,.10);--border-strong:rgba(236,229,216,.20);--primary:#7da7d8;--primary-light:rgba(125,167,216,.16)}
+  .fb-adv-bar{position:sticky;top:0;z-index:30;display:flex;align-items:center;gap:12px;padding:9px 16px;background:#1f3a5f;color:#fff;font:600 12px 'Hanken Grotesk',system-ui,sans-serif}
+  [data-theme=dark] .fb-adv-bar{background:#11243b}
+  .fb-adv-tag{background:rgba(255,255,255,.16);padding:3px 8px;border-radius:4px;letter-spacing:.16em;font-size:10.5px}
+  .fb-adv-meta{flex:1 1 auto;min-width:0;opacity:.92;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .fb-adv-theme{flex:0 0 auto;background:rgba(255,255,255,.15);border:0;color:#fff;width:30px;height:28px;border-radius:6px;cursor:pointer;font-size:15px;line-height:1}
+  .fb-adv-theme:hover{background:rgba(255,255,255,.26)}
+  [data-view=advisor] .fb-nav{top:46px}</style>
+</head><body><div class="fb-adv-bar"><span class="fb-adv-tag">ADVISOR VIEW</span><span class="fb-adv-meta">Ryan &amp; Maya — Greece Honeymoon</span><button type="button" class="fb-adv-theme" id="fb-adv-theme" aria-label="Toggle light or dark" title="Toggle light / dark">◐</button></div>
+<nav class="fb-nav"><a href="#parking">Airport parking (ATL, 10 days)</a> · <a href="#flights">Flights from Atlanta</a> · <a href="#athens-hotel">Athens hotel (4 nights)</a> · <a href="#island">Choose your island</a> · <a href="#island-hotel">Island hotel (4 nights)</a> · <a href="#sofitel">Final-night airport hotel</a> · <a href="#add-ons">Optional experiences</a> · <a href="#budget">Budget</a> · <a href="#next-steps">Next Steps</a></nav>
+
+<main id="fb-root"></main>
+<script type="application/json" id="folio-board-data">{"meta":{"schemaVersion":2,"tripId":"ryan-greece-honeymoon-sep-2026","title":"Ryan & Maya — Greece Honeymoon","subtitle":null,"destination":"Greece","datesLabel":"2026-09-18 – 2026-09-28","tripType":"trip","currency":"USD","viewerRole":"advisor","generatedAt":1749000000000,"pricingAsOf":1749000000000,"previewVersion":0,"revision":"1749000000000"},"nav":[{"label":"Airport parking (ATL, 10 days)","anchor":"parking"},{"label":"Flights from Atlanta","anchor":"flights"},{"label":"Athens hotel (4 nights)","anchor":"athens-hotel"},{"label":"Choose your island","anchor":"island"},{"label":"Island hotel (4 nights)","anchor":"island-hotel"},{"label":"Final-night airport hotel","anchor":"sofitel"},{"label":"Optional experiences","anchor":"add-ons"},{"label":"Budget","anchor":"budget"},{"label":"Next Steps","anchor":"next-steps"}],"progress":{"open":6,"resolved":0,"locked":1,"label":"6 decisions left before we can book"},"groups":[{"id":"parking","title":"Airport parking (ATL, 10 days)","type":"single_choice","status":"open","blockedBy":[],"anchor":"parking","stayRef":null,"groupNote":"Departing from Atlanta (ATL), not Birmingham — ATL keeps the nonstop options. Three ways to park for the ten days.","recommendationOptionId":"parking-offsite","deltaBaseline":"cheapest","options":[{"id":"parking-offsite","label":"Off-site lot + shuttle","summary":"Best value — The Parking Spot / Peachy, a short shuttle to the terminal.","priceLo":80,"priceHi":120,"basis":"estimate","detailUrl":"https://www.theparkingspot.com/","detailUrlKind":"reference","imageUrl":null,"photoCount":null,"stars":null,"ribbon":"Best value","note":null,"sourceRef":{"kind":"parking","candidateId":null,"stayId":null,"stayRef":null,"tripPath":null},"meta":{},"status":"recommended"},{"id":"parking-economy","label":"ATL Economy lot (on-site, uncovered)","summary":"On-airport, uncovered, no shuttle wait.","priceLo":200,"priceHi":200,"basis":"estimate","detailUrl":"https://www.atl.com/parking/","detailUrlKind":"reference","imageUrl":null,"photoCount":null,"stars":null,"ribbon":null,"note":null,"sourceRef":{"kind":"parking","candidateId":null,"stayId":null,"stayRef":null,"tripPath":null},"meta":{},"status":"neutral"},{"id":"parking-decks","label":"Daily Decks (on-site, covered)","summary":"Closest and covered — the convenience pick.","priceLo":300,"priceHi":300,"basis":"estimate","detailUrl":"https://www.atl.com/parking/","detailUrlKind":"reference","imageUrl":null,"photoCount":null,"stars":null,"ribbon":null,"note":null,"sourceRef":{"kind":"parking","candidateId":null,"stayId":null,"stayRef":null,"tripPath":null},"meta":{},"status":"neutral"}],"selectedOptionId":null,"selectedOptionIds":[],"allowAskAdvisor":true,"notes":[]},{"id":"flight-option","title":"Flights from Atlanta","type":"single_choice","status":"open","blockedBy":[],"anchor":"flights","stayRef":null,"groupNote":"Round-trip from Atlanta for two. Option D keeps the Delta nonstop with only a one-day shift — the best balance of comfort and price. Prices are reference snapshots, not locked fares; a separate Athens↔island hop adds about $572 for the couple.","recommendationOptionId":"D","deltaBaseline":"recommended","options":[{"id":"A","label":"Delta nonstop · Sep 17–27","summary":"Nonstop both ways (~10h 45m). Reference — not this exact fare.","priceLo":3728,"priceHi":3728,"basis":"estimate","detailUrl":"https://www.google.com/travel/flights?q=Flights%20ATL%20to%20ATH%202026-09-17%20returning%202026-09-27","detailUrlKind":"reference","imageUrl":null,"photoCount":null,"stars":null,"ribbon":null,"note":null,"sourceRef":{"kind":"flight","candidateId":null,"stayId":null,"stayRef":null,"tripPath":null},"meta":{"stops":0},"status":"neutral"},{"id":"B","label":"1-stop · Sep 17–27","summary":"One connection (~14–15h). Saves about $1,139 vs nonstop. Reference — not this exact fare.","priceLo":2589,"priceHi":2589,"basis":"estimate","detailUrl":"https://www.google.com/travel/flights?q=Flights%20ATL%20to%20ATH%202026-09-17%20returning%202026-09-27%201%20stop","detailUrlKind":"reference","imageUrl":null,"photoCount":null,"stars":null,"ribbon":null,"note":null,"sourceRef":{"kind":"flight","candidateId":null,"stayId":null,"stayRef":null,"tripPath":null},"meta":{"stops":1},"status":"neutral"},{"id":"C","label":"1-stop · Sep 14–24","summary":"Cheapest overall (~14–15h). Shifts the whole trip earlier. Reference — not this exact fare.","priceLo":2430,"priceHi":2430,"basis":"estimate","detailUrl":"https://www.google.com/travel/flights?q=Flights%20ATL%20to%20ATH%202026-09-14%20returning%202026-09-24%201%20stop","detailUrlKind":"reference","imageUrl":null,"photoCount":null,"stars":null,"ribbon":"Lowest","note":null,"sourceRef":{"kind":"flight","candidateId":null,"stayId":null,"stayRef":null,"tripPath":null},"meta":{"stops":1},"status":"neutral"},{"id":"D","label":"Delta nonstop · Sep 16–26","summary":"Nonstop both ways, one day earlier. Confirmed couple quote ~$2,920. The recommended balance.","priceLo":2920,"priceHi":2920,"basis":"quoted","detailUrl":"https://www.google.com/travel/flights?q=Flights%20ATL%20to%20ATH%202026-09-16%20returning%202026-09-26%20nonstop","detailUrlKind":"reference","imageUrl":null,"photoCount":null,"stars":null,"ribbon":"Best balance","note":null,"sourceRef":{"kind":"flight","candidateId":null,"stayId":null,"stayRef":null,"tripPath":null},"meta":{"stops":0},"status":"recommended"}],"selectedOptionId":null,"selectedOptionIds":[],"allowAskAdvisor":true,"notes":[]},{"id":"athens-hotel","title":"Athens hotel (4 nights)","type":"single_choice","status":"open","blockedBy":[],"anchor":"athens-hotel","stayRef":"athens-2026-09-18-2026-09-22","groupNote":"Well-located, characterful stays near Syntagma and the Acropolis — no big chains. The Electra quote is firm; the Pinnacle penthouse is a confirmed splurge.","recommendationOptionId":"h1","deltaBaseline":"recommended","options":[{"id":"h1","label":"Electra Metropolis","summary":"Value pick · rooftop pool with Acropolis views · breakfast included · central Syntagma.","priceLo":1841,"priceHi":1841,"basis":"quoted","detailUrl":"https://www.electrahotels.gr/hotels/electra-metropolis-athens/","detailUrlKind":"booking","imageUrl":null,"photoCount":null,"stars":5,"ribbon":"Recommended","note":"Confirmed quote for 4 nights.","sourceRef":{"kind":"hotel","candidateId":"h1","stayId":null,"stayRef":"athens-2026-09-18-2026-09-22","tripPath":null},"meta":{"area":"Syntagma"},"status":"recommended"},{"id":"h2","label":"AthensWas Design Hotel","summary":"Boutique · 21 rooms · two-minute walk to the Acropolis Museum · Design Hotels portfolio.","priceLo":1400,"priceHi":1800,"basis":"estimate","detailUrl":"https://www.athenswas.gr/","detailUrlKind":"reference","imageUrl":null,"photoCount":null,"stars":5,"ribbon":null,"note":"Estimate — needs a live quote. Note: may price below the Electra despite being more boutique.","sourceRef":{"kind":"hotel","candidateId":"h2","stayId":null,"stayRef":"athens-2026-09-18-2026-09-22","tripPath":null},"meta":{"area":"Acropolis Museum"},"status":"neutral"},{"id":"h3","label":"The Pinnacle — Penthouse Suite","summary":"Splurge · penthouse-only suite · 360° rooftop garden · 16 suites · HIP Hotels member.","priceLo":2982,"priceHi":2982,"basis":"quoted","detailUrl":"https://athensurbanhotels.com/accommodation/the-pinnacle/","detailUrlKind":"booking","imageUrl":null,"photoCount":null,"stars":5,"ribbon":"Splurge","note":"Confirmed quote for 4 nights.","sourceRef":{"kind":"hotel","candidateId":"h3","stayId":null,"stayRef":"athens-2026-09-18-2026-09-22","tripPath":null},"meta":{"area":"Athens"},"status":"neutral"}],"selectedOptionId":null,"selectedOptionIds":[],"allowAskAdvisor":true,"notes":[]},{"id":"island-choice","title":"Choose your island","type":"single_choice","status":"open","blockedBy":[],"anchor":"island","stayRef":null,"groupNote":"One island to unwind after Athens. Milos for dramatic volcanic landscapes and quiet coves; Paros for lively whitewashed villages and easy beaches. (Santorini intentionally left off.)","recommendationOptionId":null,"deltaBaseline":"none","options":[{"id":"milos","label":"Milos","summary":"Moonscape beaches, painted fishing villages, Kleftiko sea caves. Quieter; a 4×4 helps on the rough roads.","priceLo":null,"priceHi":null,"basis":"estimate","detailUrl":null,"detailUrlKind":null,"imageUrl":null,"photoCount":null,"stars":null,"ribbon":null,"note":null,"sourceRef":{"kind":"addon","candidateId":null,"stayId":null,"stayRef":null,"tripPath":null},"meta":{"island":"milos"},"status":"neutral"},{"id":"paros","label":"Paros","summary":"Naoussa nightlife, Kolymbithres granite coves, hilltop Lefkes. Livelier and easy to get around.","priceLo":null,"priceHi":null,"basis":"estimate","detailUrl":null,"detailUrlKind":null,"imageUrl":null,"photoCount":null,"stars":null,"ribbon":null,"note":null,"sourceRef":{"kind":"addon","candidateId":null,"stayId":null,"stayRef":null,"tripPath":null},"meta":{"island":"paros"},"status":"neutral"}],"selectedOptionId":null,"selectedOptionIds":[],"allowAskAdvisor":true,"notes":[]},{"id":"island-hotel","title":"Island hotel (4 nights)","type":"single_choice","status":"locked","blockedBy":["island-choice"],"anchor":"island-hotel","stayRef":null,"groupNote":"Shown once you pick an island. All island-hotel prices are good-faith estimates pending a live quote.","recommendationOptionId":null,"deltaBaseline":"none","options":[{"id":"im1","label":"Salt Suites Milos","summary":"Boutique · Pollonia village, walkable to beach and tavernas · by Mr & Mrs White.","priceLo":2500,"priceHi":3000,"basis":"estimate","detailUrl":"https://saltmilos.com/","detailUrlKind":"reference","imageUrl":null,"photoCount":null,"stars":5,"ribbon":null,"note":null,"sourceRef":{"kind":"hotel","candidateId":"im1","stayId":null,"stayRef":"milos-2026-09-22-2026-09-26","tripPath":null},"meta":{"island":"milos"},"status":"neutral"},{"id":"im2","label":"Milos Cove","summary":"Splurge · private beach, clifftop architecture, plunge pools.","priceLo":2800,"priceHi":3800,"basis":"estimate","detailUrl":"https://www.miloscove.com/","detailUrlKind":"reference","imageUrl":null,"photoCount":null,"stars":5,"ribbon":null,"note":"Steep, narrow access road — a 4×4 is recommended.","sourceRef":{"kind":"hotel","candidateId":"im2","stayId":null,"stayRef":"milos-2026-09-22-2026-09-26","tripPath":null},"meta":{"island":"milos"},"status":"neutral"},{"id":"im3","label":"Domes White Coast Milos (adults-only)","summary":"Top splurge · all-suite plunge pools · Michelin-pedigree restaurant Makris.","priceLo":3400,"priceHi":4400,"basis":"estimate","detailUrl":"https://domesresorts.com/domeswhitecoastmilos/","detailUrlKind":"booking","imageUrl":null,"photoCount":null,"stars":5,"ribbon":null,"note":"Confirm Sep 2026 availability — construction-related cancellations were reported for June 2026.","sourceRef":{"kind":"hotel","candidateId":"im3","stayId":null,"stayRef":"milos-2026-09-22-2026-09-26","tripPath":null},"meta":{"island":"milos"},"status":"neutral"},{"id":"ip1","label":"Stelia Mare Boutique Hotel","summary":"Value · 15 rooms, intimate, walkable to Naoussa.","priceLo":1200,"priceHi":1600,"basis":"estimate","detailUrl":"https://www.steliamare.gr/","detailUrlKind":"reference","imageUrl":null,"photoCount":null,"stars":4,"ribbon":null,"note":null,"sourceRef":{"kind":"hotel","candidateId":"ip1","stayId":null,"stayRef":"paros-2026-09-22-2026-09-26","tripPath":null},"meta":{"island":"paros"},"status":"neutral"},{"id":"ip2","label":"Cove Paros","summary":"Mid-tier · beachfront, on-site spa with couples massage, Rada restaurant by chef Gikas Xenakis.","priceLo":1700,"priceHi":2300,"basis":"estimate","detailUrl":"https://coveparos.gr/","detailUrlKind":"reference","imageUrl":null,"photoCount":null,"stars":5,"ribbon":"Top pick","note":null,"sourceRef":{"kind":"hotel","candidateId":"ip2","stayId":null,"stayRef":"paros-2026-09-22-2026-09-26","tripPath":null},"meta":{"island":"paros"},"status":"neutral"},{"id":"ip3","label":"Cosme, a Luxury Collection Resort","summary":"Splurge · Marriott Bonvoy, two restaurants, half-moon infinity pool.","priceLo":2600,"priceHi":3600,"basis":"estimate","detailUrl":"https://www.cosmeparos.com/","detailUrlKind":"reference","imageUrl":null,"photoCount":null,"stars":5,"ribbon":null,"note":null,"sourceRef":{"kind":"hotel","candidateId":"ip3","stayId":null,"stayRef":"paros-2026-09-22-2026-09-26","tripPath":null},"meta":{"island":"paros"},"status":"neutral"}],"selectedOptionId":null,"selectedOptionIds":[],"allowAskAdvisor":true,"notes":[]},{"id":"sofitel-confirm","title":"Final-night airport hotel","type":"confirm","status":"open","blockedBy":[],"anchor":"sofitel","stayRef":null,"groupNote":"The Sofitel is physically connected to the Athens terminal — an island delay can't make you miss the flight home. We recommend confirming it for the early departure.","recommendationOptionId":"sofitel","deltaBaseline":"none","options":[{"id":"sofitel","label":"Sofitel Athens Airport · 1 night (Sep 26–27)","summary":"Connected to the ATH terminal — walk to departures. The stress-free last night.","priceLo":375,"priceHi":475,"basis":"estimate","detailUrl":"https://www.sofitel-athens-airport.com/","detailUrlKind":"reference","imageUrl":null,"photoCount":null,"stars":5,"ribbon":"Recommended","note":null,"sourceRef":{"kind":"hotel","candidateId":"sofitel","stayId":null,"stayRef":"ath-airport-2026-09-26-2026-09-27","tripPath":null},"meta":{"area":"ATH airport"},"status":"recommended"}],"selectedOptionId":null,"selectedOptionIds":[],"allowAskAdvisor":true,"notes":[]},{"id":"add-ons","title":"Optional experiences","type":"multi_choice","status":"open","blockedBy":[],"anchor":"add-ons","stayRef":null,"groupNote":"Add or remove any — the running total updates instantly. All prices are estimates for the couple.","recommendationOptionId":null,"deltaBaseline":"none","options":[{"id":"delphi","label":"Delphi day trip (private driver-guide)","summary":"Full-day private driver-guide to the oracle of Apollo. Or a small-group tour with lunch ~$260–360.","priceLo":560,"priceHi":810,"basis":"estimate","detailUrl":null,"detailUrlKind":null,"imageUrl":null,"photoCount":null,"stars":null,"ribbon":null,"note":null,"sourceRef":{"kind":"tour","candidateId":null,"stayId":null,"stayRef":null,"tripPath":null},"meta":{},"status":"neutral"},{"id":"sounion","label":"Cape Sounion sunset transfer (private)","summary":"Private evening transfer to the Temple of Poseidon for the classic Athens sunset.","priceLo":180,"priceHi":280,"basis":"estimate","detailUrl":null,"detailUrlKind":null,"imageUrl":null,"photoCount":null,"stars":null,"ribbon":null,"note":null,"sourceRef":{"kind":"tour","candidateId":null,"stayId":null,"stayRef":null,"tripPath":null},"meta":{},"status":"neutral"},{"id":"acropolis-guide","label":"Acropolis private guide","summary":"A licensed guide for the Acropolis cluster — context without the crowds.","priceLo":200,"priceHi":250,"basis":"estimate","detailUrl":null,"detailUrlKind":null,"imageUrl":null,"photoCount":null,"stars":null,"ribbon":null,"note":null,"sourceRef":{"kind":"tour","candidateId":null,"stayId":null,"stayRef":null,"tripPath":null},"meta":{},"status":"neutral"},{"id":"food-tour","label":"Athens food tour","summary":"Tastings through the central market and Plaka — a delicious half-day.","priceLo":160,"priceHi":220,"basis":"estimate","detailUrl":null,"detailUrlKind":null,"imageUrl":null,"photoCount":null,"stars":null,"ribbon":null,"note":null,"sourceRef":{"kind":"tour","candidateId":null,"stayId":null,"stayRef":null,"tripPath":null},"meta":{},"status":"neutral"},{"id":"catamaran","label":"Island catamaran day (semi-private)","summary":"Milos: Kleftiko sea caves. Paros: Antiparos & the Blue Lagoon. Fully private ~$700–1,500.","priceLo":300,"priceHi":440,"basis":"estimate","detailUrl":null,"detailUrlKind":null,"imageUrl":null,"photoCount":null,"stars":null,"ribbon":"Honeymoon highlight","note":null,"sourceRef":{"kind":"tour","candidateId":null,"stayId":null,"stayRef":null,"tripPath":null},"meta":{},"status":"neutral"},{"id":"massage","label":"Couples massage at the hotel spa","summary":"A slow island morning built around the two of you.","priceLo":220,"priceHi":350,"basis":"estimate","detailUrl":null,"detailUrlKind":null,"imageUrl":null,"photoCount":null,"stars":null,"ribbon":null,"note":null,"sourceRef":{"kind":"addon","candidateId":null,"stayId":null,"stayRef":null,"tripPath":null},"meta":{},"status":"neutral"},{"id":"wine-tasting","label":"Wine tasting","summary":"An afternoon of Greek varietals — Assyrtiko and friends.","priceLo":60,"priceHi":100,"basis":"estimate","detailUrl":null,"detailUrlKind":null,"imageUrl":null,"photoCount":null,"stars":null,"ribbon":null,"note":null,"sourceRef":{"kind":"tour","candidateId":null,"stayId":null,"stayRef":null,"tripPath":null},"meta":{},"status":"neutral"},{"id":"sunset-sail","label":"Sea kayak or sunset sail","summary":"A low-key paddle or an evening sail along the island coast.","priceLo":160,"priceHi":250,"basis":"estimate","detailUrl":null,"detailUrlKind":null,"imageUrl":null,"photoCount":null,"stars":null,"ribbon":null,"note":null,"sourceRef":{"kind":"tour","candidateId":null,"stayId":null,"stayRef":null,"tripPath":null},"meta":{},"status":"neutral"},{"id":"insurance","label":"Allianz travel insurance","summary":"Trip-protection for two — recommended for an international honeymoon.","priceLo":250,"priceHi":400,"basis":"estimate","detailUrl":null,"detailUrlKind":null,"imageUrl":null,"photoCount":null,"stars":null,"ribbon":"Recommended","note":null,"sourceRef":{"kind":"addon","candidateId":null,"stayId":null,"stayRef":null,"tripPath":null},"meta":{},"status":"neutral"}],"selectedOptionId":null,"selectedOptionIds":[],"allowAskAdvisor":true,"notes":[]}],"days":[],"budget":{"mustHaves":[],"addOnGroupId":"add-ons","rangeLo":0,"rangeHi":0,"estimateCount":0},"includes":[],"hero":null,"feedback":{"submitMode":"annotation","endpoint":"/api/public/trips//annotations","sectionAnchors":["parking","flights","athens-hotel","island","island-hotel","sofitel","add-ons"]}}</script>
+<script>"use strict";(()=>{var Ee={top_pick:{id:"top_pick",label:"Top pick",icon:"\u2605",tone:"gold",audience:"client",scopes:["item","section"]},highlight:{id:"highlight",label:"Highlight",icon:"\u2726",tone:"gold",audience:"client",scopes:["item","day"]},must_see:{id:"must_see",label:"Don't miss",icon:"\u2757",tone:"amber",audience:"client",scopes:["item"]},hidden_gem:{id:"hidden_gem",label:"Hidden gem",icon:"\u{1F48E}",tone:"purple",audience:"client",scopes:["item","day"]},local_favorite:{id:"local_favorite",label:"Local favorite",icon:"\u2665",tone:"green",audience:"client",scopes:["item"]},best_value:{id:"best_value",label:"Best value",icon:"\u2B07",tone:"green",audience:"client",scopes:["item"]},splurge:{id:"splurge",label:"Splurge",icon:"\u2727",tone:"purple",audience:"client",scopes:["item"]},included:{id:"included",label:"Included",icon:"\u2713",tone:"green",audience:"client",scopes:["item"]},limited:{id:"limited",label:"Limited availability",icon:"\u23F3",tone:"amber",audience:"client",scopes:["item"]},sells_out:{id:"sells_out",label:"Sells out fast",icon:"\u{1F525}",tone:"red",audience:"client",scopes:["item"]},new_badge:{id:"new_badge",label:"New",icon:"\u25C6",tone:"blue",audience:"client",scopes:["item"]},seasonal:{id:"seasonal",label:"Seasonal",icon:"\u263C",tone:"blue",audience:"client",scopes:["item","day"]},romantic:{id:"romantic",label:"Romantic",icon:"\u2665",tone:"pink",audience:"client",scopes:["item","day"]},accessible:{id:"accessible",label:"Step-free",icon:"\u267F",tone:"blue",audience:"client",scopes:["item"]},weather:{id:"weather",label:"Weather-dependent",icon:"\u2602",tone:"neutral",audience:"client",scopes:["item","day"]},early_start:{id:"early_start",label:"Early start",icon:"\u263C",tone:"neutral",audience:"client",scopes:["item","day"]},needs_quote:{id:"needs_quote",label:"Needs quote",tone:"amber",audience:"advisor",scopes:["all"]},awaiting_client:{id:"awaiting_client",label:"Awaiting client",tone:"blue",audience:"advisor",scopes:["all"]},awaiting_supplier:{id:"awaiting_supplier",label:"Awaiting supplier",tone:"blue",audience:"advisor",scopes:["all"]},confirm_dates:{id:"confirm_dates",label:"Confirm dates",tone:"amber",audience:"advisor",scopes:["all"]},verify_price:{id:"verify_price",label:"Verify price",tone:"amber",audience:"advisor",scopes:["all"]},backup:{id:"backup",label:"Backup option",tone:"neutral",audience:"advisor",scopes:["item"]},placeholder:{id:"placeholder",label:"Placeholder",tone:"neutral",audience:"advisor",scopes:["all"]},low_commission:{id:"low_commission",label:"Low commission",tone:"red",audience:"advisor",scopes:["item"]},high_commission:{id:"high_commission",label:"High commission",tone:"green",audience:"advisor",scopes:["item"]},client_requested:{id:"client_requested",label:"Client requested",tone:"blue",audience:"advisor",scopes:["all"]},do_not_book:{id:"do_not_book",label:"Do not book",tone:"red",audience:"advisor",scopes:["item"]},on_hold:{id:"on_hold",label:"On hold",tone:"amber",audience:"advisor",scopes:["all"]}};(function(){"use strict";var kt=document.getElementById("folio-board-data"),A;try{A=JSON.parse(kt.textContent)}catch{A=null}if(!A||!Array.isArray(A.groups)){var Re=document.getElementById("fb-root");Re&&(Re.textContent="Sorry \u2014 this proposal could not be loaded.");return}var B=A.meta||{},U=A.groups||[],Ke=A.budget||{mustHaves:[],rangeLo:0,rangeHi:0,estimateCount:0},Ue=Array.isArray(A.includes)?A.includes:[],xt=A.feedback||{endpoint:"",sectionAnchors:[]},W=B.tripId||"trip",Fe="voygent-folio-board:"+W,je="edit_token",$="";try{var wt=new URLSearchParams(window.location.search),Le=wt.get("t");if(Le){$=Le;try{sessionStorage.setItem(je,Le)}catch{}}else try{$=sessionStorage.getItem(je)||""}catch{}}catch{}var k=B&&B.viewerRole==="advisor"&&!!$;function he(e){return k&&!!(e&&e.hiddenFromClient)}var Et="/api/trips/"+encodeURIComponent(B&&B.tripId||"")+"/annotations";function Ye(){return window.crypto&&crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random()}var me=0;function Se(e){if(e){me++;var t=document.getElementById("fb-submitai-badge");t&&(t.textContent=String(me),t.hidden=!1)}}function Te(e,t){if(!k)return Promise.resolve(!1);var n={version:1,op:t.op,target:t.target||{},instruction:t.instruction||""};return fetch(Et,{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+$,"Idempotency-Key":Ye()},body:JSON.stringify({section_anchor:e||"general",kind:"advisor_polish",body:JSON.stringify(n)})}).then(function(a){return a.ok}).catch(function(){return!1})}function Lt(){if(!k)return null;var e=i("span",{class:"fb-submitai-badge",id:"fb-submitai-badge",hidden:"",text:"0"}),t=i("button",{type:"button",class:"btn fb-send lit fb-submitai-btn",text:"Submit to AI"},[e]);return t.addEventListener("click",function(){fetch("/api/trips/"+encodeURIComponent(B.tripId)+"/annotations/batch/commit",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+$,"Idempotency-Key":Ye()},body:JSON.stringify({})}).then(function(n){if(n.status===409){z("A batch is already waiting for the assistant. It'll be applied on the next chat turn.");return}return n.json().then(function(a){if(n.ok){z("Sent "+(me||a&&a.item_count||"your")+" request(s) to the assistant. They'll be applied on your next chat turn."),me=0;var r=document.getElementById("fb-submitai-badge");r&&(r.textContent="0",r.hidden=!0)}else z("Couldn't submit ("+n.status+"). Try again.")})}).catch(function(){z("Network error \u2014 not submitted.")})}),t}function z(e){var t=document.getElementById("fb-ai-summary");t||(t=i("dialog",{id:"fb-ai-summary",class:"fb-dialog"}),document.body.appendChild(t)),t.innerHTML="";var n=i("div",{class:"fb-dialog-in"},[i("p",{class:"fb-dsub",text:e}),i("div",{class:"fb-dialog-actions"},[i("button",{type:"button",class:"btn lit",id:"fb-ai-summary-ok",text:"OK"})])]);t.appendChild(n),t.querySelector("#fb-ai-summary-ok").addEventListener("click",function(){try{t.close()}catch{t.removeAttribute("open")}}),typeof t.showModal=="function"?t.showModal():t.setAttribute("open","")}function ae(e,t,n){return k?fetch("/api/trips/"+encodeURIComponent(B.tripId)+"/inline-edit",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+$},body:JSON.stringify({rev:B.revision||"",op:e,target:t,value:n})}).then(function(a){return a.status===409?(z("This page is out of date \u2014 reloading the latest."),ie().then(function(){return!1})):a.ok?ie().then(function(){return!0}):(z("Edit failed ("+a.status+")."),!1)}).catch(function(){return z("Network error \u2014 edit not saved."),!1}):Promise.resolve(!1)}function ie(){return fetch("/api/trips/"+encodeURIComponent(B.tripId)+"/folio-board.json",{headers:{Accept:"application/json",Authorization:"Bearer "+$}}).then(function(e){return e.ok?e.json():null}).then(function(e){if(e){A=e,B=A.meta||{},U=A.groups||[],Ke=A.budget||Ke,St(),qe();var t=document.getElementById("hero-root");t&&t.remove();var n=document.querySelector(".hero-placeholder");n&&n.remove(),gt(A&&A.hero)}}).catch(function(){})}function St(){var e=O.selected||{};Object.keys(e).forEach(function(t){var n=Z(t);if(!n){delete e[t];return}var a=e[t];Array.isArray(a)?e[t]=a.filter(function(r){return!!ee(n,r)}):a!=null&&!ee(n,a)&&(e[t]=G(n)?[]:null)})}var O={selected:{}};function G(e){return e.type==="multi_choice"||e.type==="optional_addon"}U.forEach(function(e){G(e)?O.selected[e.id]=Array.isArray(e.selectedOptionIds)?e.selectedOptionIds.slice():[]:O.selected[e.id]=e.selectedOptionId||null}),On();function X(e){return"$"+Math.round(e).toLocaleString()}function re(e,t){return e==null&&t==null?null:e==null?X(t):t==null||e===t?X(e):X(e)+"\u2013"+X(t)}function Z(e){for(var t=0;t<U.length;t++)if(U[t].id===e)return U[t];return null}function ee(e,t){for(var n=e.options||[],a=0;a<n.length;a++)if(n[a].id===t)return n[a];return null}function Tt(e){var t=document.createElement("div");return t.textContent=e==null?"":String(e),t.innerHTML}function Ge(e,t){return"fbnote:"+e+":"+t.id+":"+t.notifyToken}function At(e,t){try{return localStorage.getItem(Ge(e,t))==="1"}catch{return!1}}function It(e,t){try{localStorage.setItem(Ge(e,t),"1")}catch{}}function Je(e,t,n,a){var r=document.createElement("div");r.className="fb-note";var o=document.createElement("div");o.className="fb-note-h",o.textContent=e.title||"A note from your advisor",r.appendChild(o);var d=document.createElement("div");if(d.className="fb-note-body",d.innerHTML=Tt(e.body),r.appendChild(d),e.url){var s=document.createElement("a");s.className="fb-note-link",s.href=e.url,s.target="_blank",s.rel="noopener noreferrer",s.textContent=e.urlLabel||"Learn more",r.appendChild(s)}var c=be(a||"",{kind:"advisor_note",noteId:e.id},e.title||"this note");if(c&&r.appendChild(c),k){var l={section:"Note",name:e.title||"this note",baseTarget:{kind:"advisor_note",noteId:e.id},fields:[{field:"title",value:e.title,prose:!0,label:"Title"},{field:"body",value:e.body,prose:!0,label:"Body",multiline:!0},{field:"url",value:e.url,prose:!1,label:"Link URL"},{field:"urlLabel",value:e.urlLabel,prose:!1,label:"Link label"}],sectionAnchor:a||"",polishTarget:{kind:"advisor_note",noteId:e.id},canHide:!1,isHidden:!1,canDelete:!0,canReorder:!1,moveDay:null,badgeKind:"advisor_note",badgeTarget:{noteId:e.id},appliedBadges:e.badges},v=se(l);v&&r.appendChild(v)}var f=de(e);return f&&r.appendChild(f),n||It(t,e),r}function Bt(e,t,n){var a=t.notes||[];a.forEach(function(r){if(At(n,r)){var o=r.title||"Note from your advisor",d=document.createElement("button");d.type="button",d.className="fb-note-chip",d.title=o;var s=document.createElement("span");s.className="fb-note-chip-label",s.textContent=o,d.appendChild(s),d.addEventListener("click",function(){d.replaceWith(Je(r,n,!0,t.anchor))}),e.appendChild(d)}else e.appendChild(Je(r,n,!1,t.anchor))})}function oe(e){var t=O.selected[e.id];return G(e)?Array.isArray(t)&&t.length>0:!!t}function ye(e){var t=O.selected[e.id];return Array.isArray(t)?t.length>0:!!t}function Ae(e){for(var t=e.blockedBy||[],n=0;n<t.length;n++){var a=Z(t[n]);if(a&&!ye(a))return!0}return!1}function _t(e){for(var t=e.blockedBy||[],n=[],a=0;a<t.length;a++){var r=Z(t[a]);r&&!ye(r)&&n.push(r.title)}return n}function ge(e){var t=O.selected[e.id],n=[];if(Array.isArray(t))t.forEach(function(r){var o=ee(e,r);o&&n.push(o)});else if(t){var a=ee(e,t);a&&n.push(a)}return n}function Dt(e){var t=e.options||[];if(e.id!=="island-hotel")return t;var n=Z("island-choice"),a=n?O.selected[n.id]:null;return a?t.filter(function(r){return r.meta&&r.meta.island===a}):t}function Ie(e,t){var n=O.selected[e.id];return Array.isArray(n)?n.indexOf(t)!==-1:n===t}function pe(e,t){var n=Z(e);if(!(!n||Ae(n))){if(G(n)){var a=O.selected[e];Array.isArray(a)||(a=O.selected[e]=[]);var r=a.indexOf(t);r===-1?a.push(t):a.splice(r,1)}else O.selected[e]=O.selected[e]===t?null:t;Pn(),qe()}}function Ce(){var e=0,t=0,n=0;return U.forEach(function(a){ge(a).forEach(function(r){r.priceLo!=null&&(e+=r.priceLo),r.priceHi!=null?t+=r.priceHi:r.priceLo!=null&&(t+=r.priceLo),r.basis==="estimate"&&(r.priceLo!=null||r.priceHi!=null)&&n++})}),{lo:e,hi:t,est:n}}function Nt(e){if(!e||e.deltaBaseline==="none")return null;if(e.deltaBaseline==="recommended")return e.recommendationOptionId?ee(e,e.recommendationOptionId):null;if(e.deltaBaseline==="cheapest"){var t=null,n=1/0;return(e.options||[]).forEach(function(a){var r=a.priceLo!=null?a.priceLo:a.priceHi!=null?a.priceHi:null;r!=null&&r<n&&(n=r,t=a)}),t}return null}function Ht(e,t){if(!e||e.deltaBaseline==="none")return null;var n=Nt(e);if(!n||n.id===t.id)return null;var a=t.priceLo!=null?t.priceLo:t.priceHi,r=n.priceLo!=null?n.priceLo:n.priceHi;if(a==null||r==null)return null;var o=a-r;return o===0?null:e.deltaBaseline==="recommended"?{text:(o>0?"+":"\u2212")+X(Math.abs(o))+" vs recommended",dir:o>0?"up":"down"}:{text:(o>0?"+":"\u2212")+X(Math.abs(o))+" vs lowest",dir:o>0?"up":"down"}}function i(e,t,n){var a=document.createElement(e);return t&&Object.keys(t).forEach(function(r){r==="text"?a.textContent=t[r]:r==="html"?a.innerHTML=t[r]:t[r]!=null&&a.setAttribute(r,t[r])}),n&&(Array.isArray(n)?n:[n]).forEach(function(r){r!=null&&a.appendChild(typeof r=="string"?document.createTextNode(r):r)}),a}function F(e,t){return i("span",{class:"tag "+e,text:t})}function Be(e){var t=e&&e.b?Ee[e.b]:null,n=t?t.label:e?e.label:null,a=t?t.tone:e?e.tone:"neutral",r=t?t.audience:e?e.audience:"client";if(!n)return null;var o="fb-badge fb-badge--"+a+(r==="advisor"?" fb-badge--adv":"");return i("span",{class:o,text:(t&&t.icon?t.icon+" ":"")+n})}function de(e){var t=e&&e.badges||[];if(!t.length)return null;var n=i("span",{class:"fb-badges"}),a=[];if(t.forEach(function(s){var c=Be(s);c&&a.push(c)}),!a.length)return null;var r=4;if(!k&&a.length>r){a.slice(0,r).forEach(function(s){n.appendChild(s)});var o=a.slice(r),d=i("button",{type:"button",class:"fb-badge fb-badge--neutral fb-badge-more","aria-label":"Show "+o.length+" more badge"+(o.length!==1?"s":""),text:"+"+o.length+" more"});d.addEventListener("click",function(s){s.preventDefault(),s.stopPropagation(),o.forEach(function(c){n.insertBefore(c,d)}),d.parentNode&&d.parentNode.removeChild(d)}),n.appendChild(d)}else a.forEach(function(s){n.appendChild(s)});return n.childNodes.length?n:null}function Ve(e){if(typeof e!="string")return e;var t=e.replace(/\s+/g," ").trim();return t=t.replace(/\s+([,.;:!?])/g,"$1"),t&&(t=t.charAt(0).toUpperCase()+t.slice(1)),t&&!/[.!?…]$/.test(t)&&(t=t+"."),t}function qt(e,t,n){var a=i("div",{class:"fb-ie-row"}),r=i("label",{class:"fb-ie-label",text:t.label||t.field}),o=t.multiline?i("textarea",{class:"fb-ie-input",rows:"3"}):i("input",{class:"fb-ie-input",type:"text"});o.value=t.value==null?"":String(t.value);var d=i("div",{class:"fb-ie-status",hidden:""}),s=i("div",{class:"fb-ie-actions"}),c=i("button",{type:"button",class:"fb-ie-save",text:"Save"}),l=i("button",{type:"button",class:"fb-ie-cancel",text:"Cancel"}),v=!1;function f(b){c.disabled=!0,ae("edit_text",le({},e,{field:t.field}),b).then(function(h){h||(c.disabled=!1)})}return c.addEventListener("click",function(b){if(b.stopPropagation(),v){f(o.value);return}var h=o.value;if(!t.prose){f(h);return}var L=Ve(h);if(L===h){f(h);return}o.value=L,v=!0,c.textContent="Save",d.hidden=!1,d.textContent="",d.appendChild(i("span",{class:"fb-ie-tidied",text:"\u2713 Tidied \u2014 your wording kept \xB7 Save to apply"}));var T=i("button",{type:"button",class:"fb-ie-undo",text:"Undo tidy"});T.addEventListener("click",function(E){E.stopPropagation(),o.value=h,d.textContent="",d.hidden=!0}),d.appendChild(document.createTextNode(" \xB7 ")),d.appendChild(T)}),l.addEventListener("click",function(b){b.stopPropagation(),n&&n()}),s.appendChild(c),s.appendChild(l),a.appendChild(r),a.appendChild(o),a.appendChild(d),a.appendChild(s),a}function le(e){for(var t=1;t<arguments.length;t++){var n=arguments[t];if(n)for(var a in n)Object.prototype.hasOwnProperty.call(n,a)&&(e[a]=n[a])}return e}var M=null,te=null,ke=null;function ne(e){var t=We(),n=t.toast;n.textContent=e,n.classList.add("fb-toast--on"),clearTimeout(n._timer),n._timer=setTimeout(function(){n.classList.remove("fb-toast--on")},1700)}function Qe(e,t,n,a){return k?fetch("/api/trips/"+encodeURIComponent(B.tripId)+"/inline-edit",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+$},body:JSON.stringify({rev:a,op:e,target:t,value:n})}).then(function(r){return r.status===409?{conflict:!0}:r.ok?r.json().then(function(o){return{ok:!0,rev:o&&o.rev||a}}).catch(function(){return{ok:!0,rev:a}}):null}).catch(function(){return null}):Promise.resolve(null)}function We(){if(M)return M;var e=i("div",{class:"fb-scrim"}),t=i("div",{class:"fb-sheet",role:"dialog","aria-modal":"true","aria-label":"Item actions",tabindex:"-1"}),n=i("div",{class:"fb-grab","aria-hidden":"true"}),a=i("div",{class:"fb-sheet-h",id:"fb-sheet-title"}),r=i("input",{type:"text",class:"fb-ai-input",autocomplete:"off","aria-label":"Ask or tell the AI about this item",placeholder:"Ask or tell the AI about this\u2026"}),o=i("button",{type:"button",class:"fb-ai-send","data-act":"ai-send",text:"Send"}),d=i("div",{class:"fb-ai-box"},[r,o]);function s(S,H,K,D){return i("button",{type:"button",class:"fb-srow"+(D?" "+D:""),"data-act":S},[i("span",{class:"fb-srow-ico","aria-hidden":"true",text:H}),K])}var c=i("span",{id:"fb-hide-label",text:"Hide from client"}),l=s("edit","\u270E",document.createTextNode("Edit text")),v=s("tidy","\u2728",document.createTextNode("Tidy with AI")),f=s("moveday","\u{1F4C5}",document.createTextNode("Move to another day\u2026")),b=s("badges","\u{1F3F7}",document.createTextNode("Badges\u2026")),h=s("hide","\u{1F6AB}",c),L=s("delete","\u2715",document.createTextNode("Delete"),"fb-srow--danger"),T=i("button",{type:"button",class:"fb-cancel","data-act":"cancel",text:"Cancel"}),E=i("div",{class:"fb-sep"}),m=i("div",{class:"fb-sep"}),C=i("div",{class:"fb-pane-main"},[a,d,E,l,v,m,f,b,h,L,T]),p=i("span",{class:"fb-days-title",id:"fb-days-title",text:"Move to another day"}),y=i("div",{class:"fb-daylist"}),_=i("div",{class:"fb-pane-days"},[i("div",{class:"fb-days-h"},[i("button",{type:"button",class:"fb-days-back","data-act":"back",text:"\u2039 Back"}),p]),y]),I=i("span",{class:"fb-badges-title",id:"fb-badges-title",text:"Badges"}),u=i("div",{class:"fb-badgebody"}),g=i("div",{class:"fb-pane-badges"},[i("div",{class:"fb-badges-h"},[i("button",{type:"button",class:"fb-badges-back","data-act":"back",text:"\u2039 Back"}),I]),u]);t.appendChild(n),t.appendChild(C),t.appendChild(_),t.appendChild(g);var x=i("div",{class:"fb-toast",role:"status","aria-live":"polite"});return document.body.appendChild(e),document.body.appendChild(t),document.body.appendChild(x),M={scrim:e,sheet:t,title:a,aiInput:r,hideLabel:c,rowEdit:l,rowTidy:v,rowMove:f,rowBadges:b,dayList:y,daysTitle:p,badgeBody:u,badgesTitle:I,toast:x},e.addEventListener("click",R),r.addEventListener("keydown",function(S){S.key==="Enter"&&(S.preventDefault(),$e())}),t.addEventListener("keydown",function(S){if(S.key==="Escape"){S.preventDefault(),R();return}S.key==="Tab"&&Pt(S)}),t.addEventListener("click",function(S){var H=S.target.closest("[data-act]");H&&Ut(H.getAttribute("data-act"))}),y.addEventListener("click",function(S){var H=S.target.closest("[data-today]");!H||!te||Gt(parseInt(H.getAttribute("data-today"),10))}),M}function Pt(e){var t='a[href],button:not([disabled]),input,[tabindex]:not([tabindex="-1"])',n=Array.prototype.slice.call(M.sheet.querySelectorAll(t)).filter(function(o){return o.offsetParent!==null});if(n.length){var a=n[0],r=n[n.length-1];e.shiftKey&&document.activeElement===a?(e.preventDefault(),r.focus()):!e.shiftKey&&document.activeElement===r&&(e.preventDefault(),a.focus())}}function Ot(e){if(k){var t=We();te=e,ke=document.activeElement,t.title.innerHTML="",t.title.appendChild(document.createTextNode((e.section||"Item")+" \xB7 ")),t.title.appendChild(i("b",{text:e.name||"this item"})),t.aiInput.value="",t.hideLabel.textContent=e.isHidden?"Show to client":"Hide from client",t.rowEdit.style.display=e.fields&&e.fields.length?"":"none",t.rowTidy.style.display=Mt(e)?"":"none",t.rowMove.style.display=e.moveDay?"":"none",t.rowBadges.style.display=e.badgeKind?"":"none";var n=t.sheet.querySelector('[data-act="hide"]');n&&(n.style.display=e.canHide?"":"none");var a=t.sheet.querySelector('[data-act="delete"]');a&&(a.style.display=e.canDelete?"":"none"),t.sheet.classList.remove("fb-sheet--days"),t.sheet.classList.remove("fb-sheet--badges"),t.scrim.classList.add("fb-scrim--on"),t.sheet.classList.add("fb-sheet--on"),setTimeout(function(){t.aiInput.focus()},60)}}function R(){if(M&&(M.scrim.classList.remove("fb-scrim--on"),M.sheet.classList.remove("fb-sheet--on"),M.sheet.classList.remove("fb-sheet--days"),M.sheet.classList.remove("fb-sheet--badges"),te=null,ke&&ke.focus))try{ke.focus()}catch{}}function Mt(e){return!!(e.fields&&e.fields.some(function(t){return t.prose}))}function Rt(e){return e.fields&&e.fields.filter(function(t){return t.prose})[0]}function $e(){if(te){var e=(M.aiInput.value||"").trim();if(!e){M.aiInput.focus();return}var t=te;Te(t.sectionAnchor,{op:"freetext",target:t.polishTarget||{},instruction:e}).then(function(n){Se(n)}),ne(Kt(t.name,e)),R()}}function Kt(e,t){var n=t.length>40?t.slice(0,40)+"\u2026":t;return"Sent to the assistant \xB7 \u201C"+(e||"item")+"\u201D: "+n}function Ut(e){var t=te;if(e==="cancel"){R();return}if(e==="ai-send"){$e();return}if(e==="back"){M.sheet.classList.remove("fb-sheet--days"),M.sheet.classList.remove("fb-sheet--badges");return}if(t){if(e==="edit"){R(),jt(t);return}if(e==="tidy"){Ft(t);return}if(e==="moveday"){Yt(t);return}if(e==="badges"){Jt(t);return}if(e==="hide"){ae(t.isHidden?"show":"hide",le({},t.baseTarget),void 0),R();return}if(e==="delete"){R(),window.confirm("Delete "+(t.name||"this item")+"? This removes it from the proposal.")&&ae("delete",le({},t.baseTarget),void 0);return}}}function Ft(e){var t=Rt(e);if(!t){R();return}var n=t.value==null?"":String(t.value),a=Ve(n);if(R(),a===n){ne("Already tidy.");return}ae("edit_text",le({},e.baseTarget,{field:t.field}),a).then(function(r){r&&ne("\u2728 Tidied \u201C"+(e.name||"item")+"\u201D.")})}function jt(e){var t=i("dialog",{class:"fb-dialog fb-edit-dialog"});function n(){try{t.close()}catch{t.removeAttribute("open")}t.parentNode&&t.parentNode.removeChild(t)}var a=i("div",{class:"fb-dialog-in"});a.appendChild(i("div",{class:"fb-sheet-h",text:"Edit \xB7 "+(e.name||"item")})),(e.fields||[]).forEach(function(r){a.appendChild(qt(le({},e.baseTarget),r,n))}),a.appendChild(i("div",{class:"fb-dialog-actions"},[i("button",{type:"button",class:"fb-ie-cancel",text:"Close"})])),a.querySelector(".fb-ie-cancel").addEventListener("click",n),t.appendChild(a),document.body.appendChild(t),typeof t.showModal=="function"?t.showModal():t.setAttribute("open","")}function Yt(e){var t=M;t.dayList.innerHTML="",t.daysTitle.textContent="Move \u201C"+(e.name||"item")+"\u201D to\u2026";var n=A&&A.days||[];n.forEach(function(a,r){if(r!==e.moveDay.dayIndex){var o="Day "+(r+1)+(a&&a.date?" \xB7 "+a.date:""),d=a&&(a.title||a.label)||"",s=i("button",{type:"button",class:"fb-dayrow","data-today":String(r)},[i("span",{class:"fb-dnum",text:o}),i("span",{class:"fb-dttl",text:d})]);t.dayList.appendChild(s)}}),t.sheet.classList.add("fb-sheet--days")}function Gt(e){var t=te;if(!(!t||!t.moveDay)){var n=t.name;R(),ae("move",{kind:t.baseTarget.kind,dayIndex:t.moveDay.dayIndex,itemIndex:t.moveDay.itemIndex,toDayIndex:e},void 0).then(function(a){a&&ne("Moved \u201C"+(n||"item")+"\u201D.")})}}function Jt(e){var t=M,n=e.badgeKind||"item",a=n==="day"?"day":n==="section"||n==="group_note"?"section":"item",r=le({kind:n},e.badgeTarget||{}),o=(e.appliedBadges||[]).map(s),d=o.map(s);t.badgesTitle.textContent="Badges \xB7 "+(e.name||"this item");function s(u){return u&&u.b?{b:u.b}:{label:u.label,audience:u.audience,tone:u.tone}}function c(u,g){return!u||!g?!1:u.b&&g.b?u.b===g.b:!u.b&&!g.b?(u.label||"").trim().toLowerCase()===(g.label||"").trim().toLowerCase()&&u.audience===g.audience:!1}function l(u,g){for(var x=0;x<u.length;x++)if(c(u[x],g))return x;return-1}function v(u){return l(d,u)>=0}function f(u){var g=l(d,u);g>=0?d.splice(g,1):d.push(u)}function b(){if(d.length!==o.length)return!0;for(var u=0;u<d.length;u++)if(l(o,d[u])<0)return!0;return!1}function h(u){for(var g=0;g<u.scopes.length;g++)if(u.scopes[g]==="all"||u.scopes[g]===a)return!0;return!1}function L(u,g){var x=[];if(Object.keys(Ee).forEach(function(H){var K=Ee[H];K.audience===g&&h(K)&&x.push(K)}),!x.length)return null;var S=i("div",{class:"fb-badge-group"});return S.appendChild(i("div",{class:"fb-badge-group-label",text:u})),x.forEach(function(H){var K=v({b:H.id}),D=i("span",{class:"fb-badgerow-chk","aria-hidden":"true",text:K?"\u2713":""}),j=i("button",{type:"button",class:"fb-badgerow"+(K?" fb-badgerow--on":"")},[Be({b:H.id}),i("span",{class:"fb-badgerow-spacer"}),D]);j.addEventListener("click",function(){var ve=j.classList.contains("fb-badgerow--on");f({b:H.id}),j.classList.toggle("fb-badgerow--on",!ve),D.textContent=ve?"":"\u2713",p()}),S.appendChild(j)}),S}function T(){var u=d.filter(function(x){return x&&!x.b});if(!u.length)return null;var g=i("div",{class:"fb-badge-group"});return g.appendChild(i("div",{class:"fb-badge-group-label",text:"Custom"})),u.forEach(function(x){var S=i("button",{type:"button",class:"fb-badgerow fb-badgerow--on"},[Be(x),i("span",{class:"fb-badgerow-spacer"}),i("span",{class:"fb-badgerow-chk","aria-hidden":"true",text:"\u2713"})]);S.addEventListener("click",function(){f(x),I()}),g.appendChild(S)}),g}function E(){var u=i("div"),g=i("button",{type:"button",class:"fb-badgerow fb-badgerow--custom",text:"\uFF0B Custom badge\u2026"}),x=i("div",{class:"fb-custom-badge-form",hidden:""}),S=i("input",{type:"text",class:"fb-add-input",placeholder:"Label",autocomplete:"off"}),H=i("select",{class:"fb-add-input"},[i("option",{value:"client",text:"Client-facing"}),i("option",{value:"advisor",text:"Workflow only"})]),K="blue",D=i("div",{class:"fb-tone-swatches"});["gold","green","blue","amber","red","purple","pink","neutral"].forEach(function(J){var fe=i("button",{type:"button",title:J.charAt(0).toUpperCase()+J.slice(1),"aria-label":"Tone: "+J,class:"fb-tone-sw fb-badge--"+J+(J===K?" fb-tone-sw--on":"")});fe.addEventListener("click",function(we){we.stopPropagation(),K=J;for(var Me=0;Me<D.childNodes.length;Me++)D.childNodes[Me].classList.remove("fb-tone-sw--on");fe.classList.add("fb-tone-sw--on")}),D.appendChild(fe)});var j=i("div",{class:"fb-add-hint",hidden:"",text:"Label is required."}),ve=i("button",{type:"button",class:"fb-add-submit",text:"Add"}),Ct=i("button",{type:"button",class:"fb-add-cancel",text:"Cancel"});return x.appendChild(i("div",{class:"fb-add-frow"},[i("div",{class:"fb-add-flabel",text:"Label"}),S])),x.appendChild(i("div",{class:"fb-add-frow"},[i("div",{class:"fb-add-flabel",text:"Audience"}),H])),x.appendChild(i("div",{class:"fb-add-frow"},[i("div",{class:"fb-add-flabel",text:"Tone"}),D])),x.appendChild(j),x.appendChild(i("div",{class:"fb-add-actions"},[ve,Ct])),g.addEventListener("click",function(){x.hidden=!1,g.hidden=!0,S.focus()}),Ct.addEventListener("click",function(J){J.stopPropagation(),x.hidden=!0,g.hidden=!1}),ve.addEventListener("click",function(J){J.stopPropagation();var fe=(S.value||"").trim();if(!fe){j.hidden=!1,S.focus();return}var we={label:fe,audience:H.value,tone:K};v(we)||d.push(we),I()}),u.appendChild(g),u.appendChild(x),u}var m,C;function p(){if(m){var u=b();m.disabled=!u,C&&(C.textContent=u?"Unsaved changes":"No changes")}}function y(){C=i("span",{class:"fb-badges-foot-hint",text:"No changes"}),m=i("button",{type:"button",class:"fb-badges-save",text:"Save"});var u=i("button",{type:"button",class:"fb-badges-cancel",text:"Cancel"});m.addEventListener("click",_),u.addEventListener("click",function(){R()});var g=i("div",{class:"fb-badges-actions"},[C,u,m]);return g}function _(){var u=d.filter(function(D){return l(o,D)<0}),g=o.filter(function(D){return l(d,D)<0});if(!u.length&&!g.length){R();return}var x=[];g.forEach(function(D){x.push({op:"remove_badge",value:D})}),u.forEach(function(D){x.push({op:"add_badge",value:D})}),m&&(m.disabled=!0,m.textContent="Saving\u2026");var S=B.revision||"",H=0;function K(){if(H>=x.length){R(),ie().then(function(){ne("Badges saved.")});return}var D=x[H++];Qe(D.op,r,D.value,S).then(function(j){if(j&&j.conflict){R(),ie().then(function(){ne("Page was out of date \u2014 reloaded. Re-check badges.")});return}if(j&&j.ok){S=j.rev,K();return}R(),ne("Couldn't save badges \u2014 try again."),ie()})}K()}function I(){t.badgeBody.innerHTML="";var u=L("Client-facing","client");u&&t.badgeBody.appendChild(u);var g=L("Workflow","advisor");g&&t.badgeBody.appendChild(g);var x=T();x&&t.badgeBody.appendChild(x),t.badgeBody.appendChild(E()),t.badgeBody.appendChild(y()),p()}I(),t.sheet.classList.add("fb-sheet--badges")}function se(e){if(!k)return null;var t=i("button",{type:"button",class:"fb-kebab","aria-label":"Actions for "+(e.name||"this item"),title:"Actions",text:"\u2630"});return t.addEventListener("click",function(n){n.stopPropagation(),Ot(e)}),t}var Y=null;function _e(e){if(!k||!e.canReorder)return null;var t=i("span",{class:"fb-handle",role:"button",tabindex:"0","aria-label":"Drag to reorder "+(e.name||"this item"),title:"Drag to reorder",text:"\u283F"});return t.addEventListener("pointerdown",function(n){Vt(n,t,e)}),t}function De(e){return Array.prototype.slice.call(e.querySelectorAll("[data-rkind]")).filter(function(t){return t.closest("[data-reorder-group]")===e})}function Vt(e,t,n){var a=t.closest("[data-rkind]"),r=a&&a.closest("[data-reorder-group]");if(!(!a||!r)){e.preventDefault();var o=De(r);Y={item:a,group:r,ctx:n,fromIndex:o.indexOf(a)},a.classList.add("fb-dragging");try{t.setPointerCapture(e.pointerId)}catch{}}}function Qt(e){if(Y){for(var t=e.clientY,n=De(Y.group),a=0;a<n.length;a++){var r=n[a];if(r!==Y.item){var o=r.getBoundingClientRect();if(t<o.top+o.height/2){r.previousElementSibling!==Y.item&&Y.group.insertBefore(Y.item,r);return}}}Y.group.appendChild(Y.item)}}function ze(){if(Y){var e=Y;Y=null;var t=e.item;t.classList.remove("fb-dragging");var n=De(e.group).indexOf(t);n===e.fromIndex||n<0||(t.classList.remove("fb-landed"),t.offsetWidth,t.classList.add("fb-landed"),t._landTimer&&clearTimeout(t._landTimer),t._landTimer=setTimeout(function(){t.classList.remove("fb-landed")},3e3),Wt(e.ctx,e.fromIndex,n))}}function Wt(e,t,n){var a=n>t?"down":"up",r=Math.abs(n-t),o=String(B.revision||""),d=t,s=e.baseTarget.kind;function c(l){if(l<=0){B.revision=o;return}var v;s==="option"?v={kind:"option",decisionId:e.baseTarget.decisionId,optionId:e.baseTarget.optionId,dir:a}:v={kind:s,dayIndex:e.baseTarget.dayIndex,itemIndex:d,dir:a},Qe("move",v,void 0,o).then(function(f){if(!f||f.conflict||!f.ok){ie();return}o=f.rev,d+=a==="down"?1:-1,c(l-1)})}c(r)}k&&(document.addEventListener("pointermove",Qt),document.addEventListener("pointerup",ze),document.addEventListener("pointercancel",ze));function $t(e){switch(e.status){case"recommended":return F("rec","Recommended");case"selected":return F("sel-badge","Selected");case"confirmed":return F("conf","Confirmed");case"alternative":return F("alt","Alternative");default:return null}}function Xe(e,t,n){var a=G(e),r=Ie(e,t.id),o=a?"checkbox":"radio",d=!a&&ye(e),s=d&&!r&&!n,c=he(t),l=i("div",{class:"fb-card"+(r?" sel":"")+(s?" dim":"")+(n?" locked":"")+(c?" fb-hidden":""),"data-multi":a?"1":"0","data-opt":t.id,role:o,"aria-checked":r?"true":"false",tabindex:n?"-1":"0","aria-disabled":n?"true":"false"});t.ribbon&&l.appendChild(i("span",{class:"ribbon",text:t.ribbon})),l.appendChild(i("div",{class:"pick","aria-hidden":"true"}));l.appendChild(i("span",{class:"stub","aria-hidden":"true",text:(String(t.id||"").replace(/[^a-z0-9]/gi,"").toUpperCase().slice(0,8)||"VGT")}));var v=i("div",null,[i("div",{class:"ttl",text:t.label}),t.summary?i("div",{class:"summary",text:t.summary}):null]),f=re(t.priceLo,t.priceHi),b=f?i("div",{class:"price range",text:f}):i("div",{class:"price none",text:"\u2014"}),h=be(e.anchor,{kind:"option",itemRef:t.id},t.label);if(h&&v.appendChild(h),l.appendChild(i("div",{class:"row"},[v,b])),k){var L={section:"Option",name:t.label,baseTarget:{kind:"option",decisionId:e.id,optionId:t.id},fields:[{field:"label",value:t.label,prose:!0,label:"Name"},{field:"summary",value:t.summary,prose:!0,label:"Summary",multiline:!0},{field:"note",value:t.note,prose:!0,label:"Note",multiline:!0},{field:"priceLo",value:t.priceLo,prose:!1,label:"Price (low)"},{field:"priceHi",value:t.priceHi,prose:!1,label:"Price (high)"}],sectionAnchor:e.anchor,polishTarget:{kind:"option",itemRef:t.id},canHide:!0,isHidden:c,canDelete:!0,canReorder:!n,moveDay:null,badgeKind:"option",badgeTarget:{decisionId:e.id,optionId:t.id},appliedBadges:t.badges};l.classList.add("fb-has-adv-ctrl"),l.setAttribute("data-rkind","option"),l.setAttribute("data-dec",e.id);var T=_e(L);T&&l.appendChild(T);var E=se(L);E&&l.appendChild(E)}var m=i("div",{class:"tags"});c&&m.appendChild(F("fb-hidden-badge","Hidden from client")),r&&t.status!=="confirmed"&&t.status!=="selected"&&m.appendChild(F("picked","Selected"));var C=$t(t);C&&m.appendChild(C),f&&m.appendChild(t.basis==="quoted"?F("quoted","Quoted"):F("est","Estimate")),t.stars&&m.appendChild(i("span",{class:"tag neutral",text:"\u2605 "+t.stars})),t.photoCount&&m.appendChild(F("photo",t.photoCount+" photos"));var p=Ht(e,t);p&&m.appendChild(F(p.dir==="up"?"delta-up":"delta-down",p.text));var y=de(t);if(y&&m.appendChild(y),m.childNodes.length&&l.appendChild(m),t.note&&l.appendChild(i("div",{class:"opt-note",text:t.note})),t.detailUrl){var _=t.detailUrlKind==="booking"?"View details":"Reference \u2197",I=i("a",{class:"link",href:t.detailUrl,target:"_blank",rel:"noopener noreferrer",text:_});I.addEventListener("click",function(u){u.stopPropagation()}),l.appendChild(i("div",{style:"margin-top:8px"},[I]))}return n||(l.addEventListener("click",function(){pe(e.id,t.id)}),l.addEventListener("keydown",function(u){(u.key==="Enter"||u.key===" "||u.key==="Spacebar")&&(u.preventDefault(),pe(e.id,t.id))})),l}function zt(e,t){var n=i("div",{class:"tabs",role:"tablist","aria-label":e.title});return(e.options||[]).forEach(function(a){var r=Ie(e,a.id),o=i("div",{class:"tab"+(r?" on":""),role:"tab","aria-selected":r?"true":"false",tabindex:t?"-1":"0"},[document.createTextNode(a.label),a.summary?i("span",{class:"ts",text:a.summary}):null]);t||(o.addEventListener("click",function(){pe(e.id,a.id)}),o.addEventListener("keydown",function(d){(d.key==="Enter"||d.key===" "||d.key==="Spacebar")&&(d.preventDefault(),pe(e.id,a.id))})),n.appendChild(o)}),n}function Xt(e,t){var n=Ae(e),a=i("section",{class:"fb-section"+(n?" locked-section":""),id:e.anchor}),r=i("div",{class:"sec-no"},[i("b",{text:String(t+1)}),document.createTextNode(e.title)]),o=de(e);if(o&&r.appendChild(o),a.appendChild(r),e.groupNote||k){var d=i("div",{class:"group-note",text:e.groupNote||(k?"(no section description \u2014 tap \u2630 to add one)":"")});!e.groupNote&&k&&d.classList.add("fb-empty-prose");var s=be(e.anchor,{kind:"group_note",decisionId:e.id},"this section's description");if(s&&d.appendChild(s),k){var c={section:"Section",name:e.title||"this section",baseTarget:{kind:"group_note",decisionId:e.id},fields:[{field:"groupNote",value:e.groupNote,prose:!0,label:"Section description",multiline:!0}],sectionAnchor:e.anchor,polishTarget:{kind:"group_note",decisionId:e.id},canHide:!1,isHidden:!1,canDelete:!!e.groupNote,canReorder:!1,moveDay:null,badgeKind:"section",badgeTarget:{decisionId:e.id},appliedBadges:e.badges},l=se(c);l&&d.appendChild(l)}a.appendChild(d)}if(Bt(a,e,W),n){var v=_t(e);a.appendChild(i("div",{class:"lock-banner",text:"Unlocks after you choose: "+(v.join(", ")||"a previous decision")+"."}))}var f=Dt(e);if(e.id==="island-choice")a.appendChild(zt(e,n));else if(e.type==="single_choice"||e.type==="confirm"){var b=i("div",{role:"radiogroup","aria-label":e.title});k&&b.setAttribute("data-reorder-group","dec-"+e.id),f.forEach(function(E){b.appendChild(Xe(e,E,n))}),a.appendChild(b)}else{var h=i("div",{role:"group","aria-label":e.title});k&&h.setAttribute("data-reorder-group","dec-"+e.id),f.forEach(function(E){h.appendChild(Xe(e,E,n))}),a.appendChild(h)}if(e.allowAskAdvisor&&!k){var L=i("button",{class:"ask-link",type:"button",text:"Ask your advisor about this"});L.addEventListener("click",function(){Pe(e.anchor)}),a.appendChild(L)}var T=He({sectionAnchor:e.anchor,mode:"option",decisionId:e.id,describeKind:"item"});return T&&a.appendChild(T),a.appendChild(i("div",{class:"rule"})),a}function ce(){return U.filter(function(e){return!G(e)})}function Zt(){return ce().filter(function(e){return!oe(e)})}function xe(){var e=ce();return e.length>0&&e.every(function(t){return oe(t)})}function Ne(e){var t=e?document.getElementById(e):null;t&&typeof t.scrollIntoView=="function"?t.scrollIntoView({behavior:"smooth",block:"start"}):e&&(location.hash="#"+e)}function en(){var e=A.progress||{open:0,resolved:0,locked:0,label:""},t=(e.open||0)+(e.resolved||0)+(e.locked||0),n=ce(),a=n.filter(oe).length,r=n.length||t||1,o=Math.round(a/r*100),d=Zt(),s=xe(),c=i("div",{class:"fb-progress"+(s?" ready":""),id:"fb-progress"}),l=i("div",{class:"pbar"});if(l.appendChild(i("span",{style:"width:"+o+"%"})),c.appendChild(l),c.appendChild(i("div",{class:"plabel"},[i("span",{html:"<b>"+a+"</b> of <b>"+r+"</b> decisions made"}),i("span",{text:k?s?"All decisions made":r-a+" still open":s?"Ready to send":r-a+" left before we can book"})])),s){var v=i("div",{class:"fb-ready-banner"},[document.createTextNode("All set! ")]);k||v.appendChild(i("span",{class:"rb-sub",text:"Send your picks and your advisor will firm up quotes and hold the dates."})),c.appendChild(v)}else if(d.length){var f=i("div",{class:"fb-steps"});f.appendChild(i("div",{class:"slabel",text:"Still to decide"})),d.forEach(function(b){var h=b;if(Ae(b)){var L=(b.blockedBy||[]).map(Z).filter(Boolean),T=L.filter(function(m){return!ye(m)})[0];T&&(h=T)}var E=i("a",{class:"fb-step",href:"#"+h.anchor,role:"link","aria-label":"Go to decision: "+b.title,text:b.title});E.addEventListener("click",function(m){m.preventDefault(),Ne(h.anchor)}),f.appendChild(E)}),c.appendChild(f)}return c}function tn(){var e=i("section",{class:"fb-section",id:"budget"});e.appendChild(i("div",{class:"sec-no"},[i("b",{text:"$"}),document.createTextNode("Budget summary")]));var t=i("div",{class:"budget"});t.appendChild(i("div",{class:"bhead"},[i("span",{class:"bt"},[document.createTextNode("Must-haves \xB7 core trip"),yt("badges","What do the Estimate and Quoted price badges mean?")]),i("span",{class:"bn",text:"updates with your picks"})])),U.forEach(function(a){G(a)||ge(a).forEach(function(r){var o=re(r.priceLo,r.priceHi);o&&t.appendChild(i("div",{class:"bline"},[i("span",{class:"bk",text:a.title+" \xB7 "+r.label}),i("span",{class:"bv",text:o})]))})}),U.forEach(function(a){if(G(a)){var r=i("div",{class:"fb-addon-grp",id:a.anchor});r.appendChild(i("div",{class:"fb-addon-head",text:(a.title||"Optional experiences")+" \xB7 tap to add"})),a.groupNote&&r.appendChild(i("div",{class:"fb-addon-note",text:a.groupNote})),(a.options||[]).forEach(function(o){var d=Ie(a,o.id),s=re(o.priceLo,o.priceHi),c=i("button",{type:"button",class:"fb-addon-row"+(d?" on":""),"aria-pressed":d?"true":"false"},[i("span",{class:"fb-addon-check","aria-hidden":"true",text:d?"\u2713":"\uFF0B"}),i("span",{class:"fb-addon-lb",text:o.label}),i("span",{class:"fb-addon-pr",text:s||""})]);c.addEventListener("click",function(){pe(a.id,o.id)}),r.appendChild(c)}),t.appendChild(r)}});var n=Ce();return t.appendChild(i("div",{class:"btot"},[i("span",{text:"Estimated total"}),i("span",{text:re(n.lo,n.hi)||"\u2014"})])),e.appendChild(t),e.appendChild(i("div",{class:"rule"})),e}function nn(){if(!Ue.length)return null;var e=i("section",{class:"fb-section fb-includes",id:"fb-includes"});return e.appendChild(i("div",{class:"sec-no"},[i("b",{text:"+"}),document.createTextNode("Good to know before you go")])),Ue.forEach(function(t){var n=i("details");n.appendChild(i("summary",{text:t.title||t.key||"Detail"})),n.appendChild(i("div",{class:"ibody",html:t.bodyHtml||""})),e.appendChild(n)}),e.appendChild(i("div",{class:"rule"})),e}function an(){var e=xe(),t=i("section",{class:"fb-section",id:"next-steps"});t.appendChild(i("div",{class:"sec-no"},[i("b",{text:"\u2192"}),document.createTextNode("Next steps")]));var n=i("div",{class:"next-steps"}),a=yt("how-send","How does sending picks work?");k?n.appendChild(i("p",null,[document.createTextNode("Queue refinements with \u2728 (any item) and \uFF0B (add), then Submit to AI to apply them on your next chat turn. Clients see a read-only version of this page."),a])):n.appendChild(i("p",null,[document.createTextNode("Happy with your picks? Send them to your advisor and they'll firm up quotes and hold the dates. Nothing here is booked until you confirm."),a]));var r=[];if(!k){var o=i("button",{class:"btn ghost",id:"fb-send-picks-secondary",type:"button",text:"Send my picks to your advisor"});o.addEventListener("click",function(){pt(o)});var d=i("button",{class:"btn ghost",type:"button",text:"Ask a question"});d.addEventListener("click",function(){Pe("")}),r.push(o,d)}return r.length&&n.appendChild(i("div",{style:"display:flex;gap:10px;flex-wrap:wrap"},r)),n.appendChild(i("div",{class:"fb-confirm",id:"fb-send-confirm"})),t.appendChild(n),t}function rn(){var e=i("button",{class:"fb-howto",type:"button","aria-label":"How this proposal works",text:"How this works"});return e.addEventListener("click",function(){ht(null,e)}),i("div",{class:"fb-head"},[i("div",{class:"eyebrow",text:(B.tripType||"Trip")+" \xB7 proposal"}),i("h1",{text:B.title||"Your trip"}),B.subtitle?i("p",{class:"sub",text:B.subtitle}):B.datesLabel?i("p",{class:"sub",text:B.datesLabel}):null,i("div",null,[e])])}function on(){return k?i("p",{class:"fb-intro fb-advisor-banner"},[i("b",{text:"\u270F\uFE0F Advisor edit mode"}),document.createTextNode(" \u2014 only you see this. Tap \u2630 on any item to edit, \u2728 to ask, \uFF0B to add \u2014 then Submit to AI.")]):i("p",{class:"fb-intro",html:"<b>Tap a card to choose.</b> Your total updates at the bottom as you go \u2014 send your picks to your advisor when you\u2019re ready. Nothing is booked until you confirm."})}function Ze(e){return(e.title||"").replace(/\s*\([^)]*\)\s*$/,"").trim()||e.title||"Decision"}function dn(){var e=ce(),t=i("div",{class:"fb-buildprog"}),n=i("div",{class:"fb-bp-chips"});e.forEach(function(s){var c=oe(s),l=i("button",{type:"button",class:"fb-bchip "+(c?"done":"todo"),title:s.title,"aria-label":Ze(s)+(c?": chosen":": not chosen yet")},[i("span",{class:"fb-bchip-ic","aria-hidden":"true",text:c?"\u2713":"\u25CB"}),i("span",{class:"fb-bchip-lb",text:Ze(s)})]);l.addEventListener("click",function(){Ne(s.anchor)}),n.appendChild(l)});var a=0;U.forEach(function(s){G(s)&&(a+=ge(s).length)}),a&&n.appendChild(i("span",{class:"fb-bchip addon",text:"+"+a+" add-on"+(a!==1?"s":"")})),t.appendChild(n);var r=Ce(),o=B.pricingAsOf?"Pricing as of "+B.pricingAsOf:"",d=(r.est?r.est+" estimate"+(r.est!==1?"s":"")+(o?" \xB7 ":""):"")+o;return d&&t.appendChild(i("div",{class:"fb-bp-asof",text:d})),t}function et(){return"fbtotal:"+W}function ln(){try{var e=localStorage.getItem(et());return e===null?!0:e==="1"}catch{return!0}}function sn(e){try{localStorage.setItem(et(),e?"1":"0")}catch{}}function tt(){var e=document.getElementById("budget");if(e)if(e.scrollIntoView)e.scrollIntoView({behavior:"smooth",block:"start"});else try{location.hash="#budget"}catch{}}function cn(){var e=document.querySelector(".fb-sticky-total");e&&e.parentNode.removeChild(e);var t=Ce(),n=xe(),a=ce(),r=a.filter(oe).length,o=ln(),d=null;k?d=Lt():(d=i("button",{class:"btn fb-send "+(n?"lit":"ghost"),id:"fb-send-picks",type:"button",text:"Send my picks"}),d.addEventListener("click",function(){pt(d)}));var s=r===a.length?"\u2713 All set \u2014 ready to send":r+" of "+a.length+" ready to book",c=i("span",{class:"fb-bp-chev","aria-hidden":"true",text:o?"\u2304":"\u2303"}),l=i("button",{type:"button",class:"fb-bp-summary","aria-expanded":o?"false":"true","aria-label":s+" \u2014 tap to "+(o?"show":"hide")+" details"},[i("span",{class:"fb-bp-sum-lb",text:s}),c]),v=dn(),f=i("div",{class:"tv fb-tv-link",id:"fb-live-total",role:"button",tabindex:"0","aria-label":"Show budget breakdown",text:re(t.lo,t.hi)||"\u2014"});f.addEventListener("click",tt),f.addEventListener("keydown",function(h){(h.key==="Enter"||h.key===" "||h.key==="Spacebar")&&(h.preventDefault(),tt())});var b=i("div",{class:"fb-sticky-total"+(o?"":" expanded")},[i("div",{class:"inner"},[i("div",{class:"tot"},[i("div",{class:"tl",text:"Your build \xB7 estimated"}),f]),d,l,v])]);l.addEventListener("click",function(){var h=b.classList.toggle("expanded");sn(!h),c.textContent=h?"\u2303":"\u2304",l.setAttribute("aria-expanded",h?"true":"false"),l.setAttribute("aria-label",s+" \u2014 tap to "+(h?"hide":"show")+" details")}),document.body.appendChild(b)}var un=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],fn=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];function pn(e){if(!e)return null;var t=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(e));if(!t)return String(e);var n=+t[1],a=+t[2],r=+t[3];if(a<1||a>12||r<1||r>31)return String(e);var o=new Date(Date.UTC(n,a-1,r));return o.getUTCMonth()!==a-1||o.getUTCDate()!==r?String(e):un[o.getUTCDay()]+", "+fn[a-1]+" "+r}function nt(e,t){var n=e&&e.anchor?/(\d+)\s*$/.exec(String(e.anchor)):null;return n?+n[1]:t+1}function at(e,t){return"fbday:"+e+":"+t}function bn(e,t){try{return localStorage.getItem(at(e,t))}catch{return null}}function it(e,t,n){try{localStorage.setItem(at(e,t),n?"1":"0")}catch{}}function vn(e,t,n){var a=bn(e,t);return a==="1"?!0:a==="0"?!1:!!n}function hn(){var e=new Date,t=e.getMonth()+1,n=e.getDate();return e.getFullYear()+"-"+(t<10?"0"+t:t)+"-"+(n<10?"0"+n:n)}function mn(e,t){var n=t.conditional;if(!(!n||!n.decisionId)){var a=Z(n.decisionId),r=O.selected[n.decisionId]||null,o=i("div",{class:"fb-day-cond"});if(!r||!n.byOptionId[r]){var d=a&&a.title?a.title.toLowerCase():"choice above";o.appendChild(i("div",{class:"fb-day-cond-pending",text:"Depends on your "+d+" \u2014 you'll see the right plan once you choose above."})),e.appendChild(o);return}var s=n.byOptionId[r],c=t.anchor||null;lt(o,s.activities,c),st(o,s.dining,c),e.appendChild(o)}}var w={observer:null,timer:null,bursts:0,engaged:!1,targets:[]};function yn(){w.engaged=!0,w.timer&&(clearTimeout(w.timer),w.timer=null),w.observer&&(w.observer.disconnect(),w.observer=null),w.targets.forEach(function(e){e.classList.remove("fb-flash--on","fb-flash--static")})}function gn(){try{return window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches}catch{return!1}}function Cn(e,t){if(w.observer&&(w.observer.disconnect(),w.observer=null),w.timer&&(clearTimeout(w.timer),w.timer=null),w.engaged)return;var n=e.querySelector("#fb-day-hint");if(w.targets=[t],n&&w.targets.push(n),!("IntersectionObserver"in window))return;if(gn()){w.observer=new IntersectionObserver(function(r){r.forEach(function(o){o.isIntersecting&&!w.engaged&&(w.targets.forEach(function(d){d.classList.add("fb-flash--static")}),w.observer.disconnect())})},{threshold:.35}),w.observer.observe(e);return}function a(){w.engaged||w.bursts>=3||(w.bursts++,w.targets.forEach(function(r){r.classList.add("fb-flash--on")}),setTimeout(function(){w.targets.forEach(function(r){r.classList.remove("fb-flash--on")})},1800),w.timer=setTimeout(a,3500))}w.observer=new IntersectionObserver(function(r){r.forEach(function(o){w.engaged||(o.isIntersecting?!w.timer&&w.bursts<3&&a():w.timer&&(clearTimeout(w.timer),w.timer=null))})},{threshold:.35}),w.observer.observe(e)}var rt=function(){return"fbdayhint:"+W};function kn(){try{return localStorage.getItem(rt())==="1"}catch{return!1}}function xn(){try{localStorage.setItem(rt(),"1")}catch{}var e=document.getElementById("fb-day-hint");e&&(e.style.display="none")}function ot(){xn(),yn()}function wn(e,t){var n=document.createDocumentFragment();kn()||n.appendChild(i("div",{class:"fb-day-hint",id:"fb-day-hint",text:k?"\u2193 Tap any day to open it. Use \u2728 on any item to ask the assistant, \uFF0B to add.":"\u2193 Tap any day to open it \u2014 tap an activity for details."}));var a=i("button",{type:"button",class:"fb-day-showall",id:"fb-day-showall",text:"Show all days"});return a.addEventListener("click",function(){var r=e.querySelectorAll(".fb-day"),o=!1;r.forEach(function(d){d.classList.contains("fb-day--open")||(o=!0)}),r.forEach(function(d){var s=d.querySelector(".fb-day-row"),c=d.querySelector(".fb-day-chev");d.classList.toggle("fb-day--open",o),c&&(c.textContent=o?"\u25BE":"\u25B8"),s&&s.setAttribute("aria-expanded",o?"true":"false"),it(W,d.id,o)}),a.textContent=o?"Collapse days":"Show all days",ot()}),n.appendChild(a),n}function En(e,t,n){var a=e.anchor||"day-"+(t+1),r=vn(W,a,n),o=he(e),d=i("div",{class:"fb-day"+(r?" fb-day--open":"")+(o?" fb-hidden":""),id:a}),s=i("span",{class:"fb-day-chev","aria-hidden":"true",text:r?"\u25BE":"\u25B8"}),c=pn(e.date),l="Day "+nt(e,t)+(c?" \xB7 "+c:"")+(e.title?" \u2014 "+e.title:""),v=i("span",{class:"fb-day-title",text:l}),f=(e.activities||[]).length,b=(e.dining||[]).length,h=[s,v];if(f||b){var L=i("span",{class:"fb-day-chips"});f&&L.appendChild(i("span",{class:"fb-day-chip",text:"\u{1F3DB} "+f})),f&&b&&L.appendChild(document.createTextNode(" \xB7 ")),b&&L.appendChild(i("span",{class:"fb-day-chip",text:"\u{1F374} "+b})),h.push(L)}var T=de(e);T&&h.push(T);var E=i("button",{type:"button",class:"fb-day-row","aria-expanded":r?"true":"false"},h);if(E.addEventListener("click",function(){var u=!d.classList.contains("fb-day--open");d.classList.toggle("fb-day--open",u),s.textContent=u?"\u25BE":"\u25B8",E.setAttribute("aria-expanded",u?"true":"false"),it(W,a,u),ot()}),k){var m={section:"Day",name:"Day "+nt(e,t),baseTarget:{kind:"day",dayIndex:t},fields:[],sectionAnchor:a,polishTarget:{day:a,kind:"day"},canHide:!0,isHidden:o,canDelete:!0,canReorder:!1,moveDay:null,badgeKind:"day",badgeTarget:{dayIndex:t},appliedBadges:e.badges},C=se(m);d.appendChild(C?i("div",{class:"fb-day-head"},[E,C]):E)}else d.appendChild(E);var p=i("div",{class:"fb-day-body"});if(k&&o&&p.appendChild(i("div",{class:"fb-day-ctrl-row"},[F("fb-hidden-badge","Hidden from client")])),e.location&&p.appendChild(i("div",{class:"fb-day-loc",text:e.location})),typeof e.body=="string"&&e.body.length&&p.appendChild(i("div",{class:"fb-day-narr",text:e.body})),lt(p,e.activities,a,t),mn(p,e),st(p,e.dining,a,t),e.stay&&e.stay.name){var y=i("div",{class:"fb-day-stay"},[i("span",{"aria-hidden":"true",text:"\u{1F6CF} "}),i("span",{class:"fb-day-stay-name",text:e.stay.name})]);if(e.stay.sectionAnchor){var _=i("button",{type:"button",class:"fb-day-stay-link",text:"\u2192 see hotel"});_.addEventListener("click",function(){Ne(e.stay.sectionAnchor)}),y.appendChild(_)}p.appendChild(y)}var I=He({sectionAnchor:a,mode:"day-items",dayIndex:t,describeKind:"item"});return I&&p.appendChild(I),d.appendChild(p),d}var dt=!1;function Ln(){dt||(dt=!0,document.addEventListener("click",function(){for(var e=document.querySelectorAll(".fb-spark-menu:not([hidden])"),t=0;t<e.length;t++)e[t].hidden=!0}))}var Sn=[{op:"write_blurb",label:"Write a blurb"},{op:"punch_up",label:"Punch up / warmer"},{op:"make_shorter",label:"Make shorter"},{op:"find_alternatives",label:"Find alternatives"},{op:"freetext",label:"Tell the assistant\u2026"}];function be(e,t,n){if(!k)return null;var a=i("span",{class:"fb-spark"}),r=i("button",{type:"button",class:"fb-spark-btn","aria-label":"Ask the assistant about "+(n||"this item"),text:"\u2728"}),o=i("div",{class:"fb-spark-menu",hidden:""});return Sn.forEach(function(d){var s=i("button",{type:"button",class:"fb-spark-item",text:d.label});s.addEventListener("click",function(c){c.stopPropagation();var l="";if(d.op==="freetext"&&(l=window.prompt('Tell the assistant what to do with "'+(n||"this item")+'":',"")||"",!l.trim())){o.hidden=!0;return}o.hidden=!0,Te(e,{op:d.op,target:t,instruction:l}).then(function(v){Se(v)})}),o.appendChild(s)}),r.addEventListener("click",function(d){d.stopPropagation(),o.hidden=!o.hidden}),a.appendChild(r),a.appendChild(o),a}function He(e){if(!k||!e||typeof e!="object")return null;var t=e.sectionAnchor||"general",n=i("div",{class:"fb-add"}),a=i("button",{type:"button",class:"fb-add-btn",text:"\uFF0B Add\u2026"}),r=null;function o(){r&&r.parentNode&&r.parentNode.removeChild(r),r=null}return a.addEventListener("click",function(d){if(d.stopPropagation(),r){o();return}r=i("div",{class:"fb-add-panel"}),r.addEventListener("click",function(v){v.stopPropagation()});var s=i("button",{type:"button",class:"fb-add-mode",text:"\u2728 Ask the assistant to add\u2026"});s.addEventListener("click",function(v){v.stopPropagation();var f=window.prompt("Describe what to add (the assistant will research/create it):","");!f||!f.trim()||(Te(t,{op:"add_describe",target:{kind:e.describeKind||"item"},instruction:f.trim()}).then(function(b){Se(b)}),o())}),r.appendChild(s);var c=i("button",{type:"button",class:"fb-add-mode",text:"\u2328 I'll type it"}),l=null;c.addEventListener("click",function(v){if(v.stopPropagation(),l&&l.parentNode){l.parentNode.removeChild(l),l=null;return}l=Tn(e,o),r.appendChild(l)}),r.appendChild(c),n.appendChild(r)}),n.appendChild(a),n}function Tn(e,t){var n=i("div",{class:"fb-add-form"});function a(C,p,y){y=y||{};var _=y.multiline?i("textarea",{class:"fb-add-input",rows:"2","data-field":p}):i("input",{class:"fb-add-input",type:y.type||"text","data-field":p});y.placeholder&&_.setAttribute("placeholder",y.placeholder);var I=i("div",{class:"fb-add-frow"},[i("label",{class:"fb-add-flabel",text:C}),_]);return n.appendChild(I),_}var r=i("div",{class:"fb-add-hint",hidden:"",role:"alert"}),o={},d;if(e.mode==="day-items"){let C=function(){var p=n.querySelector("input[name='"+c+"'][value='dining']").checked;h.hidden=p,L.hidden=!p};var s=i("div",{class:"fb-add-frow"}),c="fb-add-type-"+(e.dayIndex==null?"x":e.dayIndex),l=i("label",{class:"fb-add-radio"},[i("input",{type:"radio",name:c,value:"activity",checked:""}),document.createTextNode(" Activity")]),v=i("label",{class:"fb-add-radio"},[i("input",{type:"radio",name:c,value:"dining"}),document.createTextNode(" Dining")]);s.appendChild(i("span",{class:"fb-add-flabel",text:"Type"})),s.appendChild(l),s.appendChild(v),n.appendChild(s),o.name=a("Name *","name",{placeholder:"Required"}),o.description=a("Description","description",{multiline:!0});var f=a("Time","time",{placeholder:"e.g. 2:00 PM"}),b=a("Cuisine","cuisine",{placeholder:"e.g. Greek"});o.time=f,o.cuisine=b,o.url=a("Link","url",{type:"url",placeholder:"https://"});var h=f.parentNode,L=b.parentNode;l.querySelector("input").addEventListener("change",C),v.querySelector("input").addEventListener("change",C),C(),d=function(){var p=n.querySelector("input[name='"+c+"'][value='dining']").checked,y=p?"dining":"activity",_=o.name.value.trim();if(!_)return{requiredEmptyLabel:"Name"};var I={name:_},u=o.description.value.trim();u&&(I.description=u);var g=o.url.value.trim();if(g&&(I.url=g),p){var x=o.cuisine.value.trim();x&&(I.cuisine=x)}else{var S=o.time.value.trim();S&&(I.time=S)}return{target:{kind:y,dayIndex:e.dayIndex},value:I}}}else if(e.mode==="option")o.label=a("Name *","label",{placeholder:"Required"}),o.summary=a("Summary","summary",{multiline:!0}),o.priceLo=a("Price (low)","priceLo",{placeholder:"e.g. 1200"}),o.priceHi=a("Price (high)","priceHi",{placeholder:"e.g. 1800"}),d=function(){var C=o.label.value.trim();if(!C)return{requiredEmptyLabel:"Name"};var p={label:C},y=o.summary.value.trim();y&&(p.summary=y);var _=o.priceLo.value.trim();_&&(p.priceLo=_);var I=o.priceHi.value.trim();return I&&(p.priceHi=I),{target:{kind:"option",decisionId:e.decisionId},value:p}};else if(e.mode==="new-day")o.title=a("Day title","title",{placeholder:"Optional \u2014 e.g. Arrival in Athens"}),d=function(){var C={},p=o.title.value.trim();return p&&(C.title=p),{target:{kind:"day"},value:C}};else return n;var T=i("div",{class:"fb-add-actions"}),E=i("button",{type:"button",class:"fb-add-submit",text:"Add"}),m=i("button",{type:"button",class:"fb-add-cancel",text:"Cancel"});return E.addEventListener("click",function(C){C.stopPropagation(),r.hidden=!0;var p=d();if(!p||p.requiredEmptyLabel){r.textContent=(p&&p.requiredEmptyLabel?p.requiredEmptyLabel:"Name")+" is required.",r.hidden=!1;return}E.disabled=!0,ae("add",p.target,p.value).then(function(y){y?t&&t():E.disabled=!1})}),m.addEventListener("click",function(C){C.stopPropagation(),t&&t()}),T.appendChild(E),T.appendChild(m),n.appendChild(r),n.appendChild(T),n}function lt(e,t,n,a){var r=t||[];if(r.length){var o=typeof a=="number",d=i("div",{class:"fb-day-acts"});d.appendChild(i("div",{class:"fb-day-acts-label",text:"Activities"}));var s=i("div",{class:"fb-day-acts-list"}),c=k&&o;c&&s.setAttribute("data-reorder-group","day-"+a+"-act"),r.forEach(function(l,v){var f=he(l),b=i(c?"div":"span",{class:c?"fb-item-main":"fb-day-act-item"+(f?" fb-hidden":"")});if(l.description){var h=i("button",{type:"button",class:"fb-day-act",text:l.name}),L=i("span",{class:"fb-day-act-desc",text:l.description});h.addEventListener("click",function(){L.classList.toggle("fb-day-act-desc--on")}),b.appendChild(h),l.url&&b.appendChild(i("a",{class:"fb-day-act-link",href:l.url,target:"_blank",rel:"noopener",text:" \u2197"})),b.appendChild(L)}else b.appendChild(i("span",{class:"fb-day-act--static",text:l.name})),l.url&&b.appendChild(i("a",{class:"fb-day-act-link",href:l.url,target:"_blank",rel:"noopener",text:" \u2197"}));f&&b.appendChild(F("fb-hidden-badge","Hidden from client"));var T=be(n,{day:n,kind:"activity",itemRef:l.name},l.name);T&&b.appendChild(T);var E=de(l);if(E&&b.appendChild(E),c){var m={section:"Activity",name:l.name,baseTarget:{kind:"activity",dayIndex:a,itemIndex:v},fields:[{field:"name",value:l.name,prose:!0,label:"Name"},{field:"description",value:l.description,prose:!0,label:"Description",multiline:!0},{field:"time",value:l.time,prose:!1,label:"Time"},{field:"url",value:l.url,prose:!1,label:"Link URL"}],sectionAnchor:n,polishTarget:{day:n,kind:"activity",itemRef:l.name},canHide:!0,isHidden:f,canDelete:!0,canReorder:!0,moveDay:{dayIndex:a,itemIndex:v},badgeKind:"activity",badgeTarget:{dayIndex:a,itemIndex:v},appliedBadges:l.badges},C=i("div",{class:"fb-item-row"+(f?" fb-hidden":""),"data-rkind":"activity","data-day":String(a)}),p=_e(m);p&&C.appendChild(p),C.appendChild(b);var y=se(m);y&&C.appendChild(y),s.appendChild(C)}else s.appendChild(b)}),d.appendChild(s),e.appendChild(d)}}function st(e,t,n,a){var r=t||[];if(r.length){var o=typeof a=="number",d=i("div",{class:"fb-day-dining"});d.appendChild(i("div",{class:"fb-day-dining-label",text:"Dining"}));var s=i("div",{class:"fb-day-dining-list"}),c=k&&o;c&&s.setAttribute("data-reorder-group","day-"+a+"-dine"),r.forEach(function(l,v){var f=he(l),b=i("div",{class:(c?"fb-item-main":"fb-day-dining-item")+(f?" fb-hidden":"")}),h=l.url?i("a",{class:"fb-day-dining-name",href:l.url,target:"_blank",rel:"noopener",text:l.name}):i("span",{class:"fb-day-dining-name",text:l.name});b.appendChild(h),l.cuisine&&b.appendChild(i("span",{class:"fb-day-dining-cuisine",text:" ("+l.cuisine+")"})),l.description&&b.appendChild(i("div",{class:"fb-day-dining-desc",text:l.description})),f&&b.appendChild(F("fb-hidden-badge","Hidden from client"));var L=be(n,{day:n,kind:"dining",itemRef:l.name},l.name);L&&b.appendChild(L);var T=de(l);if(T&&b.appendChild(T),c){var E={section:"Dining",name:l.name,baseTarget:{kind:"dining",dayIndex:a,itemIndex:v},fields:[{field:"name",value:l.name,prose:!0,label:"Name"},{field:"description",value:l.description,prose:!0,label:"Description",multiline:!0},{field:"cuisine",value:l.cuisine,prose:!1,label:"Cuisine"},{field:"url",value:l.url,prose:!1,label:"Link URL"}],sectionAnchor:n,polishTarget:{day:n,kind:"dining",itemRef:l.name},canHide:!0,isHidden:f,canDelete:!0,canReorder:!0,moveDay:{dayIndex:a,itemIndex:v},badgeKind:"dining",badgeTarget:{dayIndex:a,itemIndex:v},appliedBadges:l.badges},m=i("div",{class:"fb-item-row"+(f?" fb-hidden":""),"data-rkind":"dining","data-day":String(a)}),C=_e(E);C&&m.appendChild(C),m.appendChild(b);var p=se(E);p&&m.appendChild(p),s.appendChild(m)}else s.appendChild(b)}),d.appendChild(s),e.appendChild(d)}}function An(){var e=A.days;if(!Array.isArray(e)||!e.length)return null;var t=i("section",{class:"fb-days",id:"itinerary"}),n=i("div",{class:"sec-no"},[i("b",{text:"\u2261"}),document.createTextNode("Day by day")]);t.appendChild(n),t.appendChild(wn(t,n));for(var a=hn(),r=-1,o=0;o<e.length;o++)if(e[o]&&e[o].date===a){r=o;break}r<0&&(r=0),e.forEach(function(s,c){t.appendChild(En(s,c,c===r))});var d=He({sectionAnchor:"itinerary",mode:"new-day",describeKind:"day"});return d&&t.appendChild(d),t.appendChild(i("div",{class:"rule"})),setTimeout(function(){Cn(t,n)},0),t}var ct="voygent-folio-cols";function ut(){try{var e=localStorage.getItem(ct);if(e==="1"||e==="2")return+e}catch{}return window.innerWidth>=900?2:1}function In(e){var t=i("div",{class:"fb-coltoggle",role:"group","aria-label":"Board column layout"}),n=ut(),a=i("button",{type:"button",class:"fb-coltoggle-b"+(n===1?" on":""),text:"1 col","aria-pressed":n===1?"true":"false"}),r=i("button",{type:"button",class:"fb-coltoggle-b"+(n===2?" on":""),text:"2 col","aria-pressed":n===2?"true":"false"});function o(d){try{localStorage.setItem(ct,String(d))}catch{}e.classList.toggle("fb-cols-2",d===2),a.classList.toggle("on",d===1),r.classList.toggle("on",d===2),a.setAttribute("aria-pressed",d===1?"true":"false"),r.setAttribute("aria-pressed",d===2?"true":"false")}return a.addEventListener("click",function(){o(1)}),r.addEventListener("click",function(){o(2)}),t.appendChild(a),t.appendChild(r),t}function qe(){var e=document.getElementById("fb-root");if(e){e.innerHTML="";var t=k&&ut()===2,n=i("div",{class:"wrap"+(t?" fb-cols-2":"")});n.appendChild(rn()),n.appendChild(on()),k&&n.appendChild(In(n)),n.appendChild(en());var a=k?i("div",{class:"fb-board-area"}):n;U.forEach(function(d,s){G(d)||a.appendChild(Xt(d,s))});var r=An();r&&a.appendChild(r),k&&n.appendChild(a),n.appendChild(tn());var o=nn();o&&n.appendChild(o),n.appendChild(an()),e.appendChild(n),cn()}}function Bn(e,t,n,a){return fetch(xt.endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({name:t,email:n,section_anchor:e,body:a})})}var N;function _n(){return N||(N=document.getElementById("fb-feedback"),N)||(N=i("dialog",{id:"fb-feedback"}),N.innerHTML='<form method="dialog" class="fb-dialog-in">  <h3>Ask your advisor</h3>  <p class="fb-dsub" id="fb-feedback-context">Send a question or note. Your advisor will reply by email.</p>  <label for="fb-fb-name">Your name</label><input id="fb-fb-name" type="text" autocomplete="name">  <label for="fb-fb-email">Email</label><input id="fb-fb-email" type="email" autocomplete="email">  <label for="fb-fb-message">Message</label><textarea id="fb-fb-message"></textarea>  <div class="fb-confirm" id="fb-feedback-confirm"></div>  <div class="fb-dialog-actions">    <button type="button" class="btn ghost" id="fb-fb-cancel">Cancel</button>    <button type="button" class="btn" id="fb-fb-submit">Send</button>  </div></form>',document.body.appendChild(N),N.querySelector("#fb-fb-cancel").addEventListener("click",function(){ft()}),N.querySelector("#fb-fb-submit").addEventListener("click",function(){var e=N.getAttribute("data-anchor")||"",t=(N.querySelector("#fb-fb-name").value||"").trim(),n=(N.querySelector("#fb-fb-email").value||"").trim(),a=(N.querySelector("#fb-fb-message").value||"").trim(),r=N.querySelector("#fb-feedback-confirm");if(!t){r.textContent="Please add your name.";return}if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(n)){r.textContent="Please add a valid email so your advisor can reply.";return}if(!a){r.textContent="Please add a short message.";return}r.textContent="Sending\u2026",Bn(e,t,n,a).then(function(o){o&&o.ok?(r.textContent="Sent \u2014 thank you.",setTimeout(ft,1100)):r.textContent="Couldn't send \u2014 please try again."}).catch(function(){r.textContent="Couldn't send \u2014 please try again."})})),N}function Pe(e,t,n){var a=_n();a.setAttribute("data-anchor",e||"");var r=a.querySelector("#fb-feedback-context");r&&(r.textContent=n||(e?'Question about "'+Dn(e)+'". Your advisor will reply by email.':"Send a question or note. Your advisor will reply by email."));var o=a.querySelector("#fb-fb-message");o&&typeof t=="string"&&(o.value=t),a.querySelector("#fb-feedback-confirm").textContent="",typeof a.showModal=="function"?a.showModal():a.setAttribute("open","")}function ft(){if(N){if(typeof N.close=="function")try{N.close();return}catch{}N.removeAttribute("open")}}function Dn(e){for(var t=0;t<(A.nav||[]).length;t++)if(A.nav[t].anchor===e)return A.nav[t].label;var n=U.filter(function(a){return a.anchor===e})[0];return n?n.title:e}function pt(e){xe()?vt():Hn(e||null)}var q,V;function Nn(){return q||(q=document.getElementById("fb-confirm-partial"),q)||(q=i("dialog",{id:"fb-confirm-partial","aria-labelledby":"fb-confirm-partial-title"}),q.innerHTML='<form method="dialog" class="fb-dialog-in">  <h3 id="fb-confirm-partial-title">Send your selections so far?</h3>  <p class="fb-dsub" id="fb-confirm-partial-msg"></p>  <ul class="fb-pickslist" id="fb-confirm-partial-list"></ul>  <div class="fb-dialog-actions">    <button type="button" class="btn ghost" id="fb-confirm-partial-cancel">Keep choosing</button>    <button type="button" class="btn lit" id="fb-confirm-partial-send">Send what I have</button>  </div></form>',document.body.appendChild(q),q.querySelector("#fb-confirm-partial-cancel").addEventListener("click",function(){Oe()}),q.querySelector("#fb-confirm-partial-send").addEventListener("click",function(){ue=!0,Oe(),vt()}),q.addEventListener("click",function(e){e.target===q&&Oe()}),q.addEventListener("close",function(){if(ue){ue=!1;return}V&&typeof V.focus=="function"&&V.focus(),V=null})),q}var ue=!1;function Hn(e){var t=Nn();V=e||null,ue=!1;var n=ce(),a=n.length,r=n.filter(oe).length,o=t.querySelector("#fb-confirm-partial-msg");o&&(o.textContent="You've made "+r+" of "+a+" selection"+(a===1?"":"s")+". Here's everything you've picked so far:");var d=t.querySelector("#fb-confirm-partial-list");if(d){d.textContent="";var s=bt();s.length?(s.forEach(function(c){d.appendChild(i("li",{text:c}))}),d.style.display=""):(d.appendChild(i("li",{class:"fb-pickslist-empty",text:"No selections yet \u2014 tap a card above to choose."})),o&&(o.textContent="You've made "+r+" of "+a+" selections."))}typeof t.showModal=="function"?t.showModal():t.setAttribute("open","")}function Oe(){if(q){if(typeof q.close=="function")try{q.close();return}catch{}if(q.removeAttribute("open"),ue){ue=!1;return}V&&typeof V.focus=="function"&&V.focus(),V=null}}function bt(){var e=[];return U.forEach(function(t){var n=ge(t);n.length&&e.push(t.title+": "+n.map(function(a){return a.label}).join(", "))}),e}function vt(){var e=bt(),t=Ce(),n="My picks for "+(B.title||W)+`
+
+`+(e.length?e.join(`
+`):"(no picks yet)")+`
+
+Estimated total: `+(re(t.lo,t.hi)||"\u2014")+(B.pricingAsOf?" (pricing as of "+B.pricingAsOf+")":"");Pe("picks",n,"Send your picks to your advisor \u2014 add your name and email so they can follow up and firm up quotes.")}var P,Q;function qn(){if(P||(P=document.getElementById("fb-help"),P))return P;P=i("dialog",{id:"fb-help","aria-label":"How this proposal works"});var e=k?`  <dl>    <dt>Tap \u2728 on any item</dt>    <dd>Opens the assistant menu \u2014 write a blurb, punch it up, make it shorter, find alternatives, or give free-form instructions for that item.</dd>    <dt>Tap \uFF0B Add</dt>    <dd>Two ways to add: <b>Ask the assistant</b> \u2014 describe an activity, dining spot, hotel option, or day and it researches and creates it (applied on your next chat turn); or <b>I'll type it</b> \u2014 fill in a quick form and it's added to the proposal right away.</dd>    <dt id="fb-help-how-send">Estimate vs Quoted</dt>    <dd>An <b>Estimate</b> is a good-faith price; a <b>Quoted</b> price is confirmed with the supplier.</dd>    <dt>Submit to AI</dt>    <dd>Queues your requests; they're applied on your <b>next chat turn</b> with the assistant. The live proposal doesn't change until then. <b>Clients see a read-only version</b> of this page without these controls.</dd>  </dl>`:'  <dl>    <dt>Tap a card to choose</dt>    <dd>Tap any option to pick it; tap again to clear. Your running total updates at the bottom of the page as you go.</dd>    <dt><span class="help-tag est">Estimate</span> vs <span class="help-tag quoted">Quoted</span></dt>    <dd>An <b>Estimate</b> is a good-faith price your advisor expects; a <b>Quoted</b> price has been confirmed with the supplier and is firmer.</dd>    <dt id="fb-help-how-send">Sending your picks</dt>    <dd>When you\u2019re happy, tap \u201CSend my picks to your advisor.\u201D They\u2019ll firm up quotes and hold your dates. <b>Nothing is booked until you confirm</b> \u2014 sending picks just starts the conversation.</dd>  </dl>';return P.innerHTML='<form method="dialog" class="fb-dialog-in">  <h3>How this works</h3>'+e+'  <div class="fb-dialog-actions">    <button type="button" class="btn" id="fb-help-close">Got it</button>  </div></form>',document.body.appendChild(P),P.querySelector("#fb-help-close").addEventListener("click",function(){mt()}),P.addEventListener("click",function(t){t.target===P&&mt()}),P.addEventListener("close",function(){Q&&typeof Q.focus=="function"&&Q.focus(),Q=null}),P}function ht(e,t){var n=qn();if(Q=t||null,typeof n.showModal=="function"?n.showModal():n.setAttribute("open",""),e==="how-send"){var a=n.querySelector("#fb-help-how-send");a&&typeof a.scrollIntoView=="function"&&a.scrollIntoView({block:"nearest"})}}function mt(){if(P){if(typeof P.close=="function")try{P.close();return}catch{}P.removeAttribute("open"),Q&&typeof Q.focus=="function"&&Q.focus(),Q=null}}function yt(e,t){var n=i("button",{class:"help-q",type:"button","aria-label":t||"What does this mean?",title:t||"What does this mean?",text:"?"});return n.addEventListener("click",function(a){a.preventDefault(),a.stopPropagation(),ht(e,n)}),n}function Pn(){try{localStorage.setItem(Fe,JSON.stringify(O.selected))}catch{}}function On(){try{var e=localStorage.getItem(Fe);if(!e)return;var t=JSON.parse(e);if(!t||typeof t!="object")return;U.forEach(function(n){if(n.id in t){var a=t[n.id];G(n)?Array.isArray(a)&&(O.selected[n.id]=a.filter(function(r){return!!ee(n,r)})):(a==null||ee(n,a))&&(O.selected[n.id]=a)}})}catch{}}function gt(e){if(!e)return;var t=document.getElementById("hero-root"),n=document.getElementById("fb-root");if(!n)return;if(e.placeholder){var a=document.createElement("p");a.className="hero-placeholder",a.textContent="Hero is on but has no images yet \u2014 run build_trip_hero.",n.parentNode.insertBefore(a,n);return}if(!e.images||!e.images.length)return;function r(p){var y=p&&p.focal,_=function(I){return typeof I=="number"&&I>=0&&I<=1?I:.5};return(_(y&&y.x)*100).toFixed(2)+"% "+(_(y&&y.y)*100).toFixed(2)+"%"}if(t||(t=document.createElement("div"),t.id="hero-root",t.className="hero hero--"+e.overlay.placement+" hero--"+e.overlay.theme,t.innerHTML='<div class="hero-slides"></div><div class="hero-scrim"></div><div class="hero-cap"><div class="hero-ttl"></div><div class="hero-dts"></div></div><div class="hero-dismiss"><button type="button" class="hero-pill" data-hero-collapse>\u25B4 Collapse</button></div>',t.querySelector(".hero-ttl").textContent=e.overlay.title,t.querySelector(".hero-dts").textContent=e.overlay.subtitle||"",t.querySelector(".hero-slides").innerHTML=`<div class="hero-slide on" style="background-image:url('`+encodeURI(e.images[0].url)+"');background-position:"+r(e.images[0])+'"></div>',n.parentNode.insertBefore(t,n)),e.advisorPreview){var o=document.createElement("div");o.className="hero-advisor-flag",o.textContent="Preview \u2014 not yet live for client",t.appendChild(o)}var d="voygent_hero_seen_"+(A&&A.meta&&A.meta.tripId||"x"),s=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches,c=t.querySelector(".hero-slides"),l=0,v=null,f=document.createElement("div");f.className="hero-strip",f.innerHTML=`<div class="hs-thumb" style="background-image:url('`+encodeURI(e.images[0].url)+"');background-position:"+r(e.images[0])+'"></div><div style="flex:1;min-width:0"><div class="hs-ttl"></div><div class="hs-dts"></div></div><div class="hs-exp">\u2922 View</div>',f.querySelector(".hs-ttl").textContent=e.overlay.title,f.querySelector(".hs-dts").textContent=e.overlay.subtitle||"",t.appendChild(f);function b(){h(),!(s||e.images.length<2)&&(v=setInterval(function(){var p=c.children[l];p&&p.classList.remove("on"),l=(l+1)%e.images.length;var y=c.children[l];y||(y=document.createElement("div"),y.className="hero-slide",y.style.backgroundImage="url('"+encodeURI(e.images[l].url)+"')",y.style.backgroundPosition=r(e.images[l]),c.appendChild(y)),y.classList.add("on")},4200))}function h(){v&&(clearInterval(v),v=null)}function L(){try{localStorage.setItem(d,"1")}catch{}}function T(){h(),t.classList.add("hero--collapsed"),t.classList.remove("hero--animate"),L()}function E(p){t.classList.remove("hero--collapsed"),p&&!s&&(requestAnimationFrame(function(){t.classList.add("hero--animate")}),b())}var m=new Image;m.onload=function(){setTimeout(L,3e3)},m.onerror=function(){h(),t.style.display="none",L()},m.src=e.images[0].url,t.querySelector("[data-hero-collapse]")&&t.querySelector("[data-hero-collapse]").addEventListener("click",T),f.addEventListener("click",function(){L(),E(!0)});var C=!1;try{C=!!localStorage.getItem(d)}catch{}C?t.classList.add("hero--collapsed"):E(!0)}Ln(),qe(),gt(A&&A.hero)})();})();
+</script><script>(function(){var k='voygent.folio.advisorTheme';var b=document.getElementById('fb-adv-theme');if(!b)return;b.addEventListener('click',function(){var cur=document.documentElement.getAttribute('data-theme')==='dark'?'dark':'light';var nx=cur==='dark'?'light':'dark';document.documentElement.setAttribute('data-theme',nx);try{localStorage.setItem(k,nx);}catch(e){}});})();</script>
+
+<style>
+  body > nav.fb-nav{position:static !important}
+  .vw-chev{margin-left:8px;font-size:.78em;opacity:.55}
+  #fb-root .fb-section > .sec-no{user-select:none;border-radius:8px}
+  #fb-root .fb-section > .sec-no:hover{background:var(--bg-light)}
+  .vw-toolbar{position:sticky;top:0;z-index:40;display:flex;gap:8px;align-items:center;
+    padding:8px 16px;background:var(--panel);border-bottom:1px solid var(--line);
+    font:600 12px 'Hanken Grotesk',system-ui,sans-serif;color:var(--text)}
+  [data-view=advisor] .vw-toolbar{top:46px}
+  .vw-toolbar .vw-lbl{margin-right:auto;opacity:.6;font-weight:500}
+  .vw-toolbar button{background:var(--bg-light);border:1px solid var(--border-strong);
+    color:var(--text);border-radius:6px;padding:5px 11px;cursor:pointer;font:inherit}
+  .vw-toolbar button:hover{border-color:var(--primary)}
+</style>
+<script>
+window.addEventListener('load',function(){
+  function build(){
+    var root=document.getElementById('fb-root');
+    var secs=root?document.querySelectorAll('.fb-section'):null;
+    if(!secs||!secs.length){return setTimeout(build,200);}
+    secs.forEach(function(sec){
+      if(sec.dataset.vwDone)return; sec.dataset.vwDone='1';
+      var head=sec.querySelector('.sec-no'); if(!head)return;
+      var wrap=document.createElement('div'); wrap.className='vw-body';
+      var n=head.nextSibling; while(n){var nx=n.nextSibling; wrap.appendChild(n); n=nx;}
+      sec.appendChild(wrap); wrap.style.display='none';
+      head.style.cursor='pointer'; head.setAttribute('role','button');
+      var chev=document.createElement('span'); chev.className='vw-chev'; chev.textContent='\u25B8';
+      head.appendChild(chev);
+      head.addEventListener('click',function(e){
+        if(e.target.closest('button,a,input,select,textarea'))return;
+        var open=wrap.style.display!=='none';
+        wrap.style.display=open?'none':''; chev.textContent=open?'\u25B8':'\u25BE';
+      });
+    });
+    if(!document.querySelector('.vw-toolbar')){
+      var bar=document.createElement('div'); bar.className='vw-toolbar';
+      var lbl=document.createElement('span'); lbl.className='vw-lbl'; lbl.textContent='Preview — sections collapsed; click a section to expand';
+      var be=document.createElement('button'); be.textContent='Expand all';
+      var bc=document.createElement('button'); bc.textContent='Collapse all';
+      bar.appendChild(lbl); bar.appendChild(be); bar.appendChild(bc);
+      root.parentNode.insertBefore(bar, root);
+      function setAll(open){document.querySelectorAll('.fb-section').forEach(function(s){
+        var w=s.querySelector('.vw-body'); var c=s.querySelector('.vw-chev');
+        if(w)w.style.display=open?'':'none'; if(c)c.textContent=open?'\u25BE':'\u25B8';});}
+      be.addEventListener('click',function(){setAll(true);});
+      bc.addEventListener('click',function(){setAll(false);});
+    }
+  }
+  setTimeout(build,700);
+});
+</script>
+</body></html>
