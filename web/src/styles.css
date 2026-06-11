@@ -363,3 +363,19 @@ button.ins-rail:hover { color: var(--ink); }
 .ins-gantt-bar { display: block; height: 100%; border-radius: 3px; }
 .ins-gantt-ms { text-align: right; font-variant-numeric: tabular-nums; opacity: .8; }
 .ins-gantt-total { margin-top: 8px; font-size: 11px; opacity: .85; }
+
+/* Supplier fan-out */
+.ins-fan-call { margin: 10px 0; padding-bottom: 8px; border-bottom: 1px solid var(--term-line, #2a2a2a); }
+.ins-fan-tool { font-size: 12px; margin-bottom: 6px; }
+.ins-fan-lit { display: flex; flex-wrap: wrap; gap: 6px; }
+.ins-fan-chip { font-size: 11px; border-radius: 7px; padding: 3px 8px; border: 1px solid var(--term-line, #2a2a2a); }
+.ins-fan-chip.lit { background: rgba(127,176,105,.12); border-color: var(--term-green, #7fb069); }
+.ins-fan-chip.lit.cred { background: rgba(214,163,92,.16); border-color: var(--term-amber, #d6a35c); }
+.ins-fan-count { font-variant-numeric: tabular-nums; opacity: .75; margin-left: 2px; }
+.ins-fan-more { margin: 12px 0 6px; font-size: 10px; letter-spacing: .06em; text-transform: uppercase; opacity: .7; }
+.ins-fan-catalog { display: flex; flex-wrap: wrap; gap: 6px; }
+.ins-fan-chip.dim { opacity: .6; }
+.ins-fan-chip.dim summary { cursor: pointer; list-style: none; }
+.ins-fan-chip.dim[open] { opacity: .9; flex-basis: 100%; }
+.ins-fan-cat { opacity: .6; margin-left: 4px; }
+.ins-fan-disc { margin-top: 8px; font-style: italic; opacity: .7; }
