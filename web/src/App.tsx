@@ -488,11 +488,12 @@ export function App() {
               reelView={reelView}
               reelMode={mode === "auto"}
               dataSource={dataSource}
+              onRequestAccess={mode === "auto" ? undefined : () => setShowProForm(true)}
             />
           ) : (
             <>
               <ChatView messages={chatMessages} tools={tools} onSend={send} busy={busy} presets={presets} geoCity={geoCity} />
-              <FolioPanel folio={folio} advisor={advisor} />
+              <FolioPanel folio={folio} advisor={advisor} onRequestAccess={mode === "auto" ? undefined : () => setShowProForm(true)} />
             </>
           )}
           {skin === "claude" && mode === "auto" && reelPhase === "intro" && (

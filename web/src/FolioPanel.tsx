@@ -53,9 +53,10 @@ function HotelCard({ h, advisor }: { h: FolioHotel; advisor: boolean }) {
   );
 }
 
-export function FolioPanel({ folio, advisor }: { folio: FolioData | null; advisor: boolean }) {
+export function FolioPanel({ folio, advisor, onRequestAccess }: { folio: FolioData | null; advisor: boolean; onRequestAccess?: () => void }) {
   if (!folio) return <aside className="folio empty">Your trip-folio will build here as Voygent works…</aside>;
   const commTotal = advisor ? commissionTotal(folio.hotels) : null;
+  const built = folio.flights.length > 0 || folio.hotels.length > 0;
   return (
     <aside className="folio">
       <h2 className="folio-title"><SplitFlap text={folio.title} as="span" /></h2>
@@ -101,6 +102,12 @@ export function FolioPanel({ folio, advisor }: { folio: FolioData | null; adviso
               <strong>{inc.title}:</strong> {inc.body}
             </div>
           ))}
+        </section>
+      )}
+      {onRequestAccess && built && (
+        <section className="folio-cta">
+          <p className="folio-cta-lead">This folio is your proposal, built live. Want to build real trips with live supplier data?</p>
+          <button type="button" className="folio-cta-btn" onClick={onRequestAccess}>Get an auth code for a live demo →</button>
         </section>
       )}
     </aside>

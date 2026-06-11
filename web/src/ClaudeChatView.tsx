@@ -94,7 +94,7 @@ function WorkingIndicator({ live }: { live: boolean }) {
   );
 }
 
-function FolioArtifact({ folio, advisor, edits, threads, showSend, sent }: { folio: FolioData; advisor: boolean; edits: ReelEditMarker[]; threads: ReelThread[]; showSend?: boolean; sent?: boolean }) {
+function FolioArtifact({ folio, advisor, edits, threads, showSend, sent, onRequestAccess }: { folio: FolioData; advisor: boolean; edits: ReelEditMarker[]; threads: ReelThread[]; showSend?: boolean; sent?: boolean; onRequestAccess?: () => void }) {
   const commTotal = advisor ? commissionTotal(folio.hotels) : null;
   // A title-only card (trip created, nothing promoted yet) is just noise inline.
   const hasDays = !!folio.days && folio.days.length > 0;
@@ -225,6 +225,12 @@ function FolioArtifact({ folio, advisor, edits, threads, showSend, sent }: { fol
           </span>
         </div>
       )}
+      {onRequestAccess && (
+        <div className="cl-folio-cta">
+          <p className="cl-folio-cta-lead">This folio is your proposal, built live. Want to build real trips with live supplier data?</p>
+          <button type="button" className="cl-folio-cta-btn" onClick={onRequestAccess}>Get an auth code for a live demo →</button>
+        </div>
+      )}
     </div>
   );
 }
@@ -252,7 +258,7 @@ function Welcome({ presets, geoCity, onSend, busy, postReel }: { presets: Preset
 }
 
 export function ClaudeChatView(
-  { items, folio, onSend, onPick, busy, presets, geoCity, advisor, mobileView, onMobileView, onToggleDemo, demoLabel, engHasContent, postReel, reelView, reelMode, dataSource }:
+  { items, folio, onSend, onPick, busy, presets, geoCity, advisor, mobileView, onMobileView, onToggleDemo, demoLabel, engHasContent, postReel, reelView, reelMode, dataSource, onRequestAccess }:
   {
     items: TimelineItem[];
     folio: FolioData | null;
@@ -271,6 +277,7 @@ export function ClaudeChatView(
     reelView: ReelViewState;
     reelMode?: boolean;   // reel playback (mode=auto) — shows the folio "Send to client" affordance
     dataSource?: "live" | "sample" | null;  // honesty tag: live supplier data vs curated sample fixtures
+    onRequestAccess?: () => void;  // live (non-reel) only: folio CTA → request a live-demo auth code
   },
 ) {
   const [input, setInput] = useState("");
@@ -342,7 +349,7 @@ export function ClaudeChatView(
             return busy && i === lastIdx ? <WorkingIndicator key={i} live={!reelMode} /> : null;
           })}
           {showTailWorking && <WorkingIndicator live={!reelMode} />}
-          {folio && <div className={`cl-folio-inline${reelMode ? " in-reel" : ""}`}><FolioArtifact folio={folio} advisor={advisor} edits={reelView.edits} threads={reelView.threads} showSend={reelMode} sent={!!reelView.handoff?.sent} /></div>}
+          {folio && <div className={`cl-folio-inline${reelMode ? " in-reel" : ""}`}><FolioArtifact folio={folio} advisor={advisor} edits={reelView.edits} threads={reelView.threads} showSend={reelMode} sent={!!reelView.handoff?.sent} onRequestAccess={onRequestAccess} /></div>}
           <div ref={endRef} />
         </div>
       </div>
@@ -353,7 +360,7 @@ export function ClaudeChatView(
             <button type="button" className="cl-sheet-close" onClick={() => onMobileView("chat")} aria-label="Back to chat">✕ chat</button>
           </div>
           <div className="cl-sheet-body">
-            {folio ? <FolioArtifact folio={folio} advisor={advisor} edits={reelView.edits} threads={reelView.threads} showSend={reelMode} sent={!!reelView.handoff?.sent} /> : <p className="cl-day-desc">Your trip folio will build here as Voygent works.</p>}
+            {folio ? <FolioArtifact folio={folio} advisor={advisor} edits={reelView.edits} threads={reelView.threads} showSend={reelMode} sent={!!reelView.handoff?.sent} onRequestAccess={onRequestAccess} /> : <p className="cl-day-desc">Your trip folio will build here as Voygent works.</p>}
           </div>
         </div>
       )}

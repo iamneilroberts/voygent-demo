@@ -81,7 +81,7 @@ database_id = "7825123d-3e56-423b-b2da-c5add703b252"
 APP_ORIGIN = "https://demo.voygent.ai"
 # NEIL_NOTIFY_EMAIL — recipient for pro-access request notifications (POST /pro-request).
 #   Unset ⇒ requests are still captured in D1; only the heads-up email is skipped.
-# NEIL_NOTIFY_EMAIL = "dneilroberts@gmail.com"
+NEIL_NOTIFY_EMAIL = "dneilroberts@gmail.com"
 # ONBOARD_IP_DAILY_CAP — max self-serve public codes one IP can mint per UTC day (default 3).
 # ONBOARD_IP_DAILY_CAP = "3"
 # DEMO_PUBLIC_LIVE_ENABLED — gate for the public live path (ENFORCED in
@@ -90,4 +90,7 @@ APP_ORIGIN = "https://demo.voygent.ai"
 #   VOYGENT_MCP_BEARER is confirmed credential-free (see the ⚠️ prerequisite above); then
 #   set it to open public live. Defense-in-depth — the credential-free bearer is still the
 #   primary isolation guarantee.
-# DEMO_PUBLIC_LIVE_ENABLED = "1"
+# ENABLED 2026-06-10 (demo-fix3, Neil's call) so the existing passcode demo keeps working post
+# auth-merge. ⚠️ PRE-PROMOTION TODO: confirm/swap VOYGENT_MCP_BEARER to a credential-free
+# identity before the demo URL is promoted — self-serve onboarding now opens public live.
+DEMO_PUBLIC_LIVE_ENABLED = "1"

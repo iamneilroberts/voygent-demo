@@ -379,3 +379,10 @@ button.ins-rail:hover { color: var(--ink); }
 .ins-fan-chip.dim[open] { opacity: .9; flex-basis: 100%; }
 .ins-fan-cat { opacity: .6; margin-left: 4px; }
 .ins-fan-disc { margin-top: 8px; font-style: italic; opacity: .7; }
+
+/* Folio "get a live-demo auth code" CTA (claude + board skins) */
+.folio-cta, .cl-folio-cta { margin-top: 14px; padding: 14px 12px; border-top: 1px solid var(--cl-line, #e8e6dd); text-align: center; }
+.folio-cta-lead, .cl-folio-cta-lead { font-size: 13px; color: var(--cl-muted, #6b6a64); margin: 0 0 10px; line-height: 1.4; }
+.folio-cta-btn, .cl-folio-cta-btn { display: inline-block; padding: 9px 16px; border: 0; border-radius: 8px;
+  background: var(--cl-accent, #c96442); color: var(--cl-accent-ink, #fff); font: inherit; font-weight: 600; cursor: pointer; }
+.folio-cta-btn:hover, .cl-folio-cta-btn:hover { filter: brightness(1.06); }
