@@ -559,7 +559,11 @@ export class SessionDO {
         // flight_search payload can roughly match its raw prod size — emitting a
         // "0 tokens saved" chip there would read as a broken mechanism. The hotel
         // and flight_list distills stay comfortably positive.
-        const saved = m ? meta!.rawTokensEst - m.modelFacingTokens : 0;
+        // Guard on `meta`, not just `m`: an intercepted tool can produce a measurement
+        // whose `tool` isn't one of the four distill-measured searches (e.g. excursion_search),
+        // so `meta` is undefined. Reading `.rawTokensEst` off it threw and — because this runs
+        // inside the tool-call path — surfaced as a bogus `ERROR:` result for the tool itself.
+        const saved = m && meta ? meta.rawTokensEst - m.modelFacingTokens : 0;
         if (m && meta && saved > 0) {
           emit({
             type: "inspector", kind: "savings", exchangeId, mechanism: "searchDistill",
