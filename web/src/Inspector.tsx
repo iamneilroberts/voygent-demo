@@ -5,7 +5,7 @@ import { costWeightedTokens, cacheHitRate } from "./lib/usage";
 import { MODEL_LABELS, PHASES, PHASE_LABELS, type ModelId, type PhaseModelMap, type Phase } from "../../shared/models";
 import type { SelectorMode } from "./lib/model";
 import type { StatsResponse } from "../../shared/events";
-import { StoreOpsWidget, type InsStore } from "./StoreOpsWidget";
+import { type InsStore } from "./StoreOpsWidget";
 import { storeOpsForTool } from "../../worker/storeops";
 import { buildStats, railStats, deepDiveLinks } from "./lib/inspector-stats";
 import { DRILLS, drillForStat, pipelineDrill, type DrillContext, type DrillId } from "./lib/inspector-drills";
@@ -71,8 +71,6 @@ const STAGES: { key: string; label: string; tools: string[] }[] = [
   { key: "render",  label: "Render",  tools: [] },
 ];
 
-function fmt(n: number): string { return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n); }
-function usd(n: number): string { return `$${n < 0.01 ? n.toFixed(4) : n.toFixed(2)}`; }
 function safeParse(s: string): unknown { try { return JSON.parse(s); } catch { return s; } }
 
 function ToolRow({ t }: { t: InsTool }) {
@@ -87,30 +85,6 @@ function ToolRow({ t }: { t: InsTool }) {
         <pre className="ins-raw">{JSON.stringify({ args: t.args, result: safeParse(t.result) }, null, 2)}</pre>
       )}
     </div>
-  );
-}
-
-// Trip-Integrity checks. Renders nothing until a validation event fires, so the
-// live (non-replay) path never shows an empty/implied-pass panel.
-function ValidationSection({ items }: { items: InsValidation[] }) {
-  if (items.length === 0) return null;
-  const glyph = (s: InsValidation["status"]) => (s === "fail" ? "✗" : s === "repaired" ? "↻" : "✓");
-  return (
-    <section className="ins-region ins-validation">
-      <h3>Trip integrity</h3>
-      <ul className="ins-checks">
-        {items.map((v, i) => (
-          <li key={i} className={`ins-check ins-check-${v.status}`}>
-            <span className="ins-check-glyph" aria-hidden="true">{glyph(v.status)}</span>
-            <span className="ins-check-main">
-              <span className="ins-check-label">{v.label}</span>
-              {v.detail && <span className="ins-check-detail">{v.detail}</span>}
-            </span>
-            {v.status === "repaired" && <span className="ins-check-tag">repaired</span>}
-          </li>
-        ))}
-      </ul>
-    </section>
   );
 }
 
@@ -147,7 +121,6 @@ export function Inspector(
     // Empty until a hotel search runs; drives the Supplier Fan-Out drill.
     fanouts?: InsFanout[] },
 ) {
-  const [showCost, setShowCost] = useState(true);  // cost shown by default (Neil 2026-06-07)
   // The tool log is a fixed-height scroll pane (so it never pushes the sections
   // below it down the page). Keep the newest call in view as the stream lands.
   const timelineRef = useRef<HTMLDivElement>(null);
@@ -242,6 +215,16 @@ export function Inspector(
   const drillCtx: DrillContext = {
     tools, turns, summaries, savings, fanout: fans, phases: phases ?? [],
     savedHeadline, cost, actualCost, actualByModel,
+    // Relocated detail (was always-visible; now read by the drills):
+    tokensIn, tokensOut, cacheRead,
+    sessionTokens, hitRate, proWindow,
+    routedModels,
+    perTurnDelta, perTurnTotal, templateMax, turnsTotal,
+    overhead: ov,
+    stores: stores ?? [],
+    validations: vals,
+    stats: stats ?? null,
+    exposedToolCount: latest?.exposedToolCount, fullToolCount: latest?.fullToolCount,
   };
 
   // ---- Resting states: idle (dim, pre-trip) and peek (LIVE skinny rail) ----
@@ -316,12 +299,32 @@ export function Inspector(
               <div key={st.key} className="ins-stat" data-stat={st.key}>{body}</div>
             );
           })}
-          {valTotal > 0 && (
-            <div className="ins-stat" data-stat="validation">
-              <span className={`ins-stat-n ${valFail ? "ins-stat-warn" : "ins-stat-ok"}`}>{valOk}/{valTotal}</span>
-              <span className="ins-stat-l">validation</span>
-            </div>
-          )}
+          {valTotal > 0 && (() => {
+            // The validation tile is a special (non-registry) stat — its value/tone come
+            // from the validations prop, not buildStats — but it drills into the integrity
+            // view like any other tile.
+            const drill = drillForStat("validation");
+            const active = drill && openDrill === drill.id;
+            const body = (
+              <>
+                <span className={`ins-stat-n ${valFail ? "ins-stat-warn" : "ins-stat-ok"}`}>{valOk}/{valTotal}</span>
+                <span className="ins-stat-l">validation</span>
+              </>
+            );
+            return drill ? (
+              <button
+                className={`ins-stat ins-stat-drill ${active ? "active" : ""}`}
+                data-stat="validation"
+                aria-expanded={active}
+                onClick={() => setOpenDrill(active ? null : drill.id)}
+              >
+                {body}
+                <span className="ins-stat-caret" aria-hidden="true">{active ? "▾" : "▸"}</span>
+              </button>
+            ) : (
+              <div className="ins-stat" data-stat="validation">{body}</div>
+            );
+          })()}
         </div>
         {openDrill && (() => {
           // Only stat-triggered drills render here; pipeline drills (the waterfall) have their
@@ -395,106 +398,14 @@ export function Inspector(
           );
         })()}
 
-        {/* Stats sit directly under the pipe (at the top of the section); the tool
-            log scrolls in its own fixed pane below so it never pushes these down. */}
-        <div className="ins-scoreboard">
-          <div>{turns.length} turns · {tools.length} tool calls</div>
-          {latest && <div>{latest.exposedToolCount} of {latest.fullToolCount} tools exposed</div>}
-          <div>{fmt(tokensIn)} in · {fmt(tokensOut)} out · {fmt(cacheRead)} cache-read</div>
-          {hitRate != null && (
-            <div className="ins-hitrate">
-              cache hit rate <b>{(hitRate * 100).toFixed(0)}%</b> · ≈{fmt(sessionTokens)} cost-weighted tokens
-            </div>
-          )}
-        </div>
-
+        {/* The tool-call log is the only always-on detail under the pipe; all other
+            session telemetry (cost, savings, overhead, phase trail, stores, integrity,
+            cross-session) now lives behind the summary tiles as drill content. */}
         <div className="ins-timeline" ref={timelineRef}>
           {tools.length === 0 ? <p className="ins-empty">No tool calls yet — start planning a trip.</p>
             : tools.map((t, i) => <ToolRow key={i} t={t} />)}
         </div>
-
-        <div className="ins-cost">
-          <button className="ins-toggle" onClick={() => setShowCost((s) => !s)}>
-            {showCost ? "hide $" : "show $"}
-          </button>
-          {showCost && latest && (
-            <div className="ins-cost-rows">
-              <div className="ins-actualcost">Observed routed cost <b>{usd(actualCost)}</b>{routedModels.length > 1
-                ? ` — ${routedModels.map((m) => `${usd(actualByModel[m])} ${MODEL_LABELS[m as ModelId] ?? m}`).join(" + ")}` : ""}</div>
-              <div className="ins-note">Counterfactual estimate — same usage priced as one tier: <b>{usd(cost.haiku)}</b> haiku · <b>{usd(cost.sonnet)}</b> sonnet · <b>{usd(cost.opus)}</b> opus</div>
-              {routedModels.length > 1 && <div className="ins-note">Routing splits models, so caches don't carry across the switch — cache writes are re-paid; the actual figure above already reflects that.</div>}
-            </div>
-          )}
-          {proWindow != null && sessionTokens > 0 && (
-            <div className="ins-tierline">
-              This trip ≈ <b>{((sessionTokens / proWindow) * 100).toFixed(sessionTokens / proWindow < 0.01 ? 2 : 0)}%</b> of a Pro 5-hr window (cost-weighted) ·{" "}
-              <a href="/info/cost-engineering" target="_blank" rel="noreferrer">how this is estimated →</a>
-            </div>
-          )}
-        </div>
-
-        <div className="ins-saved">
-          <h4>Context kept out of the model</h4>
-          <div className="ins-saved-total">≈ {fmt(savedHeadline)} tokens kept out of context</div>
-          <ul>
-            {savings.filter((s) => s.scope === "aggregate").map((s, i) => (
-              <li key={i}><b>{s.mechanism}</b> · {fmt(s.tokensSaved)} — {s.detail}</li>
-            ))}
-            {perTurnDelta > 0 && (
-              <li><b>toolCatalog</b> · ~{fmt(perTurnDelta)}/turn × {turnsTotal} turns = {fmt(perTurnTotal)} — fewer tool schemas sent each turn</li>
-            )}
-          </ul>
-          {templateMax > 0 && (
-            <div className="ins-note">Deterministic render estimate — ≈ {fmt(templateMax)} tokens the model never generated (folio is a server-side template render, counterfactual — not summed above).</div>
-          )}
-        </div>
-
-        <div className="ins-overhead">
-          <h4>Observer effect — the cost of measuring</h4>
-          <div>Added model tokens: <b>0</b> (inspector data is a side channel, never in context)</div>
-          {ov && <div>Inspector client payload: <b>{(ov.instrumentationBytes / 1024).toFixed(1)} KB</b></div>}
-          <div>Instrumentation CPU: <b>{!ov ? "—" : (ov.instrumentationMs != null ? `${ov.instrumentationMs} ms` : "below timer resolution")}</b></div>
-        </div>
-
-        {phases && phases.length > 0 && (
-          <div className="ins-workflow">
-            <h4>Workflow engine</h4>
-            <div className="ins-phase-trail">
-              {phases.map((p, i) => (
-                <span key={i} className="ins-phase-step">{p.phase}{i < phases.length - 1 ? " → " : ""}</span>
-              ))}
-            </div>
-            <p className="ins-note">The server-side phase machine drives each step; the model executes one instruction at a time.</p>
-          </div>
-        )}
       </section>
-
-      <ValidationSection items={vals} />
-
-      <StoreOpsWidget stores={stores ?? []} />
-
-      {stats && stats.exchanges > 0 && (() => {
-        const split = (["haiku", "sonnet", "opus"] as const).filter((k) => stats.byModel[k] > 0);
-        return (
-          <section className="ins-region ins-allsessions">
-            <h3>Across all sessions</h3>
-            <p className="ins-note">Cumulative demo usage — every trip built here. The marginal-cost-≈-$0 flex, in real numbers.</p>
-            <div className="ins-scoreboard">
-              <div><b>{fmt(stats.trips)}</b> trips planned · <b>{fmt(stats.sessions)}</b> sessions · <b>{fmt(stats.exchanges)}</b> exchanges</div>
-              <div>≈ <b>{fmt(stats.totalSavedTokens)}</b> tokens kept out of context <span className="ins-note">(estimated)</span></div>
-              <div>
-                Total inference cost <b>{usd(stats.totalActualCostUsd)}</b>
-                {split.length > 1 && (
-                  <span className="ins-note"> — {split.map((k) => `${usd(stats.byModel[k])} ${k[0].toUpperCase()}${k.slice(1)}`).join(" + ")}</span>
-                )}
-                {stats.byModel.other > 0 && (
-                  <span className="ins-note"> · {usd(stats.byModel.other)} other</span>
-                )}
-              </div>
-            </div>
-          </section>
-        );
-      })()}
 
       {(() => {
         // Primary: deep dives tied to the stats actually shown this session (registry

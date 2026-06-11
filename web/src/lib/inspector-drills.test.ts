@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { funnelRows, costScenarios, ganttBars, fanoutGroups, litSupplierIds, type DrillContext } from "./inspector-drills";
+import { funnelRows, funnelAggregateRows, costScenarios, ganttBars, fanoutGroups, litSupplierIds, type DrillContext } from "./inspector-drills";
 import type { InsSavings, InsTool, InsFanout } from "../Inspector";
 
 function savings(partial: Partial<InsSavings>): InsSavings {
@@ -27,6 +27,24 @@ describe("funnelRows", () => {
       savings({ mechanism: "searchDistill", tool: "x" }), // no raw/slim
     ] } as unknown as DrillContext;
     expect(funnelRows(ctx)).toHaveLength(0);
+  });
+});
+
+describe("funnelAggregateRows", () => {
+  it("returns aggregate-scope savings, filtered to tokensSaved > 0 (kills the patch·0 wart)", () => {
+    const ctx = { savings: [
+      savings({ mechanism: "patch", scope: "aggregate", tokensSaved: 0 }),        // the wart
+      savings({ mechanism: "searchDistill", scope: "aggregate", tokensSaved: 852 }),
+      savings({ mechanism: "toolCatalog", scope: "perTurn", tokensSaved: 300 }),    // wrong scope
+    ] } as unknown as DrillContext;
+    const rows = funnelAggregateRows(ctx);
+    expect(rows).toHaveLength(1);
+    expect(rows[0]).toMatchObject({ mechanism: "searchDistill", tokensSaved: 852 });
+  });
+
+  it("empty when no aggregate savings have real tokens", () => {
+    const ctx = { savings: [savings({ mechanism: "patch", scope: "aggregate", tokensSaved: 0 })] } as unknown as DrillContext;
+    expect(funnelAggregateRows(ctx)).toEqual([]);
   });
 });
 

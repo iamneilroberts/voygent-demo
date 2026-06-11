@@ -1,9 +1,12 @@
 import type { ReactNode } from "react";
-import type { InsTool, InsTurn, InsSummary, InsSavings, InsFanout } from "../Inspector";
+import type { InsTool, InsTurn, InsSummary, InsSavings, InsFanout, InsValidation, InsOverhead } from "../Inspector";
 import { SUPPLIER_CATALOG, SUPPLIER_DISCLAIMER } from "../inspector-data";
+import { StoreOpsWidget, type InsStore } from "../StoreOpsWidget";
+import { MODEL_LABELS, type ModelId } from "../../../shared/models";
+import type { StatsResponse } from "../../../shared/events";
 
-// Everything a drill render fn might need. Built by Inspector.tsx from the
-// derivations it already computes above its render branch (see Task 5).
+// Everything a drill render fn might need. Inspector is the single computation site;
+// the drills are pure presentation — they read these pre-computed values, never recompute.
 export interface DrillContext {
   tools: InsTool[];
   turns: InsTurn[];
@@ -15,9 +18,19 @@ export interface DrillContext {
   cost: { haiku: number; sonnet: number; opus: number };   // single-tier counterfactual
   actualCost: number;                                      // measured routed spend
   actualByModel: Record<string, number>;
+  // Relocated panel detail (was always-visible; now lives behind the tiles):
+  tokensIn: number; tokensOut: number; cacheRead: number;
+  sessionTokens: number; hitRate: number | null; proWindow: number | null;
+  routedModels: string[];
+  perTurnDelta: number; perTurnTotal: number; templateMax: number; turnsTotal: number;
+  overhead?: InsOverhead;
+  stores: InsStore[];
+  validations: InsValidation[];
+  stats: StatsResponse | null;
+  exposedToolCount?: number; fullToolCount?: number;
 }
 
-export type DrillId = "funnel" | "costSim" | "waterfall" | "fanout";
+export type DrillId = "funnel" | "costSim" | "waterfall" | "fanout" | "stores" | "integrity";
 export type DrillTrigger = { kind: "stat"; statKey: string } | { kind: "pipeline" };
 
 export interface Drill {
@@ -43,6 +56,12 @@ export function funnelRows(ctx: DrillContext): FunnelRow[] {
   return out;
 }
 
+/** Aggregate-scope "kept out" slices (patch / searchDistill / template, etc.), filtered to
+ *  real savings so a 0-token event never renders a "patch · 0" wart. */
+export function funnelAggregateRows(ctx: DrillContext): InsSavings[] {
+  return ctx.savings.filter((s) => s.scope === "aggregate" && s.tokensSaved > 0);
+}
+
 function fmtTok(n: number): string { return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n); }
 
 // Map a replay-measurement tool name (camelCase) to the client tool-call name (snake_case),
@@ -54,15 +73,18 @@ const MEASURE_TO_TOOLNAME: Record<string, string> = {
 
 function FunnelView({ ctx }: { ctx: DrillContext }) {
   const rows = funnelRows(ctx);
-  if (rows.length === 0) {
-    return <p className="ins-note">Per-search distill detail appears once a credentialed search runs.</p>;
+  const aggregate = funnelAggregateRows(ctx);
+  if (rows.length === 0 && ctx.savedHeadline <= 0 && aggregate.length === 0) {
+    return <p className="ins-note">Context-economics detail appears once the model starts working.</p>;
   }
   return (
     <div className="ins-funnel">
-      <p className="ins-note">
-        Each supplier search returns a large raw payload; the model only ever sees the slim,
-        distilled version. The eliminated slice never enters context.
-      </p>
+      {rows.length > 0 && (
+        <p className="ins-note">
+          Each supplier search returns a large raw payload; the model only ever sees the slim,
+          distilled version. The eliminated slice never enters context.
+        </p>
+      )}
       {rows.map((r, i) => {
         const slimFrac = r.rawTokens > 0 ? r.slimTokens / r.rawTokens : 1;
         const slim = ctx.tools.filter((t) => t.name === MEASURE_TO_TOOLNAME[r.tool]).slice(-1)[0];
@@ -84,6 +106,25 @@ function FunnelView({ ctx }: { ctx: DrillContext }) {
           </div>
         );
       })}
+      {/* Aggregate "kept out" total + slices (relocated from the old always-visible ins-saved). */}
+      <div className="ins-funnel-agg">
+        <div className="ins-funnel-aggtotal">≈ {fmtTok(ctx.savedHeadline)} tokens kept out of context</div>
+        <ul>
+          {aggregate.map((s, i) => (
+            <li key={i}><b>{s.mechanism}</b> · {fmtTok(s.tokensSaved)} — {s.detail}</li>
+          ))}
+          {ctx.perTurnDelta > 0 && (
+            <li><b>toolCatalog</b> · ~{fmtTok(ctx.perTurnDelta)}/turn × {ctx.turnsTotal} turns = {fmtTok(ctx.perTurnTotal)} — fewer tool schemas sent each turn</li>
+          )}
+        </ul>
+        {ctx.templateMax > 0 && (
+          <p className="ins-note">Deterministic render estimate — ≈ {fmtTok(ctx.templateMax)} tokens the model never generated (folio is a server-side template render, counterfactual — not summed above).</p>
+        )}
+        <p className="ins-note ins-funnel-tokens">
+          {fmtTok(ctx.tokensIn)} in · {fmtTok(ctx.tokensOut)} out · {fmtTok(ctx.cacheRead)} cache-read
+          {ctx.hitRate != null ? ` · cache hit ${Math.round(ctx.hitRate * 100)}%` : ""}
+        </p>
+      </div>
     </div>
   );
 }
@@ -127,6 +168,44 @@ function CostSimView({ ctx }: { ctx: DrillContext }) {
           <span className="ins-costsim-usd">{usd(r.usd)}{!r.actual && r.mult > 1 ? ` · ${r.mult.toFixed(1)}×` : ""}</span>
         </div>
       ))}
+      {ctx.routedModels.length > 1 && (
+        <>
+          <p className="ins-note">Routed across: {ctx.routedModels.map((m) => `${usd(ctx.actualByModel[m])} ${MODEL_LABELS[m as ModelId] ?? m}`).join(" + ")}.</p>
+          <p className="ins-note">Routing splits models, so caches don't carry across the switch — cache writes are re-paid; the actual figure above already reflects that.</p>
+        </>
+      )}
+      {ctx.proWindow != null && ctx.sessionTokens > 0 && (
+        <p className="ins-note ins-tierline">
+          This trip ≈ <b>{((ctx.sessionTokens / ctx.proWindow) * 100).toFixed(ctx.sessionTokens / ctx.proWindow < 0.01 ? 2 : 0)}%</b> of a Pro 5-hr window (cost-weighted) ·{" "}
+          <a href="/info/cost-engineering" target="_blank" rel="noreferrer">how this is estimated →</a>
+        </p>
+      )}
+      <CrossSessionBlock stats={ctx.stats} />
+    </div>
+  );
+}
+
+/** Cumulative cross-session aggregates (public). Renders nothing until the demo has history. */
+function CrossSessionBlock({ stats }: { stats: StatsResponse | null }) {
+  if (!stats || stats.exchanges <= 0) return null;
+  const split = (["haiku", "sonnet", "opus"] as const).filter((k) => stats.byModel[k] > 0);
+  return (
+    <div className="ins-allsessions">
+      <h5>Across all sessions</h5>
+      <p className="ins-note">Cumulative demo usage — every trip built here. The marginal-cost-≈-$0 flex, in real numbers.</p>
+      <div className="ins-scoreboard">
+        <div><b>{fmtTok(stats.trips)}</b> trips planned · <b>{fmtTok(stats.sessions)}</b> sessions · <b>{fmtTok(stats.exchanges)}</b> exchanges</div>
+        <div>≈ <b>{fmtTok(stats.totalSavedTokens)}</b> tokens kept out of context <span className="ins-note">(estimated)</span></div>
+        <div>
+          Total inference cost <b>{usd(stats.totalActualCostUsd)}</b>
+          {split.length > 1 && (
+            <span className="ins-note"> — {split.map((k) => `${usd(stats.byModel[k])} ${k[0].toUpperCase()}${k.slice(1)}`).join(" + ")}</span>
+          )}
+          {stats.byModel.other > 0 && (
+            <span className="ins-note"> · {usd(stats.byModel.other)} other</span>
+          )}
+        </div>
+      </div>
     </div>
   );
 }
@@ -177,8 +256,10 @@ function WaterfallView({ ctx }: { ctx: DrillContext }) {
   if (bars.length === 0) {
     return <p className="ins-note">The critical path appears once tool calls run.</p>;
   }
+  const ov = ctx.overhead;
   return (
     <div className="ins-gantt">
+      <div className="ins-gantt-head">{ctx.turnsTotal} turns · {ctx.tools.length} tool calls</div>
       <p className="ins-note">
         Every tool call on this run, laid end-to-end and colored by orchestration stage. We
         record per-call durations (not wall-clock timestamps), so this is a sequential view —
@@ -195,6 +276,25 @@ function WaterfallView({ ctx }: { ctx: DrillContext }) {
         </div>
       ))}
       <div className="ins-gantt-total">total tool time <b>{ms(total)}</b></div>
+
+      {ctx.phases.length > 0 && (
+        <div className="ins-workflow">
+          <h5>Workflow engine</h5>
+          <div className="ins-phase-trail">
+            {ctx.phases.map((p, i) => (
+              <span key={i} className="ins-phase-step">{p.phase}{i < ctx.phases.length - 1 ? " → " : ""}</span>
+            ))}
+          </div>
+          <p className="ins-note">The server-side phase machine drives each step; the model executes one instruction at a time.</p>
+        </div>
+      )}
+
+      <div className="ins-overhead">
+        <h5>Observer effect — the cost of measuring</h5>
+        <div>Added model tokens: <b>0</b> (inspector data is a side channel, never in context)</div>
+        {ov && <div>Inspector client payload: <b>{(ov.instrumentationBytes / 1024).toFixed(1)} KB</b></div>}
+        <div>Instrumentation CPU: <b>{!ov ? "—" : (ov.instrumentationMs != null ? `${ov.instrumentationMs} ms` : "below timer resolution")}</b></div>
+      </div>
     </div>
   );
 }
@@ -257,6 +357,41 @@ function FanoutView({ ctx }: { ctx: DrillContext }) {
   );
 }
 
+// ---- View 5: Data-store operations (projected production KV/D1) ----
+
+function StoresView({ ctx }: { ctx: DrillContext }) {
+  if (ctx.stores.length === 0) {
+    return <p className="ins-note">Projected KV/D1 ops appear once the session mutates a store (a save or a patch).</p>;
+  }
+  return <StoreOpsWidget stores={ctx.stores} />;
+}
+
+// ---- View 6: Trip integrity (server-side validation checks) ----
+// Inlined here (not imported from Inspector) to keep the drill module free of a
+// runtime cycle back into Inspector.tsx — it's the same ~15-line checks list.
+
+function IntegrityView({ ctx }: { ctx: DrillContext }) {
+  const items = ctx.validations;
+  if (items.length === 0) {
+    return <p className="ins-note">Trip-integrity checks appear once the system validates the trip (after the first build step).</p>;
+  }
+  const glyph = (s: InsValidation["status"]) => (s === "fail" ? "✗" : s === "repaired" ? "↻" : "✓");
+  return (
+    <ul className="ins-checks">
+      {items.map((v, i) => (
+        <li key={i} className={`ins-check ins-check-${v.status}`}>
+          <span className="ins-check-glyph" aria-hidden="true">{glyph(v.status)}</span>
+          <span className="ins-check-main">
+            <span className="ins-check-label">{v.label}</span>
+            {v.detail && <span className="ins-check-detail">{v.detail}</span>}
+          </span>
+          {v.status === "repaired" && <span className="ins-check-tag">repaired</span>}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export const DRILLS: Drill[] = [
   { id: "funnel", title: "Token elimination funnel", trigger: { kind: "stat", statKey: "contextKeptOut" },
     render: (ctx) => <FunnelView ctx={ctx} /> },
@@ -266,6 +401,10 @@ export const DRILLS: Drill[] = [
     render: (ctx) => <WaterfallView ctx={ctx} /> },
   { id: "fanout", title: "Supplier fan-out", trigger: { kind: "stat", statKey: "suppliersQueried" },
     render: (ctx) => <FanoutView ctx={ctx} /> },
+  { id: "stores", title: "Data-store operations", trigger: { kind: "stat", statKey: "persistedWrites" },
+    render: (ctx) => <StoresView ctx={ctx} /> },
+  { id: "integrity", title: "Trip integrity", trigger: { kind: "stat", statKey: "validation" },
+    render: (ctx) => <IntegrityView ctx={ctx} /> },
 ];
 
 export function drillForStat(statKey: string): Drill | undefined {
