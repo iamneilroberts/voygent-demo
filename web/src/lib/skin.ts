@@ -14,10 +14,17 @@ export function normalizeSkin(raw: string | null | undefined): SkinId {
   return (SKIN_IDS as readonly string[]).includes(raw ?? "") ? (raw as SkinId) : DEFAULT_SKIN;
 }
 
+// Matches the @media (max-width: 760px) breakpoint in styles.css/skin-claude.css.
+export const MOBILE_BREAKPOINT_PX = 760;
+
 // Pure precedence logic (unit-tested): an explicit, KNOWN ?skin= param wins;
-// an unknown/absent param falls back to the stored value, then the default.
-export function resolveSkin(param: string | null | undefined, stored: string | null | undefined): SkinId {
+// on small screens the claude skin is forced next (the board skin has no real
+// mobile layout — header/split-flap/Inspector all overflow a phone, so a stored
+// "board" preference is deliberately ignored there; ?skin=board is the escape
+// hatch); otherwise the stored value, then the default.
+export function resolveSkin(param: string | null | undefined, stored: string | null | undefined, smallScreen = false): SkinId {
   if (param && (SKIN_IDS as readonly string[]).includes(param)) return param as SkinId;
+  if (smallScreen) return "claude";
   return normalizeSkin(stored);
 }
 
@@ -29,12 +36,14 @@ export function applySkin(id: SkinId): void {
   try { localStorage.setItem(SKIN_STORAGE_KEY, id); } catch { /* storage blocked — ignore */ }
 }
 
-// Resolve the initial skin from the URL + storage (?skin=claude is sticky:
-// it persists via the applySkin the caller performs on mount).
+// Resolve the initial skin from the URL + storage + viewport (?skin=claude is
+// sticky: it persists via the applySkin the caller performs on mount).
 export function resolveInitialSkin(): SkinId {
   let param: string | null = null;
   let stored: string | null = null;
+  let smallScreen = false;
   try { param = new URLSearchParams(window.location.search).get("skin"); } catch { /* no window/URL — default */ }
   try { stored = localStorage.getItem(SKIN_STORAGE_KEY); } catch { /* storage blocked — ignore */ }
-  return resolveSkin(param, stored);
+  try { smallScreen = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT_PX}px)`).matches; } catch { /* no matchMedia — assume desktop */ }
+  return resolveSkin(param, stored, smallScreen);
 }

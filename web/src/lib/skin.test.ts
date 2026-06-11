@@ -35,3 +35,23 @@ describe("resolveSkin precedence", () => {
     expect(resolveSkin(undefined, undefined)).toBe(DEFAULT_SKIN);
   });
 });
+
+describe("resolveSkin on small screens", () => {
+  it("defaults to claude on a small screen (board skin has no mobile pass)", () => {
+    expect(resolveSkin(null, null, true)).toBe("claude");
+  });
+  it("small screen overrides a stored board preference", () => {
+    expect(resolveSkin(null, "board", true)).toBe("claude");
+  });
+  it("an explicit URL param still wins on a small screen", () => {
+    expect(resolveSkin("board", null, true)).toBe("board");
+    expect(resolveSkin("board", "claude", true)).toBe("board");
+  });
+  it("an unknown param on a small screen falls through to claude", () => {
+    expect(resolveSkin("bogus", "board", true)).toBe("claude");
+  });
+  it("large screens keep the existing precedence", () => {
+    expect(resolveSkin(null, "board", false)).toBe("board");
+    expect(resolveSkin(null, null, false)).toBe(DEFAULT_SKIN);
+  });
+});
