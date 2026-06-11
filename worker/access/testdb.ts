@@ -5,12 +5,19 @@ import { dirname, join } from "node:path";
 import type { Db, BatchOp } from "./db";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-const MIGRATION = join(HERE, "../../migrations/0001_access_control.sql");
+// DEMO_DB migrations, in apply order. (0002_info_overrides targets a different
+// table set and 0002_stats_code_id targets STATS_DB — neither belongs here.)
+const MIGRATIONS = [
+  "0001_access_control.sql",
+  "0003_tier.sql",
+  "0004_onboarding.sql",
+  "0005_pro_requests.sql",
+].map((f) => join(HERE, "../../migrations", f));
 
 /** A faithful in-memory Db for tests — real SQLite, same dialect as D1. */
 export function makeTestDb(): Db {
   const sqlite = new Database(":memory:");
-  sqlite.exec(readFileSync(MIGRATION, "utf8"));
+  for (const m of MIGRATIONS) sqlite.exec(readFileSync(m, "utf8"));
   return {
     async run(sql, params = []) {
       const r = sqlite.prepare(sql).run(...(params as any[]));

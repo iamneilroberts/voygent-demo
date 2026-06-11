@@ -68,6 +68,17 @@ describe("statsRowFromSummary", () => {
     expect(at("actual_sonnet")).toBe(0);
     expect(at("actual_opus")).toBe(0);
   });
+
+  it("includes code_id as a bound column when present in ctx", () => {
+    const row = statsRowFromSummary(summary, { ...ctx, codeId: "self-1" }, 0, 0);
+    expect(STATS_COLUMNS).toContain("code_id");
+    expect(row[STATS_COLUMNS.indexOf("code_id")]).toBe("self-1");
+  });
+
+  it("binds null code_id when absent from ctx", () => {
+    const row = statsRowFromSummary(summary, ctx, 0, 0);
+    expect(row[STATS_COLUMNS.indexOf("code_id")]).toBeNull();
+  });
 });
 
 describe("shapeStats", () => {

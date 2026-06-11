@@ -24,6 +24,10 @@ export const ADMIN_HTML = `<!doctype html>
  <button>Mint</button>
 </form>
 <table id="t"><thead><tr><th>code</th><th>view</th><th>daily</th><th>lifetime</th><th>expires</th><th></th></tr></thead><tbody></tbody></table>
+<h2 style="font-size:1rem;margin-top:1.5rem">Who's using the demo</h2>
+<table id="d"><thead><tr><th>code</th><th>tier</th><th>who</th><th>role</th><th>source</th><th>runs</th><th>spent</th></tr></thead><tbody></tbody></table>
+<h2 style="font-size:1rem;margin-top:1.5rem">Pending pro requests</h2>
+<table id="pr"><thead><tr><th>who</th><th>company / role</th><th>use case</th><th>grant</th><th></th></tr></thead><tbody></tbody></table>
 <script>
 const fmt = m => '$' + (m/1e6).toFixed(2);
 async function load(){
@@ -45,13 +49,59 @@ async function load(){
    await fetch('/admin/codes/'+encodeURIComponent(b.dataset.id)+'/revoke',{method:'POST',headers:{'content-type':'application/json'}}); load();
  });
 }
+async function loadDash(){
+ const r = await fetch('/admin/dashboard'); const {rows} = await r.json();
+ const tb = document.querySelector('#d tbody'); tb.innerHTML='';
+ for(const c of rows){
+   const who = (c.owner_name||'') + (c.owner_email? ' <'+c.owner_email+'>':'');
+   const tr = document.createElement('tr'); if(c.revoked) tr.className='revoked';
+   tr.innerHTML = '<td><b>'+c.id+'</b></td>'
+     +'<td>'+(c.tier||'public')+'</td>'
+     +'<td>'+(who||'<span style="color:#888">—</span>')+'</td>'
+     +'<td>'+(c.role||'—')+'</td>'
+     +'<td>'+(c.source||'—')+'</td>'
+     +'<td>'+(c.runs||0)+'</td>'
+     +'<td>'+fmt(c.actual_micros_total||0)+'</td>';
+   tb.appendChild(tr);
+ }
+}
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+async function loadRequests(){
+ const r = await fetch('/admin/requests'); const {requests} = await r.json();
+ const tb = document.querySelector('#pr tbody'); tb.innerHTML='';
+ for(const q of requests){
+   const tr = document.createElement('tr');
+   tr.innerHTML = '<td><b>'+esc(q.name)+'</b><br><span style="color:#888">'+esc(q.email)+'</span></td>'
+     +'<td>'+esc(q.company||'—')+'<br><span style="color:#888">'+esc(q.role||'')+'</span></td>'
+     +'<td style="max-width:220px">'+esc(q.use_case||'—')+(q.note?'<br><span style="color:#888">'+esc(q.note)+'</span>':'')+'</td>'
+     +'<td><input class=gd type=number step=0.01 value=10 style="width:64px"> / '
+       +'<input class=gt type=number step=0.01 value=50 style="width:64px"></td>'
+     +'<td><button class=g data-id="'+esc(q.id)+'">grant</button> '
+       +'<button class=dn data-id="'+esc(q.id)+'" style="background:#c33">deny</button></td>';
+   tb.appendChild(tr);
+ }
+ tb.querySelectorAll('button.g').forEach(b=>b.onclick=async()=>{
+   const row=b.closest('tr');
+   const body={dailyUsd:+row.querySelector('.gd').value, totalUsd:+row.querySelector('.gt').value, expiresAt:null};
+   const r=await fetch('/admin/requests/'+encodeURIComponent(b.dataset.id)+'/grant',
+     {method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});
+   const j=await r.json();
+   if(j.link){ const n=document.querySelector('#new'); n.style.display='block'; n.textContent='Pro code (email sent — copy now): '+j.link; loadRequests(); load(); loadDash(); }
+   else alert('error: '+JSON.stringify(j));
+ });
+ tb.querySelectorAll('button.dn').forEach(b=>b.onclick=async()=>{
+   if(!confirm('Deny this request?')) return;
+   await fetch('/admin/requests/'+encodeURIComponent(b.dataset.id)+'/deny',{method:'POST',headers:{'content-type':'application/json'}});
+   loadRequests();
+ });
+}
 document.querySelector('#f').onsubmit = async e => {
  e.preventDefault(); const d=Object.fromEntries(new FormData(e.target));
  d.dailyUsd=+d.dailyUsd; d.totalUsd=+d.totalUsd;
  const r = await fetch('/admin/codes',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(d)});
  const j = await r.json();
- if(j.link){ const n=document.querySelector('#new'); n.style.display='block'; n.textContent='Invite link (copy now): '+j.link; e.target.reset(); load(); }
+ if(j.link){ const n=document.querySelector('#new'); n.style.display='block'; n.textContent='Invite link (copy now): '+j.link; e.target.reset(); load(); loadDash(); }
  else alert('error: '+JSON.stringify(j));
 };
-load();
+load(); loadDash(); loadRequests();
 </script></body></html>`;

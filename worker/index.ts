@@ -11,6 +11,8 @@ import { lookupByCode, admit, admissionReason } from "./access/codes";
 import { issueCookie, verifyCookie, newSid } from "./access/session";
 import { guardMutation, getCookieHeader, json, text } from "./access/http";
 import { handleAdmin, adminAuthed } from "./access/admin";
+import { handleOnboard } from "./access/onboard";
+import { handleProRequest } from "./access/pro-request-handler";
 
 interface Env {
   SESSION: DurableObjectNamespace;
@@ -29,6 +31,12 @@ interface Env {
   ADMIN_TOKEN?: string;
   APP_ORIGIN: string;
   EST_EXCHANGE_MICROS?: string;
+  // tier / onboarding / pro-access
+  VOYGENT_MCP_BEARER_PRO?: string;
+  RESEND_API_KEY?: string;
+  ONBOARD_IP_DAILY_CAP?: string;
+  NEIL_NOTIFY_EMAIL?: string;
+  DEMO_PUBLIC_LIVE_ENABLED?: string;
   __db?: Db; // test seam: inject an in-memory Db
 }
 
@@ -127,6 +135,16 @@ export default {
       return handleStats(req, env);
     }
 
+    // --- Self-serve onboarding (public tier) ---
+    if (url.pathname === "/onboard" && req.method === "POST") {
+      return handleOnboard(req, env, db);
+    }
+
+    // --- Pro-access request (lead capture; Neil vets & grants manually) ---
+    if (url.pathname === "/pro-request" && req.method === "POST") {
+      return handleProRequest(req, env, db);
+    }
+
     // --- Auth ---
     if (url.pathname === "/auth" && req.method === "POST") {
       const bad = guardMutation(req, env.APP_ORIGIN); if (bad) return bad;
@@ -134,12 +152,12 @@ export default {
       try { code = (await req.json<{ code?: string }>()).code ?? ""; } catch { /* uniform 401 below */ }
       const hit = code ? await lookupByCode(db, code, env.CODE_HASH_KEY, new Date().toISOString()) : null;
       if (!hit) return text("this code isn't valid", 401); // uniform — no oracle
-      const setCookie = await issueCookie({ sid: newSid(), codeId: hit.id }, env.SESSION_SIGN_KEY, COOKIE_TTL_SEC, secure);
-      return json({ ok: true, view: hit.view }, 200, { "set-cookie": setCookie });
+      const setCookie = await issueCookie({ sid: newSid(), codeId: hit.id, tier: hit.tier }, env.SESSION_SIGN_KEY, COOKIE_TTL_SEC, secure);
+      return json({ ok: true, view: hit.view, tier: hit.tier }, 200, { "set-cookie": setCookie });
     }
     if (url.pathname === "/auth/me" && req.method === "GET") {
       const claims = await verifyCookie(getCookieHeader(req), env.SESSION_SIGN_KEY);
-      return claims ? json({ ok: true }) : text("no session", 401);
+      return claims ? json({ ok: true, tier: claims.tier }) : text("no session", 401);
     }
 
     // --- Admin (Cloudflare Access in front; ADMIN_TOKEN fallback inside) ---
@@ -179,7 +197,7 @@ export default {
       const id = env.SESSION.idFromName(claims.sid);
       const forward = new Request(req.url, {
         method: "POST",
-        headers: { "content-type": "application/json", "x-code-id": claims.codeId, "x-est-micros": String(est) },
+        headers: { "content-type": "application/json", "x-code-id": claims.codeId, "x-code-tier": claims.tier, "x-est-micros": String(est) },
         body: req.body,
         // duplex is required in Node.js when forwarding a streaming body
         ...(req.body ? { duplex: "half" } : {}),

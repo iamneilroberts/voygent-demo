@@ -12,7 +12,15 @@ describe("session cookie", () => {
     expect(setCookie).toContain("SameSite=Lax");
     const value = setCookie.split(";")[0].split("=").slice(1).join("=");
     const claims = await verifyCookie(`${COOKIE_NAME}=${value}`, RING);
-    expect(claims).toEqual({ sid: "s1", codeId: "c1" });
+    expect(claims).toEqual({ sid: "s1", codeId: "c1", tier: "public" });
+  });
+
+  it("round-trips tier through issue/verify", async () => {
+    const setCookie = await issueCookie({ sid: "s1", codeId: "c1", tier: "pro" }, RING, 3600, true);
+    const value = setCookie.split(";")[0].split("=").slice(1).join("=");
+    const claims = await verifyCookie(`${COOKIE_NAME}=${value}`, RING);
+    expect(claims?.tier).toBe("pro");
+    expect(claims?.codeId).toBe("c1");
   });
 
   it("rejects tampered, wrong-key, and absent cookies", async () => {
@@ -43,7 +51,7 @@ describe("session cookie", () => {
     expect(setCookie).not.toContain("Secure");
     const value = setCookie.split(";")[0].split("=").slice(1).join("=");
     const claims = await verifyCookie(`${COOKIE_NAME_INSECURE}=${value}`, RING);
-    expect(claims).toEqual({ sid: "s1", codeId: "c1" });
+    expect(claims).toEqual({ sid: "s1", codeId: "c1", tier: "public" });
   });
 
   it("rejects a token with an empty sid", async () => {

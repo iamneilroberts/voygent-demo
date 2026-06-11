@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { streamChat, UnauthorizedError } from "./sse-client";
 import { Gate } from "./Gate";
-import { readCodeFromHash, authenticate, hasSession } from "./lib/gate";
+import { OnboardingForm } from "./OnboardingForm";
+import { ProAccessForm } from "./ProAccessForm";
+import { readCodeFromHash, authenticate, sessionInfo } from "./lib/gate";
+import { effectiveMode, gateOnGoLive, showPublicDisclaimer, type Tier } from "./lib/access";
 import { ChatView, type ChatMessage, type Preset } from "./ChatView";
 import { ClaudeChatView } from "./ClaudeChatView";
 import { FolioPanel } from "./FolioPanel";
@@ -56,6 +59,13 @@ export function App() {
   const [authed, setAuthed] = useState<boolean | null>(null); // null = checking
   const [pendingCode, setPendingCode] = useState("");
   const [expanded, setExpanded] = useState(false); // Inspector: false = live skinny rail, true = full panel
+  // The reel is public: unauthed visitors are NOT blocked. Auth is required only
+  // to cross into the live demo — that crossing flips showOnboard on (Phase A
+  // renders the existing Gate; Phase B swaps in the self-serve OnboardingForm).
+  const [showOnboard, setShowOnboard] = useState(false);
+  const [forceGate, setForceGate] = useState(false); // "already have a code?" → passcode entry
+  const [showProForm, setShowProForm] = useState(false); // "request pro access" → credentialed-access request form
+  const [tier, setTier] = useState<Tier | null>(null);
   const [skin, setSkin] = useState<SkinId>(() => {
     if (resolveInitialMode() === "auto") {
       // Auto mode always plays in the claude skin. Set data-skin synchronously
@@ -80,7 +90,7 @@ export function App() {
   // sessions" panel section. Fetched once on mount, like /presets.
   const [stats, setStats] = useState<StatsResponse | null>(null);
 
-  const [mode] = useState<ModeId>(resolveInitialMode);
+  const [mode, setMode] = useState<ModeId>(resolveInitialMode);
   // Advisor view: commission per item + trip total (real supplier data only).
   const [advisor, setAdvisor] = useState<boolean>(resolveInitialAdvisor);
   useEffect(() => { persistAdvisor(advisor); }, [advisor]);
@@ -237,9 +247,19 @@ export function App() {
       .catch(() => { /* section just stays hidden when stats are unavailable */ });
     const code = readCodeFromHash(window.location, window.history);
     (async () => {
-      if (code && (await authenticate(API_BASE, code))) { setAuthed(true); return; }
-      if (code) setPendingCode(code);
-      setAuthed(await hasSession(API_BASE));
+      let sess = false;
+      if (code) {
+        const r = await authenticate(API_BASE, code);
+        if (r.ok) { sess = true; setTier(r.tier); }
+        else { setPendingCode(code); }
+      }
+      if (!sess) {
+        const me = await sessionInfo(API_BASE);
+        sess = me.ok; setTier(me.tier);
+      }
+      setAuthed(sess);
+      // Unauthed visitors always land on the reel, even if localStorage persisted "live".
+      setMode((m) => effectiveMode(m, sess));
     })();
   }, []);
 
@@ -354,8 +374,11 @@ export function App() {
   function planYourOwn() { goLive(false); }
   function tryYourself() { goLive(true); }
 
-  // Switch to live mode via a clean reload (re-latches the session), optionally flagged post-reel.
-  function goLive(greet: boolean) {
+  // The actual live transition — a clean reload that re-latches the session.
+  // No session check here: callers either already gated (goLive) or just
+  // authenticated in the same tick (onboarding), where `authed` state is still
+  // stale-false so re-checking it would wrongly re-gate.
+  function enterLive(greet: boolean) {
     persistMode("live");
     try {
       const u = new URL(window.location.href);
@@ -363,6 +386,12 @@ export function App() {
       if (greet) u.searchParams.set("greet", "reel"); else u.searchParams.delete("greet");
       window.location.href = u.toString();
     } catch { /* no-op */ }
+  }
+
+  // Reel CTA → live. Crossing into live requires a session — show onboarding when absent.
+  function goLive(greet: boolean) {
+    if (gateOnGoLive(authed === true)) { setShowOnboard(true); return; }
+    enterLive(greet);
   }
 
   async function send(text: string) {
@@ -373,7 +402,7 @@ export function App() {
     try {
       await streamChat(API_BASE, text, (e) => { recorder?.recordEvent(e); applyEvent(e, claude); }, claude ? "boards" : undefined, { ...routingBody(modelMode, smartMap), faithful });
     } catch (err) {
-      if (err instanceof UnauthorizedError) { setAuthed(false); return; }
+      if (err instanceof UnauthorizedError) { setAuthed(false); setShowOnboard(true); return; }
       showError((err as Error).message);
     } finally {
       setBusy(false);
@@ -405,16 +434,38 @@ export function App() {
   }
   const demoLabel = mode === "auto" ? "● build your own" : "▶ watch the demo";
 
-  // access-control gate: block the app shell until a valid session exists.
+  // Reel is public — only block while we're still checking the session.
   if (authed === null) return <div style={{ margin: "12vh auto", textAlign: "center", color: "#888" }}>Loading…</div>;
-  if (!authed) return <Gate initialCode={pendingCode} onSubmit={async (c) => {
-    const ok = await authenticate(API_BASE, c);
-    if (ok) setAuthed(true);
-    return ok;
-  }} />;
+  // The gate appears only when the visitor crosses into the live demo without a
+  // session. Default to the self-serve onboarding form; "already have a code?"
+  // (forceGate) switches to the passcode entry.
+  // Pro-access request form — a full takeover reachable from the public-source
+  // banner (live UI) or from the onboarding form. Guard ahead of the normal render.
+  if (showProForm) return <ProAccessForm apiBase={API_BASE} onDone={() => setShowProForm(false)} />;
+
+  if (!authed && showOnboard) {
+    if (forceGate) return <Gate initialCode={pendingCode} onSubmit={async (c) => {
+      const r = await authenticate(API_BASE, c);
+      if (r.ok) { setAuthed(true); setTier(r.tier); setShowOnboard(false); setForceGate(false); }
+      return r.ok;
+    }} />;
+    return <OnboardingForm
+      apiBase={API_BASE}
+      onAuthed={(t) => { setAuthed(true); setTier(t); setShowOnboard(false); enterLive(true); }}
+      onHaveCode={() => setForceGate(true)}
+      onWantPro={() => setShowProForm(true)}
+    />;
+  }
 
   return (
     <div className="app">
+      {showPublicDisclaimer(tier, mode) && (
+        <div className="public-source-banner" role="note"
+          style={{ padding: ".5rem 1rem", background: "#fff7e6", borderBottom: "1px solid #f0d9a8", fontSize: ".85rem", textAlign: "center" }}>
+          Results are from public sources.{" "}
+          <a href="#" onClick={(e) => { e.preventDefault(); setShowProForm(true); }}>Request pro access →</a>
+        </div>
+      )}
       {skin === "board" && (
         <header>
           <span className="brand"><strong>Voygent</strong> <span className="sub">AI travel-planning assistant</span></span>

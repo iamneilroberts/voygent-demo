@@ -1,6 +1,9 @@
 export const COOKIE_NAME = "__Host-demo_session";
 export const COOKIE_NAME_INSECURE = "demo_session"; // dev (http://localhost): __Host- prefix requires Secure
-export interface SessionClaims { sid: string; codeId: string }
+export interface SessionClaims { sid: string; codeId: string; tier: "public" | "pro" }
+// issueCookie accepts tier optionally (defaults to "public") so callers that predate
+// tiers still compile; verifyCookie always returns a concrete tier.
+export interface SessionClaimsInput { sid: string; codeId: string; tier?: "public" | "pro" }
 
 const enc = new TextEncoder();
 const b64url = (buf: ArrayBuffer | Uint8Array): string => {
@@ -38,11 +41,12 @@ export function newSid(): string {
 }
 
 export async function issueCookie(
-  claims: SessionClaims, ring: string, ttlSec: number, secure: boolean, nowMs = Date.now(),
+  claims: SessionClaimsInput, ring: string, ttlSec: number, secure: boolean, nowMs = Date.now(),
 ): Promise<string> {
   const r = parseRing(ring); const kid = activeKid(r);
   const exp = Math.floor(nowMs / 1000) + ttlSec;
-  const payload = b64url(enc.encode(JSON.stringify({ sid: claims.sid, codeId: claims.codeId, exp, kid })));
+  const tier = claims.tier === "pro" ? "pro" : "public";
+  const payload = b64url(enc.encode(JSON.stringify({ sid: claims.sid, codeId: claims.codeId, tier, exp, kid })));
   const sig = await hmac(r[kid], payload);
   const value = `${payload}.${sig}`;
   const attrs = ["Path=/", "HttpOnly", "SameSite=Lax", `Max-Age=${Math.max(0, ttlSec)}`];
@@ -57,7 +61,7 @@ export async function verifyCookie(cookieHeader: string | null, ring: string, no
   if (!m) return null;
   const [payload, sig] = m[1].split(".");
   if (!payload || !sig) return null;
-  let claims: { sid: string; codeId: string; exp: number; kid: string };
+  let claims: { sid: string; codeId: string; tier?: string; exp: number; kid: string };
   try { claims = JSON.parse(b64urlToStr(payload)); } catch { return null; }
   const r = parseRing(ring);
   const key = r[claims.kid]; if (!key) return null;
@@ -66,5 +70,6 @@ export async function verifyCookie(cookieHeader: string | null, ring: string, no
   if (typeof claims.exp !== "number" || claims.exp < Math.floor(nowMs / 1000)) return null;
   if (typeof claims.sid !== "string" || !claims.sid) return null;
   if (typeof claims.codeId !== "string" || !claims.codeId) return null;
-  return { sid: claims.sid, codeId: claims.codeId };
+  // Old cookies (issued before tiers) default to public.
+  return { sid: claims.sid, codeId: claims.codeId, tier: claims.tier === "pro" ? "pro" : "public" };
 }
