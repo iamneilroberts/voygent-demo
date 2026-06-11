@@ -145,6 +145,24 @@ function digest(events, label, allAcc) {
   return { text, tools, boards, errors, folio: folios.at(-1)?.folio ?? null };
 }
 
+// Scan the captured stream for any tool call that came back errored. The worker's
+// convention is a result string starting with "ERROR" (see session-do baseCallTool),
+// mirrored onto the inspector tool event's `ok: false`. This catches the class of bug
+// where a tool returns e.g. "ERROR: Cannot read properties of undefined (...)" — including
+// when a side-channel (telemetry) fault surfaces as a real tool's result. Returns one
+// {tool, result} per errored call, in stream order.
+function findToolErrors(allEvents) {
+  const out = [];
+  for (const e of allEvents) {
+    if (e.type !== "inspector" || e.kind !== "tool") continue;
+    const result = typeof e.result === "string" ? e.result : "";
+    if (e.ok === false || /^ERROR\b/i.test(result.trim())) {
+      out.push({ tool: e.name ?? e.tool ?? "(unknown)", result: result || "(ok=false, no result text)" });
+    }
+  }
+  return out;
+}
+
 function pickFromBoard(boardEv, kind) {
   const b = boardEv.board ?? boardEv;
   const c = (b.candidates ?? b.options ?? [])[0];
@@ -355,6 +373,17 @@ async function runOnce(runNum) {
   console.log(`enrichment tools called: ${calledEnrich.join(", ") || "NONE"}`);
   console.log(`elapsed: ${((Date.now() - t0) / 1000).toFixed(0)}s · session: ${SESSION}`);
 
+  // Tool-error invariant (applies to BOTH modes): no tool call may come back errored.
+  // This is the check that would have caught the excursion_search rawTokensEst crash.
+  const toolErrors = findToolErrors(allEvents);
+  if (toolErrors.length) {
+    console.log(`TOOL ERRORS (${toolErrors.length}):`);
+    for (const te of toolErrors) console.log(`  ✗ ${te.tool}: ${te.result.slice(0, 160)}`);
+  }
+  const toolErrorFailures = toolErrors.map(
+    (te) => `tool ${te.tool} returned an error result: ${te.result.slice(0, 160)}`,
+  );
+
   let failures;
   if (REPEAT > 1) {
     // Everything the tools returned/committed this run: the final folio + every board
@@ -365,8 +394,8 @@ async function runOnce(runNum) {
       ...allEvents.filter((e) => e.type === "board" || e.board || e.kind === "flight" || e.kind === "hotel").map((e) => JSON.stringify(e)),
       ...allEvents.filter((e) => e.type === "inspector" && e.kind === "tool").map((e) => JSON.stringify(e.result ?? "")),
     ].join(" ").toLowerCase();
-    // --repeat mode: run the acceptance assertions
-    failures = assertFolio(finalFolio, proseText, toolSourcedBlob);
+    // --repeat mode: acceptance assertions + the tool-error invariant
+    failures = [...assertFolio(finalFolio, proseText, toolSourcedBlob), ...toolErrorFailures];
     if (failures.length === 0) {
       console.log(`PASS ✅${runLabel}`);
     } else {
@@ -374,10 +403,14 @@ async function runOnce(runNum) {
       for (const f of failures) console.log(`  ✗ ${f}`);
     }
   } else {
-    // Legacy mode (single run, original thresholds preserved for backward compat)
-    const pass = days.length >= 1 && acts >= 1 && dining.length >= 1;
-    console.log(pass ? "PASS ✅" : "FAIL ❌ (expected ≥1 day with ≥1 activity and ≥1 dining pick)");
-    failures = pass ? [] : ["legacy: expected ≥1 day with ≥1 activity and ≥1 dining pick"];
+    // Legacy mode (single run, original thresholds preserved) + the tool-error invariant
+    const folioPass = days.length >= 1 && acts >= 1 && dining.length >= 1;
+    failures = [
+      ...(folioPass ? [] : ["legacy: expected ≥1 day with ≥1 activity and ≥1 dining pick"]),
+      ...toolErrorFailures,
+    ];
+    console.log(failures.length === 0 ? "PASS ✅" : "FAIL ❌");
+    for (const f of failures) console.log(`  ✗ ${f}`);
   }
 
   // Self-cleanup: smoke trips persist under the real MCP user's prefix. If the
