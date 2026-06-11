@@ -99,7 +99,13 @@ const SYSTEM_HINT =
   "adults }. Choose 2-3, stage them with patch_trip updates { hotels: [ { _candidateId:'<id>' }, ... ] }, then " +
   "call promote_hotels_to_lodging. They appear in the folio as client options.\n" +
   "4. Always stage with patch_trip using the FULL array value, never indexed paths like flights.0.x.\n" +
-  "5. Briefly narrate what you're doing in chat; let the folio carry the details.";
+  "5. Briefly narrate what you're doing in chat; let the folio carry the details.\n" +
+  "6. FINISH: the folio panel beside the chat IS the traveler's proposal — there is no separate link " +
+  "to generate or page to publish. When the trip is built and the traveler asks to send it, see the " +
+  "whole thing, or get 'the link', just tell them their proposal is the folio board right beside the " +
+  "chat and recap it in one short, warm sentence. NEVER call publish_trip, publish_folio, " +
+  "publish_to_client, share_folio, list_render, or update_advisor_profile, and NEVER ask the traveler " +
+  "to set a subdomain, configure an advisor profile, or visit account settings — none of that applies here.";
 
 // Boards mode (claude skin): the UI renders flight/hotel candidates as clickable
 // option cards beside the chat, so the model must present-and-wait instead of
@@ -142,7 +148,11 @@ const FAITHFUL_BOARDS_NOTE =
   "present the choice in one short sentence and let the traveler pick; do not enumerate the options in text. " +
   "Do NOT call list_render: it builds a hosted page on an advisor subdomain this demo does not use, so the traveler " +
   "would see nothing. Populate the in-chat cards by running flight_search then flight_list { tripId, action:'list' } " +
-  "for flights, and hotel_search_and_rank (or hotel_search) for hotels; then stop and let the traveler pick before staging.";
+  "for flights, and hotel_search_and_rank (or hotel_search) for hotels; then stop and let the traveler pick before staging.\n" +
+  "FINISH: the folio panel beside the chat IS the proposal — there is no link to generate or page to publish. " +
+  "When the traveler asks to send/finish or get 'the link', tell them their proposal is the folio board beside " +
+  "the chat and recap it briefly. Never call publish_folio/share_folio/publish_to_client/list_render/" +
+  "update_advisor_profile, and never ask them to set a subdomain or configure a profile.";
 
 export function buildFaithfulSeed(instructions: string | null, opts: { boardsMode: boolean }): string {
   const core = instructions ?? FAITHFUL_FALLBACK_CORE;
