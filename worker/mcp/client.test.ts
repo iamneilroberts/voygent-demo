@@ -91,3 +91,38 @@ describe("McpClient.initialize", () => {
     expect(seen[seen.length - 1]).toBe("sess-xyz");
   });
 });
+
+describe("McpClient.callToolRich", () => {
+  it("surfaces _meta alongside the text content", async () => {
+    const f = vi.fn().mockResolvedValue(jsonResponse({
+      jsonrpc: "2.0", id: 2,
+      result: {
+        content: [{ type: "text", text: "5 flights" }],
+        _meta: { "voygent/sizeStats": { rawBytes: 20626, distilledBytes: 3102 } },
+      },
+    }));
+    const c = new McpClient("https://mcp.test/mcp", "bearer", f as any);
+    const out = await c.callToolRich("flight_search", { trip_id: "t1", include_size_stats: true });
+    expect(out.text).toBe("5 flights");
+    expect(out.meta).toEqual({ "voygent/sizeStats": { rawBytes: 20626, distilledBytes: 3102 } });
+    // the args the caller passed go out verbatim (injection is the caller's job)
+    const sent = JSON.parse((f.mock.calls[0][1] as RequestInit).body as string);
+    expect(sent.params.arguments.include_size_stats).toBe(true);
+  });
+
+  it("returns meta:null when the result carries no _meta", async () => {
+    const f = vi.fn().mockResolvedValue(jsonResponse({ jsonrpc: "2.0", id: 2, result: { content: [{ type: "text", text: "ok" }] } }));
+    const c = new McpClient("https://mcp.test/mcp", "bearer", f as any);
+    const out = await c.callToolRich("flight_search", {});
+    expect(out).toEqual({ text: "ok", meta: null });
+  });
+
+  it("callTool keeps its string contract (text only, _meta dropped)", async () => {
+    const f = vi.fn().mockResolvedValue(jsonResponse({
+      jsonrpc: "2.0", id: 2,
+      result: { content: [{ type: "text", text: "ok" }], _meta: { "voygent/sizeStats": { rawBytes: 1, distilledBytes: 1 } } },
+    }));
+    const c = new McpClient("https://mcp.test/mcp", "bearer", f as any);
+    expect(await c.callTool("x", {})).toBe("ok");
+  });
+});

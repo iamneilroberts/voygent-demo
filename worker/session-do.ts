@@ -186,6 +186,40 @@ export function faithfulGates(faithful: boolean, liveMode: boolean): FaithfulGat
   };
 }
 
+// Replay-fixture searchDistill gate. `!bypassReplay` is load-bearing: isIntercepted()
+// is set-membership (per-tool, not per-call), so on a live-latched session an
+// intercepted-by-name search that actually went to the real MCP would otherwise read
+// a STALE replay lastMeasurement(). It also makes this emit mutually exclusive with
+// the live size-stats emit (live paths all run under bypassReplay or latch it first).
+export function shouldEmitReplayDistill(faithful: boolean, liveMode: boolean, intercepted: boolean): boolean {
+  const g = faithfulGates(faithful, liveMode);
+  return g.measureSearchDistill && !g.bypassReplay && intercepted;
+}
+
+// Live searchDistill: voygent-lite's flight_search/hotel_search accept an opt-in
+// `include_size_stats` param (PR #171); the result then carries
+// `_meta["voygent/sizeStats"] = { rawBytes, distilledBytes }` — the GENUINE supplier-raw
+// → distilled byte reduction at the fetch boundary. rawBytes is null when there was no
+// upstream byte capture (e.g. source="public", error paths) → no event. Bytes→tokens at
+// /4 to keep the funnel's chars/4 basis; the real byte figures stay in `detail`.
+export const SIZE_STATS_META_KEY = "voygent/sizeStats";
+export const SIZE_STATS_TOOLS = new Set(["flight_search", "hotel_search"]);
+export function sizeStatsSavings(
+  meta: Record<string, unknown> | null | undefined,
+  tool: string,
+): { tokensSaved: number; rawTokens: number; slimTokens: number; detail: string } | null {
+  const ss = meta?.[SIZE_STATS_META_KEY];
+  if (!ss || typeof ss !== "object") return null;
+  const { rawBytes, distilledBytes } = ss as { rawBytes?: unknown; distilledBytes?: unknown };
+  if (typeof rawBytes !== "number" || rawBytes <= 0) return null;
+  if (typeof distilledBytes !== "number" || distilledBytes < 0) return null;
+  const rawTokens = Math.round(rawBytes / 4);
+  const slimTokens = Math.round(distilledBytes / 4);
+  const tokensSaved = rawTokens - slimTokens;
+  if (tokensSaved <= 0) return null; // near-parity payload — a "0 saved" chip reads as broken
+  return { tokensSaved, rawTokens, slimTokens, detail: `live ${tool} supplier-raw ~${rawBytes}B → model saw ~${distilledBytes}B` };
+}
+
 // Live-trip workflow (additive, all sessions): when the traveler's destination
 // is NOT one of the featured trips, the session passes through to real Voygent
 // tools (full catalog, no replay). The model needs the real schemas + the real
@@ -493,18 +527,34 @@ export class SessionDO {
     // these flight/hotel results are LIVE supplier data or curated sample fixtures.
     let sourceEmitted = false;
     const markSource = (live: boolean) => { if (!sourceEmitted) { sourceEmitted = true; emit({ type: "source", live }); } };
+    // Live pass-through to the real MCP. For flight_search/hotel_search, opt into
+    // voygent-lite's size-stats telemetry at the proxy layer (the model never sees
+    // the param) and emit the genuine supplier-raw → distilled reduction as the
+    // searchDistill savings event the Token Elimination Funnel draws.
+    const liveCallTool = async (name: string, input: Record<string, unknown>): Promise<string> => {
+      if (!SIZE_STATS_TOOLS.has(name)) return mcp.callTool(name, input);
+      const { text, meta } = await mcp.callToolRich(name, { ...input, include_size_stats: true });
+      const s = sizeStatsSavings(meta, name);
+      if (s) {
+        emit({
+          type: "inspector", kind: "savings", exchangeId, mechanism: "searchDistill",
+          basis: "chars/4", scope: "aggregate", tool: name, ...s,
+        });
+      }
+      return text;
+    };
     const baseCallTool = (name: string, input: Record<string, unknown>): Promise<string> => {
       const isSearch = SEARCH_TOOLS.has(name);
       if (faithfulGates(faithful, this.liveMode).bypassReplay) {
         if (isSearch) markSource(true); // faithful / already-live → real supplier data
-        return mcp.callTool(name, input); // real pass-through, no interception
+        return liveCallTool(name, input); // real pass-through, no interception
       }
       const intercepted = this.replay.isIntercepted(name) || name === "hotel_search_and_rank";
-      if (!intercepted) return mcp.callTool(name, input);
+      if (!intercepted) return liveCallTool(name, input);
       if (isSearch && !this.replay.matchesFixture(name, input as Record<string, any>)) {
         this.liveMode = true; // destination left the featured catalog — latch live for the rest of the session
         markSource(true);     // off-menu → real supplier data
-        return mcp.callTool(name, input);
+        return liveCallTool(name, input);
       }
       if (isSearch) markSource(false); // featured trip → curated sample fixtures
       // Featured trip: hotel_search_and_rank serves the hotel fixture (replay
@@ -549,7 +599,9 @@ export class SessionDO {
         }
       }
       // searchDistill: prod response size (fixture meta) vs the slim payload the model saw.
-      if (faithfulGates(faithful, this.liveMode).measureSearchDistill && this.replay.isIntercepted(name)) {
+      // Replay-fixture path only (shouldEmitReplayDistill excludes bypassReplay) — live
+      // calls emit their own searchDistill from _meta sizeStats inside liveCallTool.
+      if (shouldEmitReplayDistill(faithful, this.liveMode, this.replay.isIntercepted(name))) {
         const m = this.replay.lastMeasurement();
         const fx = this.replay.currentFixture();
         const metaKey = m?.tool as ("flightSearch" | "flightList" | "hotelSearch" | "hotelList" | undefined);

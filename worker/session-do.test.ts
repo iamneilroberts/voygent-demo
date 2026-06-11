@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildFaithfulSeed, faithfulGates } from "./session-do";
+import { buildFaithfulSeed, faithfulGates, sizeStatsSavings, shouldEmitReplayDistill } from "./session-do";
 
 describe("buildFaithfulSeed", () => {
   const CORE = "LIVE OPERATING CORE: drive manage_trip_goal.";
@@ -60,5 +60,52 @@ describe("faithfulGates", () => {
   });
   it("faithful=true → liveMode is a don't-care (irrelevant when faithful)", () => {
     expect(faithfulGates(true, true)).toEqual(faithfulGates(true, false));
+  });
+});
+
+describe("sizeStatsSavings (live supplier-raw telemetry → searchDistill event)", () => {
+  const META = (raw: unknown, distilled: unknown) =>
+    ({ "voygent/sizeStats": { rawBytes: raw, distilledBytes: distilled } }) as Record<string, unknown>;
+
+  it("converts the verified prod example (serp JFK→LIS) at chars/4", () => {
+    const s = sizeStatsSavings(META(20626, 3102), "flight_search");
+    expect(s).toEqual({
+      tokensSaved: 4381, rawTokens: 5157, slimTokens: 776,
+      detail: "live flight_search supplier-raw ~20626B → model saw ~3102B",
+    });
+  });
+
+  it("rawBytes null (public source, no fetch-boundary capture) → no event", () => {
+    expect(sizeStatsSavings(META(null, 3102), "flight_search")).toBeNull();
+  });
+
+  it("absent _meta / absent key / malformed stats → no event", () => {
+    expect(sizeStatsSavings(null, "flight_search")).toBeNull();
+    expect(sizeStatsSavings(undefined, "flight_search")).toBeNull();
+    expect(sizeStatsSavings({}, "flight_search")).toBeNull();
+    expect(sizeStatsSavings({ "voygent/sizeStats": "bogus" }, "flight_search")).toBeNull();
+    expect(sizeStatsSavings(META("20626", 3102), "flight_search")).toBeNull();
+  });
+
+  it("zero raw or near-parity payload → no event (no broken '0 saved' chip)", () => {
+    expect(sizeStatsSavings(META(0, 0), "hotel_search")).toBeNull();
+    expect(sizeStatsSavings(META(3102, 20626), "hotel_search")).toBeNull(); // distilled bigger
+    expect(sizeStatsSavings(META(100, 100), "hotel_search")).toBeNull();    // parity
+  });
+});
+
+describe("shouldEmitReplayDistill — mutual exclusivity with the live size-stats emit", () => {
+  it("replayed featured trip (not faithful, not live) still measures", () => {
+    expect(shouldEmitReplayDistill(false, false, true)).toBe(true);
+  });
+  it("live-latched session never emits the fixture-based event (stale lastMeasurement)", () => {
+    expect(shouldEmitReplayDistill(false, true, true)).toBe(false);
+  });
+  it("faithful mode never emits", () => {
+    expect(shouldEmitReplayDistill(true, false, true)).toBe(false);
+    expect(shouldEmitReplayDistill(true, true, true)).toBe(false);
+  });
+  it("non-intercepted tools never emit", () => {
+    expect(shouldEmitReplayDistill(false, false, false)).toBe(false);
   });
 });

@@ -109,9 +109,16 @@ export class McpClient {
   }
 
   async callTool(name: string, args: Record<string, unknown>): Promise<string> {
+    return (await this.callToolRich(name, args)).text;
+  }
+
+  /** Like callTool, but also surfaces the tool result's `_meta` (e.g. voygent-lite's
+   *  opt-in `voygent/sizeStats` telemetry), which the string contract drops. */
+  async callToolRich(name: string, args: Record<string, unknown>): Promise<{ text: string; meta: Record<string, unknown> | null }> {
     const result = await this.rpc("tools/call", { name, arguments: args });
     const text = (result.content ?? [])
       .filter((c: any) => c.type === "text").map((c: any) => c.text).join("\n");
-    return text || JSON.stringify(result);
+    const meta = result._meta && typeof result._meta === "object" ? (result._meta as Record<string, unknown>) : null;
+    return { text: text || JSON.stringify(result), meta };
   }
 }

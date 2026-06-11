@@ -75,7 +75,8 @@ export function funnelAggregateRows(ctx: DrillContext): InsSavings[] {
 function fmtTok(n: number): string { return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n); }
 
 // Map a replay-measurement tool name (camelCase) to the client tool-call name (snake_case),
-// so a funnel row can find the slim payload the model actually received.
+// so a funnel row can find the slim payload the model actually received. Live size-stats
+// rows already carry the snake_case tool name, so lookups fall back to the row's own tool.
 const MEASURE_TO_TOOLNAME: Record<string, string> = {
   flightSearch: "flight_search", flightList: "flight_list",
   hotelSearch: "hotel_search", hotelList: "hotel_list",
@@ -97,7 +98,7 @@ function FunnelView({ ctx }: { ctx: DrillContext }) {
       )}
       {rows.map((r, i) => {
         const slimFrac = r.rawTokens > 0 ? r.slimTokens / r.rawTokens : 1;
-        const slim = ctx.tools.filter((t) => t.name === MEASURE_TO_TOOLNAME[r.tool]).slice(-1)[0];
+        const slim = ctx.tools.filter((t) => t.name === (MEASURE_TO_TOOLNAME[r.tool] ?? r.tool)).slice(-1)[0];
         return (
           <div className="ins-funnel-row" key={`${r.tool}-${i}`}>
             <div className="ins-funnel-head">
