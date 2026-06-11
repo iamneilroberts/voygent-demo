@@ -35,7 +35,20 @@ export function toolChipTitle(name: string, args: Record<string, any> = {}): str
       if ("flights" in u) return "Saving your flight pick";
       if ("lodging" in u) return "Locking in the hotel";
       if ("hotels" in u) return "Shortlisting hotels";
-      if ("itinerary" in u) return "Building the day-by-day";
+      if ("itinerary" in u) {
+        // The model patches the FULL day array each layer (L1 scaffold = day/date/location only;
+        // L4 rewrite adds dining, keeping activities). Label by what this patch carries so the
+        // repeated itinerary patches read as distinct steps, with the day count for scale.
+        const days = Array.isArray(u.itinerary) ? (u.itinerary as Record<string, any>[]) : [];
+        const n = days.length;
+        if (n === 0) return "Building the day-by-day";
+        const span = ` (${n} day${n === 1 ? "" : "s"})`;
+        const hasDining = days.some((d) => Array.isArray(d?.dining) && d.dining.length > 0);
+        const hasActivities = days.some((d) => Array.isArray(d?.activities) && d.activities.length > 0);
+        if (hasDining) return `Adding restaurants to your days${span}`;
+        if (hasActivities) return `Adding activities to your days${span}`;
+        return `Setting up the day-by-day${span}`;
+      }
       return "Updating the trip";
     }
     default: return titleCase(name);

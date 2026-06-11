@@ -29,6 +29,23 @@ describe("toolChipTitle", () => {
     expect(toolChipTitle("patch_trip", {})).toBe("Updating the trip");
   });
 
+  it("labels a patch_trip itinerary by layer (scaffold / activities / dining) + day count", () => {
+    // L1 scaffold: days carry only day/date/location, no activities or dining yet.
+    expect(toolChipTitle("patch_trip", { updates: { itinerary: [
+      { day: 1, location: "Tokyo" }, { day: 2, location: "Tokyo" },
+    ] } })).toBe("Setting up the day-by-day (2 days)");
+    // activities present, no dining.
+    expect(toolChipTitle("patch_trip", { updates: { itinerary: [
+      { day: 1, activities: [{ name: "Senso-ji" }] }, { day: 2, activities: [] },
+    ] } })).toBe("Adding activities to your days (2 days)");
+    // L4 full rewrite: dining present (takes precedence over activities). Singular day.
+    expect(toolChipTitle("patch_trip", { updates: { itinerary: [
+      { day: 1, activities: [{ name: "Senso-ji" }], dining: [{ name: "Sukiyabashi Jiro" }] },
+    ] } })).toBe("Adding restaurants to your days (1 day)");
+    // empty array stays the generic label (no day count to show).
+    expect(toolChipTitle("patch_trip", { updates: { itinerary: [] } })).toBe("Building the day-by-day");
+  });
+
   it("falls back to a title-cased tool name and tolerates missing args", () => {
     expect(toolChipTitle("some_new_tool", {})).toBe("Some New Tool");
     expect(toolChipTitle("save_trip")).toBe("Starting your trip");
