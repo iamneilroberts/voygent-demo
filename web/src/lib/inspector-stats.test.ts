@@ -16,7 +16,7 @@ describe("buildStats", () => {
     const stats = buildStats(input);
     const byKey = Object.fromEntries(stats.map((s) => [s.key, s]));
     expect(byKey.mcpToolsExposed.value).toBe("72");
-    expect(byKey.contextKeptOut.value).toBe("230");
+    expect(byKey.contextKeptOut.value).toBe("≈230");
     expect(byKey.contextKeptOut.tone).toBe("good");
     expect(byKey.observedCost.value).toBe("$0.41");
     expect(byKey.cacheHitRate.value).toBe("91%");

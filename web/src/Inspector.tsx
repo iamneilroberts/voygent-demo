@@ -324,7 +324,9 @@ export function Inspector(
           )}
         </div>
         {openDrill && (() => {
-          const d = DRILLS.find((x) => x.id === openDrill);
+          // Only stat-triggered drills render here; pipeline drills (the waterfall) have their
+          // own block under the pipe, so don't double-render them in the tile accordion.
+          const d = DRILLS.find((x) => x.id === openDrill && x.trigger.kind === "stat");
           return d ? (
             <div className="ins-drill" role="region" aria-label={d.title}>
               <h4 className="ins-drill-title">{d.title}</h4>

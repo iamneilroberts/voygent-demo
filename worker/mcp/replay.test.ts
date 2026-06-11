@@ -267,6 +267,9 @@ describe("FixtureReplay supplier fan-out", () => {
     await r.handle("flight_search", { origin: "MOB", destination: "DUB" }, helpers as any);
     expect(r.lastFanout()).toBeNull();
   });
+  // Note: the hotel_search_and_rank alias is remapped to replay.handle("hotel_search") in
+  // session-do.ts (~:490) before reaching replay, so the replay layer only ever sees
+  // "hotel_search"; the session-do emit guard includes the alias in its name check.
 });
 
 // Minimal in-memory helpers: capture what patchTrip writes so we can assert the

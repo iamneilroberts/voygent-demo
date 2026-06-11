@@ -63,11 +63,11 @@ function FunnelView({ ctx }: { ctx: DrillContext }) {
         Each supplier search returns a large raw payload; the model only ever sees the slim,
         distilled version. The eliminated slice never enters context.
       </p>
-      {rows.map((r) => {
+      {rows.map((r, i) => {
         const slimFrac = r.rawTokens > 0 ? r.slimTokens / r.rawTokens : 1;
         const slim = ctx.tools.filter((t) => t.name === MEASURE_TO_TOOLNAME[r.tool]).slice(-1)[0];
         return (
-          <div className="ins-funnel-row" key={r.tool}>
+          <div className="ins-funnel-row" key={`${r.tool}-${i}`}>
             <div className="ins-funnel-head">
               <b>{r.tool}</b>
               <span>{fmtTok(r.rawTokens)} → {fmtTok(r.slimTokens)} tok <span className="good">(−{r.pct}%)</span></span>

@@ -40,7 +40,7 @@ export function buildStats(i: StatInput): InspectorStat[] {
     { key: "mcpToolsExposed", value: fmtInt(i.mcpToolsExposed), label: "MCP tools exposed", rail: 3, deepDive: "production-system" },
     { key: "distinctTools", value: fmtInt(i.distinctTools), label: "distinct tools", deepDive: "production-system" },
     { key: "persistedWrites", value: fmtInt(i.persistedWrites), label: "persisted writes", deepDive: "data-stores" },
-    { key: "contextKeptOut", value: fmtInt(i.contextKeptOut), label: "context kept out", tone: "good", rail: 1, bar: i.contextKeptOutBar, deepDive: "context-economics", drill: "funnel" },
+    { key: "contextKeptOut", value: `≈${fmtInt(i.contextKeptOut)}`, label: "context kept out", tone: "good", rail: 1, bar: i.contextKeptOutBar, deepDive: "context-economics", drill: "funnel" },
     { key: "observedCost", value: fmtUsd(i.observedCostUsd), label: "observed cost", tone: "good", rail: 2, deepDive: "cost-engineering", drill: "costSim" },
     { key: "cacheHitRate", value: `${Math.round(i.cacheHitRate * 100)}%`, label: "cache hit rate", deepDive: "cost-engineering" },
     { key: "suppliersQueried", value: fmtInt(i.suppliersQueried), label: "suppliers queried", deepDive: "production-system", drill: "fanout" },
