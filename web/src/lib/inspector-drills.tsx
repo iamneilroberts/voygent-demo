@@ -44,22 +44,32 @@ export interface Drill {
 
 export interface FunnelRow { tool: string; rawTokens: number; slimTokens: number; pct: number }
 
-/** One row per searchDistill event carrying both raw and slim token counts. */
+// A distill row only earns a bar if it eliminated a meaningful share. Some searches
+// barely compress (flight candidates carry full per-leg routing the advisor wants, so
+// a flight_search payload ~= its raw prod size) — a "−1%" bar reads as a broken mechanism,
+// so we hide it. The real wins (hotels, flight_list) sit comfortably above this.
+export const MIN_DISTILL_PCT = 20;
+
+/** One row per searchDistill event carrying raw+slim, filtered to meaningful (>= MIN_DISTILL_PCT) wins. */
 export function funnelRows(ctx: DrillContext): FunnelRow[] {
   const out: FunnelRow[] = [];
   for (const s of ctx.savings) {
     if (s.mechanism !== "searchDistill") continue;
     if (typeof s.rawTokens !== "number" || typeof s.slimTokens !== "number" || !s.tool) continue;
     const pct = s.rawTokens > 0 ? Math.round((1 - s.slimTokens / s.rawTokens) * 100) : 0;
+    if (pct < MIN_DISTILL_PCT) continue;
     out.push({ tool: s.tool, rawTokens: s.rawTokens, slimTokens: s.slimTokens, pct });
   }
   return out;
 }
 
-/** Aggregate-scope "kept out" slices (patch / searchDistill / template, etc.), filtered to
- *  real savings so a 0-token event never renders a "patch · 0" wart. */
+/** Aggregate-scope "kept out" slices (patch / template, etc.), filtered to real savings so a
+ *  0-token event never renders a "patch · 0" wart. searchDistill is EXCLUDED here — it's already
+ *  shown as the per-search funnel rows above, so listing it again is pure duplication. */
 export function funnelAggregateRows(ctx: DrillContext): InsSavings[] {
-  return ctx.savings.filter((s) => s.scope === "aggregate" && s.tokensSaved > 0);
+  return ctx.savings.filter(
+    (s) => s.scope === "aggregate" && s.tokensSaved > 0 && s.mechanism !== "searchDistill",
+  );
 }
 
 function fmtTok(n: number): string { return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n); }

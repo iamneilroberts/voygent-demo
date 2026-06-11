@@ -28,18 +28,29 @@ describe("funnelRows", () => {
     ] } as unknown as DrillContext;
     expect(funnelRows(ctx)).toHaveLength(0);
   });
+
+  it("drops distills below the meaningful threshold (a barely-compressed search reads as noise)", () => {
+    const ctx = { savings: [
+      savings({ tool: "hotelSearch", rawTokens: 1195, slimTokens: 343, tokensSaved: 852 }), // 71% — kept
+      savings({ tool: "flightSearch", rawTokens: 700, slimTokens: 692, tokensSaved: 8 }),    // 1% — dropped
+    ] } as unknown as DrillContext;
+    const rows = funnelRows(ctx);
+    expect(rows).toHaveLength(1);
+    expect(rows[0].tool).toBe("hotelSearch");
+  });
 });
 
 describe("funnelAggregateRows", () => {
-  it("returns aggregate-scope savings, filtered to tokensSaved > 0 (kills the patch·0 wart)", () => {
+  it("returns aggregate-scope savings with real tokens, EXCLUDING searchDistill (shown as rows above)", () => {
     const ctx = { savings: [
-      savings({ mechanism: "patch", scope: "aggregate", tokensSaved: 0 }),        // the wart
-      savings({ mechanism: "searchDistill", scope: "aggregate", tokensSaved: 852 }),
-      savings({ mechanism: "toolCatalog", scope: "perTurn", tokensSaved: 300 }),    // wrong scope
+      savings({ mechanism: "patch", scope: "aggregate", tokensSaved: 0 }),          // the wart — filtered
+      savings({ mechanism: "patch", scope: "aggregate", tokensSaved: 1200 }),        // real — kept
+      savings({ mechanism: "searchDistill", scope: "aggregate", tokensSaved: 852 }), // shown as a row, NOT here
+      savings({ mechanism: "toolCatalog", scope: "perTurn", tokensSaved: 300 }),     // wrong scope
     ] } as unknown as DrillContext;
     const rows = funnelAggregateRows(ctx);
     expect(rows).toHaveLength(1);
-    expect(rows[0]).toMatchObject({ mechanism: "searchDistill", tokensSaved: 852 });
+    expect(rows[0]).toMatchObject({ mechanism: "patch", tokensSaved: 1200 });
   });
 
   it("empty when no aggregate savings have real tokens", () => {
