@@ -20,7 +20,7 @@ export interface DrillContext {
   actualByModel: Record<string, number>;
   // Relocated panel detail (was always-visible; now lives behind the tiles):
   tokensIn: number; tokensOut: number; cacheRead: number;
-  sessionTokens: number; hitRate: number | null; proWindow: number | null;
+  freshTokens: number; hitRate: number | null; proWindow: number | null;
   routedModels: string[];
   perTurnDelta: number; perTurnTotal: number; templateMax: number; turnsTotal: number;
   overhead?: InsOverhead;
@@ -174,9 +174,9 @@ function CostSimView({ ctx }: { ctx: DrillContext }) {
           <p className="ins-note">Routing splits models, so caches don't carry across the switch — cache writes are re-paid; the actual figure above already reflects that.</p>
         </>
       )}
-      {ctx.proWindow != null && ctx.sessionTokens > 0 && (
+      {ctx.proWindow != null && ctx.freshTokens > 0 && (
         <p className="ins-note ins-tierline">
-          This trip ≈ <b>{((ctx.sessionTokens / ctx.proWindow) * 100).toFixed(ctx.sessionTokens / ctx.proWindow < 0.01 ? 2 : 0)}%</b> of a Pro 5-hr window (cost-weighted) ·{" "}
+          This trip ≈ <b>{((ctx.freshTokens / ctx.proWindow) * 100).toFixed(ctx.freshTokens / ctx.proWindow < 0.01 ? 2 : 0)}%</b> of a Pro 5-hr window (new tokens; cached context not counted) ·{" "}
           <a href="/info/cost-engineering" target="_blank" rel="noreferrer">how this is estimated →</a>
         </p>
       )}

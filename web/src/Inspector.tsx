@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, type ReactNode } from "react";
 import type { EngState } from "./lib/inspector-state";
 import { PLAN_TIERS } from "./inspector-data";
-import { costWeightedTokens, cacheHitRate } from "./lib/usage";
+import { cacheHitRate } from "./lib/usage";
 import { MODEL_LABELS, PHASES, PHASE_LABELS, type ModelId, type PhaseModelMap, type Phase } from "../../shared/models";
 import type { SelectorMode } from "./lib/model";
 import type { StatsResponse } from "../../shared/events";
@@ -162,8 +162,12 @@ export function Inspector(
   // 5-10x pessimistic against the sub-window estimate once the moving cache
   // breakpoint landed. See lib/usage.ts.
   const usage = { inputTokens: tokensIn, cacheReadTokens: cacheRead, cacheCreationTokens: cacheWrite };
-  const sessionTokens = costWeightedTokens(usage);
   const hitRate = cacheHitRate(usage);
+  // Fresh tokens = newly-processed input + output, EXCLUDING cached-context re-reads and
+  // cache writes. The old cost-weighted figure counted a session's growing cached context
+  // re-read every turn, so a single trip read as >100% of a Pro 5-hr window — backwards.
+  // Fresh in+out is the honest "new work" figure and lands a trip at a small, sane share.
+  const freshTokens = tokensIn + tokensOut;
   const proWindow = PLAN_TIERS.find((p) => p.id === "pro")?.windowTokens ?? null;
 
   // Honest context-saved model:
@@ -217,7 +221,7 @@ export function Inspector(
     savedHeadline, cost, actualCost, actualByModel,
     // Relocated detail (was always-visible; now read by the drills):
     tokensIn, tokensOut, cacheRead,
-    sessionTokens, hitRate, proWindow,
+    freshTokens, hitRate, proWindow,
     routedModels,
     perTurnDelta, perTurnTotal, templateMax, turnsTotal,
     overhead: ov,
