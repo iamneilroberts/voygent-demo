@@ -8,6 +8,7 @@ const input: StatInput = {
   contextKeptOut: 230,
   observedCostUsd: 0.41,
   cacheHitRate: 0.91,
+  suppliersQueried: 2,
 };
 
 describe("buildStats", () => {
@@ -25,10 +26,12 @@ describe("buildStats", () => {
       if (s.deepDive) expect(s.deepDive).toMatch(/^[a-z-]+$/);
     }
   });
-  it("tags the funnel and cost-sim tiles with their drill id", () => {
+  it("tags the funnel, cost-sim, and fanout tiles with their drill id", () => {
     const byKey = Object.fromEntries(buildStats(input).map((s) => [s.key, s]));
     expect(byKey.contextKeptOut.drill).toBe("funnel");
     expect(byKey.observedCost.drill).toBe("costSim");
+    expect(byKey.suppliersQueried.drill).toBe("fanout");
+    expect(byKey.suppliersQueried.value).toBe("2");
   });
 });
 

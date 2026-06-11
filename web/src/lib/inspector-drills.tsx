@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { InsTool, InsTurn, InsSummary, InsSavings } from "../Inspector";
+import type { InsTool, InsTurn, InsSummary, InsSavings, InsFanout } from "../Inspector";
 
 // Everything a drill render fn might need. Built by Inspector.tsx from the
 // derivations it already computes above its render branch (see Task 5).
@@ -8,6 +8,7 @@ export interface DrillContext {
   turns: InsTurn[];
   summaries: InsSummary[];
   savings: InsSavings[];
+  fanout: InsFanout[];
   phases: { phase: string; via: string }[];
   savedHeadline: number;                                   // aggregate "context kept out"
   cost: { haiku: number; sonnet: number; opus: number };   // single-tier counterfactual
@@ -15,7 +16,7 @@ export interface DrillContext {
   actualByModel: Record<string, number>;
 }
 
-export type DrillId = "funnel" | "costSim" | "waterfall";
+export type DrillId = "funnel" | "costSim" | "waterfall" | "fanout";
 export type DrillTrigger = { kind: "stat"; statKey: string } | { kind: "pipeline" };
 
 export interface Drill {

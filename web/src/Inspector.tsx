@@ -218,6 +218,10 @@ export function Inspector(
   const valOk = vals.filter((v) => v.status === "pass" || v.status === "repaired").length;
   const valFail = vals.some((v) => v.status === "fail");
 
+  // Distinct supplier adapters genuinely queried this session (across all fan-out events).
+  const fans = fanouts ?? [];
+  const suppliersQueried = new Set(fans.flatMap((f) => f.sources.map((s) => s.id))).size;
+
   // Registry-driven stats (single source for the rail, the panel, and the deep dives).
   // Named regStats to avoid the cross-session `stats` prop above.
   const regStats = buildStats({
@@ -227,6 +231,7 @@ export function Inspector(
     contextKeptOut: savedHeadline,
     observedCostUsd: actualCost,
     cacheHitRate: hitRate ?? 0,
+    suppliersQueried,
   });
   // Active phase for the rail: the phase trail's last entry, else the latest lit stage.
   const activePhase = phases && phases.length ? phases[phases.length - 1].phase
@@ -235,7 +240,7 @@ export function Inspector(
   // Which drill is expanded in the open panel (single-open accordion). null = none.
   const [openDrill, setOpenDrill] = useState<DrillId | null>(null);
   const drillCtx: DrillContext = {
-    tools, turns, summaries, savings, phases: phases ?? [],
+    tools, turns, summaries, savings, fanout: fans, phases: phases ?? [],
     savedHeadline, cost, actualCost, actualByModel,
   };
 

@@ -11,7 +11,7 @@ export interface InspectorStat {
   rail?: number;                       // present = eligible for the rail; lower = higher priority
   bar?: number;                        // optional 0..1 fill (e.g. tokens-saved proportion)
   deepDive?: string;                   // /info slug this stat links to
-  drill?: "funnel" | "costSim" | "waterfall";   // expandable detail view this stat opens
+  drill?: "funnel" | "costSim" | "waterfall" | "fanout";   // expandable detail view this stat opens
 }
 
 // The metrics the Inspector already computes, passed in as plain values so this stays
@@ -23,6 +23,7 @@ export interface StatInput {
   contextKeptOut: number;              // tokens kept out of the model (savedHeadline)
   observedCostUsd: number;             // measured routed spend
   cacheHitRate: number;                // 0..1
+  suppliersQueried: number;            // distinct supplier adapters lit this session (fan-out)
   contextKeptOutBar?: number;          // optional 0..1 proportion for the rail fill bar
 }
 
@@ -42,6 +43,7 @@ export function buildStats(i: StatInput): InspectorStat[] {
     { key: "contextKeptOut", value: fmtInt(i.contextKeptOut), label: "context kept out", tone: "good", rail: 1, bar: i.contextKeptOutBar, deepDive: "context-economics", drill: "funnel" },
     { key: "observedCost", value: fmtUsd(i.observedCostUsd), label: "observed cost", tone: "good", rail: 2, deepDive: "cost-engineering", drill: "costSim" },
     { key: "cacheHitRate", value: `${Math.round(i.cacheHitRate * 100)}%`, label: "cache hit rate", deepDive: "cost-engineering" },
+    { key: "suppliersQueried", value: fmtInt(i.suppliersQueried), label: "suppliers queried", deepDive: "production-system", drill: "fanout" },
   ];
 }
 
