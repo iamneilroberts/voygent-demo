@@ -324,12 +324,16 @@ button.ins-rail:hover { color: var(--ink); }
 .tweaks-group.is-disabled button[disabled] { cursor: not-allowed; }
 .tweaks-note { font: 500 .75rem/1.5 ui-monospace, monospace; color: var(--muted); margin: 4px 0 0; }
 
-/* Phase D — drillable tiles + drill detail panel */
-.ins-stat-drill { cursor: pointer; background: none; border: none; text-align: left;
-  font: inherit; color: inherit; position: relative; padding-right: 16px; }
-.ins-stat-drill:hover { background: var(--term-line, rgba(255,255,255,.04)); border-radius: 6px; }
-.ins-stat-drill.active { background: var(--term-line, rgba(255,255,255,.06)); border-radius: 6px; }
-.ins-stat-caret { position: absolute; top: 2px; right: 4px; font-size: 9px; opacity: .6; }
+/* Phase D — drillable tiles + drill detail panel.
+   Drillable tiles inherit the SAME raised --board-2 fill as the inert tiles (no
+   `background: none` — that let the lighter strip bg show through and made the
+   non-clickable tiles look more "active" than the clickable ones). The affordance
+   is the colored caret + a real lift to --board-3 on hover/open, not relative darkness. */
+.ins-stat-drill { cursor: pointer; border: none; text-align: left;
+  font: inherit; color: inherit; position: relative; padding-right: 16px; transition: background .12s ease; }
+.ins-stat-drill:hover { background: var(--board-3); }
+.ins-stat-drill.active { background: var(--board-3); box-shadow: inset 2px 0 0 var(--amber-hi); }
+.ins-stat-caret { position: absolute; top: 2px; right: 4px; font-size: 9px; color: var(--amber-hi); opacity: .85; }
 .ins-drill { margin-top: 10px; padding: 12px; border: 1px solid var(--term-line, #2a2a2a);
   border-radius: 8px; background: rgba(0,0,0,.18); }
 .ins-drill-title { margin: 0 0 8px; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; opacity: .8; }
