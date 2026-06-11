@@ -29,12 +29,15 @@ new_sqlite_classes = ["SessionDO"]
 # (writes) and the top-level worker (GET /stats reads) bind STATS_DB.
 # DEPLOY STEP 1 (before `wrangler deploy`): create the DB and paste its id here:
 #   wrangler d1 create voygent-demo-stats   →   copy database_id below
-#   wrangler d1 execute voygent-demo-stats --remote --file migrations/0001_session_stats.sql
+#   wrangler d1 migrations apply voygent-demo-stats --remote
 # Until then the binding is absent in dev/test and the feature is a silent no-op.
+# migrations_dir is split per database (2026-06-11): a single shared migrations/ dir
+# would make `migrations apply <either-db>` try to run the other DB's files too.
 [[d1_databases]]
 binding = "STATS_DB"
 database_name = "voygent-demo-stats"
 database_id = "20321ac2-3669-489e-b67c-5e5bd91d6f2e"
+migrations_dir = "migrations-stats"
 
 # demo.voygent.ai is served by a MORE-SPECIFIC route than the *.voygent.ai wildcard
 # (which points every other subdomain at the prod `voygent` Worker). Most-specific-wins —
@@ -71,6 +74,7 @@ zone_name = "voygent.ai"
 binding = "DEMO_DB"
 database_name = "voygent-demo"
 database_id = "7825123d-3e56-423b-b2da-c5add703b252"
+migrations_dir = "migrations"
 
 [vars]
 # The exact origin the SPA is served from. Used by the Origin/CSRF guard — POSTs whose
