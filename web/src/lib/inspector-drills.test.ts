@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { funnelRows, costScenarios, ganttBars, type DrillContext } from "./inspector-drills";
-import type { InsSavings, InsTool } from "../Inspector";
+import { funnelRows, costScenarios, ganttBars, fanoutGroups, litSupplierIds, type DrillContext } from "./inspector-drills";
+import type { InsSavings, InsTool, InsFanout } from "../Inspector";
 
 function savings(partial: Partial<InsSavings>): InsSavings {
   return {
@@ -68,5 +68,40 @@ describe("ganttBars", () => {
 
   it("returns [] for no tools", () => {
     expect(ganttBars({ tools: [] } as unknown as DrillContext)).toEqual([]);
+  });
+});
+
+function fanout(tool: string, sources: InsFanout["sources"], shortlisted: number): InsFanout {
+  return { type: "inspector", kind: "fanout", exchangeId: "x", tool, sources, shortlisted };
+}
+
+describe("fanoutGroups / litSupplierIds", () => {
+  const ctx = { fanout: [
+    fanout("hotel_search", [
+      { id: "cpmaxx", label: "CPMaxx", count: 8, credentialed: true },
+      { id: "serp", label: "Google", count: 22, credentialed: false },
+    ], 8),
+    fanout("hotel_list", [
+      { id: "cpmaxx", label: "CPMaxx", count: 8, credentialed: true },
+    ], 6),
+  ] } as unknown as DrillContext;
+
+  it("returns one group per fanout event, preserving tool + sources + shortlisted", () => {
+    const groups = fanoutGroups(ctx);
+    expect(groups).toHaveLength(2);
+    expect(groups[0]).toMatchObject({ tool: "hotel_search", shortlisted: 8 });
+    expect(groups[0].sources.map((s) => s.id)).toEqual(["cpmaxx", "serp"]);
+  });
+
+  it("litSupplierIds is the distinct set of source ids across all events", () => {
+    const lit = litSupplierIds(ctx);
+    expect(lit.has("cpmaxx")).toBe(true);
+    expect(lit.has("serp")).toBe(true);
+    expect(lit.size).toBe(2);
+  });
+
+  it("empty when no fanout events", () => {
+    expect(fanoutGroups({ fanout: [] } as unknown as DrillContext)).toEqual([]);
+    expect(litSupplierIds({ fanout: [] } as unknown as DrillContext).size).toBe(0);
   });
 });

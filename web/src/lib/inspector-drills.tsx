@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { InsTool, InsTurn, InsSummary, InsSavings, InsFanout } from "../Inspector";
+import { SUPPLIER_CATALOG, SUPPLIER_DISCLAIMER } from "../inspector-data";
 
 // Everything a drill render fn might need. Built by Inspector.tsx from the
 // derivations it already computes above its render branch (see Task 5).
@@ -198,6 +199,64 @@ function WaterfallView({ ctx }: { ctx: DrillContext }) {
   );
 }
 
+// ---- View 4: Supplier Fan-Out ----
+
+export interface FanoutGroup { tool: string; sources: InsFanout["sources"]; shortlisted: number }
+
+/** One group per consolidated tool call, in order. */
+export function fanoutGroups(ctx: DrillContext): FanoutGroup[] {
+  return ctx.fanout.map((f) => ({ tool: f.tool, sources: f.sources, shortlisted: f.shortlisted }));
+}
+
+/** Distinct supplier ids genuinely queried across all fan-out events. */
+export function litSupplierIds(ctx: DrillContext): Set<string> {
+  return new Set(ctx.fanout.flatMap((f) => f.sources.map((s) => s.id)));
+}
+
+function FanoutView({ ctx }: { ctx: DrillContext }) {
+  const groups = fanoutGroups(ctx);
+  const lit = litSupplierIds(ctx);
+  if (groups.length === 0) {
+    return <p className="ins-note">Supplier fan-out appears once a hotel search runs.</p>;
+  }
+  const dimmed = SUPPLIER_CATALOG.filter((s) => !lit.has(s.id));
+  return (
+    <div className="ins-fan">
+      <p className="ins-note">
+        One consolidated call routes through the supplier-consolidation layer to several
+        provider adapters, aggregates, then distills. Lit adapters were genuinely queried this
+        session (real captured counts); the rest show what the production router can reach.
+      </p>
+      {groups.map((g, i) => (
+        <div className="ins-fan-call" key={i}>
+          <div className="ins-fan-tool"><b>{g.tool}</b> <span className="ins-note">→ deduped to {g.shortlisted}</span></div>
+          <div className="ins-fan-lit">
+            {g.sources.map((s) => (
+              <span key={s.id} className={`ins-fan-chip lit ${s.credentialed ? "cred" : ""}`}>
+                <b>{s.label}</b> <span className="ins-fan-count">{s.count}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      ))}
+      {dimmed.length > 0 && (
+        <>
+          <h5 className="ins-fan-more">Also in the production catalog</h5>
+          <div className="ins-fan-catalog">
+            {dimmed.map((s) => (
+              <details className="ins-fan-chip dim" key={s.id}>
+                <summary><b>{s.label}</b> <span className="ins-fan-cat">{s.category}</span></summary>
+                <p className="ins-note">{s.coverage}</p>
+              </details>
+            ))}
+          </div>
+          <p className="ins-note ins-fan-disc">{SUPPLIER_DISCLAIMER}</p>
+        </>
+      )}
+    </div>
+  );
+}
+
 export const DRILLS: Drill[] = [
   { id: "funnel", title: "Token elimination funnel", trigger: { kind: "stat", statKey: "contextKeptOut" },
     render: (ctx) => <FunnelView ctx={ctx} /> },
@@ -205,6 +264,8 @@ export const DRILLS: Drill[] = [
     render: (ctx) => <CostSimView ctx={ctx} /> },
   { id: "waterfall", title: "Per-phase critical path", trigger: { kind: "pipeline" },
     render: (ctx) => <WaterfallView ctx={ctx} /> },
+  { id: "fanout", title: "Supplier fan-out", trigger: { kind: "stat", statKey: "suppliersQueried" },
+    render: (ctx) => <FanoutView ctx={ctx} /> },
 ];
 
 export function drillForStat(statKey: string): Drill | undefined {
