@@ -17,6 +17,7 @@ export const INFO_NAV: InfoPageMeta[] = [
   { slug: "phase-machine",     title: "Keeping the model on track",         nav: "phase machine" },
   { slug: "subagents",         title: "Subagents for the drudge work",      nav: "subagents (soon)" },
   { slug: "resume",            title: "Neil Roberts — resume",              nav: "resume" },
+  { slug: "engineering-v2",    title: "The deep dives, rewritten",          nav: "deep dives v2" },
 ];
 
 function esc(s: string): string {
