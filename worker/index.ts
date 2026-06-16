@@ -13,6 +13,7 @@ import { guardMutation, getCookieHeader, json, text } from "./access/http";
 import { handleAdmin, adminAuthed } from "./access/admin";
 import { handleOnboard } from "./access/onboard";
 import { handleProRequest } from "./access/pro-request-handler";
+import { handleShowcase, handleShowcaseComment } from "./showcase/routes";
 
 interface Env {
   SESSION: DurableObjectNamespace;
@@ -205,6 +206,13 @@ export default {
         ...(req.body ? { duplex: "half" } : {}),
       } as RequestInit);
       return env.SESSION.get(id).fetch(forward);
+    }
+
+    if (url.pathname === "/showcase" && req.method === "GET") {
+      return handleShowcase(req, env, db);
+    }
+    if (url.pathname === "/showcase/comments" && req.method === "POST") {
+      return handleShowcaseComment(req, env, db);
     }
 
     return new Response("ok");
