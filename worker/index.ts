@@ -37,6 +37,8 @@ interface Env {
   ONBOARD_IP_DAILY_CAP?: string;
   NEIL_NOTIFY_EMAIL?: string;
   DEMO_PUBLIC_LIVE_ENABLED?: string;
+  SHOWCASE_ENABLED?: string;
+  COMMENT_IP_SALT?: string;
   __db?: Db; // test seam: inject an in-memory Db
 }
 
