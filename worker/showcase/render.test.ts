@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { renderShowcasePage, renderModerationPage, renderShowcaseBody } from "./render";
+import { SECTIONS as REAL_SECTIONS } from "./config";
 import type { Section } from "./config";
 import type { CommentRow } from "./comments";
 
@@ -57,5 +58,23 @@ describe("renderModerationPage", () => {
     expect(html).not.toContain("<img onerror=1>");
     expect(html).toContain("&lt;script&gt;");
     expect(html).toContain("p1");
+  });
+});
+
+describe("no-leak defense-in-depth", () => {
+  it("the showcase BODY (its own source-allowlisted content) has no denylisted internal markers", () => {
+    // Assert against renderShowcaseBody, NOT renderShowcasePage: the shared site chrome
+    // added by renderInfoPage legitimately contains nav words like "cost engineering"
+    // (already public on /info — an allowed source). The leak guarantee is about the
+    // showcase's OWN content (curated sections + build-log + comments).
+    const body = renderShowcaseBody({
+      sections: REAL_SECTIONS,
+      buildlog: [{ date: "2026-06-16", text: "Public showcase page goes live." }],
+      comments: [],
+      showComments: true,
+    });
+    // Regression catch, NOT the guarantee (which is the source allowlist + no pm/journal/git import).
+    const denylist = [/\$\d/, /PM_DASHBOARD_TOKEN/, /worktree/i, /journal/i, /\bcost\b/i];
+    for (const re of denylist) expect(body).not.toMatch(re);
   });
 });
