@@ -89,6 +89,17 @@ describe("comment store (real SQLite)", () => {
     expect(await withinRateLimit(db, "other", now, RATE_LIMIT_WINDOW_MS, RATE_LIMIT_MAX)).toBe(true);
   });
 
+  it("treats a row exactly at the window boundary as outside the window (> not >=)", async () => {
+    const db = makeTestDb();
+    const now = 1_000_000;
+    // created_at === now - window → predicate `created_at > now - window` is false → not counted
+    await insertPending(db, { id: "boundary", createdAt: now - RATE_LIMIT_WINDOW_MS, name: "N", body: "B", ipHash: "edge", sectionRef: null });
+    expect(await withinRateLimit(db, "edge", now, RATE_LIMIT_WINDOW_MS, 1)).toBe(true);
+    // one inside the window with maxN=1 → at limit → false
+    await insertPending(db, { id: "inside", createdAt: now - 1, name: "N", body: "B", ipHash: "edge", sectionRef: null });
+    expect(await withinRateLimit(db, "edge", now, RATE_LIMIT_WINDOW_MS, 1)).toBe(false);
+  });
+
   it("pruneOld deletes old pending/rejected but keeps approved", async () => {
     const db = makeTestDb();
     const now = COMMENT_TTL_MS + 10_000;

@@ -27,6 +27,9 @@ export function validateComment(input: CommentInput): ValidationResult {
 
 /** HMAC-SHA256(salt, normalized_ip) hex. Pseudonymous, NOT anonymized. Never store the raw IP. */
 export async function hashIp(ip: string, salt: string): Promise<string> {
+  // Normalize: trim/lowercase, strip surrounding [brackets], then drop an IPv6 %zone.
+  // The trailing split("]") is load-bearing for the [addr]%zone form, where the closing
+  // bracket sits mid-string (not at the end) and survives the replace(/\]$/) above.
   const norm = (ip || "")
     .trim()
     .toLowerCase()
@@ -90,6 +93,7 @@ export async function insertPending(
   );
 }
 
+/** Newest-first (DESC) — public display order. */
 export async function listApproved(db: Db, limit: number): Promise<CommentRow[]> {
   return db.all<CommentRow>(
     "SELECT id, created_at, author_name, body, section_ref FROM showcase_comments WHERE status = 'approved' ORDER BY created_at DESC LIMIT ?",
@@ -97,6 +101,7 @@ export async function listApproved(db: Db, limit: number): Promise<CommentRow[]>
   );
 }
 
+/** Oldest-first (ASC) — FIFO moderation queue. */
 export async function listPending(db: Db, limit: number): Promise<CommentRow[]> {
   return db.all<CommentRow>(
     "SELECT id, created_at, author_name, body, section_ref FROM showcase_comments WHERE status = 'pending' ORDER BY created_at ASC LIMIT ?",
