@@ -15,11 +15,11 @@
 These were left open in the design spec; they are now decided so the plan has no placeholders. If you disagree, raise it before coding — do not silently diverge.
 
 - **D1 binding = `DEMO_DB`** (the access-control DB, `database_id` in `wrangler.toml`), NOT `STATS_DB`/`voygent-demo-stats`. Rationale: it is where access/moderation state already lives, it is exposed through the clean `Db` interface (`worker/access/db.ts`), and `makeTestDb()` (`worker/access/testdb.ts`) applies `migrations/` at construction, so tests get the table automatically. Migration file: `migrations/0006_showcase_comments.sql`.
-- **CSRF on moderation POSTs (finding #1) is satisfied by the existing `guardMutation(req, env.APP_ORIGIN)`** in `worker/access/http.ts`, which enforces the `Origin` header against `APP_ORIGIN` **and** requires `content-type: application/json`. A simple cross-site HTML form cannot send `application/json` without a CORS preflight (and this endpoint is not CORS-open), so the content-type gate plus Origin check is the CSRF defense. Admin moderation therefore submits via JSON `fetch()` (the same pattern the existing in-place editor uses). A separate per-request CSRF token is **not** added in v1 — the requirement is met by `guardMutation`; documented here as a conscious decision, not an omission.
+- **CSRF on moderation POSTs (finding #1) is satisfied by the existing `guardMutation(req, env.APP_ORIGIN)`** in `worker/access/http.ts`, which exact-matches the `Origin` header against `APP_ORIGIN` and requires `content-type: application/json`. **The real CSRF defense here is the strict `Origin === APP_ORIGIN` check** — NOT a content-type/preflight barrier. (Correction from codex review: the top-level worker answers `OPTIONS` with permissive CORS — `worker/index.ts:72`, `cors()` allows `POST, OPTIONS` — so do not rely on "cross-site JSON needs a preflight." The Origin exact-match is what stops a forged cross-site POST, and `handleAdmin` already gates `adminAuthed` on top of it.) Admin moderation submits via JSON `fetch()` (same pattern as the existing in-place editor; the browser sets `Origin` automatically and it must equal `APP_ORIGIN`). A separate per-request CSRF token is **not** added in v1 — the Origin match plus `adminAuthed` is sufficient; documented here as a conscious decision, not an omission.
 - **Public comment form uses `application/x-www-form-urlencoded`** (a plain `<form>`, no JavaScript). This keeps the `/showcase` CSP at `script-src 'none'`. The public POST handler does its own validation (it does NOT call `guardMutation`, since that would force JSON).
 - **Build-log source = `worker/showcase/changelog.json`** (a committed JSON array of `{ "date": "YYYY-MM-DD", "text": "..." }`), imported into the worker bundle exactly like `worker/info/content.json` (native JSON import — no bundler text-loader needed). This is the spec's "single committed source the author controls"; `.json` instead of `.md` because the repo already imports JSON natively and content.json sets the precedent. The author appends one object to publish a build-log line. Nothing else feeds the build-log.
 - **Rate limit = best-effort COUNT-then-INSERT**, max **5 inserts per IP-hash per rolling 10 minutes** (`RATE_LIMIT_MAX = 5`, `RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000`). The COUNT-then-INSERT race (finding #8) is accepted for v1 because manual moderation is the real backstop; documented in code. Escalation lever (atomic bucket table or Turnstile) is out of scope for v1.
-- **Retention/TTL (finding #2/#3) = 30 days** (`COMMENT_TTL_MS = 30 * 24 * 60 * 60 * 1000`), enforced as a delete-on-read sweep at the top of `GET /showcase` (prune `pending` + `rejected` rows older than TTL; approved rows persist). No scheduled job in v1.
+- **Retention/TTL (finding #2/#3) = 30 days** (`COMMENT_TTL_MS = 30 * 24 * 60 * 60 * 1000`), enforced as a delete-on-read sweep at the top of `GET /showcase` (prune `pending` + `rejected` rows older than TTL; approved rows persist). No scheduled job in v1. **Tradeoff (codex review, accepted for v1):** delete-on-read means every public `GET /showcase` issues a D1 write. Acceptable at this traffic; if `/showcase` ever gets hot, move pruning to a scheduled `cron` trigger or throttle it (e.g. probabilistic sweep). Noted as a v1 limitation, not a silent cap.
 - **Body-size cap = 8 KB** (`MAX_BODY_BYTES = 8192`), checked against `Content-Length` before reading the body (finding #2).
 
 ---
@@ -64,26 +64,36 @@ Create `migrations/0006_showcase_comments.sql`:
 CREATE TABLE IF NOT EXISTS showcase_comments (
   id            TEXT PRIMARY KEY,
   created_at    INTEGER NOT NULL,          -- epoch ms
-  author_name   TEXT NOT NULL,             -- capped <= 80 chars at write time
-  body          TEXT NOT NULL,             -- capped <= 2000 chars at write time
+  author_name   TEXT NOT NULL CHECK (length(author_name) <= 80),
+  body          TEXT NOT NULL CHECK (length(body) <= 2000),
   status        TEXT NOT NULL CHECK (status IN ('pending','approved','rejected')),
   ip_hash       TEXT NOT NULL,             -- HMAC-SHA256(COMMENT_IP_SALT, normalized_ip)
   section_ref   TEXT,                      -- validated against known section ids, else NULL
   moderated_at  INTEGER,                   -- epoch ms, set on approve/reject
   moderated_by  TEXT                       -- moderator identity, set on approve/reject
 );
+-- DB-layer length CHECKs (codex review): defense-in-depth so any future write path
+-- cannot bypass the app-layer name<=80 / body<=2000 caps.
 CREATE INDEX IF NOT EXISTS idx_showcase_comments_status_created
   ON showcase_comments (status, created_at);
 CREATE INDEX IF NOT EXISTS idx_showcase_comments_iphash_created
   ON showcase_comments (ip_hash, created_at);
 ```
 
-- [ ] **Step 2: Confirm `makeTestDb()` picks up the new migration**
+- [ ] **Step 2: Add the migration to `makeTestDb()`'s hardcoded list (REQUIRED — verified)**
 
-The showcase tests rely on `makeTestDb()` applying `migrations/*.sql`. Verify how it loads migrations:
+`makeTestDb()` (`worker/access/testdb.ts`) does NOT glob the migrations directory — it applies a **hardcoded `MIGRATIONS` array** (around lines 8–15) mapped to `../../migrations`. So `0006` will NOT be picked up automatically; you MUST add it or every comment-store test fails with `no such table: showcase_comments`.
 
-Run: `grep -n "migrations" worker/access/testdb.ts`
-Expected: it reads/globs the `migrations/` directory (so `0006` is applied automatically). If instead it imports a hardcoded list of migration files, add `0006_showcase_comments.sql` to that list now. Do not proceed until a fresh `makeTestDb()` would contain `showcase_comments`.
+Edit the `MIGRATIONS` array in `worker/access/testdb.ts` to append the new file (keep apply order):
+
+```ts
+const MIGRATIONS = [
+  // ...existing entries (0001, 0003, 0004, 0005 — note 0002 is intentionally excluded; it targets a different DB)...
+  "0006_showcase_comments.sql",
+].map((f) => join(HERE, "../../migrations", f));
+```
+
+Run: `grep -n "MIGRATIONS" worker/access/testdb.ts` to confirm `0006_showcase_comments.sql` is in the list before proceeding.
 
 - [ ] **Step 3: Add env fields to the `Env` interface**
 
@@ -118,8 +128,8 @@ Expected: PASS (no references to the table yet; only Env fields added).
 - [ ] **Step 6: Commit**
 
 ```bash
-git add migrations/0006_showcase_comments.sql worker/index.ts wrangler.toml
-git commit -m "feat(showcase): add showcase_comments migration + env wiring"
+git add migrations/0006_showcase_comments.sql worker/index.ts wrangler.toml worker/access/testdb.ts
+git commit -m "feat(showcase): add showcase_comments migration + env wiring + testdb migration"
 ```
 
 ---
@@ -562,7 +572,13 @@ export async function listPending(db: Db, limit: number): Promise<CommentRow[]> 
   );
 }
 
-/** Returns true if a pending row existed and was transitioned. Avoids depending on a changes-count field. */
+/**
+ * Atomic transition (codex review): one conditional UPDATE guarded by status='pending',
+ * trusting DbResult.changes. Avoids the SELECT-then-UPDATE race where two admins both
+ * transition the same row and both see success. `DbResult { changes: number }` is
+ * provided by the repo's Db adapter (worker/access/db.ts).
+ * Returns true iff exactly this call transitioned a pending row.
+ */
 export async function moderate(
   db: Db,
   id: string,
@@ -570,17 +586,12 @@ export async function moderate(
   by: string,
   now: number,
 ): Promise<boolean> {
-  const existing = await db.first<{ status: string }>(
-    "SELECT status FROM showcase_comments WHERE id = ?",
-    [id],
-  );
-  if (!existing || existing.status !== "pending") return false;
   const status = action === "approve" ? "approved" : "rejected";
-  await db.run(
-    "UPDATE showcase_comments SET status = ?, moderated_at = ?, moderated_by = ? WHERE id = ?",
+  const res = await db.run(
+    "UPDATE showcase_comments SET status = ?, moderated_at = ?, moderated_by = ? WHERE id = ? AND status = 'pending'",
     [status, now, by, id],
   );
-  return true;
+  return (res.changes ?? 0) > 0;
 }
 
 /** Retention sweep (finding #2/#3): drop old pending+rejected; keep approved. */
@@ -712,6 +723,16 @@ function escMultiline(s: string): string {
   return esc(s).replace(/\n/g, "<br>");
 }
 
+/**
+ * Attribute-context escaping (codex review): the shared esc() escapes &<> but NOT quotes,
+ * so it is unsafe for `attr="${value}"`. Use this for any value interpolated into an
+ * HTML attribute. (Today the only interpolated attrs are server UUIDs / trusted section
+ * ids, so this is defense-in-depth, but it keeps the helper correct for future values.)
+ */
+function escAttr(s: string): string {
+  return esc(s).replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
+
 function buildlogHtml(entries: BuildLogEntry[]): string {
   if (entries.length === 0) return "<p>No build-log entries yet.</p>";
   const items = entries
@@ -757,7 +778,7 @@ function sectionHtml(s: Section, buildlog: BuildLogEntry[], comments: CommentRow
       // Curated, author-trusted HTML — intentionally NOT escaped.
       inner = s.bodyHtml ?? "";
   }
-  return `<section id="${esc(s.id)}"><h2>${esc(s.title)}</h2>${inner}</section>`;
+  return `<section id="${escAttr(s.id)}"><h2>${esc(s.title)}</h2>${inner}</section>`;
 }
 
 export interface ShowcaseRenderInput {
@@ -767,11 +788,25 @@ export interface ShowcaseRenderInput {
   showComments: boolean;
 }
 
-export function renderShowcasePage(input: ShowcaseRenderInput): string {
-  const body = enabledSections(input.sections)
+/**
+ * Body-only composition (the showcase's OWN content: curated sections + build-log +
+ * comments). Exposed separately so the no-leak test (Task 8) asserts against exactly
+ * the showcase-controlled source allowlist, NOT the shared site chrome that
+ * renderInfoPage adds (its nav legitimately contains words like "cost engineering",
+ * which are already public on /info and are an allowed source — not a leak).
+ */
+export function renderShowcaseBody(input: ShowcaseRenderInput): string {
+  return enabledSections(input.sections)
     .map((s) => sectionHtml(s, input.buildlog, input.comments, input.showComments))
     .join("\n");
-  return renderInfoPage({ title: "Follow the build", subtitle: "Voygent — public showcase" }, body, "showcase");
+}
+
+export function renderShowcasePage(input: ShowcaseRenderInput): string {
+  return renderInfoPage(
+    { title: "Follow the build", subtitle: "Voygent — public showcase" },
+    renderShowcaseBody(input),
+    "showcase",
+  );
 }
 
 export function renderModerationPage(pending: CommentRow[]): string {
@@ -781,12 +816,12 @@ export function renderModerationPage(pending: CommentRow[]): string {
       : pending
           .map(
             (c) => `
-      <div class="pending" data-id="${esc(c.id)}">
+      <div class="pending" data-id="${escAttr(c.id)}">
         <strong>${esc(c.author_name)}</strong>
         ${c.section_ref ? `<em>on ${esc(c.section_ref)}</em>` : ""}
         <div>${escMultiline(c.body)}</div>
-        <button class="approve" data-id="${esc(c.id)}">Approve</button>
-        <button class="reject" data-id="${esc(c.id)}">Reject</button>
+        <button class="approve" data-id="${escAttr(c.id)}">Approve</button>
+        <button class="reject" data-id="${escAttr(c.id)}">Reject</button>
       </div>`,
           )
           .join("");
@@ -866,6 +901,14 @@ function postForm(fields: Record<string, string>, headers: Record<string, string
   });
 }
 
+// A Db whose every method throws — simulates a missing showcase_comments table / D1 outage.
+const throwingDb: any = {
+  run: async () => { throw new Error("no such table: showcase_comments"); },
+  first: async () => { throw new Error("no such table: showcase_comments"); },
+  all: async () => { throw new Error("no such table: showcase_comments"); },
+  batch: async () => { throw new Error("no such table: showcase_comments"); },
+};
+
 describe("GET /showcase", () => {
   it("404s when SHOWCASE_ENABLED is unset (inert)", async () => {
     const db = makeTestDb();
@@ -879,6 +922,19 @@ describe("GET /showcase", () => {
     expect(res.status).toBe(200);
     expect(res.headers.get("content-type")).toContain("text/html");
     expect(res.headers.get("content-security-policy")).toBe(SHOWCASE_CSP);
+  });
+
+  it("still renders 200 (no comment form) when the salt is missing — fail-closed UX", async () => {
+    const db = makeTestDb();
+    const res = await handleShowcase(getReq(), env({ COMMENT_IP_SALT: undefined }), db);
+    expect(res.status).toBe(200);
+    expect(await res.text()).not.toContain('action="/showcase/comments"');
+  });
+
+  it("degrades to no-comments (still 200) when D1 throws", async () => {
+    const res = await handleShowcase(getReq(), env(), throwingDb);
+    expect(res.status).toBe(200);
+    expect(await res.text()).not.toContain('action="/showcase/comments"');
   });
 });
 
@@ -894,6 +950,11 @@ describe("POST /showcase/comments", () => {
     const res = await handleShowcaseComment(postForm({ name: "n", body: "b", website: "" }), env({ COMMENT_IP_SALT: undefined }), db);
     expect(res.status).toBe(503);
     expect((await listPending(db, 10)).length).toBe(0);
+  });
+
+  it("503s fail-closed (not 500) when the comments table/D1 is unavailable", async () => {
+    const res = await handleShowcaseComment(postForm({ name: "n", body: "b", website: "" }), env(), throwingDb);
+    expect(res.status).toBe(503);
   });
 
   it("415s on wrong content-type", async () => {
@@ -990,7 +1051,12 @@ function htmlResponse(html: string, status = 200): Response {
 
 /** Always-neutral submit acknowledgement (no oracle for honeypot/rate-limit). */
 function neutralAck(): Response {
-  return htmlResponse("<!doctype html><p>Thanks — your comment is held for review.</p>", 200);
+  return htmlResponse(
+    '<!doctype html><meta charset="utf-8"><title>Thanks</title>' +
+      "<p>Thanks — your comment is held for review.</p>" +
+      '<p><a href="/showcase">Back to the showcase</a></p>',
+    200,
+  );
 }
 
 /**
@@ -1002,13 +1068,18 @@ export async function handleShowcase(req: Request, env: ShowcaseEnv, db: Db): Pr
 
   const now = Date.now();
   let comments: Awaited<ReturnType<typeof listApproved>> = [];
-  let showComments = true;
-  try {
-    await pruneOld(db, now, COMMENT_TTL_MS);          // retention sweep (best-effort)
-    comments = await listApproved(db, APPROVED_LIMIT);
-  } catch {
-    // Migration not applied / D1 unavailable -> hide comments, do not throw (finding #4).
-    showComments = false;
+  // Fail-closed UX (codex review): if the salt is missing the POST would 503, so hide
+  // the comment form here too — never render a form that cannot be submitted.
+  let showComments = !!env.COMMENT_IP_SALT && !!db;
+  if (showComments) {
+    try {
+      await pruneOld(db, now, COMMENT_TTL_MS);          // retention sweep (best-effort)
+      comments = await listApproved(db, APPROVED_LIMIT);
+    } catch {
+      // Migration not applied / D1 unavailable -> hide comments, do not throw (finding #4).
+      showComments = false;
+      comments = [];
+    }
   }
 
   const buildlog = parseBuildLog(changelogRaw as any);
@@ -1034,17 +1105,22 @@ export async function handleShowcaseComment(req: Request, env: ShowcaseEnv, db: 
     return new Response("unsupported media type", { status: 415 });
   }
 
-  // Body-size cap BEFORE reading/parsing (finding #2).
-  const len = Number(req.headers.get("content-length") || "0");
-  if (Number.isFinite(len) && len > MAX_BODY_BYTES) {
+  // Body-size cap (finding #2 + codex review). Content-Length char/byte note: a missing or
+  // non-numeric Content-Length is rejected (a normal browser form POST always sets it), and
+  // we re-check actual UTF-8 byte length after reading so a lying header can't slip past.
+  const lenHeader = req.headers.get("content-length");
+  const len = lenHeader === null ? NaN : Number(lenHeader);
+  if (!Number.isFinite(len) || len > MAX_BODY_BYTES) {
     return new Response("payload too large", { status: 413 });
   }
 
   let form: URLSearchParams;
   try {
-    const text = await req.text();
-    if (text.length > MAX_BODY_BYTES) return new Response("payload too large", { status: 413 });
-    form = new URLSearchParams(text);
+    const raw = await req.text();
+    if (new TextEncoder().encode(raw).length > MAX_BODY_BYTES) {
+      return new Response("payload too large", { status: 413 });
+    }
+    form = new URLSearchParams(raw);
   } catch {
     return new Response("bad request", { status: 400 });
   }
@@ -1062,14 +1138,20 @@ export async function handleShowcaseComment(req: Request, env: ShowcaseEnv, db: 
 
   const now = Date.now();
   const ipHash = await hashIp(req.headers.get("cf-connecting-ip") || "", env.COMMENT_IP_SALT);
-
-  // Rate limit: over the cap -> neutral ack, no write (no oracle).
-  const ok = await withinRateLimit(db, ipHash, now, RATE_LIMIT_WINDOW_MS, RATE_LIMIT_MAX);
-  if (!ok) return neutralAck();
-
   const sectionRef = normalizeSectionRef(form.get("section_ref"), KNOWN_SECTION_IDS);
   const id = crypto.randomUUID();
-  await insertPending(db, { id, createdAt: now, name: validated.name, body: validated.body, ipHash, sectionRef });
+
+  // Fail-closed on ANY D1 error (codex review): a missing showcase_comments table or a
+  // D1 outage makes withinRateLimit/insertPending throw — that must be a controlled 503,
+  // never an unhandled 500 that writes nothing silently or leaks a stack.
+  try {
+    // Rate limit: over the cap -> neutral ack, no write (no oracle).
+    const ok = await withinRateLimit(db, ipHash, now, RATE_LIMIT_WINDOW_MS, RATE_LIMIT_MAX);
+    if (!ok) return neutralAck();
+    await insertPending(db, { id, createdAt: now, name: validated.name, body: validated.body, ipHash, sectionRef });
+  } catch {
+    return new Response("comments unavailable", { status: 503 });
+  }
   return neutralAck();
 }
 ```
@@ -1263,13 +1345,7 @@ Inside `handleAdmin`, BEFORE the final `return text("not found", 404)`, add:
   }
 ```
 
-Confirm `handleAdmin` already enforces `adminAuthed` at the top (it gates every `/admin*` route). If it does NOT, add at the very top of `handleAdmin`:
-
-```ts
-  if (!adminAuthed(req, env)) return text("unauthorized", 401);
-```
-
-(Run `grep -n "adminAuthed" worker/access/admin.ts` to confirm before adding — do not double-gate.)
+**Confirmed (codex review + grounding):** `handleAdmin` ALREADY enforces auth at its top (`worker/access/admin.ts:33` — `if (!adminAuthed(req, env)) return text("unauthorized", 401);`), which gates every `/admin*` route including the new `/admin/comments*`. **Do NOT add a second gate.** `handleAdminComments` assumes `adminAuthed` has already passed.
 
 - [ ] **Step 6: Typecheck + full suite**
 
@@ -1295,20 +1371,25 @@ git commit -m "feat(showcase): admin moderation routes (list + approve/reject) w
 Append to `worker/showcase/render.test.ts`:
 
 ```ts
+import { renderShowcaseBody } from "./render";
 import { SECTIONS } from "./config";
 
 describe("no-leak defense-in-depth (finding #7)", () => {
-  it("a fully-rendered default page contains no denylisted internal markers", () => {
-    const html = renderShowcasePage({
+  it("the showcase BODY (its own source-allowlisted content) has no denylisted internal markers", () => {
+    // Assert against renderShowcaseBody, NOT renderShowcasePage: the shared site chrome
+    // added by renderInfoPage legitimately contains nav words like "cost engineering"
+    // (already public on /info — an allowed source). The leak guarantee is about the
+    // showcase's OWN content (curated sections + build-log + comments).
+    const body = renderShowcaseBody({
       sections: SECTIONS,
       buildlog: [{ date: "2026-06-16", text: "Public showcase page goes live." }],
       comments: [],
       showComments: true,
     });
-    // This is a regression catch, not the guarantee. The real guarantee is the strict
+    // This is a regression catch, NOT the guarantee. The real guarantee is the strict
     // source allowlist + no import path from pm/journal/git modules + manual moderation.
     const denylist = [/\$\d/, /PM_DASHBOARD_TOKEN/, /worktree/i, /journal/i, /\bcost\b/i];
-    for (const re of denylist) expect(html).not.toMatch(re);
+    for (const re of denylist) expect(body).not.toMatch(re);
   });
 });
 ```
@@ -1318,19 +1399,57 @@ describe("no-leak defense-in-depth (finding #7)", () => {
 Run: `npx vitest run worker/showcase/render.test.ts`
 Expected: PASS. (If a curated `bodyHtml` placeholder happens to trip the denylist, fix the curated copy — never weaken the test.)
 
-- [ ] **Step 3: Full suite + typecheck (final gate)**
+- [ ] **Step 3: Worker-routing integration tests (codex review — exercise the real boundary)**
+
+The per-handler tests don't prove the routes are actually wired before the `return new Response("ok")` fallthrough, nor that the admin gate fires through `handleAdmin`. Add `worker/showcase/integration.test.ts` driving the real `worker.fetch()` with the `__db` injection seam (the same seam `makeDb` honors at `worker/index.ts:46`). Verify the exact import path of the default worker export first (`grep -n "export default" worker/index.ts`).
+
+```ts
+import { describe, it, expect } from "vitest";
+import worker from "../index";
+import { makeTestDb } from "../access/testdb";
+
+const ORIGIN = "http://localhost:8787";
+function baseEnv(extra: Record<string, unknown> = {}): any {
+  return { __db: makeTestDb(), APP_ORIGIN: ORIGIN, ADMIN_TOKEN: "secret", ...extra };
+}
+
+describe("showcase routing through worker.fetch", () => {
+  it("GET /showcase is inert (404) when SHOWCASE_ENABLED is unset", async () => {
+    const res = await worker.fetch(new Request(`${ORIGIN}/showcase`, { method: "GET" }), baseEnv());
+    expect(res.status).toBe(404);
+  });
+
+  it("GET /showcase renders 200 when enabled", async () => {
+    const res = await worker.fetch(new Request(`${ORIGIN}/showcase`, { method: "GET" }), baseEnv({ SHOWCASE_ENABLED: "1", COMMENT_IP_SALT: "s" }));
+    expect(res.status).toBe(200);
+  });
+
+  it("unauthenticated POST /admin/comments/x/approve is 401 (handleAdmin gate)", async () => {
+    const res = await worker.fetch(
+      new Request(`${ORIGIN}/admin/comments/x/approve`, { method: "POST", headers: { origin: ORIGIN, "content-type": "application/json" }, body: "{}" }),
+      baseEnv(),
+    );
+    expect(res.status).toBe(401);
+  });
+});
+```
+
+Run: `npx vitest run worker/showcase/integration.test.ts`
+Expected: PASS. (If the worker's `fetch` signature needs a third `ctx` arg, pass a stub `{} as any`; check `worker/index.ts`'s `fetch(req, env, ctx)` shape.)
+
+- [ ] **Step 4: Full suite + typecheck (final gate)**
 
 Run: `npm run typecheck && npm test`
 Expected: PASS.
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
-git add worker/showcase/render.test.ts
-git commit -m "test(showcase): no-leak denylist regression (defense-in-depth)"
+git add worker/showcase/render.test.ts worker/showcase/integration.test.ts
+git commit -m "test(showcase): no-leak regression + worker-routing integration tests"
 ```
 
-- [ ] **Step 5: Apply the D1 migration (remote)**
+- [ ] **Step 6: Apply the D1 migration (remote)**
 
 The `showcase_comments` table must exist in the live `voygent-demo` D1 before deploy, or `GET /showcase` degrades to no-comments and `POST` 503s.
 
@@ -1339,12 +1458,12 @@ Expected: migration `0006_showcase_comments` applied. Verify:
 Run: `npx wrangler d1 execute voygent-demo --remote --command "SELECT name FROM sqlite_master WHERE type='table' AND name='showcase_comments';"`
 Expected: one row.
 
-- [ ] **Step 6: Set the secret**
+- [ ] **Step 7: Set the secret**
 
 Run: `npx wrangler secret put COMMENT_IP_SALT`
 Enter a long random value (e.g. `openssl rand -hex 32`). This is the HMAC key; rotating it invalidates existing rate-limit grouping (acceptable).
 
-- [ ] **Step 7: Deploy with the feature still OFF**
+- [ ] **Step 8: Deploy with the feature still OFF**
 
 `SHOWCASE_ENABLED` stays UNSET, so both routes are inert (404) after deploy — ship the code dark, then enable when curated content is written.
 
@@ -1353,7 +1472,7 @@ Expected: deploy succeeds. Verify inert:
 Run: `curl -s -o /dev/null -w "%{http_code}\n" https://demo.voygent.ai/showcase`
 Expected: `404`.
 
-- [ ] **Step 8: Enable when ready (separate, deliberate step — not part of this build)**
+- [ ] **Step 9: Enable when ready (separate, deliberate step — not part of this build)**
 
 When curated `config.ts` copy + initial `changelog.json` entries are written, set `SHOWCASE_ENABLED = "1"` in `wrangler.toml` `[vars]` (or via dashboard) and redeploy. Then verify:
 Run: `curl -s -o /dev/null -w "%{http_code}\n" https://demo.voygent.ai/showcase`
@@ -1380,4 +1499,13 @@ Expected: `200`. Submit a test comment, confirm it does NOT appear, approve it a
 
 **3. Type consistency** — `CommentRow` fields (`id`, `created_at`, `author_name`, `body`, `section_ref`) are identical across `comments.ts`, `render.ts`, and tests. `validateComment` returns the same `ValidationResult` shape used in `routes.ts`. `moderate()`/`withinRateLimit()`/`pruneOld()` signatures match their call sites. `SHOWCASE_CSP` is defined once and asserted in tests. `esc`/`renderInfoPage` imports match the exports added/confirmed in Task 5.
 
-**Verification dependencies flagged for the implementer** (resolve in-task, do not guess): `makeTestDb()` migration loading (Task 1.2), exact `guardMutation` return/status (Task 7.1/7.3), `worker/access/http.ts` exports (Task 7.3), whether `handleAdmin` already gates on `adminAuthed` (Task 7.5), `resolveJsonModule` for the changelog import (Task 6.4).
+**Verification dependencies flagged for the implementer** (resolve in-task, do not guess): exact `guardMutation` return/status (Task 7.1/7.3), `worker/access/http.ts` exports (Task 7.3), `worker.fetch` signature for the integration tests (Task 8.3), `resolveJsonModule` for the changelog import (Task 6 note). (Several earlier unknowns are now confirmed against the live repo — see "Codex review folded in" below.)
+
+## Codex review folded in (2026-06-16, second pass)
+
+A codex external review (`/codex-review`, read-only against the live repo) was run on this plan + spec. Findings folded in:
+
+- **Block-on:** (1) `makeTestDb()` uses a HARDCODED migration list, not a glob → Task 1.2 now mandates adding `0006` to it. (2) `POST /showcase/comments` now wraps D1 ops in try/catch → controlled `503` instead of an unhandled 500 when the table/D1 is missing (+ test). (3) The no-leak test now targets `renderShowcaseBody()` (showcase's own content) instead of the full page — `renderInfoPage`'s nav legitimately contains "cost engineering". (4) `GET /showcase` now hides the comment form when the salt is missing (fail-closed UX) (+ tests).
+- **Should-fix:** (5) CSRF rationale corrected — the worker IS CORS-permissive on OPTIONS, so the real defense is `guardMutation`'s exact `Origin === APP_ORIGIN` match (not a preflight barrier). (6) Body cap hardened — reject missing/non-numeric `Content-Length`, re-check UTF-8 byte length after read. (7) `moderate()` is now a single atomic conditional UPDATE trusting `DbResult.changes` (no SELECT-then-UPDATE race). (8) Added `escAttr()` for attribute-context interpolation (esc() doesn't escape quotes). (9) Migration adds `CHECK(length(...))` constraints. (10) Added worker-level `integration.test.ts` (real routing + admin 401 gate).
+- **Confirmed fine by codex:** `Db` method shapes, `guardMutation` call shape, no double `adminAuthed` gate, `resolveJsonModule` on, `script-src 'none'` compatible with `renderInfoPage` (inline styles, no script; admin script is on a different route), SQL parameterized (no injection/SSRF/public-XSS).
+- **Deferred (nice-to-have):** scheduled/throttled prune instead of delete-on-read (noted as v1 tradeoff); add a discoverability link to `/admin/comments` from the existing admin page (optional, do during wiring).
