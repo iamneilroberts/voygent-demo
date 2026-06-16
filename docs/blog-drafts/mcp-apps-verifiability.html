@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRAFT — Making an AI feature you can verify · Voygent engineering notes</title>
+<!--
+  ============================================================================
+  NON-PUBLIC DRAFT. Lives in docs/blog-drafts/ — the Worker serves /info, /blog,
+  /presets, /stats, /admin, /chat etc., NOT /docs. This file is not reachable on
+  the live site. Edit it here and iterate.
+
+  TO PUBLISH (later): copy the <article> body fragment (between the BODY-START /
+  BODY-END markers) into worker/info/content.json under a new slug, e.g.:
+
+    "mcp-apps-verifiability": {
+      "title":    "<see TITLE below>",
+      "subtitle": "<see SUBTITLE below>",
+      "tags":     ["mcp-apps","architecture","determinism"],
+      "blog":     true,                // <-- this flag is what makes it public at /blog
+      "body":     "<the BODY fragment, JSON-escaped>"
+    }
+
+  Then port via scripts/info-content.mjs (the existing content tooling). Until that
+  entry exists with blog:true, nothing here is live.
+
+  TITLE:    Making an AI feature you can verify
+  SUBTITLE: An LLM is nondeterministic. The interface around it doesn't have to be — Voygent wraps the model in a deterministic, tested, auditable shell.
+  Source outline (voygent-lite): docs/posts/2026-06-16-mcp-apps-deterministic-interface-folio-board.md
+  Flags: [VERIFY] = confirm before publishing · [NEEDS] = asset still missing.
+  ============================================================================
+-->
+<style>
+  :root { --bg:#0c0a07; --panel:#14110b; --ink:#efe7d6; --muted:#9a907c; --amber:#f5a623; --green:#3fb950; --line:#2a2316;
+          --verify:#f5a623; --needs:#ef6f6f; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:400 16px/1.65 ui-sans-serif, system-ui, sans-serif; }
+  .wrap { max-width:760px; margin:0 auto; padding:32px 20px 64px; }
+  .draftbar { background:var(--panel); border:1px solid var(--line); border-left:3px solid var(--amber);
+              color:var(--muted); font:500 .8125rem/1.6 ui-monospace, monospace; padding:10px 14px; margin-bottom:24px; border-radius:4px; }
+  h1 { font-size:1.6rem; line-height:1.25; margin:0 0 6px; color:var(--ink); }
+  .subtitle { color:var(--muted); margin:0 0 28px; font-size:1.0625rem; }
+  h2 { font-size:1.125rem; margin:32px 0 8px; color:var(--amber); }
+  p, li { color:#d9d2c2; }
+  code, .mono { font:500 .875em ui-monospace, monospace; color:var(--green); }
+  .artifact { font:500 .75rem/1.5 ui-monospace, monospace; color:var(--muted); display:block; margin-top:2px; }
+  blockquote { margin:16px 0; padding:10px 16px; border-left:3px solid var(--amber); background:var(--panel); color:#d9d2c2; font-style:italic; }
+  .stat { color:var(--green); font-weight:600; }
+  ol, ul { padding-left:22px; }
+  .flag { font:700 .7rem/1 ui-monospace, monospace; padding:2px 6px; border-radius:3px; letter-spacing:.3px; }
+  .flag.verify { color:var(--bg); background:var(--verify); }
+  .flag.needs  { color:#fff; background:var(--needs); }
+  footer.info { margin-top:48px; padding-top:16px; border-top:1px solid var(--line);
+                font:500 .8125rem/1.8 ui-monospace, monospace; color:var(--muted); }
+  footer.info a { color:var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="draftbar">
+    DRAFT · not live · docs/blog-drafts/ &nbsp;|&nbsp;
+    <span class="flag verify">VERIFY</span> confirm before publishing &nbsp;
+    <span class="flag needs">NEEDS</span> asset still missing
+  </div>
+
+  <h1>Making an AI feature you can verify</h1>
+  <p class="subtitle">An LLM is nondeterministic. The interface around it doesn't have to be — Voygent wraps the model in a deterministic, tested, auditable shell.</p>
+
+  <!-- BODY-START (this fragment is what goes into content.json "body") -->
+  <article>
+
+  <p>An experienced engineer trusts deterministic code: you read it, you test it, the same input gives the same output. An LLM breaks that contract. The same prompt yields different text, and the model can state things that aren't true. So the reasonable objection is "how do I verify any of this?"</p>
+  <p>The answer isn't to make the model deterministic. It's to make its job small, and make everything around it deterministic and testable. This is one worked example: Folio Board, a whole-trip review widget that renders inside the chat. Here's what's deterministic, what isn't, and where the line sits.</p>
+  <blockquote>You don't make an LLM deterministic. You make the surface around it deterministic, and you shrink the model's job to something you can check.</blockquote>
+
+  <h2>What an MCP App is</h2>
+  <p>MCP (Model Context Protocol) lets a server expose <em>tools</em> the model can call over a standard wire format. The host — claude.ai, Claude Desktop — runs the tools the model picks. An <strong>MCP App</strong> adds a UI: the server registers a <code>ui://</code> resource (HTML for a sandboxed iframe), a tool result references it, and the host renders that widget inline. So instead of a wall of text, <code>preview_folio_board</code> returns an interactive trip review.</p>
+  <span class="artifact">resource + versioned URI: src/mcp/folio-board-app/register.ts:77,136-158 · tool: src/mcp/tools/preview-folio-board.ts:56-63</span>
+  <p>One spec primitive does the heavy lifting below: <code>_meta.ui.visibility</code> marks a tool visible to the model, to the app, or both.</p>
+
+  <h2>The core trick: keep the data out of the model</h2>
+  <p>The naive design returns the full trip into the model's context. It's large, it re-bills every turn, and once it's in context the model can read it wrong or paraphrase it into something false. Folio Board does the opposite. The model-visible result carries a tiny reference only — <code>{ __voygentFolioBoardRef: { tripId, rev } }</code>. The widget then calls an app-only tool, <code>folio_board_data</code> (visibility <code>["app"]</code>, invisible to the model), to fetch the full projection itself.</p>
+  <span class="artifact">ref: preview-folio-board.ts:215-230 · app-only data tool: register.ts:174-226</span>
+  <p>Measured on staging: the model-visible payload dropped from <span class="stat">36,621 B / ~9,155 tokens</span> to <span class="stat">531 B / ~132 tokens</span> — a <span class="stat">~98.5%</span> cut, flat regardless of trip size. The full board the widget renders is about <span class="stat">22,000 tokens</span>, and it never enters the model's context. The ADR records the proof: after a fetch and a pick, Claude could not read a non-selected option's price and said the data "weren't passed back to me."</p>
+  <span class="artifact">numbers: docs/research/2026-06-12-folio-board-app-staging-smoke-and-token-cost.md:12 · docs/adr/0012-...md:88-95</span>
+  <p>This is a verifiability argument, not only a cost one. The model can't misreport data it never received. The widget renders from the real record, deterministically; the hallucination-prone channel is bypassed for the data, and the model is left to route.</p>
+  <blockquote>The model can't lie about data it never sees. The widget reads the record; the model just opens the drawer.</blockquote>
+
+  <h2>The interface renders from data, not from text</h2>
+  <p>The widget renders from the trip projection in storage, not from anything the model wrote. Same record, same render. Around that core it uses the current MCP Apps features deliberately:</p>
+  <ul>
+    <li><strong>Compact by default.</strong> Every decision group, every day, the whole Included section start collapsed to one line; the advisor expands what they want. It's a pre-send review surface, not where picks are made. <span class="artifact">folio-board-widget.js:240-261</span></li>
+    <li><strong>Host-native theming.</strong> The widget consumes the host's 36 standardized CSS variables and fonts so it matches claude.ai light and dark. <span class="artifact">applyHostStyleVariables / applyHostFonts — folio-board-widget.js:2038-2039</span></li>
+    <li><strong>Fullscreen on request.</strong> <code>app.requestDisplayMode()</code>, with the button shown only when the host advertises support. <span class="artifact">folio-board-widget.js:1454-1460,1212</span></li>
+    <li><strong>Calendar export.</strong> The <code>.ics</code> is built in-widget (RFC 5545) and handed to the host via <code>app.downloadFile()</code>, because the sandbox blocks direct downloads. The generator is pure, so it's unit-tested directly. <span class="artifact">ics.js · folio-board-widget.js:1465-1479</span></li>
+    <li><strong>Images past the sandbox CSP.</strong> <code>_meta.ui.csp.resourceDomains</code> widens the iframe's default <code>img-src</code> so committed hero images load. <span class="artifact">register.ts:104-106,145,153</span></li>
+  </ul>
+  <p>One efficiency detail worth keeping: claude.ai web caches <code>ui://</code> resources by URI and won't refetch on reconnect, so a static URI meant shipped widget updates never reached connected clients. The fix hashes the bundled HTML into the URI, so a content change is a new URI. <span class="artifact">widgetVersionTag() — register.ts:63-77</span></p>
+
+  <h2>The payoff: write-backs that read like deterministic code</h2>
+  <p>When the advisor edits in the widget — picks an option, sets a commission, edits a note — it does not ask the model to mutate the trip. It calls app-only write tools with guarantees you'd recognize from any careful backend.</p>
+  <span class="artifact">five app-only tools (visibility ["app"], tier pro): register.ts:81-89 · registered in server.ts:393-406</span>
+  <ol>
+    <li><strong>Stable addressing, not array index.</strong> A durable <code>editKey</code> of <code>decision:&lt;decisionId&gt;:&lt;optionId&gt;</code> identifies a target by identity, so a reorder can't redirect a write. <span class="artifact">register.ts:506-543</span></li>
+    <li><strong>Exactly one match, or refuse.</strong> The resolver returns <code>target_ambiguous</code> unless exactly one option matches — malformed data never silently writes to the first match. <span class="artifact">register.ts:519-528</span></li>
+    <li><strong>Optimistic concurrency.</strong> The write carries a <code>rev</code>; a mismatch returns <code>version_diverged</code> with the current rev. No lost updates. <span class="artifact">register.ts:601-604, :696-700, :443-445</span></li>
+    <li><strong>Bounded validation.</strong> <code>validateCommissionPatch</code> checks only the keys present — <code>amount</code> in [0, 1e6], <code>pct</code> in [0, 100], explicit <code>null</code> means clear. <span class="artifact">src/lib/commission-core.ts:132-155</span></li>
+    <li><strong>Access control, defense in depth.</strong> <code>canCurate()</code> requires both an interactive host and an advisor projection, so a client-shaped payload can never surface an edit control. <span class="artifact">folio-board-widget.js:239</span></li>
+  </ol>
+  <p>The model can propose an edit. It cannot bypass identity-addressing, ambiguity-refusal, version-guarding, range-validation, or the advisor gate. The mutation path has the same properties as code you'd write and test by hand. The nondeterministic part is "the advisor clicked this option." The rest is deterministic.</p>
+  <blockquote>The AI proposes. The write path disposes — by identity, exactly once, version-guarded, range-checked, role-gated.</blockquote>
+
+  <h2>You can verify the tool surface too</h2>
+  <p><code>list_my_tools</code> enumerates every tool actually registered for the session, read from inside the server — the model cannot hallucinate the list. The catalog is locked per session, so what the agent can do is fixed and inspectable. You don't take the model's word for its own capabilities; you read them off the server.</p>
+  <span class="artifact">src/mcp/tools/introspection.ts:54-55</span>
+
+  <h2>Where the line sits</h2>
+  <p>Nondeterministic, and that's fine: which tool the model calls, with which arguments, and the prose it writes around the widget. Deterministic and tested: the data fetch, the render, validation, persistence, concurrency, and access control, behind roughly <span class="stat">4,098</span> <span class="flag verify">VERIFY</span> unit tests at the time the commission tool merged. The pattern generalizes: shrink the probabilistic core to a routing decision, and make every shell around it deterministic and unit-tested. That's how an AI feature gets the verifiability of ordinary code.</p>
+
+  <h2>Caveats, and where the spec is moving</h2>
+  <p>The model-to-app direction isn't there yet: an ADR explored tools the app exposes back to the model, but a probe found Claude Desktop doesn't enumerate them, so it's shelved. <span class="flag verify">VERIFY</span> current spec status before publishing. The spec itself moves — 0.3.0 replaced <code>viewport</code> with <code>containerDimensions</code>; the 0.2.2 helpers <code>registerAppTool()</code>/<code>registerAppResource()</code> exist, though this code registers via the lower-level resource/tool calls. <span class="flag verify">VERIFY</span> that phrasing so it doesn't read as "we skip the SDK." And host differences are real: the two-way <code>sendMessage</code> path trips claude.ai's prompt-injection caution banner. <span class="flag needs">NEEDS</span> a decision on whether to mention it.</p>
+
+  <h2>Try it</h2>
+  <p>Open a trip on the live demo and the Folio Board renders inline. <span class="flag needs">NEEDS</span> confirm Folio Board is enabled with a clean demo trip. The pattern — a reference instead of a payload, plus guarded app-only write tools — carries past travel to any AI feature with a real data model and real mutations.</p>
+  <span class="artifact">read: ADR-0012 (ref-and-fetch), ADR-0013 (model→app), the staging token-cost note · <span class="flag needs">NEEDS</span> 2-3 screenshots: compact, expanded group, commission editor</span>
+
+  </article>
+  <!-- BODY-END -->
+
+  <footer class="info">
+    <strong>Pre-publish checklist</strong><br>
+    <span class="flag verify">VERIFY</span> tool count (78 last asserted) + vitest count (4,098) at tip of main<br>
+    <span class="flag verify">VERIFY</span> ADR-0013 / model→app spec status as of publish date<br>
+    <span class="flag verify">VERIFY</span> registerAppTool phrasing (we use lower-level register calls)<br>
+    <span class="flag needs">NEEDS</span> screenshots (compact, expanded group, commission editor)<br>
+    <span class="flag needs">NEEDS</span> confirm Folio Board live + demo trip on demo.voygent.ai<br>
+    <span class="flag needs">NEEDS</span> decision on mentioning the sendMessage prompt-injection banner<br><br>
+    Sources: voygent-lite — register.ts, preview-folio-board.ts, commission-core.ts, introspection.ts, folio-board-widget.js, ics.js, docs/adr/0012, docs/research/2026-06-12 token-cost note, ~/.claude/ext-apps-docs/RELEASES.md
+  </footer>
+</div>
+</body>
+</html>
