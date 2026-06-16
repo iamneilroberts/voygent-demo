@@ -1,6 +1,6 @@
 import type { Db } from "../access/db";
-import { SECTIONS, KNOWN_SECTION_IDS } from "./config";
-import { parseBuildLog } from "./buildlog";
+import { SECTIONS, KNOWN_SECTION_IDS, SHOWCASE_PATH } from "./config";
+import { parseBuildLog, type RawEntry } from "./buildlog";
 import changelogRaw from "./changelog.json";
 import { renderShowcasePage } from "./render";
 import {
@@ -44,7 +44,7 @@ function neutralAck(): Response {
   return htmlResponse(
     '<!doctype html><meta charset="utf-8"><title>Thanks</title>' +
       "<p>Thanks — your comment is held for review.</p>" +
-      '<p><a href="/showcase">Back to the showcase</a></p>',
+      `<p><a href="${SHOWCASE_PATH}">Back to the showcase</a></p>`,
     200,
   );
 }
@@ -72,7 +72,7 @@ export async function handleShowcase(req: Request, env: ShowcaseEnv, db: Db): Pr
     }
   }
 
-  const buildlog = parseBuildLog(changelogRaw as any);
+  const buildlog = parseBuildLog(changelogRaw as RawEntry[]);
   const html = renderShowcasePage({ sections: SECTIONS, buildlog, comments, showComments });
   return htmlResponse(html, 200);
 }
@@ -90,6 +90,7 @@ export async function handleShowcaseComment(req: Request, env: ShowcaseEnv, db: 
     return new Response("comments unavailable", { status: 503 });
   }
 
+  const now = Date.now();
   const ctype = req.headers.get("content-type") || "";
   if (!ctype.includes("application/x-www-form-urlencoded")) {
     return new Response("unsupported media type", { status: 415 });
@@ -128,7 +129,6 @@ export async function handleShowcaseComment(req: Request, env: ShowcaseEnv, db: 
   // Empty/over-length: legit UX, return a 400 (not an oracle for spam logic).
   if (!validated.ok) return new Response("invalid comment", { status: 400 });
 
-  const now = Date.now();
   const ipHash = await hashIp(req.headers.get("cf-connecting-ip") || "", env.COMMENT_IP_SALT);
   const sectionRef = normalizeSectionRef(form.get("section_ref"), KNOWN_SECTION_IDS);
   const id = crypto.randomUUID();

@@ -14,6 +14,7 @@ import { handleAdmin, adminAuthed } from "./access/admin";
 import { handleOnboard } from "./access/onboard";
 import { handleProRequest } from "./access/pro-request-handler";
 import { handleShowcase, handleShowcaseComment } from "./showcase/routes";
+import { SHOWCASE_PATH, SHOWCASE_COMMENTS_PATH } from "./showcase/config";
 
 interface Env {
   SESSION: DurableObjectNamespace;
@@ -208,10 +209,10 @@ export default {
       return env.SESSION.get(id).fetch(forward);
     }
 
-    if (url.pathname === "/showcase" && req.method === "GET") {
+    if (url.pathname === SHOWCASE_PATH && req.method === "GET") {
       return handleShowcase(req, env, db);
     }
-    if (url.pathname === "/showcase/comments" && req.method === "POST") {
+    if (url.pathname === SHOWCASE_COMMENTS_PATH && req.method === "POST") {
       return handleShowcaseComment(req, env, db);
     }
 

@@ -1,5 +1,5 @@
 import { renderInfoPage, esc } from "../info/layout";
-import { enabledSections, type Section } from "./config";
+import { enabledSections, type Section, SHOWCASE_COMMENTS_PATH } from "./config";
 import type { BuildLogEntry } from "./buildlog";
 import type { CommentRow } from "./comments";
 
@@ -38,7 +38,7 @@ function commentsHtml(comments: CommentRow[]): string {
           .join("")}</ul>`;
   // Plain HTML form (no JS) -> /showcase CSP can keep script-src 'none'.
   const form = `
-    <form method="POST" action="/showcase/comments" class="comment-form">
+    <form method="POST" action="${SHOWCASE_COMMENTS_PATH}" class="comment-form">
       <label>Name <input type="text" name="name" maxlength="80" required></label>
       <label>Comment <textarea name="body" maxlength="2000" required></textarea></label>
       <input type="text" name="website" autocomplete="off" tabindex="-1"

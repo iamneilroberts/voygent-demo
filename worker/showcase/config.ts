@@ -1,3 +1,6 @@
+export const SHOWCASE_PATH = "/showcase";
+export const SHOWCASE_COMMENTS_PATH = "/showcase/comments";
+
 export type SectionType =
   | "overview"
   | "architecture"
