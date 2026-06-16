@@ -11,7 +11,11 @@ export interface Section {
   title: string;
   enabled: boolean;
   order: number;
-  /** Curated, TRUSTED HTML fragment for prose sections (overview/architecture/milestones). */
+  /**
+   * Curated, AUTHOR-TRUSTED HTML fragment for prose sections (overview/architecture/
+   * milestones). Rendered UNESCAPED. Only ever set from this file's static SECTIONS —
+   * NEVER from user input or any external/runtime source, or it becomes an XSS sink.
+   */
   bodyHtml?: string;
 }
 

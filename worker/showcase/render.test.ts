@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { renderShowcasePage, renderModerationPage } from "./render";
+import { renderShowcasePage, renderModerationPage, renderShowcaseBody } from "./render";
 import type { Section } from "./config";
 import type { CommentRow } from "./comments";
 
@@ -39,6 +39,11 @@ describe("renderShowcasePage", () => {
   it("hides the comments section when showComments is false (graceful degrade)", () => {
     const html = renderShowcasePage({ sections: SECTIONS, buildlog: [], comments: [], showComments: false });
     expect(html).not.toContain('action="/showcase/comments"');
+  });
+
+  it("renders an empty body when no sections are enabled", () => {
+    const body = renderShowcaseBody({ sections: [], buildlog: [], comments: [], showComments: true });
+    expect(body).toBe("");
   });
 });
 
