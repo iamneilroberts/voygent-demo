@@ -3,6 +3,7 @@ import { json, text, guardMutation } from "../access/http";
 import { listPending, moderate } from "./comments";
 import { renderModerationPage } from "./render";
 
+// Safety cap: the moderation page renders every pending row as HTML, so bound it.
 const PENDING_LIMIT = 100;
 
 /** Moderator identity for the audit columns: CF Access email if present, else admin-token. */

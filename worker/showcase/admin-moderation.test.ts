@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { makeTestDb } from "../access/testdb";
-import { handleAdminComments } from "./admin-moderation";
-import { insertPending, listApproved } from "./comments";
+import { handleAdminComments, moderatorId } from "./admin-moderation";
+import { insertPending, listApproved, listPending } from "./comments";
 
 const ORIGIN = "http://localhost:8787";
 function env(): any { return { APP_ORIGIN: ORIGIN, ADMIN_TOKEN: "secret" }; }
@@ -48,5 +48,22 @@ describe("admin moderation routes", () => {
     const db = makeTestDb();
     const res = await handleAdminComments(new Request(`${ORIGIN}/admin/comments/x/y/z`, { method: "POST" }), env(), db);
     expect(res.status).toBe(404);
+  });
+
+  it("reject transitions a pending row out of pending (not approved)", async () => {
+    const db = makeTestDb();
+    await insertPending(db, { id: "p9", createdAt: 1, name: "n", body: "b", ipHash: "h", sectionRef: null });
+    const res = await handleAdminComments(actionReq("p9", "reject"), env(), db);
+    expect(res.status).toBe(200);
+    expect((await listApproved(db, 10)).length).toBe(0);   // not approved
+    expect((await listPending(db, 10)).length).toBe(0);     // no longer pending
+  });
+});
+
+describe("moderatorId", () => {
+  it("uses the CF Access email when present, else admin-token", () => {
+    const withEmail = new Request("http://x/", { headers: { "cf-access-authenticated-user-email": "kim@example.com" } });
+    expect(moderatorId(withEmail)).toBe("kim@example.com");
+    expect(moderatorId(new Request("http://x/"))).toBe("admin-token");
   });
 });
