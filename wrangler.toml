@@ -101,4 +101,4 @@ NEIL_NOTIFY_EMAIL = "dneilroberts@gmail.com"
 # identity before the demo URL is promoted — self-serve onboarding now opens public live.
 DEMO_PUBLIC_LIVE_ENABLED = "1"
 # Showcase page master toggle. Unset => /showcase + /showcase/comments are inert (404).
-# SHOWCASE_ENABLED = "1"   # uncomment to enable
+SHOWCASE_ENABLED = "1"   # enabled 2026-06-16 (showcase go-live)
