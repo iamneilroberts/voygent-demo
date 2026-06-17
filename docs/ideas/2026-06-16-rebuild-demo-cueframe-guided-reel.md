@@ -62,11 +62,20 @@ one recorded workflow.
 - **Edit callouts (immutable, re-validated):** `callout/edit.ts` —
   `addCallout()`, `editCallout()`, `removeCallout()`, `reanchorCallout()`,
   `retimeCallout()`, `moveCalloutToFrame()`.
-- **Resolvers (heuristic, no LLM):** `callout/resolve.ts` — `resolveFrame()`,
-  `resolveAnchor()` (NL phrase → box via IDF token scoring), `draftCopy()`.
-- **Plugin commands:** `plugin/commands/cueframe-callout.md`, `…-capture.md`.
+- **Resolvers (deterministic core):** `callout/resolve.ts` — `resolveFrame()`,
+  `resolveAnchor()` (NL phrase → box via IDF token scoring), `draftCopy()`. These
+  are pure/heuristic library functions with no model call of their own.
+- **The intelligence is agent-driven, NOT absent.** Cueframe's conversational acts
+  are **Claude Code plugin skills** (`plugin/skills/capture`, `plugin/skills/callout`)
+  run on the **local AI LLM**; the agent interprets natural language and calls the
+  deterministic core libs above (GOAL.md:13, README:67). So an "LLM that reads
+  guidance" already exists — it's the agent host, not embedded HTTP infra. The
+  `src/` core stays deterministic and is what the agent orchestrates.
 - **No "revise from guidance" verb exists** — only per-callout edits or fresh
-  re-capture.
+  re-capture. BUT the mission already names this: README:18 = *"a demo you can
+  re-generate from a description instead of re-recording from scratch,"* and
+  GOAL.md:70 carries `meta.notes` = "freeform house-voice guidance." This idea
+  extends that, it doesn't invent it.
 
 ### What "update a reel from guidance" would touch (in cueframe)
 1. **`src/cli.ts`** — new `revise` verb (or `--guidance` flag) = the entry point.
@@ -100,8 +109,12 @@ one recorded workflow.
 ## Rough approach (proposed, not decided)
 Likely sequencing — confirm during brainstorming:
 1. **Decide what "guidance" is** (Open Q1) — this gates everything.
-2. If NL/LLM-driven: add an LLM-calling orchestrator over `callout/edit.ts` +
-   a `revise` CLI verb. Cueframe has no LLM layer today — net-new.
+2. Build the `revise` flow as a **new agent-driven plugin skill** (sibling to the
+   existing `capture`/`callout` skills): read the full spec, interpret a multi-step
+   guidance prompt on the local AI LLM, and dispatch to the deterministic
+   `callout/edit.ts` ops. The model layer already exists (the agent host); the new
+   work is the skill + orchestration + a `revise` CLI verb that exposes the same
+   library path non-conversationally.
 3. Wire the demo: either keep the bespoke `web/src/` player and treat cueframe as
    an authoring tool that exports to it, OR rebuild the player on `spec.json`
    (bigger). Decide scope (Open Q4).
@@ -110,8 +123,10 @@ Likely sequencing — confirm during brainstorming:
    reuses existing frames, that pre-work may not block this idea.
 
 ## Open questions
-1. **What form does "guidance" take?** NL prompt (needs an LLM layer cueframe
-   lacks), structured edit instructions, or both? — gates the whole design.
+1. **What form does "guidance" take?** Free-form NL (interpreted by the
+   agent/local AI LLM that already drives cueframe's skills), structured edit
+   instructions, or both? — gates the whole design. Note the model layer already
+   exists; this is about the prompt/skill contract, not new inference infra.
 2. **Update in place or new version?** cueframe edits are immutable (return new
    Spec); workflow could overwrite `spec.json` or emit `spec-v2.json`.
 3. **Does guidance ever re-shoot frames,** or only revise callouts/pacing on
@@ -128,8 +143,10 @@ Likely sequencing — confirm during brainstorming:
   1–2 open). Blocks any rebuild that records real claude.ai/folio. Recon script
   from the spike was never run — unknown if Playwright can even reach the folio
   iframe across claude.ai's sandbox.
-- **cueframe has no LLM layer** — all resolvers are heuristic. Free-form guidance
-  parsing is net-new code.
+- ~~cueframe has no LLM layer~~ **(corrected)** — cueframe's conversational acts
+  are agent-driven Claude Code skills on the **local AI LLM**; the model layer
+  exists. The `src/` resolvers are deterministic on purpose. Guided revise is a new
+  *skill + orchestration*, not new inference infra.
 - **Demo isn't on cueframe's format yet** — current reel is the bespoke screenplay
   DSL; "rebuild" may mean replacing `ReelCallout.tsx`, `lib/recording.ts`,
   `lib/reel-render.ts`, `recordings/registry.ts`.
