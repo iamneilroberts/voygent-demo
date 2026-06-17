@@ -1,3 +1,14 @@
 [
-  { "date": "2026-06-16", "text": "Public showcase page goes live." }
+  { "date": "2026-06-16", "text": "Public showcase page goes live." },
+  { "date": "2026-06-16", "text": "Inline flight and hotel compare boards now render directly in chat — compare options and pick one without leaving the conversation." },
+  { "date": "2026-06-16", "text": "Free-tier flight search now falls back gracefully to public fare sources when consolidator credentials aren't present, so a search always returns results." },
+  { "date": "2026-06-15", "text": "A security regression suite covering tenant isolation, auth, tier enforcement, output escaping and SSRF now gates every production deploy. Two vulnerability classes were found and fixed along the way." },
+  { "date": "2026-06-15", "text": "Advisors can set commission rates on individual option choices straight from the in-chat proposal, with values that survive a trip rebuild." },
+  { "date": "2026-06-14", "text": "Added geocoding and place search — resolve location names to coordinates and find restaurants, attractions and hotels, with results cached globally." },
+  { "date": "2026-06-14", "text": "The in-chat proposal now shows per-segment flight detail: route, carrier, times, layovers, cabin, confirmation number and price." },
+  { "date": "2026-06-14", "text": "Added a day-by-day timeline and a full budget breakdown to the in-chat proposal." },
+  { "date": "2026-06-13", "text": "Shipped a batch of in-chat proposal features: action items, packing list, agency branding, per-day highlights, hero image, and calendar (.ics) export." },
+  { "date": "2026-06-13", "text": "Advisors can now edit trip text — traveler summary, day notes, budget notes — directly inside the in-chat proposal, with edits gated to advisors." },
+  { "date": "2026-06-12", "text": "Per-user credential vault: advisors store their own supplier logins, and tools activate automatically based on what's present." },
+  { "date": "2026-06-11", "text": "Finalized the Free / Pro / Agency tier model, with the tool catalog locked per session at connect time." }
 ]
