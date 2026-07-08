@@ -13,6 +13,8 @@ import { guardMutation, getCookieHeader, json, text } from "./access/http";
 import { handleAdmin, adminAuthed } from "./access/admin";
 import { handleOnboard } from "./access/onboard";
 import { handleProRequest } from "./access/pro-request-handler";
+import { handleShowcase, handleShowcaseComment } from "./showcase/routes";
+import { SHOWCASE_PATH, SHOWCASE_COMMENTS_PATH } from "./showcase/config";
 
 interface Env {
   SESSION: DurableObjectNamespace;
@@ -37,6 +39,8 @@ interface Env {
   ONBOARD_IP_DAILY_CAP?: string;
   NEIL_NOTIFY_EMAIL?: string;
   DEMO_PUBLIC_LIVE_ENABLED?: string;
+  SHOWCASE_ENABLED?: string;
+  COMMENT_IP_SALT?: string;
   __db?: Db; // test seam: inject an in-memory Db
 }
 
@@ -203,6 +207,13 @@ export default {
         ...(req.body ? { duplex: "half" } : {}),
       } as RequestInit);
       return env.SESSION.get(id).fetch(forward);
+    }
+
+    if (url.pathname === SHOWCASE_PATH && req.method === "GET") {
+      return handleShowcase(req, env, db);
+    }
+    if (url.pathname === SHOWCASE_COMMENTS_PATH && req.method === "POST") {
+      return handleShowcaseComment(req, env, db);
     }
 
     return new Response("ok");

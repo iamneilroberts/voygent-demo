@@ -12,6 +12,7 @@ const MIGRATIONS = [
   "0003_tier.sql",
   "0004_onboarding.sql",
   "0005_pro_requests.sql",
+  "0006_showcase_comments.sql",
 ].map((f) => join(HERE, "../../migrations", f));
 
 /** A faithful in-memory Db for tests — real SQLite, same dialect as D1. */

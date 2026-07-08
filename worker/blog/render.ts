@@ -115,6 +115,7 @@ export function renderBlog(hero: PageData | null, posts: BlogMeta[], opts: { wit
     <a href="#posts">Deep dives</a>
     <a href="#bio">Bio</a>
     <a href="#contact">Contact</a>
+    <a href="/showcase">Follow the build</a>
     <a href="https://github.com/iamneilroberts" target="_blank" rel="noreferrer">GitHub ↗</a>
     <a href="/info/resume">Resume</a>
     <a href="/">Live demo →</a>

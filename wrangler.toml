@@ -63,6 +63,8 @@ zone_name = "voygent.ai"
 #     live sessions). Unset ⇒ pro codes refuse live with "pro access not enabled" (fail closed).
 # Kept as secrets (not [vars]) so the MCP target can be flipped staging<->prod
 # with a single `wrangler secret put` and no redeploy.
+# COMMENT_IP_SALT is a secret (HMAC key for comment IP pseudonymity):
+#   wrangler secret put COMMENT_IP_SALT
 #
 # ⚠️  CREDENTIAL-ISOLATION PREREQUISITE: VOYGENT_MCP_BEARER (the PUBLIC-tier bearer) MUST be a
 #     credential-free Voygent identity — a free-tier user with NO supplier creds — before any
@@ -98,3 +100,5 @@ NEIL_NOTIFY_EMAIL = "dneilroberts@gmail.com"
 # auth-merge. ⚠️ PRE-PROMOTION TODO: confirm/swap VOYGENT_MCP_BEARER to a credential-free
 # identity before the demo URL is promoted — self-serve onboarding now opens public live.
 DEMO_PUBLIC_LIVE_ENABLED = "1"
+# Showcase page master toggle. Unset => /showcase + /showcase/comments are inert (404).
+SHOWCASE_ENABLED = "1"   # enabled 2026-06-16 (showcase go-live)

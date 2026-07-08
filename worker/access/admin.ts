@@ -6,6 +6,7 @@ import { insertCodeMeta } from "./meta";
 import { listPending, getRequest, markGranted, markDenied } from "./pro-requests";
 import { sendEmail, proGrantedEmail } from "../email/resend";
 import { ADMIN_HTML } from "./admin-page";
+import { handleAdminComments } from "../showcase/admin-moderation";
 
 export interface AdminEnv {
   CODE_HASH_KEY: string;
@@ -121,6 +122,10 @@ export async function handleAdmin(req: Request, env: AdminEnv, db: Db): Promise<
     const bad = guardMutation(req, env.APP_ORIGIN); if (bad) return bad;
     await markDenied(db, decodeURIComponent(deny[1]), new Date().toISOString());
     return json({ ok: true });
+  }
+
+  if (url.pathname === "/admin/comments" || url.pathname.startsWith("/admin/comments/")) {
+    return handleAdminComments(req, env, db);
   }
 
   return text("not found", 404);

@@ -20,7 +20,7 @@ export const INFO_NAV: InfoPageMeta[] = [
   { slug: "engineering-v2",    title: "The deep dives, rewritten",          nav: "deep dives v2" },
 ];
 
-function esc(s: string): string {
+export function esc(s: string): string {
   return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
