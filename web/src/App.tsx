@@ -29,7 +29,7 @@ import { resolveInitialMode, persistMode, type ModeId } from "./lib/mode";
 import { replayChat } from "./lib/recording";
 import { emptyReelViewState, applyInteraction, reconcileEdits, type ReelViewState } from "./lib/interaction";
 import { isPickTool, resolveBoardPickId } from "./lib/board-match";
-import { selectReel } from "./recordings/registry";
+import { selectReel, CHAPTERS, REELS } from "./recordings/registry";
 import { ReelIntro } from "./ReelIntro";
 import { ReelCallout } from "./ReelCallout";
 import { ReelHandoffNotice } from "./ReelHandoffNotice";
@@ -111,9 +111,7 @@ export function App() {
   // Mobile-only: which surface is showing (chat base + folio/engineering overlays).
   const [mobileView, setMobileView] = useState<MobileView>(DEFAULT_MOBILE_VIEW);
   const replayAbort = useRef<AbortController | null>(null);
-  // Lazy-init guard (Codex review): useRef(selectReel()) would evaluate selectReel()
-  // on EVERY render, and selectReel() advances the localStorage rotation counter — so a
-  // plain useRef(arg) would double-count rotation. Compute exactly once per mount.
+  // Lazy-init: compute once per mount (useRef(selectReel()) would re-evaluate on every render).
   const selectedReelRef = useRef<ReturnType<typeof selectReel> | null>(null);
   if (!selectedReelRef.current) selectedReelRef.current = selectReel();
   const selectedReel = selectedReelRef.current;
@@ -374,6 +372,19 @@ export function App() {
   function planYourOwn() { goLive(false); }
   function tryYourself() { goLive(true); }
 
+  // Chapter navigation — a clean reload on ?reel=<id> so the target reel starts
+  // from a fresh state. mode=auto is pinned (the URL param beats persisted mode).
+  function gotoReel(id: string) {
+    persistMode("auto");
+    try {
+      const u = new URL(window.location.href);
+      u.searchParams.set("reel", id); u.searchParams.set("mode", "auto"); u.searchParams.delete("greet");
+      window.location.href = u.toString();
+    } catch { /* no-op */ }
+  }
+  const nextReel = selectedReel.next ? REELS.find((r) => r.id === selectedReel.next) : undefined;
+  const nextChapter = nextReel ? { label: `Watch ${nextReel.title} →`, onClick: () => gotoReel(nextReel.id) } : undefined;
+
   // The actual live transition — a clean reload that re-latches the session.
   // No session check here: callers either already gated (goLive) or just
   // authenticated in the same tick (onboarding), where `authed` state is still
@@ -501,6 +512,8 @@ export function App() {
               title={selectedReel.title} blurb={selectedReel.blurb} durationLabel={selectedReel.durationLabel}
               eyebrow={selectedReel.intro?.eyebrow} note={selectedReel.intro?.note}
               onWatch={startReel} onPlanYourOwn={planYourOwn}
+              chapters={CHAPTERS.map((c) => ({ id: c.id, title: c.title, durationLabel: c.durationLabel, current: c.id === selectedReel.id }))}
+              onChapter={gotoReel}
             />
           )}
           {skin === "claude" && mode === "auto" && reelPhase === "playing" && activeHighlight && (
@@ -547,13 +560,14 @@ export function App() {
             reelView.clientView
               // Reels with a priced client-view (collab) end on an interactive folio the
               // viewer can experiment with; others keep the static end card.
-              ? <ReelExplore view={reelView.clientView} onLiveDemo={tryYourself} onReplay={startReel} />
+              ? <ReelExplore view={reelView.clientView} onLiveDemo={tryYourself} onReplay={startReel} nextChapter={nextChapter} />
               : <ReelEndCard
                   onTryYourself={tryYourself} onReplay={startReel}
                   recap={selectedReel.recap}
                   eyebrow={selectedReel.endCard?.eyebrow}
                   title={selectedReel.endCard?.title}
                   blurb={selectedReel.endCard?.blurb}
+                  nextChapter={nextChapter}
                 />
           )}
         </section>

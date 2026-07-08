@@ -8,8 +8,10 @@ import { computeTripTotal, usd } from "./lib/reel-pricing";
 // the live interactive demo. Seeded from the final client-view snapshot (the same
 // pricing data the reel already built), so the numbers stay consistent.
 export function ReelExplore(
-  { view, onLiveDemo, onReplay }:
-  { view: ReelClientSession; onLiveDemo: () => void; onReplay: () => void },
+  { view, onLiveDemo, onReplay, nextChapter }:
+  { view: ReelClientSession; onLiveDemo: () => void; onReplay: () => void;
+    // Chapter 1 ends here (not on ReelEndCard), so the next-chapter CTA lives here too.
+    nextChapter?: { label: string; onClick: () => void } },
 ) {
   const [pickedHotelId, setPicked] = useState<string | null>(view.pickedHotelId ?? view.hotels[0]?.id ?? null);
   const [addons, setAddons] = useState(view.addons);
@@ -60,6 +62,7 @@ export function ReelExplore(
 
         <div className="cl-explore-actions">
           <button type="button" className="cl-explore-send" onClick={() => setSent(true)}>Send to Voygent →</button>
+          {nextChapter && <button type="button" className="cl-explore-cta" onClick={nextChapter.onClick}>{nextChapter.label}</button>}
           <button type="button" className="cl-explore-cta" onClick={onLiveDemo}>Open the interactive demo</button>
           <button type="button" className="cl-explore-replay" onClick={onReplay}>↺ Replay the reel</button>
         </div>

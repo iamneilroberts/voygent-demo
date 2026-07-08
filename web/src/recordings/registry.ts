@@ -19,6 +19,8 @@ export interface ReelEntry {
   recap?: string[];
   endCard?: { eyebrow: string; title: string; blurb: string };
   intro?: { eyebrow: string; note: string };
+  chapter?: number;  // position in the story arc; absent → not a chapter (legacy reels)
+  next?: string;     // id of the chapter to offer when this reel ends
 }
 
 export const REELS: ReelEntry[] = [
@@ -32,6 +34,8 @@ export const REELS: ReelEntry[] = [
   },
   {
     id: "collab",
+    chapter: 1,
+    next: "run",
     title: "Chapter 1 · A trip, built together",
     blurb: "Watch an advisor, a traveller, and Voygent shape a whole Dublin trip end to end.",
     durationLabel: "~4 min",
@@ -50,6 +54,7 @@ export const REELS: ReelEntry[] = [
   },
   {
     id: "run",
+    chapter: 2,
     title: "Chapter 2 · Run the trip",
     blurb: "The trip is sold. Watch a confirmation file itself, two empty days become a tour sale, and the travellers shape their own week.",
     durationLabel: "~2 min",
@@ -62,22 +67,19 @@ export const REELS: ReelEntry[] = [
   },
 ];
 
-const ROT_KEY = "voygent-demo-reel-rot";
+// The story arc, in order, for the intro-card chapter list.
+export const CHAPTERS: ReelEntry[] = REELS
+  .filter((r) => r.chapter != null)
+  .sort((a, b) => a.chapter! - b.chapter!);
 
-// Pure: explicit id wins; else round-robin by counter. Never throws.
-export function pickReel(reels: ReelEntry[], param: string | null, counter: number): ReelEntry {
+// Pure: explicit id wins; else chapter 1; else the first reel. Never throws.
+export function pickReel(reels: ReelEntry[], param: string | null): ReelEntry {
   if (param) { const hit = reels.find((r) => r.id === param); if (hit) return hit; }
-  const i = ((counter % reels.length) + reels.length) % reels.length;
-  return reels[i];
+  return reels.find((r) => r.chapter === 1) ?? reels[0];
 }
 
 export function selectReel(search?: string): ReelEntry {
   let param: string | null = null;
   try { param = new URLSearchParams(search ?? window.location.search).get("reel"); } catch { /* default */ }
-  let counter = 0;
-  try { counter = parseInt(localStorage.getItem(ROT_KEY) ?? "0", 10) || 0; } catch { /* default */ }
-  const entry = pickReel(REELS, param, counter);
-  // advance rotation only when not explicitly overridden, so a shared ?reel link is stable
-  if (!param) { try { localStorage.setItem(ROT_KEY, String(counter + 1)); } catch { /* ignore */ } }
-  return entry;
+  return pickReel(REELS, param);
 }
