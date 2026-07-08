@@ -20,7 +20,7 @@ export function ReelFolioView({ view, mode, cta }: {
   const [localDay, setLocalDay] = useState<number | null>(view.expandedDay);
   const addons = interactive ? localAddons : view.addons;
   const expandedDay = interactive ? localDay : view.expandedDay;
-  const total = computeTripTotal({ ...view, addons });
+  const total = computeTripTotal({ flightsPrice: view.flightsPrice, activitiesPrice: view.activitiesPrice, hotels: view.hotels, pickedHotelId: view.pickedHotelId, addons });
   const rootRef = useRef<HTMLDivElement>(null);
 
   // Scripted section cuts: bring the focused anchor into view (smooth unless reduced).
@@ -57,9 +57,9 @@ export function ReelFolioView({ view, mode, cta }: {
               const dayAddons = addons.filter((a) => a.day === n);
               const dayNotes = view.notes.filter((nt) => nt.anchor === `folio-day-${n}`);
               return (
-                <article key={d.title} className={`cl-fv-day ${openDay ? "open" : ""}`} data-reel-target={`folio-day-${n}`}
-                  onClick={interactive ? () => setLocalDay(openDay ? null : n) : undefined}>
-                  <div className="cl-fv-day-h"><span className="cl-fv-day-num" aria-hidden="true">{n}</span><span className="cl-fv-day-title">{d.title}</span><span className="cl-fv-day-date">{d.date}</span></div>
+                <article key={d.title} className={`cl-fv-day ${openDay ? "open" : ""}`} data-reel-target={`folio-day-${n}`}>
+                  {/* Toggle lives on the header only — clicks on the day body / notes must not collapse the card. */}
+                  <div className="cl-fv-day-h" onClick={interactive ? () => setLocalDay(openDay ? null : n) : undefined}><span className="cl-fv-day-num" aria-hidden="true">{n}</span><span className="cl-fv-day-title">{d.title}</span><span className="cl-fv-day-date">{d.date}</span></div>
                   {openDay && (
                     <div className="cl-fv-day-body">
                       {d.activities.map((a) => <div key={a.name} className="cl-fv-act">{a.name}</div>)}
@@ -70,7 +70,7 @@ export function ReelFolioView({ view, mode, cta }: {
                     <div className="cl-fv-addons">
                       {dayAddons.map((a) => (
                         <button key={a.id} type="button" className={`cl-fv-addon ${a.on ? "on" : ""}`} disabled={!interactive} aria-pressed={a.on}
-                          onClick={interactive ? (e) => { e.stopPropagation(); setLocalAddons((xs) => xs.map((x) => (x.id === a.id ? { ...x, on: !x.on } : x))); } : undefined}>
+                          onClick={interactive ? () => setLocalAddons((xs) => xs.map((x) => (x.id === a.id ? { ...x, on: !x.on } : x))) : undefined}>
                           <span className="cl-fv-check" aria-hidden="true">{a.on ? "☑" : "☐"}</span>
                           <span className="cl-fv-addon-label">{a.label}<i>recommended · add it if it fits</i></span>
                           <span className="cl-fv-addon-price">+{usd(a.price)}</span>

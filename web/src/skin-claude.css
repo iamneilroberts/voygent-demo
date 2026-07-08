@@ -771,3 +771,6 @@
 @keyframes cl-fv-bump { 0% { transform: scale(1.12); } 100% { transform: scale(1); } }
 :root[data-skin="claude"] .cl-fv-cta { display: grid; gap: 8px; padding: 12px 22px 16px; background: var(--cl-surface); border-top: 1px solid var(--cl-line); }
 @media (max-width: 640px) { :root[data-skin="claude"] .cl-fv-scrim { padding: 0; } :root[data-skin="claude"] .cl-fv-window { max-width: none; max-height: none; height: 100%; border-radius: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  :root[data-skin="claude"] .cl-fv-total b, :root[data-skin="claude"] .cl-fv-pulse { animation: none !important; }
+}
