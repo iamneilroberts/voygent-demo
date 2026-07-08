@@ -32,7 +32,7 @@ class Builder {
   readonly agent = {
     says: (text: string) => this.event({ type: "text", delta: text }),
     tool: (tool: string, o?: { summary?: string }) => { this.event({ type: "tool", tool, phase: "start" }); this.event({ type: "tool", tool, phase: "done", summary: o?.summary }); },
-    board: (kind: "flight" | "hotel" | "includes", boardId: string, candidates: BoardCandidate[]) => {
+    board: (kind: "flight" | "hotel" | "includes" | "tour", boardId: string, candidates: BoardCandidate[]) => {
       this.boards.set(boardId, new Set(candidates.map((c) => c.id)));
       this.event({ type: "board", kind, boardId, tripId: "t", candidates });
     },

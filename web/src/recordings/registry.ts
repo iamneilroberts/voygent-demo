@@ -4,6 +4,7 @@ import type { Highlight, HighlightTrack } from "../lib/highlights";
 import dublin from "./dublin-oct.json";
 import dublinHl from "./dublin-oct.highlights.json";
 import { dublinCollab } from "./dublin-collab.screenplay";
+import { dublinRun } from "./dublin-run.screenplay";
 
 export interface ReelEntry {
   id: string;
@@ -31,7 +32,7 @@ export const REELS: ReelEntry[] = [
   },
   {
     id: "collab",
-    title: "A trip, built together",
+    title: "Chapter 1 · A trip, built together",
     blurb: "Watch an advisor, a traveller, and Voygent shape a whole Dublin trip end to end.",
     durationLabel: "~4 min",
     recording: dublinCollab.recording,
@@ -46,6 +47,18 @@ export const REELS: ReelEntry[] = [
       title: "How a trip comes together",
       blurb: "An advisor, the travellers, and Voygent shaping one trip in a single thread. They pick the flight, choose the hotel with live pricing, and leave the note that becomes the plan. The collaboration here is a scripted walk-through of the workflow, and your own run pulls real live flights and hotels.",
     },
+  },
+  {
+    id: "run",
+    title: "Chapter 2 · Run the trip",
+    blurb: "The trip is sold. Watch a confirmation file itself, two empty days become a tour sale, and the travellers shape their own week.",
+    durationLabel: "~2 min",
+    recording: dublinRun.recording,
+    highlights: dublinRun.highlights,
+    recap: ["📋 pasted confirmation, filed", "🗓 two open days → a $142 tour", "💷 client adds an extra, price updates", "✓ one-click confirm"],
+    intro: { eyebrow: "▶ Chapter 2", note: "This walk-through is scripted, like chapter 1. A real Voygent run files real confirmations and sells real tours." },
+    endCard: { eyebrow: "✓ The week after", title: "Hours of admin. Zero typing.",
+      blurb: "A pasted email became a filed confirmation. Two empty days became a commissionable tour. The travellers added an extra themselves. The advisor clicked twice. The collaboration here is a scripted walk-through of the workflow." },
   },
 ];
 

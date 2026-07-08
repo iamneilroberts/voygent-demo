@@ -102,6 +102,8 @@ html, body, #root { height: 100%; margin: 0; }
 .folio-day-act { margin-left: .75rem; }
 .folio-day-dining, .folio-day-stay { font-size: .85em; opacity: .75; margin-left: .75rem; }
 .folio-include { margin: .3rem 0; opacity: .85; }
+.folio-booking { margin: .3rem 0; }
+.folio-booking-conf { display: inline-block; margin-left: .5rem; font: 600 var(--t-12)/1.3 var(--mono); opacity: .8; }
 
 /* ---- inspector (inline CRT) ---- */
 .inspector { height: 100%; overflow-y: auto; padding: var(--s4) var(--s4) var(--s8); }

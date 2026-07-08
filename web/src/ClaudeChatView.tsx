@@ -154,6 +154,20 @@ function FolioArtifact({ folio, advisor, edits, threads, showSend, sent, onReque
           ))}
         </div>
       )}
+      {folio.bookings && folio.bookings.length > 0 && (
+        <div className="cl-artifact-sec" data-reel-target="folio-bookings">
+          <h4>Confirmed</h4>
+          {folio.bookings.map((b, i) => (
+            <div key={i} className="cl-artifact-row">
+              <span className="cl-artifact-main">
+                <span className="cl-artifact-name">{b.label}</span>
+                {b.detail && <span className="cl-artifact-meta">{b.detail}</span>}
+              </span>
+              <span className="cl-artifact-conf">{b.conf}</span>
+            </div>
+          ))}
+        </div>
+      )}
       {hasDays && (
         <div className="cl-artifact-sec cl-artifact-days" data-reel-target="folio-days">
           <h4>Day by day</h4>

@@ -201,14 +201,14 @@ export const dublinCollab = screenplay({ trip: "Dublin · collab", skin: "claude
     ],
     footnote: "Full cost and context metrics live in the interactive demo.",
   });
-  s.spotlight({ interactionKind: "engpanel", nth: 1 }, { target: "eng-panel", eyebrow: "Under the hood", title: "Every step is a real tool call", body: "Behind the chat, Voygent is calling real tools in order. The interactive demo opens the full engineering view, with the cost of every call and the context it keeps out of the model." });
+  s.spotlight({ interactionKind: "engpanel", nth: 1 }, { target: "eng-panel", eyebrow: "Under the hood", title: "Every step is a real tool call", body: "Behind the chat, Voygent is calling real search tools in order. Six real fares came back from a live search. Every price on the board has a source, not a guess." });
   s.agent.engPanel(null);
 
   // Act 5 — Refine: the advisor edits a single day in place, with a note on why.
   s.advisor.edits("days[2].activities[0]", { was: "Free morning in Temple Bar", now: "Cliffs of Moher day trip", tag: "Advisor edited" }, edited);
   s.advisor.comments("days[3]", "Swapped the Howth cliff path for the village and harbour walk, to keep it step-free for them.", "thread-access");
   s.agent.says("Updated Day 3 with the Cliffs of Moher day trip, and noted the Day 4 swap. The coach handles the driving so it stays easy.");
-  s.spotlight({ interactionKind: "edit", nth: 1 }, { target: "folio-day-2", eyebrow: "The advisor's touch", title: "The advisor edits one day", body: "The advisor changes a single day and leaves a note. The change is marked as theirs and the rest of the week stays as it was." });
+  s.spotlight({ interactionKind: "edit", nth: 1 }, { target: "folio-day-2", eyebrow: "The advisor's touch", title: "The advisor edits one day", body: "The advisor just retyped the line, the way you'd fix a document. No prompt, no paragraph. The change is marked as hers and the rest of the week stays put." });
 
   // Act 6 — What's included: a quick chooser the advisor curates into the folio.
   s.agent.tool("get_help", { summary: "Trip extras · tips, customs, weather" });
@@ -216,7 +216,7 @@ export const dublinCollab = screenplay({ trip: "Dublin · collab", skin: "claude
   s.agent.board("includes", "b-incl", includeCandidates);
   s.advisor.picksMany("b-incl", INCLUDE_KEEP, "Keep weather, transit, customs and apps");
   s.agent.folio(withIncludes);
-  s.spotlight({ interactionKind: "pick", nth: 3 }, { target: "board-includes", eyebrow: "The finishing pass", title: "What to include", body: "The advisor keeps the extras worth sending, so the travellers get useful notes on weather, getting around, and tipping." });
+  s.spotlight({ interactionKind: "pick", nth: 3 }, { target: "board-includes", eyebrow: "The finishing pass", title: "What to include", body: "Weather, getting around, tipping, handy apps. The advisor typed none of it. She just chose which of the ready-written extras are worth sending." });
 
   // Act 7 — Send: the advisor adds a note and sends the folio to the travelers.
   s.advisor.says("I'll add a quick note for them: pick your hotel and tell me what you think, no rush.");
