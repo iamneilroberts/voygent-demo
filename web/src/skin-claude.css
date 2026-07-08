@@ -222,20 +222,22 @@
 :root[data-skin="claude"] .cl-option-mark { width: 18px; color: var(--cl-accent); font-weight: 700; }
 :root[data-skin="claude"] .cl-board-hint { margin-top: 8px; font-size: .75rem; color: var(--cl-muted); }
 
-/* ---- inline trip-folio artifact card ---- */
+/* ---- inline trip-folio artifact card ----
+   Alaska-warm family (C11b): cream card, pine signature edge, serif title — the
+   advisor's working folio reads as the same product as the client folio surfaces. */
 :root[data-skin="claude"] .cl-artifact {
-  align-self: stretch; background: var(--cl-surface);
-  border: 1px solid var(--cl-line); border-radius: 12px; padding: 10px 13px;
+  align-self: stretch; background: #faf6ec;
+  border: 1px solid #e0d8c7; border-top: 3px solid #3d5245; border-radius: 12px; padding: 10px 13px;
   box-shadow: 0 1px 3px rgba(31, 30, 28, .05);
 }
 :root[data-skin="claude"] .cl-artifact-head { display: flex; flex-direction: column; gap: 4px; }
 :root[data-skin="claude"] .cl-artifact-titlerow { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
-:root[data-skin="claude"] .cl-artifact-kicker { font-size: .625rem; letter-spacing: .1em; text-transform: uppercase; color: var(--cl-muted); }
-:root[data-skin="claude"] .cl-artifact-title { font: 600 .9375rem/1.3 var(--cl-sans); }
+:root[data-skin="claude"] .cl-artifact-kicker { font-size: .625rem; letter-spacing: .1em; text-transform: uppercase; color: #3d5245; font-weight: 700; }
+:root[data-skin="claude"] .cl-artifact-title { font: 600 1.0625rem/1.3 var(--cl-serif); }
 :root[data-skin="claude"] .cl-artifact-headcomm { margin-left: auto; }
 /* Glance summary strip under the title. */
 :root[data-skin="claude"] .cl-artifact-summary { display: flex; flex-wrap: wrap; gap: 6px; }
-:root[data-skin="claude"] .cl-artifact-chip { font: 500 .75rem/1 var(--cl-sans); color: var(--cl-ink-2); background: var(--cl-tool-bg); border: 1px solid var(--cl-line); border-radius: 999px; padding: 4px 9px; white-space: nowrap; }
+:root[data-skin="claude"] .cl-artifact-chip { font: 500 .75rem/1 var(--cl-sans); color: var(--cl-ink-2); background: #efe8d8; border: 1px solid #e0d8c7; border-radius: 999px; padding: 4px 9px; white-space: nowrap; }
 :root[data-skin="claude"] .cl-artifact-sec { margin-top: 8px; }
 :root[data-skin="claude"] .cl-artifact-sec h4 { margin: 8px 0 3px; font-size: .6875rem; letter-spacing: .06em; text-transform: uppercase; color: var(--cl-muted); font-weight: 600; }
 :root[data-skin="claude"] .cl-artifact-row {
@@ -246,10 +248,10 @@
 :root[data-skin="claude"] .cl-artifact-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0; }
 :root[data-skin="claude"] .cl-artifact-name { font-weight: 600; font-size: .875rem; }
 :root[data-skin="claude"] .cl-artifact-meta { font-size: .75rem; color: var(--cl-muted); }
-:root[data-skin="claude"] .cl-artifact-price { font-weight: 600; font-size: .875rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
+:root[data-skin="claude"] .cl-artifact-price { font-weight: 600; font-size: .875rem; white-space: nowrap; font-variant-numeric: tabular-nums; color: #a96223; }
 :root[data-skin="claude"] .cl-artifact-sub { display: block; font-weight: 400; font-size: .75rem; color: var(--cl-muted); text-align: right; }
 /* Confirmation-number chip on a filed third-party booking (e.g. a pasted airline email). */
-:root[data-skin="claude"] .cl-artifact-conf { font: 600 .75rem/1 var(--cl-mono); color: var(--cl-ink-2); background: var(--cl-tool-bg); border: 1px solid var(--cl-line); border-radius: 999px; padding: 3px 9px; white-space: nowrap; letter-spacing: .02em; }
+:root[data-skin="claude"] .cl-artifact-conf { font: 600 .75rem/1 var(--cl-mono); color: #3d5245; background: #efe8d8; border: 1px solid #e0d8c7; border-radius: 999px; padding: 3px 9px; white-space: nowrap; letter-spacing: .02em; }
 
 /* ---- folio "Send to client" affordance (reel) ---- */
 :root[data-skin="claude"] .cl-artifact-foot { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--cl-line); display: flex; justify-content: flex-end; }
@@ -325,8 +327,8 @@
 }
 
 /* ---- day-by-day itinerary rows (compact: one tight block per day) ---- */
-:root[data-skin="claude"] .cl-day { padding: .3rem 0; border-top: 1px solid var(--cl-line); }
-:root[data-skin="claude"] .cl-day:first-of-type { border-top: none; }
+:root[data-skin="claude"] .cl-day { padding: 6px 10px; margin: 6px 0; background: #f1ebdd; border: 1px solid #e0d8c7; border-radius: 8px; }
+:root[data-skin="claude"] .cl-day:first-of-type { margin-top: 2px; }
 :root[data-skin="claude"] .cl-day-head { display: flex; justify-content: space-between; align-items: baseline; gap: .5rem; }
 :root[data-skin="claude"] .cl-day-title { font-weight: 600; font-size: .8125rem; }
 :root[data-skin="claude"] .cl-day-date { font-size: .75rem; opacity: .6; white-space: nowrap; }
@@ -339,7 +341,7 @@
 
 /* ---- includes / good-to-know: collapsible long-form, one row per item ---- */
 :root[data-skin="claude"] .cl-include-list { display: flex; flex-direction: column; gap: 4px; }
-:root[data-skin="claude"] .cl-include { border: 1px solid var(--cl-line); border-radius: 8px; background: var(--cl-tool-bg); overflow: hidden; }
+:root[data-skin="claude"] .cl-include { border: 1px solid #e0d8c7; border-radius: 8px; background: #f1ebdd; overflow: hidden; }
 :root[data-skin="claude"] .cl-include-title { display: flex; align-items: center; justify-content: space-between; cursor: pointer; font: 600 .8125rem/1.3 var(--cl-sans); color: var(--cl-ink-2); padding: 7px 11px; list-style: none; }
 :root[data-skin="claude"] .cl-include-title::-webkit-details-marker { display: none; }
 :root[data-skin="claude"] .cl-include-title::after { content: "▸"; color: var(--cl-muted); font-size: .75rem; margin-left: 8px; transition: transform .15s ease; }
