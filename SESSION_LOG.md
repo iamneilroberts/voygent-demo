@@ -1,3 +1,9 @@
+## 2026-07-08 — Ch3 client-folio chapter + C11 complete (three prod ships)
+
+Shipped reel chapter 3 "Their trip, their window" (client-POV folio window; new mode-aware `ReelFolioView`, `folioview` interaction plumbing, `dublin-client` screenplay; Worker `590fe92a`), then redefined C11 with Neil (spec Decision 6 — FolioArtifact is the advisor surface, not a folio copy) and completed both halves: C11a ReelExplore retirement (ch1/ch2 now end on ReelFolioView interactive via `folioSessionFromClient`; Worker `8a95bdcc`) and C11b FolioArtifact alaska-warm restyle (CSS-only, WCAG-AA price color; Worker `a4c68e57`). Three code-review gates (17 findings addressed, 1 declined YAGNI), 25/25 live browser pass, full suite 590/591 (one pre-existing failure).
+
+Main artifact: voygent-demo main `764dec4` · spec `docs/superpowers/specs/2026-07-08-ch3-client-experience-design.md` · live at https://demo.voygent.ai/?reel=client&mode=auto
+
 ## 2026-06-16 — Showcase go-live + docs refresh + cueframe
 
 Took the public "Follow the build" showcase live (real Overview/Architecture/Milestones copy + 12-entry build log, `SHOWCASE_ENABLED=1`, deployed to demo.voygent.ai; comment→moderation loop smoke-verified — held-for-review + honeypot drop, no /info or /blog regression), documented the June features + cueframe on `/info/production-system` (+v2), and added a `/blog` → `/showcase` nav link. Also ran the voygent-hype full refresh and brought the system docs current (`features.md`, voygent-lite `docs/FEATURES.md` + `README.md`).
