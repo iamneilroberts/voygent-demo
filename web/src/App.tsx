@@ -122,8 +122,9 @@ export function App() {
   const speedRef = useRef(speed); useEffect(() => { speedRef.current = speed; }, [speed]);
   // Third speed control (Neil QA 07-08): "Read" plays beats at 1× but HOLDS every
   // callout until the viewer clicks Continue — even 1× auto-continue is too fast to
-  // finish a callout. Implemented by rendering callouts with paused=true, which
-  // disarms their auto-continue timer (playback already waits on the callout).
+  // finish a callout. Wired via ReelCallout's `hold` prop (NOT `paused`): hold disarms
+  // the auto-continue timer while keeping the target-recovery scroll live; paused is
+  // reserved for the viewer's pause button, which must never fight their scrolling.
   const [readMode, setReadMode] = useState(false);
   const [activeHighlight, setActiveHighlight] = useState<Highlight | null>(null);
   // Playback transport: pause/resume gate (a ref so the replay closure reads the live
