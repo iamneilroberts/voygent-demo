@@ -313,6 +313,84 @@ describe("runAgentLoop", () => {
     expect(toolResult.content).toContain("502"); // model still sees the raw error
   });
 
+  it("marks ok=false and hides an object-form {ok:false, error:{code,message}} envelope (promote_flights shape)", async () => {
+    const asstTool: AssistantMessage = {
+      role: "assistant",
+      content: [{ type: "tool_use", id: "t3", name: "promote_flights", input: {} }],
+    };
+    const asstFinal: AssistantMessage = { role: "assistant", content: [{ type: "text", text: "ok" }] };
+    const out: ServerEvent[] = [];
+    await runAgentLoop({
+      provider: fakeProvider([
+        [{ type: "tool-call", id: "t3", name: "promote_flights", input: {} }, { type: "turn-complete", assistant: asstTool }],
+        [{ type: "text-delta", delta: "ok" }, { type: "turn-complete", assistant: asstFinal }],
+      ]),
+      tools: [], messages: [{ role: "user", content: "go" }] as ConversationMessage[],
+      friendlyToolErrors: true,
+      callTool: async () => JSON.stringify({ ok: false, error: { code: "ambiguous_outbound", message: "Two candidates match." } }),
+      onFolio: async () => {},
+      emit: (e) => out.push(e),
+    });
+    const done = out.find((e) => e.type === "tool" && (e as any).phase === "done") as any;
+    expect(done.summary.toLowerCase()).toContain("another");
+    const tool = out.find((e) => e.type === "inspector" && (e as any).kind === "tool") as any;
+    expect(tool.ok).toBe(false);
+  });
+
+  it("marks ok=false for an ok:false envelope with no error field at all", async () => {
+    const asstTool: AssistantMessage = {
+      role: "assistant",
+      content: [{ type: "tool_use", id: "t4", name: "promote_hotels_to_lodging", input: {} }],
+    };
+    const asstFinal: AssistantMessage = { role: "assistant", content: [{ type: "text", text: "ok" }] };
+    const out: ServerEvent[] = [];
+    await runAgentLoop({
+      provider: fakeProvider([
+        [{ type: "tool-call", id: "t4", name: "promote_hotels_to_lodging", input: {} }, { type: "turn-complete", assistant: asstTool }],
+        [{ type: "text-delta", delta: "ok" }, { type: "turn-complete", assistant: asstFinal }],
+      ]),
+      tools: [], messages: [{ role: "user", content: "go" }] as ConversationMessage[],
+      friendlyToolErrors: true,
+      callTool: async () => JSON.stringify({ ok: false, tripId: "demo-1" }),
+      onFolio: async () => {},
+      emit: (e) => out.push(e),
+    });
+    const done = out.find((e) => e.type === "tool" && (e as any).phase === "done") as any;
+    expect(done.summary.toLowerCase()).toContain("another");
+    const tool = out.find((e) => e.type === "inspector" && (e as any).kind === "tool") as any;
+    expect(tool.ok).toBe(false);
+  });
+
+  it("false-positive guard: an 'error' key nested inside the payload (not top-level) does not trip detection", async () => {
+    const asstTool: AssistantMessage = {
+      role: "assistant",
+      content: [{ type: "tool_use", id: "t5", name: "hotel_search", input: {} }],
+    };
+    const asstFinal: AssistantMessage = { role: "assistant", content: [{ type: "text", text: "ok" }] };
+    const out: ServerEvent[] = [];
+    let buildCalls = 0;
+    await runAgentLoop({
+      provider: fakeProvider([
+        [{ type: "tool-call", id: "t5", name: "hotel_search", input: {} }, { type: "turn-complete", assistant: asstTool }],
+        [{ type: "text-delta", delta: "ok" }, { type: "turn-complete", assistant: asstFinal }],
+      ]),
+      tools: [], messages: [{ role: "user", content: "go" }] as ConversationMessage[],
+      friendlyToolErrors: true,
+      // top-level ok is true/absent-of-false and there's no top-level `error` — a
+      // nested field merely named "error" (e.g. a hotel's own free-text note) must
+      // never be mistaken for a tool failure.
+      callTool: async () => JSON.stringify({ status: "ok", candidates: [{ id: "h1", name: "The Note", error: "not a failure, just a field" }] }),
+      onFolio: async () => {},
+      buildBoard: () => { buildCalls++; return null; },
+      emit: (e) => out.push(e),
+    });
+    const done = out.find((e) => e.type === "tool" && (e as any).phase === "done") as any;
+    expect(done.summary.toLowerCase()).not.toContain("another");
+    const tool = out.find((e) => e.type === "inspector" && (e as any).kind === "tool") as any;
+    expect(tool.ok).toBe(true);
+    expect(buildCalls).toBe(1); // ok stayed true, so buildBoard still ran
+  });
+
   it("without friendlyToolErrors (default), the failure chip is byte-identical to summarizeToolResult", async () => {
     const asstTool: AssistantMessage = {
       role: "assistant",

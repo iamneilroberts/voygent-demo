@@ -27,6 +27,21 @@ describe("summarizeToolResult", () => {
       .toBe("error: no results for CUN");
   });
 
+  it("surfaces a structured {ok:false, error:{code,message}} promote failure", () => {
+    expect(summarizeToolResult(JSON.stringify({
+      ok: false, error: { code: "ambiguous_outbound", message: "Two candidates match; stage one explicitly." },
+    }))).toBe("error: ambiguous_outbound — Two candidates match; stage one explicitly.");
+  });
+
+  it("surfaces an object-form error with only a message (no code)", () => {
+    expect(summarizeToolResult(JSON.stringify({ ok: false, error: { message: "no staged candidates" } })))
+      .toBe("error: no staged candidates");
+  });
+
+  it("reports ok:false with no error field as a failure, not 'ok · ...'", () => {
+    expect(summarizeToolResult(JSON.stringify({ ok: false, tripId: "demo-1" }))).toBe("error: request failed");
+  });
+
   it("clips non-JSON text without mid-token JSON debris", () => {
     const s = summarizeToolResult("Found 4 tours.\nAll bookable.   Extra   whitespace");
     expect(s).toBe("Found 4 tours. All bookable. Extra whitespace");
