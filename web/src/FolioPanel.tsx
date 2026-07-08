@@ -94,6 +94,18 @@ export function FolioPanel({ folio, advisor, onRequestAccess }: { folio: FolioDa
           ))}
         </section>
       )}
+      {folio.bookings && folio.bookings.length > 0 && (
+        <section>
+          <h3>Confirmed</h3>
+          {folio.bookings.map((b, i) => (
+            <div key={i} className="folio-booking">
+              <strong>{b.label}</strong>
+              {b.detail ? <span className="card-sub"> {b.detail}</span> : null}
+              <span className="folio-booking-conf">{b.conf}</span>
+            </div>
+          ))}
+        </section>
+      )}
       {folio.includes && folio.includes.length > 0 && (
         <section>
           <h3>What&#39;s included &amp; good to know</h3>

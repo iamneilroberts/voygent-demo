@@ -43,8 +43,8 @@ export function BoardView(
   const hasReelSelection = (selectedCandidate?.candidateIds.length ?? 0) > 0;
   const locked = board.resolved || !!board.resolvedId || hasReelSelection;
   const interactive = !reelMode; // live driving = highlight, then confirm
-  const kindWord = board.kind === "flight" ? "flight" : board.kind === "hotel" ? "hotel" : "option";
-  const title = board.kind === "flight" ? "Select a flight" : board.kind === "includes" ? "Choose what to include" : "Choose a hotel";
+  const kindWord = board.kind === "flight" ? "flight" : board.kind === "hotel" ? "hotel" : board.kind === "tour" ? "tour" : "option";
+  const title = board.kind === "flight" ? "Select a flight" : board.kind === "includes" ? "Choose what to include" : board.kind === "tour" ? "Choose a tour" : "Choose a hotel";
 
   function rowClick(c: BoardCandidate) {
     if (locked || busy) return;
@@ -132,7 +132,7 @@ export function BoardView(
       {interactive && !locked && (
         <div className="cl-board-actions">
           <button type="button" className="cl-board-confirm" disabled={!highlighted || busy} onClick={confirm}>
-            {board.kind === "flight" ? "Confirm flight →" : board.kind === "hotel" ? "Choose this hotel →" : "Confirm →"}
+            {board.kind === "flight" ? "Confirm flight →" : board.kind === "hotel" ? "Choose this hotel →" : board.kind === "tour" ? "Add this tour →" : "Confirm →"}
           </button>
           {!highlighted && <span className="cl-board-hint">Tap a {kindWord} to see details, or just tell me what you prefer.</span>}
         </div>

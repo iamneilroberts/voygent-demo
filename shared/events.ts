@@ -22,6 +22,12 @@ export interface FolioDay {
   activities: FolioActivity[]; dining: FolioDining[]; stay?: string;
 }
 export interface FolioInclude { key: string; title: string; body: string }
+export interface FolioBooking {
+  label: string;             // "Aer Lingus EI 106 · MOB→DUB"
+  conf: string;              // supplier confirmation number
+  detail?: string;           // "Oct 4 · 8:55p JFK→DUB · 2 adults · $3,180"
+  status?: "confirmed" | "pending";
+}
 export interface FolioData {
   tripId: string;
   title: string;
@@ -29,6 +35,7 @@ export interface FolioData {
   hotels: FolioHotel[];
   days?: FolioDay[];          // NEW — day-by-day (activities = excursions + free things; dining)
   includes?: FolioInclude[];  // NEW — boilerplate "what's included / tips"
+  bookings?: FolioBooking[];  // NEW — confirmed/pending third-party bookings (e.g. a tour add-on)
 }
 
 // One segment of a flight itinerary — the expandable detail behind a flight option.
@@ -75,7 +82,7 @@ export type ServerEvent =
   | { type: "text"; delta: string }
   | { type: "tool"; tool: string; phase: "start" | "done"; summary?: string; title?: string }
   | { type: "folio"; folio: FolioData }
-  | { type: "board"; kind: "flight" | "hotel" | "includes"; boardId: string; tripId: string; candidates: BoardCandidate[] }
+  | { type: "board"; kind: "flight" | "hotel" | "includes" | "tour"; boardId: string; tripId: string; candidates: BoardCandidate[] }
   // Honesty signal: whether this session's flight/hotel results are LIVE supplier data
   // (true) or curated sample fixtures (false). Emitted once, when the first search
   // resolves. The UI shows a "live" / "sample results" tag so we never imply replayed
