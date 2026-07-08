@@ -25,10 +25,13 @@ export function ReelCallout(
     // A target taller than the viewport (e.g. the full flight board) would land on its
     // bottom edge with "nearest", scrolling the chosen option at the top out of view —
     // so align such targets to their TOP. Short targets keep "nearest".
-    try {
-      const tall = el.getBoundingClientRect().height > window.innerHeight * 0.78;
-      el.scrollIntoView({ block: tall ? "start" : "nearest", inline: "nearest" });
-    } catch { /* ignore */ }
+    const scrollToEl = () => {
+      try {
+        const tall = el.getBoundingClientRect().height > window.innerHeight * 0.78;
+        el.scrollIntoView({ block: tall ? "start" : "nearest", inline: "nearest" });
+      } catch { /* ignore */ }
+    };
+    scrollToEl();
     const measure = () => {
       const r = el.getBoundingClientRect();
       const vh = window.innerHeight, vw = window.innerWidth;
@@ -38,7 +41,20 @@ export function ReelCallout(
     measure();
     const raf = requestAnimationFrame(measure); // re-measure after scrollIntoView settles
     window.addEventListener("resize", measure);
-    return () => { cancelAnimationFrame(raf); window.removeEventListener("resize", measure); };
+    // A2: the target can GROW after mount — a folio spotlight fires on the same beat
+    // that renders the folio's new content, and on a phone that growth pushed the whole
+    // artifact below the fold AFTER the mount-time scroll (spotlit content invisible for
+    // the entire dwell). Re-assert the scroll when the target's size changes, but only
+    // if it has drifted fully out of view — never fight a viewer reading while paused.
+    const ro = typeof ResizeObserver !== "undefined"
+      ? new ResizeObserver(() => {
+          const r = el.getBoundingClientRect();
+          if (r.bottom < 0 || r.top > window.innerHeight) scrollToEl();
+          measure();
+        })
+      : null;
+    ro?.observe(el);
+    return () => { cancelAnimationFrame(raf); ro?.disconnect(); window.removeEventListener("resize", measure); };
   }, [highlight.target]);
 
   // Auto-resume after dwell (reduced-motion = instant). While paused, no timer is

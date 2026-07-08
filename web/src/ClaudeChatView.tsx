@@ -304,16 +304,26 @@ export function ClaudeChatView(
   // Auto-scroll ONLY on new chat content AND only when the user is already at the
   // bottom — never on a folio-only update (that yank was the mobile "glitchy
   // scrolling"). Track the pinned-to-bottom state from the scroll position.
+  // A2: only a USER scroll may unpin. Our own scrollIntoView calls below also fire
+  // onScroll, and on a phone a pinned chooser board is taller than the viewport, so
+  // treating that programmatic scroll as intent permanently killed follow-scroll —
+  // everything after the pick (confirmation, first folio) landed below the fold.
+  const progScrollUntil = useRef(0);
   function onScroll() {
     const el = scrollRef.current;
     if (!el) return;
+    if (Date.now() < progScrollUntil.current) return; // our scrollIntoView, not the user
     pinnedRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
   }
   useEffect(() => {
-    if (!pinnedRef.current) return;
+    // Reel playback follows the newest beat unconditionally — there is no reader to
+    // protect, and ReelCallout's own target scrolls would otherwise unpin us for good.
+    // (Viewers who want to linger have the pause control.)
+    if (!reelMode && !pinnedRef.current) return;
     // If a chooser board is awaiting a pick, keep IT in view instead of scrolling past it
     // to the trailing summary text (Neil: better to miss the summary than have to scroll
     // back up to choose). Otherwise stick to the bottom as before.
+    progScrollUntil.current = Date.now() + 250;
     const pendingBoard = items.some((it) => it.role === "board" && !it.resolved && !it.resolvedId);
     if (pendingBoard) {
       const boards = scrollRef.current?.querySelectorAll<HTMLElement>('[data-reel-target^="board-"]');
@@ -321,7 +331,7 @@ export function ClaudeChatView(
       if (last) { last.scrollIntoView({ block: "start" }); return; }
     }
     endRef.current?.scrollIntoView({ block: "end" });
-  }, [items, busy]);
+  }, [items, busy, reelMode]);
 
   const lastIdx = items.length - 1;
   // Enrichment runs a long batch of tools (itinerary, excursions, dining) with
