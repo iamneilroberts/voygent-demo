@@ -44,7 +44,7 @@ Baggage allowance 1PC per passenger. Check-in opens 24hrs before departure.`;
 const filedBooking: FolioBooking = {
   label: "Aer Lingus EI 106 · JFK→DUB",
   conf: "6XKPTR",
-  detail: "Oct 4 · 8:55p → 8:35a +1 · Mark & Julie Jones · $3,180 incl. taxes",
+  detail: "Oct 4 · 8:55p → 8:35a +1 · Mark & Julie Miller · $3,180 incl. taxes",
   status: "confirmed",
 };
 const withBooking: FolioData = { ...soldFolio, bookings: [filedBooking] };
@@ -96,7 +96,7 @@ const cvClosed: ReelClientSession = { ...cvNote, open: false };
 export const dublinRun = screenplay({ trip: "Dublin · run", skin: "claude" }, (s) => {
   // Beat 1: the paste. A messy airline email becomes a filed, structured booking.
   s.advisor.says(CONF_EMAIL);
-  s.agent.says("That's the Joneses' flight confirmation. Filing it.");
+  s.agent.says("That's the Millers' flight confirmation. Filing it.");
   s.agent.tool("add_booking", { summary: "Booking filed · EI 106 · conf 6XKPTR" });
   s.agent.folio(withBooking);
   s.spotlight({ eventType: "folio", nth: 1 }, {
@@ -127,11 +127,11 @@ export const dublinRun = screenplay({ trip: "Dublin · run", skin: "claude" }, (
   s.spotlight({ interactionKind: "clientview", nth: 1 }, {
     target: "client-view", eyebrow: "Their evening, their call",
     title: "The travellers do it themselves",
-    body: "The Joneses open their own window, turn on the whiskey walk, and watch the price update. No email back and forth to get there.",
+    body: "The Millers open their own window, turn on the whiskey walk, and watch the price update. No email back and forth to get there.",
   });
 
   // Beat 4: the relay. The note lands, Voygent proposes the fit, one click confirms it.
-  s.agent.says("The Joneses added the whiskey tasting walk and asked to do it the evening they return from Wicklow. Day 6 works. Confirm?");
+  s.agent.says("The Millers added the whiskey tasting walk and asked to do it the evening they return from Wicklow. Day 6 works. Confirm?");
   s.advisor.says("Confirm it.");
   s.agent.tool("patch_trip", { summary: "day 6 evening + whiskey walk" });
   s.agent.folio(finalFolio);
