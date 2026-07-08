@@ -10,7 +10,7 @@ import type { ReelClientSession } from "../lib/recording";
 // The folio as chapter 1 left it (re-declared locally; values match dublin-collab's
 // finalFolio: title, the Aer Lingus flight, The Dean hotel, six days incl. Cliffs of
 // Moher on day 3 and the Temple Bar food tour on day 5, and the four kept includes).
-const days = [
+export const days = [
   { title: "Day 1 · Arrive in Dublin", date: "Sat Oct 4", activities: [{ name: "Evening stroll along the Liffey" }], dining: [{ name: "The Woollen Mills", cuisine: "Irish" }] },
   { title: "Day 2 · History in the old city", date: "Sun Oct 5", activities: [{ name: "Trinity College & the Book of Kells" }, { name: "EPIC: the Irish emigration museum" }], dining: [{ name: "Fade Street Social", cuisine: "Modern Irish" }] },
   { title: "Day 3 · Open day", date: "Mon Oct 6", activities: [{ name: "Cliffs of Moher day trip" }], dining: [{ name: "Klaw", cuisine: "Seafood" }] },
@@ -18,7 +18,7 @@ const days = [
   { title: "Day 5 · Temple Bar evening", date: "Wed Oct 8", activities: [{ name: "Chester Beatty Library (step-free)" }, { name: "Temple Bar food tour" }], dining: [{ name: "The Boxty House", cuisine: "Irish" }] },
   { title: "Day 6 · Easy last day", date: "Thu Oct 9", activities: [{ name: "National Museum of Ireland" }], dining: [{ name: "Glovers Alley", cuisine: "Modern Irish" }] },
 ];
-const soldFolio: FolioData = {
+export const soldFolio: FolioData = {
   tripId: "dublin",
   title: "A week in Dublin",
   flights: [{ label: "Aer Lingus · MOB→DUB", price: "$3,180", date: "Oct 4-11", stops: 1 }],
