@@ -12,7 +12,9 @@ Source handoffs: `pause-2026-07-08-ch3-client-folio.md` (newest) · `pause-2026-
 - [x] Neil reviewed ch3 spec 2026-07-08 (edits: self-serve add-on positioning `011340a`; Decision 4 one-surface-two-modes + Decision 5 scroll fallback `f3ff77c`)
 - [x] Ch3 plan written (`docs/superpowers/plans/2026-07-08-ch3-client-folio-chapter.md`, `ea27235`) and IMPLEMENTED on demo-design (tasks 1-8: visual contract `bb5878a`, types `d9978ee`, plumbing `cab5c64`, screenplay `aa36478`, ReelFolioView `cf0dc5a`, registry `789edb7`, App wiring `99723dd`, beat-4 visibility fix `d2f5e83`); browser pass 16/16
 - [x] Ch3 SHIPPED LIVE 2026-07-08: review gate wf_f1fee23d (5 findings → 4 fixed `a4e7bc7`, 1 declined YAGNI); main ff to `a4e7bc7`, pushed; Worker Version `590fe92a`; live bundle `index-JAD2xy6t.js`; live smoke 16/16 (default intro 3 chapters, ch3 plays→ends on interactive folio, ch2 end offers ch3, mobile full-bleed)
-- [ ] C11: swap curated demo's FolioArtifact (`ClaudeChatView.tsx:97-250`) to ReelFolioView — follow-up AFTER ch3 ships (decided in ch3 spec)
+- [x] C11 REDEFINED (spec Decision 6, Neil 2026-07-08): literal FolioArtifact→ReelFolioView swap retracted (FolioArtifact is the advisor-view chat folio: commission/bookings/edits/threads + ch1/ch2 anchors). Split: (a) ReelExplore retirement, (b) FolioArtifact alaska-warm restyle.
+- [ ] C11a: ReelExplore retirement — BUILT on demo-design (adapter `1b22782`, ReelFolioView parity `0cdec37`, App wiring + deletion `9c49eea`); browser pass 25/25; review gate wf_db37fd3e running → merge → deploy
+- [ ] C11b: FolioArtifact alaska-warm restyle (keep structure + anchors; visual contract docs/reference/2026-07-08-alaska-warm-folio-staging.png)
 - [ ] C9: feature the folio in ch1/ch2 (mid-chapter pop-up) — separate item; ch3 ends on the folio by construction
 - [ ] A2: mobile reel scroll — callout geometry vs target compete for the fold (`ReelCallout.tsx:22-81`); needs visual iteration on a phone viewport
 - [ ] B6: Rome hotel fixture price mix — recapture via `scripts/capture-fixtures.mjs` with a price spread
