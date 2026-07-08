@@ -159,7 +159,7 @@
 :root[data-skin="claude"] .cl-option-wrap { display: flex; flex-direction: column; transition: opacity .2s; }
 :root[data-skin="claude"] .cl-option-wrap.dimmed { opacity: .45; }
 :root[data-skin="claude"] .cl-option {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 12px; width: 100%; text-align: left;
+  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
   background: var(--cl-bg); border: 1px solid var(--cl-line); border-radius: 10px;
   padding: 10px 14px; cursor: pointer; font: inherit; color: var(--cl-ink);
   transition: border-color .15s, box-shadow .15s, opacity .2s;
@@ -221,7 +221,9 @@
 :root[data-skin="claude"] .cl-artifact-totalrow { border-top: 1px dashed #d9d2c5; margin-top: 4px; padding-top: 6px; }
 :root[data-skin="claude"] .cl-option-mark { width: 18px; color: var(--cl-accent); font-weight: 700; }
 /* the "{Actor} chose this" mark is longer than its 18px slot — give it its own
-   full-width line INSIDE the card (all viewports; it used to jut past the right edge) */
+   full-width line INSIDE the card (it used to jut past the right edge). Wrap is scoped
+   to PICKED cards so unpicked boards keep their single-line thumb/main/econ layout. */
+:root[data-skin="claude"] .cl-option-wrap.picked .cl-option { flex-wrap: wrap; }
 :root[data-skin="claude"] .cl-option-wrap.picked .cl-option-mark { flex: 1 0 100%; width: auto; order: 9; margin-top: 5px; text-align: left; }
 :root[data-skin="claude"] .cl-board-hint { margin-top: 8px; font-size: .75rem; color: var(--cl-muted); }
 
@@ -392,7 +394,9 @@
   /* during the reel, keep the folio inline so its guided callouts (day-by-day, edits,
      send) can anchor to on-screen targets instead of the hidden Folio sheet */
   :root[data-skin="claude"] .cl-folio-inline.in-reel { display: block; }
-  /* (the picked "{Actor} chose this" own-line rule is base now — see .cl-option-mark) */
+  /* narrow cards: let ANY option row wrap (econ column etc.), and let the picked mark
+     wrap its text; the picked own-line rule itself is base now — see .cl-option-mark */
+  :root[data-skin="claude"] .cl-option { flex-wrap: wrap; }
   :root[data-skin="claude"] .cl-option-wrap.picked .cl-option-mark { white-space: normal; }
   /* fixed desktop chrome would overlap the composer — hidden on mobile (demo toggle lives in the pill bar) */
   .skin-switch, .watch-demo { display: none; }

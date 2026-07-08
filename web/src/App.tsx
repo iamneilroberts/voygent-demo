@@ -528,7 +528,8 @@ export function App() {
               key={activeHighlight.title}
               highlight={activeHighlight}
               dwellMs={activeHighlight.dwellMs ?? 4000}
-              paused={paused || readMode}
+              paused={paused}
+              hold={readMode}
               onContinue={() => hlResolve.current?.()}
             />
           )}

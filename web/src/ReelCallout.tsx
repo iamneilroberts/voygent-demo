@@ -14,9 +14,14 @@ function findTarget(target: string): HTMLElement | null {
 interface Rect { top: number; left: number; width: number; height: number }
 
 export function ReelCallout(
-  { highlight, dwellMs, onContinue, paused }:
-  { highlight: Highlight; dwellMs: number; onContinue: () => void; paused?: boolean },
+  { highlight, dwellMs, onContinue, paused, hold }:
+  // `paused` = the viewer hit the global pause (they may be scrolling/reading — never
+  // fight them). `hold` = Read mode's until-Continue hold: the auto-continue timer is
+  // disarmed but the target-recovery scroll stays live (the viewer isn't scrolling;
+  // they're waiting on content that may still grow out of view).
+  { highlight: Highlight; dwellMs: number; onContinue: () => void; paused?: boolean; hold?: boolean },
 ) {
+  const held = paused || hold;
   // rect = the target's viewport rect when it's on-screen; null => no/offscreen target (centered fallback).
   const [rect, setRect] = useState<Rect | null>(null);
   // The ResizeObserver below outlives renders; read `paused` through a ref so its
@@ -64,14 +69,14 @@ export function ReelCallout(
     return () => { cancelAnimationFrame(raf); ro?.disconnect(); window.removeEventListener("resize", measure); };
   }, [highlight.target]);
 
-  // Auto-resume after dwell (reduced-motion = instant). While paused, no timer is
-  // armed (only the Continue button advances); resuming re-arms a fresh dwell.
+  // Auto-resume after dwell (reduced-motion = instant). While paused or held, no timer
+  // is armed (only the Continue button advances); resuming re-arms a fresh dwell.
   useEffect(() => {
-    if (paused) return;
+    if (held) return;
     const reduced = (() => { try { return window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch { return false; } })();
     const t = setTimeout(onContinue, reduced ? 0 : dwellMs);
     return () => clearTimeout(t);
-  }, [dwellMs, onContinue, paused]);
+  }, [dwellMs, onContinue, held]);
 
   // Card placement: beside the target when there's horizontal room (desktop). On a
   // narrow screen a full-width target leaves no side room, so the card would cover it —
@@ -113,7 +118,7 @@ export function ReelCallout(
         <h4 className="cl-reel-callout-h">{highlight.title}</h4>
         <p className="cl-reel-callout-b">{highlight.body}</p>
         <div className="cl-reel-callout-bar">
-          <span className="cl-reel-prog"><i style={{ animationDuration: `${dwellMs}ms`, animationPlayState: paused ? "paused" : "running" }} /></span>
+          <span className="cl-reel-prog"><i style={{ animationDuration: `${dwellMs}ms`, animationPlayState: held ? "paused" : "running" }} /></span>
           <button type="button" className="cl-reel-continue" onClick={onContinue}>Continue ▶</button>
         </div>
       </div>
