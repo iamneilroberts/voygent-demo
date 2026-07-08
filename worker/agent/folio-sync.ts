@@ -1,4 +1,5 @@
 import type { FolioData, FolioFlight, FolioHotel, FolioDay, FolioActivity, FolioDining, FolioInclude } from "../../shared/events";
+import { googleHotelUrl } from "./boards";
 
 const MUTATING = new Set([
   "flight_search", "hotel_search", "excursion_search",
@@ -121,29 +122,34 @@ export function tripToFolio(tripId: string, raw: any): FolioData {
       : Array.isArray(t.lodging) ? t.lodging : [];
   // Skip bare staging stubs ({ _candidateId } with no display data) so the folio
   // never flashes nameless "Hotel" placeholders between stage and promote.
-  const hotels: FolioHotel[] = lodgingSrc.filter((h: any) => h && (h.name || h.priceTotal || h.total)).map((h: any) => ({
-    name: String(h.name ?? "Hotel"),
-    // Headline what the CLIENT pays (cpmaxx clientPrice) when present, else the stay total.
-    price: asPrice(h.clientPrice ?? h.price ?? h.total ?? h.rate ?? h.priceTotal),
-    stars: typeof h.stars === "number" ? h.stars : (typeof h.starRating === "number" ? h.starRating : undefined),
-    area: h.location ?? h.area ?? undefined,
-    nights: typeof h.nights === "number" ? h.nights : undefined,
-    perNight: asPrice(h.pricePerNight),
-    // Advisor economics — pass through ONLY when the source carries real
-    // numbers (cpmaxx writes commission/commission_pct; serp has none).
-    commission: typeof h.commission === "number" && Number.isFinite(h.commission) ? h.commission : undefined,
-    commissionPct: typeof h.commissionPct === "number" ? h.commissionPct
-      : typeof h.commission_pct === "number" ? h.commission_pct : undefined,
-    // Credentialed cpmaxx extras: property photo + the quote-sheet / room-select link.
-    image: typeof h.image === "string" && h.image ? h.image : undefined,
-    quoteUrl: typeof h.quoteUrl === "string" && h.quoteUrl ? h.quoteUrl
-      : typeof h.hotelSheetUrl === "string" && h.hotelSheetUrl ? h.hotelSheetUrl
-      : typeof h.url === "string" && h.url ? h.url : undefined,
-    // Context so the (real, premium) rate reads sanely.
-    travelers: typeof h.travelers === "number" ? h.travelers : undefined,
-    allInclusive: h.allInclusive === true ? true : undefined,
-    clientPrice: typeof h.clientPrice === "number" ? h.clientPrice : undefined,
-  }));
+  const hotels: FolioHotel[] = lodgingSrc.filter((h: any) => h && (h.name || h.priceTotal || h.total)).map((h: any) => {
+    const name = String(h.name ?? "Hotel");
+    const area = h.location ?? h.area ?? undefined;
+    return {
+      name,
+      // Headline what the CLIENT pays (cpmaxx clientPrice) when present, else the stay total.
+      price: asPrice(h.clientPrice ?? h.price ?? h.total ?? h.rate ?? h.priceTotal),
+      stars: typeof h.stars === "number" ? h.stars : (typeof h.starRating === "number" ? h.starRating : undefined),
+      area,
+      nights: typeof h.nights === "number" ? h.nights : undefined,
+      perNight: asPrice(h.pricePerNight),
+      // Advisor economics — pass through ONLY when the source carries real
+      // numbers (cpmaxx writes commission/commission_pct; serp has none).
+      commission: typeof h.commission === "number" && Number.isFinite(h.commission) ? h.commission : undefined,
+      commissionPct: typeof h.commissionPct === "number" ? h.commissionPct
+        : typeof h.commission_pct === "number" ? h.commission_pct : undefined,
+      // Credentialed cpmaxx extras: property photo passes through, but the
+      // quote-sheet / room-select link is behind the advisor's CPMaxx login and
+      // must never reach the client — use the same Google-by-name fallback the
+      // board fix (boards.ts cpmaxxHotelCandidate) uses instead, unconditionally.
+      image: typeof h.image === "string" && h.image ? h.image : undefined,
+      quoteUrl: googleHotelUrl(name, area),
+      // Context so the (real, premium) rate reads sanely.
+      travelers: typeof h.travelers === "number" ? h.travelers : undefined,
+      allInclusive: h.allInclusive === true ? true : undefined,
+      clientPrice: typeof h.clientPrice === "number" ? h.clientPrice : undefined,
+    };
+  });
 
   const days = projectDays(t.itinerary);
   const base: FolioData = { tripId, title, flights, hotels };

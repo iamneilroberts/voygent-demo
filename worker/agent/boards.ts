@@ -70,7 +70,7 @@ function flightCandidate(c: Record<string, any>): BoardCandidate | null {
 // Mirrors voygent-lite's googleFallbackUrl so the demo's "search ↗" lands the same
 // place the real renderer would — honest (a real search for a real property), and
 // no fabricated supplier inventory.
-function googleHotelUrl(name: string, area: unknown): string {
+export function googleHotelUrl(name: string, area: unknown): string {
   const q = [name, typeof area === "string" ? area : null].filter(Boolean).join(" ");
   return `https://www.google.com/search?q=${encodeURIComponent(q)}`;
 }
