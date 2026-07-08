@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { isTripMutating, tripToFolio } from "./folio-sync";
+import { googleHotelUrl } from "./boards";
 
 describe("isTripMutating", () => {
   it("flags trip-mutating tools called with a trip_id", () => {
@@ -53,7 +54,7 @@ describe("tripToFolio", () => {
     expect(folio.hotels[2].commissionPct).toBeUndefined();
   });
 
-  it("passes through the property photo + quote-sheet link on synthesized cpmaxx lodging", () => {
+  it("passes through the property photo but substitutes a public link for the credentialed quote-sheet URL", () => {
     const raw = {
       data: {
         meta: { title: "Cancún Escape" },
@@ -67,10 +68,14 @@ describe("tripToFolio", () => {
     };
     const folio = tripToFolio("t1", raw);
     expect(folio.hotels[0].image).toBe("https://i.travelapi.com/lodging/x_b.jpg");
-    expect(folio.hotels[0].quoteUrl).toBe("https://cpmaxx.example/HotelSheets/497758");
-    // Falls back to a bare `url` when quoteUrl/hotelSheetUrl are absent.
+    // The credentialed CPMaxx quote-sheet link must never reach the client — a
+    // public Google-by-name link takes its place, same as the board fix.
+    expect(folio.hotels[0].quoteUrl).toBe(googleHotelUrl("Dreams Playa Mujeres", "Punta Sam"));
+    expect(folio.hotels[0].quoteUrl).not.toContain("cpmaxx.example");
+    // Same substitution applies even for a bare `url` field (no quoteUrl/
+    // hotelSheetUrl name) — the folio link is always the public one.
     const fallback = tripToFolio("t2", { data: { lodging: [{ name: "H", total: 1, url: "https://u" }] } });
-    expect(fallback.hotels[0].quoteUrl).toBe("https://u");
+    expect(fallback.hotels[0].quoteUrl).toBe(googleHotelUrl("H", undefined));
   });
 
   it("folio lodging headlines client price with all-inclusive/traveler context", () => {

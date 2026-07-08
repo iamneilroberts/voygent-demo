@@ -8,6 +8,7 @@
 
 import type { ServerEvent, BoardCandidate, FlightLeg } from "../../shared/events";
 import { cpmaxxHotelById } from "../fixtures/index";
+import { segmentsToLegs } from "./legs";
 
 const FLIGHT_TOOLS = new Set(["flight_search", "flight_list"]);
 const HOTEL_TOOLS = new Set(["hotel_search", "hotel_list", "hotel_search_and_rank"]);
@@ -57,7 +58,10 @@ function flightCandidate(c: Record<string, any>): BoardCandidate | null {
   const out: BoardCandidate = { id: c.id, title, price, meta, summary };
   if (typeof travelers === "number") out.travelers = travelers;
   if (typeof perPerson === "number") out.perPerson = perPerson;
-  const legs = legsFrom(c.legs);
+  // Replayed/fixture candidates already carry pre-shaped `legs`. Live/faithful
+  // passthrough candidates carry raw prod `segments` instead — derive legs from
+  // those so the routing/aircraft expander works for live results too.
+  const legs = legsFrom(c.legs) ?? segmentsToLegs(c.segments);
   if (legs) out.legs = legs;
   return out;
 }
@@ -66,7 +70,7 @@ function flightCandidate(c: Record<string, any>): BoardCandidate | null {
 // Mirrors voygent-lite's googleFallbackUrl so the demo's "search ↗" lands the same
 // place the real renderer would — honest (a real search for a real property), and
 // no fabricated supplier inventory.
-function googleHotelUrl(name: string, area: unknown): string {
+export function googleHotelUrl(name: string, area: unknown): string {
   const q = [name, typeof area === "string" ? area : null].filter(Boolean).join(" ");
   return `https://www.google.com/search?q=${encodeURIComponent(q)}`;
 }
@@ -148,8 +152,11 @@ function cpmaxxHotelCandidate(c: Record<string, any>): BoardCandidate | null {
   if (allInc) out.allInclusive = true;
   if (typeof clientPrice === "number") out.clientPrice = clientPrice;
 
-  const sheet = str(c.hotelSheetUrl, c.hotel_sheet_url, fx?.hotelSheetUrl ?? undefined);
-  if (sheet) { out.detailUrl = sheet; out.detailLabel = "view rooms ↗"; }
+  // The credentialed CPMaxx quote-sheet URL must never reach a public demo card
+  // (it's behind the advisor's login). Use the same Google-by-name fallback the
+  // non-cpmaxx hotel mapper uses instead — a real, honest search link.
+  out.detailUrl = googleHotelUrl(c.name, area);
+  out.detailLabel = "details ↗";
   const image = str(c.image, fx?.image ?? undefined);
   if (image) out.image = image;
   const photoCount = num(c.pictureCount, c.picture_count, fx?.pictureCount ?? undefined);

@@ -39,7 +39,7 @@ function HotelCard({ h, advisor }: { h: FolioHotel; advisor: boolean }) {
         <div className="card-title">{h.name}</div>
         {meta && <div className="card-meta">{meta}</div>}
         {h.quoteUrl && (
-          <a className="card-link" href={h.quoteUrl} target="_blank" rel="noopener noreferrer">view rooms ↗</a>
+          <a className="card-link" href={h.quoteUrl} target="_blank" rel="noopener noreferrer">details ↗</a>
         )}
       </div>
       <div className="card-price">

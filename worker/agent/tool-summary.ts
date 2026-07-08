@@ -28,6 +28,17 @@ export function summarizeToolResult(content: string): string {
   const o = parsed as Record<string, unknown>;
 
   if (typeof o.error === "string" && o.error) return clip(`error: ${o.error}`, MAX);
+  // Structured failure envelope, e.g. promote_flights/promote_hotels_to_lodging
+  // returning {ok:false, error:{code,message}} — surface it the same way a
+  // plain string error is surfaced, instead of falling through to the
+  // unrecognized-object branch (which would misreport it as "ok · ...").
+  if (o.error && typeof o.error === "object" && !Array.isArray(o.error)) {
+    const e = o.error as Record<string, unknown>;
+    const code = typeof e.code === "string" && e.code ? e.code : undefined;
+    const message = typeof e.message === "string" && e.message ? e.message : undefined;
+    if (code || message) return clip(`error: ${[code, message].filter(Boolean).join(" — ")}`, MAX);
+  }
+  if (o.ok === false) return clip("error: request failed", MAX);
 
   const parts: string[] = [];
   if (typeof o.status === "string") parts.push(o.status);

@@ -15,11 +15,24 @@ function visitorToolSummary(content: string, ok: boolean, friendlyOnFail: boolea
   return summarizeToolResult(content);
 }
 
+// Detects a structured tool-result failure envelope, conservatively — only
+// top-level `ok`/`error` are consulted, so a nested payload that happens to
+// carry a key named `error` (e.g. a folio field) never false-positives.
+// Matches: a non-empty string `error`, an `ok: false` flag (with or without
+// an `error` object), or an `error` object carrying a `code` and/or `message`
+// (the promote_flights/promote_hotels_to_lodging failure shape).
 function hasJsonError(content: string): boolean {
   try {
     const o = JSON.parse(content);
-    return !!o && typeof o === "object" && typeof (o as { error?: unknown }).error === "string"
-      && !!(o as { error?: string }).error;
+    if (!o || typeof o !== "object" || Array.isArray(o)) return false;
+    const rec = o as Record<string, unknown>;
+    if (rec.ok === false) return true;
+    if (typeof rec.error === "string" && rec.error) return true;
+    if (rec.error && typeof rec.error === "object" && !Array.isArray(rec.error)) {
+      const e = rec.error as Record<string, unknown>;
+      return (typeof e.code === "string" && !!e.code) || (typeof e.message === "string" && !!e.message);
+    }
+    return false;
   } catch { return false; }
 }
 
@@ -120,7 +133,7 @@ export async function runAgentLoop(args: AgentLoopArgs): Promise<void> {
       const t0 = Date.now();
       let content: string;
       let ok = true;
-      try { content = await callTool(t.name, t.input); if (content.startsWith("ERROR:")) ok = false; }
+      try { content = await callTool(t.name, t.input); if (content.startsWith("ERROR:") || hasJsonError(content)) ok = false; }
       catch (e) { content = `ERROR: ${(e as Error).message}`; ok = false; }
       const latencyMs = Date.now() - t0;
       emit({ type: "tool", tool: t.name, phase: "done", summary: visitorToolSummary(content, ok, !!args.friendlyToolErrors) });

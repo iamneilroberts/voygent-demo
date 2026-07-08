@@ -1,6 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { FixtureReplay, type ReplayHelpers } from "./replay";
 import { FIXTURE_BY_ID, matchFlightFixture, matchHotelFixture, cpmaxxHotelsFor, type Fixture } from "../fixtures/index";
+import { tripToFolio } from "../agent/folio-sync";
+import { googleHotelUrl } from "../agent/boards";
 
 const DUBLIN = FIXTURE_BY_ID["dublin-oct"];
 const CANCUN = FIXTURE_BY_ID["cancun-beach"];
@@ -192,7 +194,7 @@ describe("credentialed cpmaxx hotel replay", () => {
     r["hotelSearch"]({ location: "Cancun" });
     const cpmaxx = cpmaxxHotelsFor(CANCUN);
     const picks = cpmaxx.slice(0, 3);
-    const { patches, helpers } = fakeHelpers({ hotels: picks.map((h) => ({ _candidateId: h.id })) });
+    const { trip, patches, helpers } = fakeHelpers({ hotels: picks.map((h) => ({ _candidateId: h.id })) });
     const out = JSON.parse(await r["promoteHotels"](helpers));
     expect(out.ok).toBe(true);
     expect(out.promoted).toBe(3);
@@ -202,9 +204,18 @@ describe("credentialed cpmaxx hotel replay", () => {
     expect(card.total).toBe(picks[0].priceTotal);
     expect(card.commission).toBe(picks[0].commission);
     expect(card.image).toBe(picks[0].image);
-    expect(card.quoteUrl).toBe(picks[0].hotelSheetUrl);
     expect(card._candidateId).toBe(picks[0].id);
     expect((patches[0].lodging as any[]).length).toBe(3);
+
+    // The credentialed CPMaxx quote-sheet URL must never reach the web client. The
+    // client only ever sees trip data through tripToFolio (the folio-sync layer) —
+    // assert that projection substitutes the same public Google-by-name link the
+    // board fix uses, and that hotelSheetUrl is nowhere in the client payload.
+    const folio = tripToFolio("demo-x", { data: trip });
+    expect(folio.hotels[0].quoteUrl).toBe(googleHotelUrl(picks[0].name, picks[0].area));
+    expect(folio.hotels[0].quoteUrl).not.toBe(picks[0].hotelSheetUrl);
+    expect(JSON.stringify(folio)).not.toContain("hotelSheetUrl");
+    if (picks[0].hotelSheetUrl) expect(JSON.stringify(folio)).not.toContain(picks[0].hotelSheetUrl);
   });
 
   it("still drops an invented id when synthesizing cpmaxx lodging (fabrication guard)", async () => {
