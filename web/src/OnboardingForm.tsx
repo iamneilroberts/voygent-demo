@@ -51,7 +51,7 @@ export function OnboardingForm({ apiBase, onAuthed, onHaveCode, onWantPro }: {
           <option value="curious">Just curious</option>
           <option value="other">Other</option>
         </select>
-        <textarea placeholder="Anything you want Neil to know? (optional)" value={note}
+        <textarea placeholder="Any questions or comments? (optional)" value={note}
           onChange={(e) => setNote(e.target.value)} style={{ ...field, minHeight: 64 }} />
         <button disabled={busy || !name.trim() || !email.trim()}
           style={{ ...field, background: "#2b6", color: "#fff", border: 0, cursor: "pointer" }}>

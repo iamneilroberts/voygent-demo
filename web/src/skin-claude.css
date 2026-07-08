@@ -159,7 +159,7 @@
 :root[data-skin="claude"] .cl-option-wrap { display: flex; flex-direction: column; transition: opacity .2s; }
 :root[data-skin="claude"] .cl-option-wrap.dimmed { opacity: .45; }
 :root[data-skin="claude"] .cl-option {
-  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px; width: 100%; text-align: left;
   background: var(--cl-bg); border: 1px solid var(--cl-line); border-radius: 10px;
   padding: 10px 14px; cursor: pointer; font: inherit; color: var(--cl-ink);
   transition: border-color .15s, box-shadow .15s, opacity .2s;
@@ -220,6 +220,9 @@
 :root[data-skin="claude"] .cl-artifact-total { font-size: .875rem; }
 :root[data-skin="claude"] .cl-artifact-totalrow { border-top: 1px dashed #d9d2c5; margin-top: 4px; padding-top: 6px; }
 :root[data-skin="claude"] .cl-option-mark { width: 18px; color: var(--cl-accent); font-weight: 700; }
+/* the "{Actor} chose this" mark is longer than its 18px slot — give it its own
+   full-width line INSIDE the card (all viewports; it used to jut past the right edge) */
+:root[data-skin="claude"] .cl-option-wrap.picked .cl-option-mark { flex: 1 0 100%; width: auto; order: 9; margin-top: 5px; text-align: left; }
 :root[data-skin="claude"] .cl-board-hint { margin-top: 8px; font-size: .75rem; color: var(--cl-muted); }
 
 /* ---- inline trip-folio artifact card ----
@@ -389,10 +392,8 @@
   /* during the reel, keep the folio inline so its guided callouts (day-by-day, edits,
      send) can anchor to on-screen targets instead of the hidden Folio sheet */
   :root[data-skin="claude"] .cl-folio-inline.in-reel { display: block; }
-  /* the "{Actor} chose this" mark overflows the narrow option card — drop it to its own
-     full-width line under the option instead of running off the right edge */
-  :root[data-skin="claude"] .cl-option { flex-wrap: wrap; }
-  :root[data-skin="claude"] .cl-option-wrap.picked .cl-option-mark { flex: 1 0 100%; width: auto; order: 9; margin-top: 5px; text-align: left; white-space: normal; }
+  /* (the picked "{Actor} chose this" own-line rule is base now — see .cl-option-mark) */
+  :root[data-skin="claude"] .cl-option-wrap.picked .cl-option-mark { white-space: normal; }
   /* fixed desktop chrome would overlap the composer — hidden on mobile (demo toggle lives in the pill bar) */
   .skin-switch, .watch-demo { display: none; }
   /* declutter: keep ONE disambiguation (the ribbon); drop the redundant composer
@@ -482,7 +483,9 @@
 }
 :root[data-skin="claude"] .cl-reel-callout-ey { font: 600 .625rem/1 var(--cl-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--cl-accent); }
 :root[data-skin="claude"] .cl-reel-callout-h { font: 600 .875rem/1.25 var(--cl-sans); margin: 8px 0 5px; }
-:root[data-skin="claude"] .cl-reel-callout-b { font-size: .78rem; line-height: 1.5; color: var(--cl-muted); margin: 0; }
+/* Body reads in ~4s before auto-continue — muted gray on the cream card was too low-
+   contrast to finish in time (Neil QA 07-08); ink-2 keeps hierarchy but stays legible. */
+:root[data-skin="claude"] .cl-reel-callout-b { font-size: .78rem; line-height: 1.5; color: var(--cl-ink-2); margin: 0; }
 :root[data-skin="claude"] .cl-reel-callout-bar { display: flex; align-items: center; gap: 8px; margin-top: 11px; }
 :root[data-skin="claude"] .cl-reel-prog { flex: 1; height: 3px; border-radius: 2px; background: var(--cl-line); overflow: hidden; }
 :root[data-skin="claude"] .cl-reel-prog i { display: block; height: 100%; width: 0; background: var(--cl-accent); animation: cl-reel-fill linear forwards; }
@@ -712,6 +715,20 @@
 :root[data-skin="claude"] .cl-fv-day-body { margin-top: 8px; padding: 10px 12px; background: #fffdf7; border-radius: 8px; }
 :root[data-skin="claude"] .cl-fv-act, :root[data-skin="claude"] .cl-fv-dine { padding: 3px 0; font: 13px/1.45 var(--cl-sans); }
 :root[data-skin="claude"] .cl-fv-addons { margin-top: 8px; display: grid; gap: 6px; }
+:root[data-skin="claude"] .cl-fv-addon-row { display: flex; flex-direction: column; gap: 2px; }
+:root[data-skin="claude"] .cl-fv-addon-more { align-self: flex-end; background: none; border: 0; padding: 2px 4px; font: 600 11px/1 var(--cl-sans); color: #96561d; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+:root[data-skin="claude"] .cl-fv-addon-more:disabled { cursor: default; }
+/* N5 tour page — the client's "tour details" drill-down inside the folio window */
+:root[data-skin="claude"] .cl-fv-tour { padding: 18px 22px 24px; display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
+:root[data-skin="claude"] .cl-fv-tour-back { background: none; border: 0; padding: 0; font: 600 12px/1 var(--cl-sans); color: #3d5245; cursor: pointer; }
+:root[data-skin="claude"] .cl-fv-tour-back:disabled { cursor: default; }
+:root[data-skin="claude"] .cl-fv-tour-title { margin: 2px 0 0; font: 600 1.35rem/1.2 var(--cl-serif, Georgia, serif); color: #1f1e1c; }
+:root[data-skin="claude"] .cl-fv-tour-price { margin: 0; font: 600 13px/1.3 var(--cl-sans); color: #96561d; }
+:root[data-skin="claude"] .cl-fv-tour-blurb { margin: 0; font: 14px/1.55 var(--cl-sans); color: #3d3d3a; }
+:root[data-skin="claude"] .cl-fv-tour-bullets { margin: 0; padding-left: 18px; display: grid; gap: 5px; font: 13px/1.4 var(--cl-sans); color: #3d3d3a; }
+:root[data-skin="claude"] .cl-fv-tour-add { margin-top: 6px; padding: 10px 18px; border: 0; border-radius: 9px; background: #3d5245; color: #faf6ec; font: 600 13px/1 var(--cl-sans); cursor: pointer; }
+:root[data-skin="claude"] .cl-fv-tour-add.on { background: #f2f4ee; color: #3d5245; border: 1px solid #3d5245; }
+:root[data-skin="claude"] .cl-fv-tour-add:disabled { cursor: default; }
 :root[data-skin="claude"] .cl-fv-addon { display: flex; align-items: center; gap: 10px; width: 100%; padding: 8px 10px; background: #fffdf7; border: 1px dashed #cfc5ad; border-radius: 8px; text-align: left; font: 13px/1.3 var(--cl-sans); color: #2b2a26; cursor: pointer; }
 :root[data-skin="claude"] .cl-fv-addon:disabled { cursor: default; }
 :root[data-skin="claude"] .cl-fv-addon.on { border-style: solid; border-color: #3d5245; background: #f2f4ee; }

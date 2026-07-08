@@ -28,6 +28,19 @@ describe("dublin-client screenplay (ch3)", () => {
     expect(totals[totals.length - 1]).toBe(4756);
   });
 
+  it("drills into the Kilmainham tour page before adding it (link → details → select → price)", () => {
+    const detailIdx = views.findIndex((v) => v.openDetailId === "tour:kilmainham");
+    expect(detailIdx).toBeGreaterThan(0);
+    expect(views[detailIdx].url).toContain("/tours/");           // the simulated link click navigates
+    expect(views[detailIdx].addons.find((a) => a.id === "tour:kilmainham")?.detail?.blurb).toBeTruthy();
+    // a later beat scrolls the page to its CTA…
+    expect(views.slice(detailIdx).some((v) => v.openDetailId && v.focus === "tour-detail-cta")).toBe(true);
+    // …then the client selects it: back on the folio, tour ON, total moved 4640 → 4756
+    const after = views.slice(detailIdx).find((v) => !v.openDetailId);
+    expect(after?.addons.find((a) => a.id === "tour:kilmainham")?.on).toBe(true);
+    expect(after && computeTripTotal(after)).toBe(4756);
+  });
+
   it("lands Julie's note on day 2 and the advisor's reply in the same thread", () => {
     const last = views[views.length - 1];
     expect(last.notes.map((n) => n.author)).toEqual(["client", "advisor"]);

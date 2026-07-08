@@ -8,7 +8,11 @@ export type Actor = "agent" | "advisor" | "client";
 // sees after the advisor sends the folio. Snapshot-based — each `clientview` beat
 // carries the full state, so consecutive beats animate the live price recalc.
 export interface ReelHotelOption { id: string; name: string; price: number; meta?: string }
-export interface ReelAddon { id: string; label: string; price: number; on: boolean; day?: number }
+// Optional drill-down content for an add-on: renders a "tour details" link on its row
+// and a full tour page inside the folio window (N5 — the client researches the tour
+// themselves before selecting it). Fixture copy only; prices stay on the addon.
+export interface ReelAddonDetail { blurb: string; bullets: string[] }
+export interface ReelAddon { id: string; label: string; price: number; on: boolean; day?: number; detail?: ReelAddonDetail }
 export interface ReelClientSession {
   open: boolean;
   url: string;            // simulated address-bar URL, e.g. voygent.app/t/dublin
@@ -44,6 +48,10 @@ export interface ReelFolioSession {
   advisorUpdating: boolean;
   focus: string | null;
   expandedDay: number | null;
+  // When set (to an addon id whose ReelAddon carries `detail`), the window shows that
+  // tour's page instead of the folio body — the scripted "client clicks the link" beat.
+  // Omitted/null → the folio. Interactive mode tracks this locally instead.
+  openDetailId?: string | null;
 }
 
 // A brief peek at the engineering view (reel): a small panel that slides in to show

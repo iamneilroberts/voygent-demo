@@ -19,6 +19,9 @@ export function ReelFolioView({ view, mode, cta }: {
   const interactive = mode === "interactive";
   const [localAddons, setLocalAddons] = useState(view.addons);
   const [localDay, setLocalDay] = useState<number | null>(view.expandedDay);
+  // N5 drill-down: which addon's tour page is open. Scripted mode reads the snapshot;
+  // interactive mode drives it from the row's "tour details" link.
+  const [localDetail, setLocalDetail] = useState<string | null>(null);
   // Interactive seeding falls back to the first hotel (as ReelExplore did) so an
   // unpicked session never renders an empty selection with the hotel cost silently $0.
   const [localPicked, setLocalPicked] = useState<string | null>(view.pickedHotelId ?? view.hotels[0]?.id ?? null);
@@ -26,6 +29,8 @@ export function ReelFolioView({ view, mode, cta }: {
   const addons = interactive ? localAddons : view.addons;
   const expandedDay = interactive ? localDay : view.expandedDay;
   const pickedHotelId = interactive ? localPicked : view.pickedHotelId;
+  const openDetailId = interactive ? localDetail : (view.openDetailId ?? null);
+  const openDetail = addons.find((a) => a.id === openDetailId && a.detail);
   const total = computeTripTotal({ flightsPrice: view.flightsPrice, activitiesPrice: view.activitiesPrice, hotels: view.hotels, pickedHotelId, addons });
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -37,15 +42,28 @@ export function ReelFolioView({ view, mode, cta }: {
     el?.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
   }, [view.focus]);
 
+  // Interactive drill-down: opening/closing a tour page starts reading from its top.
+  useEffect(() => {
+    if (interactive && rootRef.current) rootRef.current.scrollTop = 0;
+  }, [interactive, localDetail]);
+
   // The day-card hint is scheduling copy ("does it fit this day?"); undated extras
   // (transfers, insurance) get no hint — it would mislabel them.
   const renderAddon = (a: ReelAddon, hint?: string) => (
-    <button key={a.id} type="button" className={`cl-fv-addon ${a.on ? "on" : ""}`} disabled={!interactive} aria-pressed={a.on}
-      onClick={interactive ? () => setLocalAddons((xs) => xs.map((x) => (x.id === a.id ? { ...x, on: !x.on } : x))) : undefined}>
-      <span className="cl-fv-check" aria-hidden="true">{a.on ? "☑" : "☐"}</span>
-      <span className="cl-fv-addon-label">{a.label}{hint && <i>{hint}</i>}</span>
-      <span className="cl-fv-addon-price">+{usd(a.price)}</span>
-    </button>
+    <div key={a.id} className="cl-fv-addon-row">
+      <button type="button" className={`cl-fv-addon ${a.on ? "on" : ""}`} disabled={!interactive} aria-pressed={a.on}
+        onClick={interactive ? () => setLocalAddons((xs) => xs.map((x) => (x.id === a.id ? { ...x, on: !x.on } : x))) : undefined}>
+        <span className="cl-fv-check" aria-hidden="true">{a.on ? "☑" : "☐"}</span>
+        <span className="cl-fv-addon-label">{a.label}{hint && <i>{hint}</i>}</span>
+        <span className="cl-fv-addon-price">+{usd(a.price)}</span>
+      </button>
+      {a.detail && (
+        <button type="button" className="cl-fv-addon-more" disabled={!interactive}
+          onClick={interactive ? () => setLocalDetail(a.id) : undefined}>
+          tour details →
+        </button>
+      )}
+    </div>
   );
 
   const days = view.folio.days ?? [];
@@ -55,6 +73,29 @@ export function ReelFolioView({ view, mode, cta }: {
       <div className="cl-fv-window">
         <div className="cl-fv-bar" aria-hidden="true"><span className="cl-fv-dots">● ● ●</span><span className="cl-fv-url">{view.url}</span></div>
         <div className="cl-fv-scroll" ref={rootRef}>
+          {openDetail ? (
+            // N5: the tour page — what the client's "tour details" link opens. Replaces
+            // the folio body (a page navigation); the trip-total bar below stays put so
+            // the price moment reads when the tour is added. Fixture copy only.
+            <div className="cl-fv-tour" data-reel-target="tour-detail">
+              <button type="button" className="cl-fv-tour-back" disabled={!interactive}
+                onClick={interactive ? () => setLocalDetail(null) : undefined}>← Back to your trip</button>
+              <h3 className="cl-fv-tour-title">{openDetail.label}</h3>
+              <p className="cl-fv-tour-price">{usd(openDetail.price / 2)} per person · {usd(openDetail.price)} for two</p>
+              <p className="cl-fv-tour-blurb">{openDetail.detail!.blurb}</p>
+              <ul className="cl-fv-tour-bullets">
+                {openDetail.detail!.bullets.map((b) => <li key={b}>{b}</li>)}
+              </ul>
+              <button type="button" className={`cl-fv-tour-add ${openDetail.on ? "on" : ""}`} data-reel-target="tour-detail-cta"
+                disabled={!interactive} aria-pressed={openDetail.on}
+                onClick={interactive ? () => {
+                  setLocalAddons((xs) => xs.map((x) => (x.id === openDetail.id ? { ...x, on: true } : x)));
+                  setLocalDetail(null);
+                } : undefined}>
+                {openDetail.on ? "✓ Added to your trip" : `Add to trip · +${usd(openDetail.price)}`}
+              </button>
+            </div>
+          ) : (<>
           <header className="cl-fv-hero" data-reel-target="folio-hero">
             <span className={`cl-fv-status ${view.status}`} data-reel-target="folio-status">{view.status === "final" ? "✓ Final" : "Draft"}</span>
             <h2 className="cl-fv-title">{view.folio.title}</h2>
@@ -131,6 +172,7 @@ export function ReelFolioView({ view, mode, cta }: {
               ))}
             </section>
           )}
+          </>)}
         </div>
 
         {view.advisorUpdating && <div className="cl-fv-updating" role="status"><span className="cl-fv-pulse" aria-hidden="true" />Advisor is updating…</div>}
@@ -138,7 +180,7 @@ export function ReelFolioView({ view, mode, cta }: {
         {cta && (
           <div className="cl-fv-cta">
             <p className="cl-fv-disclosure">This is the scripted demo trip; the live demo pulls real flights and hotels.</p>
-            {cta.sendFunnel && <button type="button" className="cl-reel-btn cl-reel-btn-primary" onClick={() => setSent(true)}>Send to Voygent →</button>}
+            {cta.sendFunnel && <button type="button" className="cl-reel-btn cl-reel-btn-primary" onClick={() => setSent(true)}>Send to your advisor →</button>}
             {cta.nextChapter && <button type="button" className={`cl-reel-btn ${cta.sendFunnel ? "cl-reel-btn-secondary" : "cl-reel-btn-primary"}`} onClick={cta.nextChapter.onClick}>{cta.nextChapter.label}</button>}
             <button type="button" className={`cl-reel-btn ${cta.sendFunnel || cta.nextChapter ? "cl-reel-btn-secondary" : "cl-reel-btn-primary"}`} onClick={cta.onTryYourself}>Build your own trip →</button>
             <button type="button" className="cl-reel-btn cl-reel-btn-secondary" onClick={cta.onReplay}>↺ Replay the chapter</button>

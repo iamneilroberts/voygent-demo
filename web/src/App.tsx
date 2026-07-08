@@ -120,6 +120,11 @@ export function App() {
   const [reelPhase, setReelPhase] = useState<ReelPhase>(() => (resolveInitialMode() === "auto" ? "intro" : "ended"));
   const [speed, setSpeed] = useState<number>(2);          // default 2x
   const speedRef = useRef(speed); useEffect(() => { speedRef.current = speed; }, [speed]);
+  // Third speed control (Neil QA 07-08): "Read" plays beats at 1× but HOLDS every
+  // callout until the viewer clicks Continue — even 1× auto-continue is too fast to
+  // finish a callout. Implemented by rendering callouts with paused=true, which
+  // disarms their auto-continue timer (playback already waits on the callout).
+  const [readMode, setReadMode] = useState(false);
   const [activeHighlight, setActiveHighlight] = useState<Highlight | null>(null);
   // Playback transport: pause/resume gate (a ref so the replay closure reads the live
   // value) + waiters resolved on resume; progress = (framesDone, framesTotal).
@@ -523,7 +528,7 @@ export function App() {
               key={activeHighlight.title}
               highlight={activeHighlight}
               dwellMs={activeHighlight.dwellMs ?? 4000}
-              paused={paused}
+              paused={paused || readMode}
               onContinue={() => hlResolve.current?.()}
             />
           )}
@@ -554,8 +559,9 @@ export function App() {
                 />
               </div>
               <div className="cl-reel-speed">
-                <button type="button" aria-pressed={speed === 1} onClick={() => setSpeed(1)}>1×</button>
-                <button type="button" aria-pressed={speed === 2} onClick={() => setSpeed(2)}>2×</button>
+                <button type="button" aria-pressed={speed === 1 && !readMode} onClick={() => { setSpeed(1); setReadMode(false); }}>1×</button>
+                <button type="button" aria-pressed={speed === 2 && !readMode} onClick={() => { setSpeed(2); setReadMode(false); }}>2×</button>
+                <button type="button" aria-pressed={readMode} title="Play at 1× and hold every callout until you click Continue" onClick={() => { setSpeed(1); setReadMode(true); }}>Read</button>
               </div>
               <button type="button" className="cl-reel-ctl" aria-pressed={showFrameNum} aria-label="Toggle frame number" title="Frame number" onClick={toggleFrameNum}>#</button>
               {showFrameNum && <span className="cl-reel-frameno" aria-live="off">{reelProg.done}/{reelProg.total}</span>}
