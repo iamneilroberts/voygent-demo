@@ -34,6 +34,7 @@ import { ReelIntro } from "./ReelIntro";
 import { ReelCallout } from "./ReelCallout";
 import { ReelHandoffNotice } from "./ReelHandoffNotice";
 import { ReelClientView } from "./ReelClientView";
+import { ReelFolioView } from "./ReelFolioView";
 import { ReelEngPanel } from "./ReelEngPanel";
 import { ReelEndCard } from "./ReelEndCard";
 import { ReelExplore } from "./ReelExplore";
@@ -532,6 +533,9 @@ export function App() {
           {skin === "claude" && mode === "auto" && reelPhase === "playing" && reelView.clientView?.open && (
             <ReelClientView view={reelView.clientView} />
           )}
+          {skin === "claude" && mode === "auto" && reelPhase === "playing" && reelView.folioView?.open && (
+            <ReelFolioView view={reelView.folioView} mode="scripted" />
+          )}
           {skin === "claude" && mode === "auto" && reelPhase === "playing" && reelView.engPanel?.open && (
             <ReelEngPanel view={reelView.engPanel} />
           )}
@@ -558,7 +562,11 @@ export function App() {
             </div>
           )}
           {skin === "claude" && mode === "auto" && reelPhase === "ended" && (
-            reelView.clientView
+            reelView.folioView?.open
+              // Ch3 ends on the folio itself: same surface, now interactive, standard CTA row.
+              ? <ReelFolioView view={reelView.folioView} mode="interactive"
+                  cta={{ nextChapter, onTryYourself: tryYourself, onReplay: startReel }} />
+              : reelView.clientView
               // Reels with a priced client-view (collab) end on an interactive folio the
               // viewer can experiment with; others keep the static end card.
               ? <ReelExplore view={reelView.clientView} onLiveDemo={tryYourself} onReplay={startReel} nextChapter={nextChapter} />
