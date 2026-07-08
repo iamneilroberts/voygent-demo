@@ -56,7 +56,7 @@ const tours: BoardCandidate[] = [
   { id: "tour:wicklow", title: "Wicklow Mountains & Glendalough day trip", price: "$142 pp", badge: "Best fit",
     meta: "Day 6 · 8h · coach + walk", summary: "Wicklow day trip $142", commission: 43, commissionPct: 15 },
   { id: "tour:whiskey", title: "Dublin whiskey tasting walk", price: "$95 pp",
-    meta: "Day 4 evening · 3h", summary: "Whiskey walk $95", commission: 24, commissionPct: 12 },
+    meta: "Day 4 evening · 3h", summary: "Whiskey walk $95", commission: 23, commissionPct: 12 },
 ];
 // Day 6 (index 5) gains the Wicklow day trip once the advisor picks it.
 const withTour: FolioData = {
@@ -118,14 +118,14 @@ export const dublinRun = screenplay({ trip: "Dublin · run", skin: "claude" }, (
 
   // Beat 3: the travellers' window. The other two tours go to them as add-on options
   // on the trip the advisor already sent; they toggle one on and the total recalcs live.
-  s.advisor.says("I'll send them the other evening's options and let them choose.");
+  s.advisor.says("The other two tours stay on the board as options. I'll send them over and let them choose.");
   s.advisor.sendsToClient({ subject: "One more evening in Dublin, your call" });
   s.client.view(cvBase);
   s.client.view(cvAddon);
   s.client.view(cvNote);
   s.client.view(cvClosed);
   s.spotlight({ interactionKind: "clientview", nth: 1 }, {
-    target: "client-view-toggle", eyebrow: "Their evening, their call",
+    target: "client-view", eyebrow: "Their evening, their call",
     title: "The travellers do it themselves",
     body: "The Hendersons open their own window, turn on the whiskey walk, and watch the price update. No email back and forth to get there.",
   });
@@ -136,7 +136,7 @@ export const dublinRun = screenplay({ trip: "Dublin · run", skin: "claude" }, (
   s.agent.tool("patch_trip", { summary: "day 6 evening + whiskey walk" });
   s.agent.folio(finalFolio);
   s.spotlight({ eventType: "folio", nth: 3 }, {
-    target: "client-view", eyebrow: "You didn't sell that tour",
+    target: "folio-days", eyebrow: "You didn't sell that tour",
     title: "The folio did",
     body: "The travellers browsed the extras on their own, added one, and left a note. It came back as a one-click confirmation, not a phone call.",
   });

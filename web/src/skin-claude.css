@@ -248,6 +248,8 @@
 :root[data-skin="claude"] .cl-artifact-meta { font-size: .75rem; color: var(--cl-muted); }
 :root[data-skin="claude"] .cl-artifact-price { font-weight: 600; font-size: .875rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
 :root[data-skin="claude"] .cl-artifact-sub { display: block; font-weight: 400; font-size: .75rem; color: var(--cl-muted); text-align: right; }
+/* Confirmation-number chip on a filed third-party booking (e.g. a pasted airline email). */
+:root[data-skin="claude"] .cl-artifact-conf { font: 600 .75rem/1 var(--cl-mono); color: var(--cl-ink-2); background: var(--cl-tool-bg); border: 1px solid var(--cl-line); border-radius: 999px; padding: 3px 9px; white-space: nowrap; letter-spacing: .02em; }
 
 /* ---- folio "Send to client" affordance (reel) ---- */
 :root[data-skin="claude"] .cl-artifact-foot { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--cl-line); display: flex; justify-content: flex-end; }
