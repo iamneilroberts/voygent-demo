@@ -4,6 +4,7 @@ import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { dublinRun } from "./dublin-run.screenplay";
 import { dublinCollab } from "./dublin-collab.screenplay";
+import { dublinClient } from "./dublin-client.screenplay";
 
 // Guard against a highlight spotlighting a `data-reel-target` that no claude-skin
 // component actually emits — that's exactly how the pre-fix dublin-run screenplay
@@ -50,7 +51,7 @@ describe("reel highlight targets exist in the claude-skin render path", () => {
     expect(staticTargets.has("client-view")).toBe(true);
   });
 
-  for (const [name, screenplay] of [["dublinRun", dublinRun], ["dublinCollab", dublinCollab]] as const) {
+  for (const [name, screenplay] of [["dublinRun", dublinRun], ["dublinCollab", dublinCollab], ["dublinClient", dublinClient]] as const) {
     it(`every highlight target in ${name} resolves to a real or dynamically-valid data-reel-target`, () => {
       const bad = screenplay.highlights
         .map((h) => h.target)
