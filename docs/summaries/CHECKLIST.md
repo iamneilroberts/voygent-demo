@@ -1,6 +1,6 @@
 # Demo design lane — checklist
 
-_Updated: 2026-07-08 18:55 — demo-design_
+_Updated: 2026-07-08 19:20 — demo-design_ (A2 + N1-N6 SHIPPED prod: Worker d6188ce5, bundle index-BCDZlZ28.js, main = fcc71f9)
 
 Source handoffs: `pause-2026-07-08-c9-a2-b6-lane.md` (newest) · `pause-2026-07-08-ch3-client-folio.md` · QA queue: `pause-2026-07-08-neil-demo-qa.md`
 
