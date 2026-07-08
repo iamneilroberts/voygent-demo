@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { computeTripTotal, usd } from "./reel-pricing";
+import { computeTripTotal, usd, type TripPricing } from "./reel-pricing";
 import type { ReelClientSession } from "./recording";
 
 const base: ReelClientSession = {
@@ -35,6 +35,24 @@ describe("computeTripTotal", () => {
       { id: "cliffs", label: "Cliffs premium", price: 95, on: false },
     ] };
     expect(computeTripTotal(v)).toBe(3180 + 959 + 420 + 180);
+  });
+});
+
+// The pricing slice is shared by ReelClientSession (ch1/ch2) and ReelFolioSession (ch3);
+// these tests pin the slice shape so both stay assignable.
+describe("computeTripTotal over the TripPricing slice", () => {
+  const parts: TripPricing = {
+    flightsPrice: 3180,
+    activitiesPrice: 284,
+    hotels: [{ id: "serp:h1", name: "The Dean Dublin", price: 168 * 7 }],
+    pickedHotelId: "serp:h1",
+    addons: [{ id: "tour:kilmainham", label: "Kilmainham Gaol & Museum tour", price: 58 * 2, on: true }],
+  };
+  it("sums flights + picked hotel + activities + toggled-on add-ons", () => {
+    expect(computeTripTotal(parts)).toBe(4756);
+  });
+  it("drops toggled-off add-ons and an unpicked hotel", () => {
+    expect(computeTripTotal({ ...parts, pickedHotelId: null, addons: [{ ...parts.addons[0], on: false }] })).toBe(3464);
   });
 });
 

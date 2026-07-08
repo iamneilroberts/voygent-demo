@@ -1,4 +1,4 @@
-import type { ServerEvent } from "../../../shared/events";
+import type { ServerEvent, FolioData } from "../../../shared/events";
 import { computeDelay, interactionDwell } from "./pacing";
 import { resolveHighlightFrames, type Highlight } from "./highlights";
 
@@ -8,7 +8,7 @@ export type Actor = "agent" | "advisor" | "client";
 // sees after the advisor sends the folio. Snapshot-based — each `clientview` beat
 // carries the full state, so consecutive beats animate the live price recalc.
 export interface ReelHotelOption { id: string; name: string; price: number; meta?: string }
-export interface ReelAddon { id: string; label: string; price: number; on: boolean }
+export interface ReelAddon { id: string; label: string; price: number; on: boolean; day?: number }
 export interface ReelClientSession {
   open: boolean;
   url: string;            // simulated address-bar URL, e.g. voygent.app/t/dublin
@@ -20,6 +20,30 @@ export interface ReelClientSession {
   addons: ReelAddon[];           // optional upgrades the client can toggle
   question: string | null;       // the client's typed note (shown before Send)
   progress: number;              // 0..1, "ready to book"
+}
+
+export interface ReelFolioNote { anchor: string; author: "client" | "advisor"; text: string }
+
+// The full client folio window (ch3): a simulated browser window showing the folio
+// itself — production-faithful content (FolioData) plus the live-pricing fields the
+// client plays with. Snapshot-based like ReelClientSession: each `folioview` beat
+// replaces the snapshot; consecutive snapshots animate (total recalc, day swap,
+// Draft→Final). `focus` names a data-reel-target anchor the surface scrolls into view
+// (the spec's section-cut scroll driving). `expandedDay` is 1-based into folio.days.
+export interface ReelFolioSession {
+  open: boolean;
+  url: string;
+  folio: FolioData;
+  flightsPrice: number;
+  activitiesPrice: number;
+  hotels: ReelHotelOption[];
+  pickedHotelId: string | null;
+  addons: ReelAddon[];
+  notes: ReelFolioNote[];
+  status: "draft" | "final";
+  advisorUpdating: boolean;
+  focus: string | null;
+  expandedDay: number | null;
 }
 
 // A brief peek at the engineering view (reel): a small panel that slides in to show
