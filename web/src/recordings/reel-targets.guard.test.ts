@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { dublinRun } from "./dublin-run.screenplay";
 import { dublinCollab } from "./dublin-collab.screenplay";
 import { dublinClient } from "./dublin-client.screenplay";
+import { resolveHighlightFrames } from "../lib/highlights";
 
 // Guard against a highlight spotlighting a `data-reel-target` that no claude-skin
 // component actually emits — that's exactly how the pre-fix dublin-run screenplay
@@ -56,6 +57,36 @@ describe("reel highlight targets exist in the claude-skin render path", () => {
       const bad = screenplay.highlights
         .map((h) => h.target)
         .filter((t) => !isValidTarget(t, staticTargets));
+      expect(bad).toEqual([]);
+    });
+  }
+});
+
+// C9: ReelCallout resolves targets with a GLOBAL document.querySelector, and in ch1/ch2
+// the chat's FolioArtifact (ClaudeChatView) stays in the DOM behind the cutaway scrim.
+// A spotlight bound to a `folioview` frame must therefore target an anchor the chat can
+// NOT emit, or the callout anchors to the hidden chat element instead of the cutaway.
+// Chat-emittable anchors = ClaudeChatView's static literals + its 0-based `folio-day-${i}`
+// for every day index the recording's folio events actually reach. (ch3 is exempt: it
+// emits no chat folio events by design.)
+describe("cutaway (folioview) spotlight targets avoid anchors the chat folio also emits", () => {
+  const chatSrc = readFileSync(join(webSrcDir, "ClaudeChatView.tsx"), "utf8");
+  const chatStatic = new Set([...chatSrc.matchAll(/data-reel-target="([^"]+)"/g)].map((m) => m[1]));
+
+  for (const [name, sp] of [["dublinRun", dublinRun], ["dublinCollab", dublinCollab]] as const) {
+    it(`${name}: folioview-bound highlights collide with nothing the chat renders`, () => {
+      const frames = sp.recording.frames;
+      const maxDays = Math.max(0, ...frames.flatMap((f) =>
+        f.kind === "event" && f.event.type === "folio" ? [f.event.folio.days?.length ?? 0] : []));
+      const chatTargets = new Set(chatStatic);
+      for (let d = 0; d < maxDays; d++) chatTargets.add(`folio-day-${d}`);
+      const bad: string[] = [];
+      for (const [idx, hs] of resolveHighlightFrames(frames, sp.highlights)) {
+        const f = frames[idx];
+        if (f.kind === "interaction" && f.interaction.kind === "folioview") {
+          for (const h of hs) if (chatTargets.has(h.target)) bad.push(h.target);
+        }
+      }
       expect(bad).toEqual([]);
     });
   }

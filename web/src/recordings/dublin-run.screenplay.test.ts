@@ -53,6 +53,18 @@ describe("dublin-run screenplay", () => {
     expect(settled && computeTripTotal(settled)).toBeGreaterThan(clientViews[0].flightsPrice);
   });
 
+  it("cuts away to the client folio right after the Wicklow pick — day 6 focused and already current (C9)", () => {
+    const fvs = interactions.flatMap((i) => (i.kind === "folioview" ? [i.view] : []));
+    expect(fvs.length).toBeGreaterThanOrEqual(2);
+    const first = fvs[0]!;
+    expect(first.focus).toBe("folio-day-6");
+    expect(first.expandedDay).toBe(6);
+    expect(first.folio.days?.[5].activities.map((a) => a.name).join()).toContain("Wicklow");
+    expect(first.addons).toEqual([]);  // beat 3 hasn't offered the optional tours yet
+    expect(computeTripTotal(first)).toBe(3180 + 1176 + 284); // = ch3's opening total (wire-truth lineage)
+    expect(fvs.at(-1)).toBeNull();     // closed — ended still derives from clientView
+  });
+
   it("resolves every callout, in ascending frame order", () => {
     const resolved = resolveHighlightFrames(frames, dublinRun.highlights);
     const total = [...resolved.values()].reduce((n, hs) => n + hs.length, 0);

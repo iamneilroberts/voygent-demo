@@ -20,7 +20,22 @@ describe("dublin-collab full reel (grounding)", () => {
   const clientViews = interactions.flatMap((i) => i.kind === "clientview" && i.view ? [i.view as ReelClientSession] : []);
 
   it("exercises every interaction kind, including the engineering-panel peek", () => {
-    expect(new Set(kinds)).toEqual(new Set(["pick", "edit", "comment", "handoff", "clientview", "engpanel"]));
+    expect(new Set(kinds)).toEqual(new Set(["pick", "edit", "comment", "handoff", "clientview", "engpanel", "folioview"]));
+  });
+
+  it("cuts away to the folio window after the send, then closes it before the client-view beat (C9)", () => {
+    const seq = kinds;
+    const h = seq.indexOf("handoff"), fv = seq.indexOf("folioview"), cv = seq.indexOf("clientview");
+    expect(h).toBeGreaterThanOrEqual(0);
+    expect(fv).toBeGreaterThan(h);   // the cutaway is what the send delivers
+    expect(cv).toBeGreaterThan(fv);  // the pricing-widget beat still follows it
+    const fvs = interactions.flatMap((i) => (i.kind === "folioview" ? [i.view] : []));
+    expect(fvs.at(-1)).toBeNull();   // closed — ended still derives from clientView
+    const first = fvs[0]!;
+    expect(first.pickedHotelId).toBeNull();          // nothing picked at send time
+    expect(first.hotels.length).toBe(3);             // the Act-3 shortlist as the client's choice
+    expect(computeTripTotal(first)).toBe(3180 + 740); // matches cvBase's un-picked total
+    expect(first.folio.includes?.length).toBeGreaterThanOrEqual(1); // the sent folio carries the extras
   });
 
   it("has a multi-select shortlist (advisor picks >1 hotel) and a single flight pick", () => {
@@ -61,11 +76,11 @@ describe("dublin-collab full reel (grounding)", () => {
     expect(settled?.hotels.find((h) => h.id === "serp:h1")?.price).toBe(168 * 7);
   });
 
-  it("resolves all eleven per-act callouts (none dropped)", () => {
-    expect(dublinCollab.highlights.length).toBe(11);
+  it("resolves all twelve per-act callouts (none dropped)", () => {
+    expect(dublinCollab.highlights.length).toBe(12);
     const resolved = resolveHighlightFrames(frames, dublinCollab.highlights);
     const total = [...resolved.values()].reduce((n, hs) => n + hs.length, 0);
-    expect(total).toBe(11);
+    expect(total).toBe(12);
   });
 
   it("fires the callouts in ascending frame order (act order reads right)", () => {

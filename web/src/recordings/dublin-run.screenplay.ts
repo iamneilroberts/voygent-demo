@@ -1,6 +1,6 @@
 import { screenplay } from "../lib/screenplay";
 import type { BoardCandidate, FolioData, FolioBooking } from "../../../shared/events";
-import type { ReelClientSession } from "../lib/recording";
+import type { ReelClientSession, ReelFolioSession } from "../lib/recording";
 
 // "Dublin, run the trip" (chapter 2). The trip from chapter 1 is sold; this reel is the
 // week after: a confirmation email gets pasted and filed, Voygent flags two open days and
@@ -93,6 +93,29 @@ const cvAddon: ReelClientSession = { ...cvBase, addons: cvBase.addons.map((a) =>
 const cvNote: ReelClientSession = { ...cvAddon, question: "Can we do the whiskey walk the same night we land back from Wicklow?", progress: 1 };
 const cvClosed: ReelClientSession = { ...cvNote, open: false };
 
+// ── C9 cutaway (spec Decision 7): the Millers' folio page right after the Wicklow pick —
+//    day 6 already carries the tour. The two remaining tours are NOT here: beat 3 is
+//    where the advisor offers them, so showing them as toggles now would be dishonest.
+//    Total = 3180 + Dean 1176 + Wicklow 284 = $4,640 (ch3's opening total, same fixture
+//    lineage). Draft status matches the ended surface's convention (folioSessionFromClient).
+//    folio-day-6 is ReelFolioView's 1-based anchor; the chat folio's 0-based anchors stop
+//    at folio-day-5 for this six-day trip, so the spotlight can't collide (guarded).
+const fvDay6: ReelFolioSession = {
+  open: true,
+  url: "voygent.app/t/dublin",
+  folio: withTour,
+  flightsPrice: 3180,
+  activitiesPrice: 284,
+  hotels: cvBase.hotels,
+  pickedHotelId: "serp:h1",
+  addons: [],
+  notes: [],
+  status: "draft",
+  advisorUpdating: false,
+  focus: "folio-day-6",
+  expandedDay: 6,
+};
+
 export const dublinRun = screenplay({ trip: "Dublin · run", skin: "claude" }, (s) => {
   // Beat 1: the paste. A messy airline email becomes a filed, structured booking.
   s.advisor.says(CONF_EMAIL);
@@ -115,6 +138,15 @@ export const dublinRun = screenplay({ trip: "Dublin · run", skin: "claude" }, (
     title: "Voygent notices first",
     body: "Open days in a sold trip are unsold inventory. Voygent flags them and pulls real, commissionable tours that fit. The advisor clicks one and it is in the plan.",
   });
+
+  // Beat 2.5 — cutaway (C9): meanwhile, on the Millers' page, day 6 is already current.
+  s.client.folioView(fvDay6);
+  s.spotlight({ interactionKind: "folioview", nth: 1 }, {
+    target: "folio-day-6", eyebrow: "Meanwhile, in their window",
+    title: "Same link, already current",
+    body: "One click in chat, and day 6 on the Millers' page carries the Wicklow trip. No new PDF to send, no version two — the folio they already have stays current.",
+  });
+  s.client.folioView(null);
 
   // Beat 3: the travellers' window. The other two tours go to them as add-on options
   // on the trip the advisor already sent; they toggle one on and the total recalcs live.

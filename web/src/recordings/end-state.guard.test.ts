@@ -26,6 +26,16 @@ for (const [name, sp] of [["dublinCollab", dublinCollab], ["dublinRun", dublinRu
       expect(clientViews[clientViews.length - 1]).toBeTruthy();
     });
 
+    // C9 cutaways open ReelFolioView mid-chapter; App's ended branch PREFERS folioView
+    // over clientView, so a cutaway left open would hijack the end-state. Every ch1/ch2
+    // folioview track must exist (C9 grounding) and end with an explicit close (null).
+    it("has a folioview cutaway and ends its track closed (null), so ended derives from clientView", () => {
+      const folioViews = frames.flatMap((f) =>
+        f.kind === "interaction" && f.interaction.kind === "folioview" ? [f.interaction.view] : []);
+      expect(folioViews.length).toBeGreaterThan(0);
+      expect(folioViews[folioViews.length - 1]).toBeNull();
+    });
+
     it("keeps folio hotels reconciled with the session's hotel options (name + nights×rate)", () => {
       const lastFolio = folios[folios.length - 1];
       const lastView = clientViews[clientViews.length - 1]!;

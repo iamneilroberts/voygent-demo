@@ -1,6 +1,6 @@
 import { screenplay } from "../lib/screenplay";
 import type { BoardCandidate, FolioData, FolioDay, FolioInclude } from "../../../shared/events";
-import type { ReelClientSession } from "../lib/recording";
+import type { ReelClientSession, ReelFolioSession } from "../lib/recording";
 
 // "Dublin, built together" — the full collaboration reel (R5). One honest thread that
 // walks an advisor, a traveler, and Voygent through a whole trip: a loose brief that
@@ -151,6 +151,29 @@ const cvAddon: ReelClientSession   = { ...cvPicked, addons: cvBase.addons.map((a
 const cvNote: ReelClientSession    = { ...cvAddon, question: "Could we add a food tour our last evening? We loved the one in Lisbon.", progress: 1 };
 const cvClosed: ReelClientSession  = { ...cvNote, open: false };
 
+// ── C9 cutaway (spec Decision 7): the folio as it LANDS in the Millers' window, right
+//    after the Act-7 send. The sent folio is withIncludes — no hotel committed yet — so
+//    the shortlist renders as the client's choice with nothing picked, and the total
+//    matches cvBase's un-picked $3,920. Cutaway spotlights may only target anchors the
+//    chat folio can't emit (reel-targets guard); the track must end closed (null) so the
+//    ended phase still derives from the client session (end-state guard).
+const fvSent: ReelFolioSession = {
+  open: true,
+  url: "voygent.app/t/dublin",
+  folio: withIncludes,
+  flightsPrice: 3180,
+  activitiesPrice: 740,
+  hotels: cvHotels,
+  pickedHotelId: null,
+  addons: cvBase.addons,
+  notes: [],
+  status: "draft",
+  advisorUpdating: false,
+  focus: "folio-hero",
+  expandedDay: null,
+};
+const fvChoice: ReelFolioSession = { ...fvSent, focus: "folio-hotel-choice" };
+
 export const dublinCollab = screenplay({ trip: "Dublin · collab", skin: "claude" }, (s) => {
   // Act 1 — Intake: a loose brief that firms up. The advisor forgets the dates; Voygent
   // asks; the advisor adds one more requirement on the way back.
@@ -222,6 +245,17 @@ export const dublinCollab = screenplay({ trip: "Dublin · collab", skin: "claude
   s.advisor.says("I'll add a quick note for them: pick your hotel and tell me what you think, no rush.");
   s.advisor.sendsToClient({ subject: "Your Dublin trip is ready to look over" });
   s.spotlight({ interactionKind: "handoff", nth: 1 }, { target: "handoff-notice", eyebrow: "Out to the travellers", title: "Sent for review", body: "The advisor adds a note and sends the folio. The travellers get it by email and can reply straight back into Voygent. Simulated here." });
+
+  // Act 7.5 — cutaway (C9): what that send actually delivers. Their window, briefly:
+  // the folio page arrives, then a scroll to the shortlist-as-their-choice; then close.
+  s.client.folioView(fvSent);
+  s.spotlight({ interactionKind: "folioview", nth: 1 }, {
+    target: "folio-hero", eyebrow: "What lands with the Millers",
+    title: "A living page, not an attachment",
+    body: "The email carries a link to this page — the flight, every day, the extras, and the three hotels she shortlisted, ready to choose. Chapter 3 rides along in their window.",
+  });
+  s.client.folioView(fvChoice);
+  s.client.folioView(null);
 
   // Act 8 — The traveler's window: they pick a hotel and toggle an add-on; the price
   // recalcs live; then they leave a note and send it back.
