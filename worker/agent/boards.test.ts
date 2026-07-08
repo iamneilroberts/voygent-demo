@@ -66,6 +66,40 @@ describe("createBoardBuilder", () => {
     expect(first.meta).toMatch(/\dh/);
   });
 
+  it("derives legs from raw prod segments on live (non-replayed) flight candidates", () => {
+    // Live/faithful passthrough candidates carry raw prod `segments`, not a
+    // pre-shaped `legs` array (that's a replay-layer-only convenience). The
+    // board must still populate legs so the routing/aircraft expander works.
+    const build = createBoardBuilder();
+    const ev = build("flight_search", JSON.stringify({
+      status: "ok", action: "list", tripId: TRIP, count: 1, version: 1,
+      candidates: [{
+        id: "serp:live1", source: "serp", route: "MOB→DUB", price: 3426,
+        validatingCarrier: "United", stops: 1, cabin: "Economy", durationMinutes: 747,
+        segments: [
+          {
+            origin: "MOB", destination: "IAD",
+            depart: "2026-10-12 12:53", arrive: "2026-10-12 16:15",
+            carrier: "United", flightNumber: "UA 4314",
+            durationMinutes: 142, layover: null, equipment: "Embraer ERJ-135/145",
+          },
+          {
+            origin: "IAD", destination: "DUB",
+            depart: "2026-10-12 19:05", arrive: "2026-10-13 07:20",
+            carrier: "United", flightNumber: "UA 310",
+            durationMinutes: 435, layover: "2h 50m", equipment: "Boeing 757",
+          },
+        ],
+      }],
+    }), TRIP);
+    if (ev?.type !== "board") throw new Error("expected board event");
+    const first = ev.candidates[0];
+    expect(first.legs).toBeDefined();
+    expect(first.legs).toHaveLength(2);
+    expect(first.legs![0]).toMatchObject({ from: "MOB", to: "IAD", carrier: "United", flightNo: "UA 4314", aircraft: "Embraer ERJ-135/145" });
+    expect(first.legs![1]).toMatchObject({ from: "IAD", to: "DUB", layoverAfter: "2h 50m" });
+  });
+
   it("formats flight price as whole USD with separators", () => {
     const build = createBoardBuilder();
     const ev = build("flight_list", JSON.stringify({

@@ -8,6 +8,7 @@
 
 import type { ServerEvent, BoardCandidate, FlightLeg } from "../../shared/events";
 import { cpmaxxHotelById } from "../fixtures/index";
+import { segmentsToLegs } from "./legs";
 
 const FLIGHT_TOOLS = new Set(["flight_search", "flight_list"]);
 const HOTEL_TOOLS = new Set(["hotel_search", "hotel_list", "hotel_search_and_rank"]);
@@ -57,7 +58,10 @@ function flightCandidate(c: Record<string, any>): BoardCandidate | null {
   const out: BoardCandidate = { id: c.id, title, price, meta, summary };
   if (typeof travelers === "number") out.travelers = travelers;
   if (typeof perPerson === "number") out.perPerson = perPerson;
-  const legs = legsFrom(c.legs);
+  // Replayed/fixture candidates already carry pre-shaped `legs`. Live/faithful
+  // passthrough candidates carry raw prod `segments` instead — derive legs from
+  // those so the routing/aircraft expander works for live results too.
+  const legs = legsFrom(c.legs) ?? segmentsToLegs(c.segments);
   if (legs) out.legs = legs;
   return out;
 }
