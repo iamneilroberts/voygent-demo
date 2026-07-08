@@ -240,3 +240,13 @@ beat against prod with a disposable trip.
 of this task rather than deleted, so the two bookings written above stay inspectable as
 evidence. It no longer appears in `get_context`/active trip lists but remains readable via
 `read_trip`/`find_trips`.
+
+## Beat 2 — controller amendment (2026-07-07, main session)
+
+Upgraded NO-GO → **GO (prod-shipped evidence, staging demo unavailable)**. The gap-fill
+capability is true of the shipped product: `suggest_gap_tours` code path
+(`src/mcp/tools/gap-recommender.ts:934-1032` on main), prod `VIATOR_API_KEY` present
+(secret list, names only), and the goal-loop day-aware tour fill shipped to prod
+2026-07-02. The staging-only gap (missing VIATOR_API_KEY secret) was escalated to Neil
+as an optional staging-QA improvement; it does not make the reel's claim untrue. The
+reel remains a scripted walk-through and says so on its intro/end cards.
