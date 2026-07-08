@@ -16,12 +16,17 @@ import { resolveHighlightFrames } from "../lib/highlights";
 // reels lands on one of them.
 const webSrcDir = join(dirname(fileURLToPath(import.meta.url)), "..");
 
+// One scanner for both guards below — the anchor-authoring convention lives here only.
+function fileTargets(name: string): Set<string> {
+  const src = readFileSync(join(webSrcDir, name), "utf8");
+  return new Set([...src.matchAll(/data-reel-target="([^"]+)"/g)].map((m) => m[1]));
+}
+
 function collectStaticTargets(): Set<string> {
   const out = new Set<string>();
   for (const name of readdirSync(webSrcDir)) {
     if (!name.endsWith(".tsx")) continue;
-    const src = readFileSync(join(webSrcDir, name), "utf8");
-    for (const m of src.matchAll(/data-reel-target="([^"]+)"/g)) out.add(m[1]);
+    for (const t of fileTargets(name)) out.add(t);
   }
   return out;
 }
@@ -70,8 +75,7 @@ describe("reel highlight targets exist in the claude-skin render path", () => {
 // for every day index the recording's folio events actually reach. (ch3 is exempt: it
 // emits no chat folio events by design.)
 describe("cutaway (folioview) spotlight targets avoid anchors the chat folio also emits", () => {
-  const chatSrc = readFileSync(join(webSrcDir, "ClaudeChatView.tsx"), "utf8");
-  const chatStatic = new Set([...chatSrc.matchAll(/data-reel-target="([^"]+)"/g)].map((m) => m[1]));
+  const chatStatic = fileTargets("ClaudeChatView.tsx");
 
   for (const [name, sp] of [["dublinRun", dublinRun], ["dublinCollab", dublinCollab]] as const) {
     it(`${name}: folioview-bound highlights collide with nothing the chat renders`, () => {

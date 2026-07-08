@@ -465,7 +465,9 @@
 
 /* Spotlight dim + anchored callout */
 /* Anchored callout overlay: full-viewport, click-through except the card. */
-:root[data-skin="claude"] .cl-reel-overlay { position: fixed; inset: 0; z-index: 60; pointer-events: none; }
+/* Above .cl-fv-scrim (63): callout cards + spot rings must stay visible (and Continue
+   clickable) during folioview beats — ch3 and the C9 ch1/ch2 cutaways. */
+:root[data-skin="claude"] .cl-reel-overlay { position: fixed; inset: 0; z-index: 65; pointer-events: none; }
 :root[data-skin="claude"] .cl-reel-dim { position: fixed; inset: 0; background: #1f1e1c66; }
 /* Spotlight: a transparent box at the target; the huge box-shadow spread dims everything outside it,
    the inner ring + glow mark the stat. Order: ring, glow, then the dimming spread (painted behind). */
@@ -490,7 +492,9 @@
 /* Playback transport — absolutely positioned in the top-right of .product while
    playing. MUST be positioned (Codex review): a plain inline child would push layout. */
 :root[data-skin="claude"] .cl-reel-controls {
-  position: absolute; top: 12px; right: 16px; z-index: 60;
+  /* Above the callout overlay (65) and .cl-fv-scrim (63): pause/seek must stay
+     reachable while a folioview surface or a callout is up. */
+  position: absolute; top: 12px; right: 16px; z-index: 66;
   display: inline-flex; align-items: center; gap: 8px;
   background: var(--cl-surface); border: 1px solid var(--cl-line); border-radius: 10px; padding: 4px 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
