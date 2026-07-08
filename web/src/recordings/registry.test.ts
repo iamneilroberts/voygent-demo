@@ -29,13 +29,20 @@ describe("chapter arc", () => {
     expect(entry.chapter).toBe(1);
     expect(entry.next).toBe("run");
   });
-  it("run is chapter 2 with no next chapter yet", () => {
+  it("run is chapter 2 and points to client as the next chapter", () => {
     const entry = pickReel(REELS, "run");
     expect(entry.chapter).toBe(2);
+    expect(entry.next).toBe("client");
+  });
+  it("client is chapter 3, the end of the arc for now, with honest scripted framing", () => {
+    const entry = pickReel(REELS, "client");
+    expect(entry.chapter).toBe(3);
     expect(entry.next).toBeUndefined();
+    expect(entry.title).toBe("Chapter 3 · Their trip, their window");
+    expect(entry.intro?.note).toMatch(/scripted/i);
   });
   it("CHAPTERS lists the story arc in order", () => {
-    expect(CHAPTERS.map((c) => c.id)).toEqual(["collab", "run"]);
+    expect(CHAPTERS.map((c) => c.id)).toEqual(["collab", "run", "client"]);
   });
   it("every next id resolves to a registered reel", () => {
     for (const r of REELS) {

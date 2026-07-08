@@ -5,6 +5,7 @@ import dublin from "./dublin-oct.json";
 import dublinHl from "./dublin-oct.highlights.json";
 import { dublinCollab } from "./dublin-collab.screenplay";
 import { dublinRun } from "./dublin-run.screenplay";
+import { dublinClient } from "./dublin-client.screenplay";
 
 export interface ReelEntry {
   id: string;
@@ -55,6 +56,7 @@ export const REELS: ReelEntry[] = [
   {
     id: "run",
     chapter: 2,
+    next: "client",
     title: "Chapter 2 · Run the trip",
     blurb: "The trip is sold. Watch a confirmation file itself, two empty days become a tour sale, and the travellers shape their own week.",
     durationLabel: "~2 min",
@@ -64,6 +66,18 @@ export const REELS: ReelEntry[] = [
     intro: { eyebrow: "▶ Chapter 2", note: "This walk-through is scripted, like chapter 1. A real Voygent run files real confirmations and sells real tours." },
     endCard: { eyebrow: "✓ The week after", title: "Hours of admin. Zero typing.",
       blurb: "A pasted email became a filed confirmation. Two empty days became a commissionable tour. The travellers added an extra themselves. The advisor clicked twice. The collaboration here is a scripted walk-through of the workflow." },
+  },
+  {
+    id: "client",
+    chapter: 3,
+    title: "Chapter 3 · Their trip, their window",
+    blurb: "The proposal lands with the Millers. Watch them explore it, make it theirs, and send it back ready to book.",
+    durationLabel: "~2 min",
+    recording: dublinClient.recording,
+    highlights: dublinClient.highlights,
+    recap: ["📬 a living page, not a PDF", "💷 priced add-ons, toggled live", "💬 their note, on the day itself", "✓ back to the advisor ready to book"],
+    intro: { eyebrow: "▶ Chapter 3", note: "This walk-through is scripted, like chapters 1 and 2. A real Voygent folio is a live page your clients open, change, and annotate." },
+    // No endCard: the chapter ends on the folio surface itself (ReelFolioView interactive).
   },
 ];
 
