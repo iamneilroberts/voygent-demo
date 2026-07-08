@@ -44,4 +44,10 @@ describe("collab reel registration", () => {
     expect(entry.endCard).toBeUndefined();
     expect(entry.intro).toBeUndefined();
   });
+
+  it("resolves ?reel=run to the run-the-trip chapter", () => {
+    const hit = pickReel(REELS, "run", 0);
+    expect(hit.id).toBe("run");
+    expect(hit.title).toContain("Run the trip");
+  });
 });
