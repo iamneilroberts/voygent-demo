@@ -18,7 +18,10 @@ Check items off here as they ship.
       scrolls insufficiently; content hidden below fold). Applies to the animated
       reel AND the curated demo (same problem per Neil items 2 & 8).
 - [ ] A4. "You don't pay per interaction — it's part of the subscription" made
-      prominent wherever per-call costs show (engineering panel, any cost line).
+      prominent wherever per-call costs show. PLUS (Neil 07-08): show WHICH MODEL
+      each cost line came from (Haiku default is itself a selling point).
+      Root cause note: costs are LIVE telemetry (tokens × rates), demo default =
+      claude-haiku-4-5 (session-do.ts:67), LLM_MODEL secret may override in prod.
 - [ ] A10-discoverability. Neil "doesn't see the second chapter" — the reels
       rotate via ?reel= param with no visible chapter navigation. Add an explicit
       chapter picker / next-chapter affordance (end-card CTA "Watch chapter 2" +
@@ -39,10 +42,10 @@ Check items off here as they ship.
 
 ## C. Design-gated (brainstorm with Neil before building)
 - [ ] C9. Feature the folio: pop up once or twice during the reel, END on the folio.
-- [ ] C10. Restructure animated demo into 2 chapters = ADVISOR experience then
-      CLIENT experience (incl. 2-way updates between live client view and advisor
-      folio — the recently shipped M7 lane). Current split ("win the client" /
-      "run the trip") does not match this; re-cut or re-frame.
+- [ ] C10 (REVISED 2026-07-08 after Neil watched ch2): KEEP "Run the trip" as-is
+      ("the paste is impressive, keep it"). ADD a new client-experience chapter
+      (2-way updates between live client view and advisor folio — M7 lane).
+      Original "drop paste/gap-fill" decision REVERSED by Neil.
 - [ ] C11. Curated-demo folio looks nothing like current production folio (warm
       editorial, alaska-warm theme). Make it match production and impress.
 
