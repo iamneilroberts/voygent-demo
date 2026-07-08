@@ -19,11 +19,13 @@
 
 **Beat 1 — The proposal arrives.** One framing line on the advisor surface ("Sending the Millers their folio"), then full-screen transition to the Millers' window: the folio opens — warm editorial, the Dublin week, Aer Lingus flight, The Dean, day cards, live total. Spotlight: "This is what lands in your client's inbox. No PDF, no attachment — a living page."
 
-**Beat 2 — They explore.** Scripted scroll through the days; day 5 expands; the includes surface (October weather, Leap Card, tipping). Spotlight: "Everything the advisor curated, in the client's hands — nothing to re-explain by email."
+**Beat 2 — They explore.** Scripted scroll through the days; day 5 expands; the includes surface (October weather, Leap Card, tipping). The proposal visibly carries optional add-ons the advisor pre-loaded on the day cards ("recommended — add it if it fits"), each with its price. Spotlight: "The advisor sends one recommended plan already packed with options to consider — not a week of back-and-forth emails."
 
-**Beat 3 — They make it theirs.** Julie toggles the Kilmainham Gaol tour on → trip total recalculates live. She leaves a note on day 2: "Mark's ankle — can we keep this day light on walking?" Spotlight: "Changes and questions happen in the folio, not in a reply-all thread."
+**Beat 3 — They make it theirs.** Julie toggles the Kilmainham Gaol tour on → trip total recalculates live. She flips a second optional add-on (from the same fixture lineage) on, watches the total move, flips it back off — the price is live, not a quote she has to ask for. She leaves a note on day 2: "Mark's ankle — can we keep this day light on walking?" Spotlight: "The client tweaks the trip themselves and sees the price change instantly. They're in control — and the advisor never has to make the upsell call; the folio already made it."
 
-**Beat 4 — The 2-way moment.** "Advisor is updating…" indicator → day 2 visibly changes in their window (EPIC museum swapped for a step-free alternative, one-line advisor reply attached) → folio settles to **Final**. Spotlight: "The advisor's answer lands in the same window. That's the loop." End state: the finished folio itself (no separate end card) with the standard CTA row (next-chapter slot empty until a ch4 exists; "Build your own trip" + replay).
+**Beat 4 — The 2-way moment.** "Advisor is updating…" indicator → day 2 visibly changes in their window (EPIC museum swapped for a step-free alternative, one-line advisor reply attached) → folio settles to **Final**. Spotlight: "The advisor's answer lands in the same window — and the trip comes back ready to book. That's the loop." End state: the finished folio itself (no separate end card) with the standard CTA row (next-chapter slot empty until a ch4 exists; "Build your own trip" + replay).
+
+**Positioning spine (anchor for all spotlight copy):** the client self-serving add-ons in the folio replaces the advisor↔client back-and-forth. Three advantages the beats must land, in order: (beat 2/3) the client feels in control; (beat 3) the advisor doesn't have to upsell — the pre-loaded options and live total do it; (beat 4) the advisor gets the trip back ready to book.
 
 ## Honesty rules
 
