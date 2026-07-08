@@ -372,15 +372,20 @@ export function App() {
   function planYourOwn() { goLive(false); }
   function tryYourself() { goLive(true); }
 
-  // Chapter navigation — a clean reload on ?reel=<id> so the target reel starts
-  // from a fresh state. mode=auto is pinned (the URL param beats persisted mode).
-  function gotoReel(id: string) {
-    persistMode("auto");
+  // Clean reload with mutated URL params — re-latches the session / restarts the
+  // reel player from a fresh state. Shared by gotoReel, enterLive, toggleDemo.
+  function reloadWith(mutate: (u: URL) => void) {
     try {
       const u = new URL(window.location.href);
-      u.searchParams.set("reel", id); u.searchParams.set("mode", "auto"); u.searchParams.delete("greet");
+      mutate(u);
       window.location.href = u.toString();
     } catch { /* no-op */ }
+  }
+
+  // Chapter navigation — mode=auto is pinned (the URL param beats persisted mode).
+  function gotoReel(id: string) {
+    persistMode("auto");
+    reloadWith((u) => { u.searchParams.set("reel", id); u.searchParams.set("mode", "auto"); u.searchParams.delete("greet"); });
   }
   const nextReel = selectedReel.next ? REELS.find((r) => r.id === selectedReel.next) : undefined;
   const nextChapter = nextReel ? { label: `Watch ${nextReel.title} →`, onClick: () => gotoReel(nextReel.id) } : undefined;
@@ -391,12 +396,10 @@ export function App() {
   // stale-false so re-checking it would wrongly re-gate.
   function enterLive(greet: boolean) {
     persistMode("live");
-    try {
-      const u = new URL(window.location.href);
+    reloadWith((u) => {
       u.searchParams.set("mode", "live"); u.searchParams.set("skin", "claude");
       if (greet) u.searchParams.set("greet", "reel"); else u.searchParams.delete("greet");
-      window.location.href = u.toString();
-    } catch { /* no-op */ }
+    });
   }
 
   // Reel CTA → live. Crossing into live requires a session — show onboarding when absent.
@@ -436,12 +439,10 @@ export function App() {
   function toggleDemo() {
     const next: ModeId = mode === "auto" ? "live" : "auto";
     persistMode(next);
-    try {
-      const u = new URL(window.location.href);
+    reloadWith((u) => {
       u.searchParams.set("mode", next);
       if (next === "auto") u.searchParams.set("skin", "claude");
-      window.location.href = u.toString();   // reload re-latches the session cleanly
-    } catch { /* no-op */ }
+    });
   }
   const demoLabel = mode === "auto" ? "● build your own" : "▶ watch the demo";
 

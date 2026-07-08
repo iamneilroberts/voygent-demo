@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { ReelClientSession } from "./lib/recording";
+import type { NextChapterCta } from "./ReelEndCard";
 import { computeTripTotal, usd } from "./lib/reel-pricing";
 
 // Interactive end-state for the collab reel: instead of a static end card, the reel
@@ -11,7 +12,7 @@ export function ReelExplore(
   { view, onLiveDemo, onReplay, nextChapter }:
   { view: ReelClientSession; onLiveDemo: () => void; onReplay: () => void;
     // Chapter 1 ends here (not on ReelEndCard), so the next-chapter CTA lives here too.
-    nextChapter?: { label: string; onClick: () => void } },
+    nextChapter?: NextChapterCta },
 ) {
   const [pickedHotelId, setPicked] = useState<string | null>(view.pickedHotelId ?? view.hotels[0]?.id ?? null);
   const [addons, setAddons] = useState(view.addons);

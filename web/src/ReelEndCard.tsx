@@ -1,4 +1,7 @@
 // web/src/ReelEndCard.tsx
+// The next-chapter CTA shape shared by both end surfaces (ReelEndCard, ReelExplore).
+export interface NextChapterCta { label: string; onClick: () => void }
+
 const DEFAULT_RECAP = ["✈ live flights", "🏨 live hotels", "↩ self-corrected", "◇ context cached", "low cost"];
 const DEFAULT_EYEBROW = "✓ That was a real session";
 const DEFAULT_TITLE = "Now it's your turn";
@@ -11,7 +14,7 @@ export function ReelEndCard(
     // dublin-oct recording). The scripted collab reel passes its own honest framing.
     recap?: string[]; eyebrow?: string; title?: string; blurb?: string;
     // When the reel has a next chapter, it becomes the primary CTA.
-    nextChapter?: { label: string; onClick: () => void } },
+    nextChapter?: NextChapterCta },
 ) {
   const chips = recap ?? DEFAULT_RECAP;
   return (
