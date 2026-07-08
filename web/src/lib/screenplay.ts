@@ -1,5 +1,5 @@
 import type { ServerEvent, BoardCandidate, FolioData } from "../../../shared/events";
-import type { Recording, Frame, Actor, ReelClientSession, ReelEngPanel } from "./recording";
+import type { Recording, Frame, Actor, ReelClientSession, ReelEngPanel, ReelFolioSession } from "./recording";
 import type { Highlight, HighlightMatch } from "./highlights";
 
 interface Meta { trip: string; skin: "claude" }
@@ -73,6 +73,11 @@ class Builder {
       // call is one beat; pass null to close. Consecutive snapshots animate the price recalc.
       view: (snapshot: ReelClientSession | null) => {
         this.add({ delayMs: 0, kind: "interaction", actor, interaction: { kind: "clientview", view: snapshot }, beatId: this.beat() });
+      },
+      // Ch3: open/update/close the simulated client FOLIO window (the full folio, not the
+      // pricing widget). Snapshot-based like view(); pass null to close.
+      folioView: (snapshot: ReelFolioSession | null) => {
+        this.add({ delayMs: 0, kind: "interaction", actor, interaction: { kind: "folioview", view: snapshot }, beatId: this.beat() });
       },
     };
   }

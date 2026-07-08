@@ -63,6 +63,7 @@ export type ReelInteraction =
   | { kind: "comment"; anchor: string; threadId: string; text: string }
   | { kind: "handoff"; channel: "email"; subject: string; reply?: string }
   | { kind: "clientview"; view: ReelClientSession | null }
+  | { kind: "folioview"; view: ReelFolioSession | null }
   | { kind: "engpanel"; view: ReelEngPanel | null };
 
 export type Frame =

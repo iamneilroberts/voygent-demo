@@ -1,12 +1,13 @@
-import type { Actor, ReelInteraction, ReelClientSession, ReelEngPanel } from "./recording";
+import type { Actor, ReelInteraction, ReelClientSession, ReelEngPanel, ReelFolioSession } from "./recording";
 
 export interface ReelEditMarker { path: string; was: string; now: string; tag: string; actor: Actor; reconciled: boolean }
 export interface ReelComment { actor: Actor; text: string }
 export interface ReelThread { threadId: string; anchor: string; comments: ReelComment[] }
 export interface ReelHandoff { sent: boolean; routedBack: boolean; subject?: string; reply?: string }
 
-// Reel-only presentation state. Deliberately holds NO folio data — the canonical
-// folio is owned exclusively by the ServerEvent "folio" reducer (applyEvent).
+// Reel-only presentation state. The canonical chat folio is owned exclusively by the
+// ServerEvent "folio" reducer (applyEvent); `folioView` below is a different thing —
+// the ch3 client-window snapshot, which carries its own FolioData copy by design.
 export interface ReelViewState {
   // Per board: which candidate id(s) are chosen + who chose. Multiple ids = a
   // multi-select board (e.g. the advisor shortlisting hotels, or picking includes).
@@ -15,11 +16,12 @@ export interface ReelViewState {
   threads: ReelThread[];
   handoff: ReelHandoff | null;
   clientView: ReelClientSession | null;   // R4: the simulated client browser window
+  folioView: ReelFolioSession | null;     // ch3: the client's full folio window
   engPanel: ReelEngPanel | null;          // brief engineering-view peek
 }
 
 export function emptyReelViewState(): ReelViewState {
-  return { selected: {}, edits: [], threads: [], handoff: null, clientView: null, engPanel: null };
+  return { selected: {}, edits: [], threads: [], handoff: null, clientView: null, folioView: null, engPanel: null };
 }
 
 export function applyInteraction(state: ReelViewState, i: ReelInteraction, actor: Actor): ReelViewState {
@@ -39,6 +41,8 @@ export function applyInteraction(state: ReelViewState, i: ReelInteraction, actor
       return { ...state, handoff: { sent: true, routedBack: i.reply != null, subject: i.subject, reply: i.reply } };
     case "clientview":
       return { ...state, clientView: i.view };
+    case "folioview":
+      return { ...state, folioView: i.view };
     case "engpanel":
       return { ...state, engPanel: i.view };
   }

@@ -37,6 +37,22 @@ describe("applyInteraction", () => {
     expect(s.clientView).toBeNull();
   });
 
+  it("opens, updates and closes the client folio window (folioview)", () => {
+    const fv = {
+      open: true, url: "voygent.app/t/dublin",
+      folio: { tripId: "dublin", title: "A week in Dublin", flights: [], hotels: [] },
+      flightsPrice: 3180, activitiesPrice: 284, hotels: [], pickedHotelId: null,
+      addons: [], notes: [], status: "draft" as const, advisorUpdating: false,
+      focus: null, expandedDay: null,
+    };
+    let s = applyInteraction(emptyReelViewState(), { kind: "folioview", view: fv }, "client");
+    expect(s.folioView?.open).toBe(true);
+    s = applyInteraction(s, { kind: "folioview", view: { ...fv, status: "final" } }, "client");
+    expect(s.folioView?.status).toBe("final");
+    s = applyInteraction(s, { kind: "folioview", view: null }, "client");
+    expect(s.folioView).toBeNull();
+  });
+
   it("handoff sets sent and routedBack when a reply is present", () => {
     const s = applyInteraction(emptyReelViewState(), { kind: "handoff", channel: "email", subject: "Your trip", reply: "Add a food tour?" }, "advisor");
     expect(s.handoff).toEqual({ sent: true, routedBack: true, subject: "Your trip", reply: "Add a food tour?" });
