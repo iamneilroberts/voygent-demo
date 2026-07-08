@@ -742,3 +742,4 @@
 :root[data-skin="claude"] .cl-fv-dialog-h { margin: 0; font: 600 18px/1.25 var(--cl-serif); }
 :root[data-skin="claude"] .cl-fv-dialog-p { margin: 0 0 8px; font: 13px/1.5 var(--cl-sans); color: var(--cl-muted); }
 :root[data-skin="claude"] .cl-fv-keep { padding: 6px; border: none; background: none; color: var(--cl-muted); font: 500 13px/1 var(--cl-sans); cursor: pointer; }
+:root[data-skin="claude"] .cl-fv-disclosure { margin: 0 0 2px; font: 12px/1.45 var(--cl-sans); color: var(--cl-muted); text-align: center; }

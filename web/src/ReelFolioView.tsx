@@ -19,7 +19,9 @@ export function ReelFolioView({ view, mode, cta }: {
   const interactive = mode === "interactive";
   const [localAddons, setLocalAddons] = useState(view.addons);
   const [localDay, setLocalDay] = useState<number | null>(view.expandedDay);
-  const [localPicked, setLocalPicked] = useState<string | null>(view.pickedHotelId);
+  // Interactive seeding falls back to the first hotel (as ReelExplore did) so an
+  // unpicked session never renders an empty selection with the hotel cost silently $0.
+  const [localPicked, setLocalPicked] = useState<string | null>(view.pickedHotelId ?? view.hotels[0]?.id ?? null);
   const [sent, setSent] = useState(false);
   const addons = interactive ? localAddons : view.addons;
   const expandedDay = interactive ? localDay : view.expandedDay;
@@ -35,11 +37,13 @@ export function ReelFolioView({ view, mode, cta }: {
     el?.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
   }, [view.focus]);
 
-  const renderAddon = (a: ReelAddon) => (
+  // The day-card hint is scheduling copy ("does it fit this day?"); undated extras
+  // (transfers, insurance) get no hint — it would mislabel them.
+  const renderAddon = (a: ReelAddon, hint?: string) => (
     <button key={a.id} type="button" className={`cl-fv-addon ${a.on ? "on" : ""}`} disabled={!interactive} aria-pressed={a.on}
       onClick={interactive ? () => setLocalAddons((xs) => xs.map((x) => (x.id === a.id ? { ...x, on: !x.on } : x))) : undefined}>
       <span className="cl-fv-check" aria-hidden="true">{a.on ? "☑" : "☐"}</span>
-      <span className="cl-fv-addon-label">{a.label}<i>recommended · add it if it fits</i></span>
+      <span className="cl-fv-addon-label">{a.label}{hint && <i>{hint}</i>}</span>
       <span className="cl-fv-addon-price">+{usd(a.price)}</span>
     </button>
   );
@@ -97,7 +101,7 @@ export function ReelFolioView({ view, mode, cta }: {
                       {d.dining.map((x) => <div key={x.name} className="cl-fv-dine">🍽 {x.name}{x.cuisine ? ` · ${x.cuisine}` : ""}</div>)}
                     </div>
                   )}
-                  {dayAddons.length > 0 && <div className="cl-fv-addons">{dayAddons.map(renderAddon)}</div>}
+                  {dayAddons.length > 0 && <div className="cl-fv-addons">{dayAddons.map((a) => renderAddon(a, "recommended · add it if it fits"))}</div>}
                   {dayNotes.length > 0 && (
                     <div className="cl-fv-notes" data-reel-target="folio-note">
                       {dayNotes.map((nt, k) => (
@@ -113,7 +117,7 @@ export function ReelFolioView({ view, mode, cta }: {
           {looseAddons.length > 0 && (
             <section className="cl-fv-extras" data-reel-target="folio-addons">
               <h3 className="cl-fv-sec-h">Optional extras</h3>
-              <div className="cl-fv-addons">{looseAddons.map(renderAddon)}</div>
+              <div className="cl-fv-addons">{looseAddons.map((a) => renderAddon(a))}</div>
             </section>
           )}
 
@@ -133,6 +137,7 @@ export function ReelFolioView({ view, mode, cta }: {
         <div className="cl-fv-total" data-reel-target="folio-total"><span>Trip total · two travellers</span><b key={total}>{usd(total)}</b></div>
         {cta && (
           <div className="cl-fv-cta">
+            <p className="cl-fv-disclosure">This is the scripted demo trip; the live demo pulls real flights and hotels.</p>
             {cta.sendFunnel && <button type="button" className="cl-reel-btn cl-reel-btn-primary" onClick={() => setSent(true)}>Send to Voygent →</button>}
             {cta.nextChapter && <button type="button" className={`cl-reel-btn ${cta.sendFunnel ? "cl-reel-btn-secondary" : "cl-reel-btn-primary"}`} onClick={cta.nextChapter.onClick}>{cta.nextChapter.label}</button>}
             <button type="button" className={`cl-reel-btn ${cta.sendFunnel || cta.nextChapter ? "cl-reel-btn-secondary" : "cl-reel-btn-primary"}`} onClick={cta.onTryYourself}>Build your own trip →</button>
