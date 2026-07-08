@@ -56,7 +56,7 @@ const julieNote = { anchor: "folio-day-2", author: "client" as const, text: "Mar
 const fvNote: ReelFolioSession = { ...fvWhiskeyOff, notes: [julieNote], focus: "folio-note" };
 // Beat 4 — the 2-way moment.
 const advisorReply = { anchor: "folio-day-2", author: "advisor" as const, text: "Swapped the EPIC museum for the National Gallery. Step-free, and it keeps the afternoon slow." };
-const fvUpdating: ReelFolioSession = { ...fvNote, advisorUpdating: true, focus: "folio-day-2" };
+const fvUpdating: ReelFolioSession = { ...fvNote, advisorUpdating: true, focus: "folio-day-2", expandedDay: 2 };
 const fvSwapped: ReelFolioSession = { ...fvUpdating, advisorUpdating: false, folio: finalFolio, notes: [julieNote, advisorReply] };
 const fvFinal: ReelFolioSession = { ...fvSwapped, status: "final", focus: "folio-status" };
 
