@@ -33,6 +33,14 @@ describe("buildStats", () => {
     expect(byKey.suppliersQueried.drill).toBe("fanout");
     expect(byKey.suppliersQueried.value).toBe("2");
   });
+  it("attaches a sublabel to the observedCost tile when a model label is given", () => {
+    const byKey = Object.fromEntries(buildStats({ ...input, costModelLabel: "Sonnet" }).map((s) => [s.key, s]));
+    expect(byKey.observedCost.sublabel).toBe("Sonnet");
+  });
+  it("leaves observedCost.sublabel unset when no model label is given", () => {
+    const byKey = Object.fromEntries(buildStats(input).map((s) => [s.key, s]));
+    expect(byKey.observedCost.sublabel).toBeUndefined();
+  });
 });
 
 describe("railStats", () => {

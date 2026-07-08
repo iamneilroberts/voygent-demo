@@ -170,6 +170,10 @@ function CostSimView({ ctx }: { ctx: DrillContext }) {
         actual. Cache-disabled and distill-disabled scenarios are coming (they need server-side
         repricing, kept off the client).
       </p>
+      <p className="ins-note">
+        This is Voygent's infrastructure cost, shown for transparency. You don't pay per
+        interaction. It's included in your subscription.
+      </p>
       {rows.map((r) => (
         <div className={`ins-costsim-row ${r.actual ? "actual" : ""}`} key={r.label}>
           <span className="ins-costsim-label">{r.label}</span>
@@ -179,6 +183,9 @@ function CostSimView({ ctx }: { ctx: DrillContext }) {
           <span className="ins-costsim-usd">{usd(r.usd)}{!r.actual && r.mult > 1 ? ` · ${r.mult.toFixed(1)}×` : ""}</span>
         </div>
       ))}
+      {ctx.routedModels.length === 1 && (
+        <p className="ins-note">Model: {MODEL_LABELS[ctx.routedModels[0] as ModelId] ?? ctx.routedModels[0]}.</p>
+      )}
       {ctx.routedModels.length > 1 && (
         <>
           <p className="ins-note">Routed across: {ctx.routedModels.map((m) => `${usd(ctx.actualByModel[m])} ${MODEL_LABELS[m as ModelId] ?? m}`).join(" + ")}.</p>

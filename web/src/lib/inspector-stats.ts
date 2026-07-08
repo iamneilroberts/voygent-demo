@@ -12,6 +12,7 @@ export interface InspectorStat {
   bar?: number;                        // optional 0..1 fill (e.g. tokens-saved proportion)
   deepDive?: string;                   // /info slug this stat links to
   drill?: "funnel" | "costSim" | "waterfall" | "fanout" | "stores" | "integrity";   // expandable detail view this stat opens
+  sublabel?: string;                   // small secondary line under the tile (e.g. which model produced it)
 }
 
 // The metrics the Inspector already computes, passed in as plain values so this stays
@@ -25,6 +26,7 @@ export interface StatInput {
   cacheHitRate: number;                // 0..1
   suppliersQueried: number;            // distinct supplier adapters lit this session (fan-out)
   contextKeptOutBar?: number;          // optional 0..1 proportion for the rail fill bar
+  costModelLabel?: string;             // which model(s) produced observedCostUsd (e.g. "Sonnet", "mixed")
 }
 
 function fmtInt(n: number): string {
@@ -41,7 +43,7 @@ export function buildStats(i: StatInput): InspectorStat[] {
     { key: "distinctTools", value: fmtInt(i.distinctTools), label: "distinct tools", deepDive: "production-system" },
     { key: "persistedWrites", value: fmtInt(i.persistedWrites), label: "persisted writes", deepDive: "data-stores", drill: "stores" },
     { key: "contextKeptOut", value: `≈${fmtInt(i.contextKeptOut)}`, label: "context kept out", tone: "good", rail: 1, bar: i.contextKeptOutBar, deepDive: "context-economics", drill: "funnel" },
-    { key: "observedCost", value: fmtUsd(i.observedCostUsd), label: "observed cost", tone: "good", rail: 2, deepDive: "cost-engineering", drill: "costSim" },
+    { key: "observedCost", value: fmtUsd(i.observedCostUsd), label: "observed cost", tone: "good", rail: 2, deepDive: "cost-engineering", drill: "costSim", ...(i.costModelLabel ? { sublabel: i.costModelLabel } : {}) },
     { key: "cacheHitRate", value: `${Math.round(i.cacheHitRate * 100)}%`, label: "cache hit rate", deepDive: "cost-engineering" },
     { key: "suppliersQueried", value: fmtInt(i.suppliersQueried), label: "suppliers queried", deepDive: "production-system", drill: "fanout" },
   ];

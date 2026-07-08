@@ -158,6 +158,10 @@ export function Inspector(
   const actualByModel: Record<string, number> = {};
   for (const s of summaries) for (const [m, c] of Object.entries(s.actualCostByModel ?? {})) actualByModel[m] = (actualByModel[m] ?? 0) + c;
   const routedModels = Object.keys(actualByModel).filter((m) => actualByModel[m] > 0);
+  // Which model produced the observed-cost figure — shown as a sublabel under the
+  // tile so "observed cost" never reads as attribution-free.
+  const costModelLabel = routedModels.length === 1 ? (MODEL_LABELS[routedModels[0]] ?? routedModels[0])
+    : routedModels.length > 1 ? "mixed" : undefined;
   // Cost-weighted (reads 0.1x, writes 1.25x) — the raw in+cacheRead sum read
   // 5-10x pessimistic against the sub-window estimate once the moving cache
   // breakpoint landed. See lib/usage.ts.
@@ -209,6 +213,7 @@ export function Inspector(
     observedCostUsd: actualCost,
     cacheHitRate: hitRate ?? 0,
     suppliersQueried,
+    costModelLabel,
   });
   // Active phase for the rail: the phase trail's last entry, else the latest lit stage.
   const activePhase = phases && phases.length ? phases[phases.length - 1].phase
@@ -286,6 +291,7 @@ export function Inspector(
               <>
                 <span className={`ins-stat-n ${st.tone === "good" ? "ins-stat-cost" : ""}`}>{st.value}</span>
                 <span className="ins-stat-l">{st.label}</span>
+                {st.sublabel && <span className="ins-stat-sub">{st.sublabel}</span>}
               </>
             );
             return drill ? (
