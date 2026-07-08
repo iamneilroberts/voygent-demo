@@ -37,7 +37,7 @@ import { ReelClientView } from "./ReelClientView";
 import { ReelFolioView } from "./ReelFolioView";
 import { ReelEngPanel } from "./ReelEngPanel";
 import { ReelEndCard } from "./ReelEndCard";
-import { ReelExplore } from "./ReelExplore";
+import { folioSessionFromClient } from "./lib/folio-session";
 import type { Highlight } from "./lib/highlights";
 import { isChatMessage, type TimelineItem, type BoardItem } from "./timeline";
 
@@ -566,10 +566,11 @@ export function App() {
               // Ch3 ends on the folio itself: same surface, now interactive, standard CTA row.
               ? <ReelFolioView view={reelView.folioView} mode="interactive"
                   cta={{ nextChapter, onTryYourself: tryYourself, onReplay: startReel }} />
-              : reelView.clientView
-              // Reels with a priced client-view (collab) end on an interactive folio the
-              // viewer can experiment with; others keep the static end card.
-              ? <ReelExplore view={reelView.clientView} onLiveDemo={tryYourself} onReplay={startReel} nextChapter={nextChapter} />
+              : reelView.clientView && folio
+              // Reels with a priced client-view (ch1/ch2) end on the same folio surface,
+              // interactive, built from the client session + the canonical chat folio.
+              ? <ReelFolioView view={folioSessionFromClient(reelView.clientView, folio)} mode="interactive"
+                  cta={{ nextChapter, onTryYourself: tryYourself, onReplay: startReel, sendFunnel: true }} />
               : <ReelEndCard
                   onTryYourself={tryYourself} onReplay={startReel}
                   recap={selectedReel.recap}

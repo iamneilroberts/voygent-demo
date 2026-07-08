@@ -1,5 +1,5 @@
 // web/src/ReelEndCard.tsx
-// The next-chapter CTA shape shared by both end surfaces (ReelEndCard, ReelExplore).
+// The next-chapter CTA shape shared by both end surfaces (ReelEndCard, ReelFolioView).
 export interface NextChapterCta { label: string; onClick: () => void }
 
 const DEFAULT_RECAP = ["✈ live flights", "🏨 live hotels", "↩ self-corrected", "◇ context cached", "low cost"];

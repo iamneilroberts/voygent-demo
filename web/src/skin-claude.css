@@ -663,50 +663,6 @@
   @keyframes cl-eng-peek-in { from { opacity: 0; transform: translate(50%, -10px); } to { opacity: 1; transform: translateX(50%); } }
 }
 
-/* ===== Interactive end-state: the trip folio the viewer can experiment with ===== */
-:root[data-skin="claude"] .cl-explore-scrim { position: fixed; inset: 0; z-index: 62; display: flex; align-items: center; justify-content: center; padding: 20px; background: rgba(31,30,28,.5); overflow: auto; }
-:root[data-skin="claude"] .cl-explore {
-  width: 100%; max-width: 380px; max-height: calc(100vh - 40px); overflow: auto;
-  background: var(--cl-surface); border: 1px solid var(--cl-line); border-radius: 16px;
-  padding: 18px 18px 16px; box-shadow: 0 20px 60px rgba(0,0,0,.28);
-}
-:root[data-skin="claude"] .cl-explore-head { display: flex; flex-direction: column; gap: 3px; margin-bottom: 8px; }
-:root[data-skin="claude"] .cl-explore-eyebrow { font: 600 .6875rem/1 var(--cl-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--cl-accent); }
-:root[data-skin="claude"] .cl-explore-title { font: 600 1.125rem/1.25 var(--cl-serif); margin: 0; }
-:root[data-skin="claude"] .cl-explore-note { font-size: .8125rem; line-height: 1.45; color: var(--cl-muted); margin: 0 0 12px; }
-:root[data-skin="claude"] .cl-explore-line { display: flex; justify-content: space-between; align-items: baseline; padding: 7px 0; border-top: 1px solid var(--cl-line); font-size: .875rem; font-variant-numeric: tabular-nums; }
-:root[data-skin="claude"] .cl-explore-group { margin: 8px 0; }
-:root[data-skin="claude"] .cl-explore-group-h { font: 600 .6875rem/1 var(--cl-sans); letter-spacing: .05em; text-transform: uppercase; color: var(--cl-muted); margin: 6px 0; }
-:root[data-skin="claude"] .cl-explore-opt, :root[data-skin="claude"] .cl-explore-addon {
-  display: flex; align-items: center; gap: 10px; width: 100%; text-align: left;
-  background: var(--cl-surface); border: 1px solid var(--cl-line); border-radius: 9px;
-  padding: 9px 11px; margin-bottom: 6px; cursor: pointer; font: inherit; color: var(--cl-ink);
-  transition: border-color .12s, background .12s;
-}
-:root[data-skin="claude"] .cl-explore-opt:hover, :root[data-skin="claude"] .cl-explore-addon:hover { border-color: #d8d5c8; }
-:root[data-skin="claude"] .cl-explore-opt.on, :root[data-skin="claude"] .cl-explore-addon.on { border-color: var(--cl-accent); background: #fdf6f2; }
-:root[data-skin="claude"] .cl-explore-radio, :root[data-skin="claude"] .cl-explore-check { color: var(--cl-accent); width: 16px; }
-:root[data-skin="claude"] .cl-explore-opt-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
-:root[data-skin="claude"] .cl-explore-opt-name { font-weight: 600; font-size: .875rem; }
-:root[data-skin="claude"] .cl-explore-opt-meta { font-size: .75rem; color: var(--cl-muted); }
-:root[data-skin="claude"] .cl-explore-opt-price { font-weight: 600; font-size: .875rem; white-space: nowrap; font-variant-numeric: tabular-nums; }
-:root[data-skin="claude"] .cl-explore-total { display: flex; justify-content: space-between; align-items: baseline; margin-top: 10px; padding-top: 10px; border-top: 2px solid var(--cl-ink); font-size: .9375rem; }
-:root[data-skin="claude"] .cl-explore-total b { font-size: 1.375rem; font-variant-numeric: tabular-nums; animation: cl-cv-pop .3s ease-out 1; }
-:root[data-skin="claude"] .cl-explore-actions { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
-:root[data-skin="claude"] .cl-explore-send { padding: 12px; border: none; border-radius: 9px; background: var(--cl-accent); color: var(--cl-accent-ink); font: 600 .9375rem/1 var(--cl-sans); cursor: pointer; }
-:root[data-skin="claude"] .cl-explore-send:hover { filter: brightness(1.05); }
-:root[data-skin="claude"] .cl-explore-cta { padding: 11px; border: 1px solid var(--cl-accent); border-radius: 9px; background: none; color: var(--cl-accent); font: 600 .875rem/1 var(--cl-sans); cursor: pointer; }
-:root[data-skin="claude"] .cl-explore-cta:hover { background: #fdf6f2; }
-:root[data-skin="claude"] .cl-explore-replay { padding: 6px; border: none; background: none; color: var(--cl-muted); font: 500 .8125rem/1 var(--cl-sans); cursor: pointer; }
-:root[data-skin="claude"] .cl-explore-replay:hover { color: var(--cl-ink-2); }
-/* "Send to Voygent" dialog: points at the live demo */
-:root[data-skin="claude"] .cl-explore-dialog-scrim { position: fixed; inset: 0; z-index: 63; display: flex; align-items: center; justify-content: center; padding: 24px; background: rgba(31,30,28,.55); }
-:root[data-skin="claude"] .cl-explore-dialog { width: 100%; max-width: 340px; background: var(--cl-surface); border-radius: 16px; padding: 22px; box-shadow: 0 24px 70px rgba(0,0,0,.35); text-align: center; }
-:root[data-skin="claude"] .cl-explore-dialog-eyebrow { font: 600 .6875rem/1 var(--cl-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--cl-accent); }
-:root[data-skin="claude"] .cl-explore-dialog-h { font: 600 1.1875rem/1.25 var(--cl-serif); margin: 8px 0 6px; }
-:root[data-skin="claude"] .cl-explore-dialog-p { font-size: .875rem; line-height: 1.5; color: var(--cl-muted); margin: 0 0 16px; }
-:root[data-skin="claude"] .cl-explore-dialog .cl-explore-send { width: 100%; }
-:root[data-skin="claude"] .cl-explore-keep { margin-top: 8px; padding: 6px; border: none; background: none; color: var(--cl-muted); font: 500 .8125rem/1 var(--cl-sans); cursor: pointer; }
 
 /* Screen-reader-only utility */
 .cl-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
