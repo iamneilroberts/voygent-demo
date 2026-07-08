@@ -66,6 +66,20 @@ describe("createBoardBuilder", () => {
     expect(first.meta).toMatch(/\dh/);
   });
 
+  it("never leaks the credentialed CPMaxx quote-sheet URL into a public demo card", () => {
+    const build = createBoardBuilder();
+    const ev = build("hotel_search", hotelSearchPayload("Cancun"), TRIP);
+    if (ev?.type !== "board") throw new Error("expected board event");
+    const cpmaxx = cpmaxxHotelsFor(CANCUN);
+    expect(cpmaxx[0].hotelSheetUrl).toBeTruthy(); // sanity: the fixture really has one
+    const serialized = JSON.stringify(ev.candidates);
+    expect(serialized).not.toContain("hotelSheetUrl");
+    expect(serialized).not.toContain(cpmaxx[0].hotelSheetUrl);
+    for (const c of ev.candidates) {
+      expect(c.detailUrl).toContain("google.com/search");
+    }
+  });
+
   it("derives legs from raw prod segments on live (non-replayed) flight candidates", () => {
     // Live/faithful passthrough candidates carry raw prod `segments`, not a
     // pre-shaped `legs` array (that's a replay-layer-only convenience). The
@@ -139,8 +153,12 @@ describe("createBoardBuilder", () => {
     const first = ev.candidates[0];
     expect(first.commission).toBe(cpmaxx[0].commission);
     expect(first.commissionPct).toBe(cpmaxx[0].commissionPct);
-    expect(first.detailUrl).toBe(cpmaxx[0].hotelSheetUrl);
-    expect(first.detailLabel).toBe("view rooms ↗");
+    // Public demo cards must NEVER carry the credentialed CPMaxx quote-sheet link —
+    // use the same honest Google-by-name fallback the non-cpmaxx mapper uses.
+    expect(first.detailUrl).toContain("google.com/search");
+    expect(first.detailUrl).toContain(encodeURIComponent(cpmaxx[0].name));
+    expect(first.detailUrl).not.toBe(cpmaxx[0].hotelSheetUrl);
+    expect(first.detailLabel).toBe("details ↗");
     expect(first.image).toBe(cpmaxx[0].image);
     expect(first.photoCount).toBe(cpmaxx[0].pictureCount);
     // Client price is the headline; the per-night reconciles FROM it (client/nights),
@@ -243,12 +261,17 @@ describe("hotel_search_and_rank (cpmaxx live) board mapping", () => {
     expect(a.id).toBe("990114");           // numeric id coerced to string
     expect(a.title).toBe("Omni Cancun Villas");
     expect(a.price).toBe("$1,160/night");
-    expect(a.detailUrl).toBe("https://cpmaxx.example/sheet/990114");
+    // Credentialed CPMaxx quote-sheet links must never reach a public demo card —
+    // the Google-by-name fallback stands in instead.
+    expect(a.detailUrl).toContain("google.com/search");
+    expect(a.detailUrl).not.toBe("https://cpmaxx.example/sheet/990114");
+    expect(a.detailLabel).toBe("details ↗");
     expect(a.commission).toBe(2436.69);
     expect(a.commissionPct).toBe(30);
     expect(a.meta).toContain("4★");
     expect(a.meta).toContain("Boulevard Kukulcan");
     expect(b.commission).toBeUndefined();  // absent fields stay absent
+    expect(JSON.stringify(board.candidates)).not.toContain("cpmaxx.example/sheet");
   });
 
   it("returns null when hotels array is empty", () => {
