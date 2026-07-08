@@ -1,6 +1,7 @@
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import type { Highlight } from "./lib/highlights";
+import { markProgrammaticScroll } from "./lib/scroll-intent";
 
 // Resolve a highlight target key to a live DOM element.
 //   "stat:<key>"  -> the engineering-panel stat card [data-stat="<key>"]
@@ -18,6 +19,10 @@ export function ReelCallout(
 ) {
   // rect = the target's viewport rect when it's on-screen; null => no/offscreen target (centered fallback).
   const [rect, setRect] = useState<Rect | null>(null);
+  // The ResizeObserver below outlives renders; read `paused` through a ref so its
+  // callback never acts on a stale closure.
+  const pausedRef = useRef(paused);
+  pausedRef.current = paused;
 
   useLayoutEffect(() => {
     const el = findTarget(highlight.target);
@@ -27,6 +32,7 @@ export function ReelCallout(
     // so align such targets to their TOP. Short targets keep "nearest".
     const scrollToEl = () => {
       try {
+        markProgrammaticScroll(); // don't let follow-scroll read this as user intent
         const tall = el.getBoundingClientRect().height > window.innerHeight * 0.78;
         el.scrollIntoView({ block: tall ? "start" : "nearest", inline: "nearest" });
       } catch { /* ignore */ }
@@ -45,11 +51,12 @@ export function ReelCallout(
     // that renders the folio's new content, and on a phone that growth pushed the whole
     // artifact below the fold AFTER the mount-time scroll (spotlit content invisible for
     // the entire dwell). Re-assert the scroll when the target's size changes, but only
-    // if it has drifted fully out of view — never fight a viewer reading while paused.
+    // if it has drifted fully out of view, and never while the viewer is paused reading
+    // (the ring still re-measures so it tracks the resized target).
     const ro = typeof ResizeObserver !== "undefined"
       ? new ResizeObserver(() => {
           const r = el.getBoundingClientRect();
-          if (r.bottom < 0 || r.top > window.innerHeight) scrollToEl();
+          if (!pausedRef.current && (r.bottom < 0 || r.top > window.innerHeight)) scrollToEl();
           measure();
         })
       : null;

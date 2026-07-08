@@ -8,6 +8,7 @@ import { BoardView } from "./BoardView";
 import { commissionLabel, commissionTotal, fmtUsd } from "./lib/advisor";
 import { safeHttpUrl } from "./lib/url";
 import { type MobileView, toggleMobileView } from "./lib/mobile-view";
+import { markProgrammaticScroll, consumeProgrammaticScroll } from "./lib/scroll-intent";
 import { editForActivity, actorClass, actorLabel, threadsForDay, actorInitial, sendButtonLabel } from "./lib/reel-render";
 import type { ReelViewState, ReelEditMarker, ReelThread } from "./lib/interaction";
 
@@ -304,26 +305,29 @@ export function ClaudeChatView(
   // Auto-scroll ONLY on new chat content AND only when the user is already at the
   // bottom — never on a folio-only update (that yank was the mobile "glitchy
   // scrolling"). Track the pinned-to-bottom state from the scroll position.
-  // A2: only a USER scroll may unpin. Our own scrollIntoView calls below also fire
-  // onScroll, and on a phone a pinned chooser board is taller than the viewport, so
-  // treating that programmatic scroll as intent permanently killed follow-scroll —
-  // everything after the pick (confirmation, first folio) landed below the fold.
-  const progScrollUntil = useRef(0);
+  // A2: only a USER scroll may unpin. Our own scrollIntoView calls (and ReelCallout's)
+  // also fire onScroll, and on a phone a pinned chooser board is taller than the
+  // viewport, so treating those programmatic scrolls as intent permanently killed
+  // follow-scroll — everything after a pick (confirmation, first folio) landed below
+  // the fold. Programmatic scrolls mark themselves (lib/scroll-intent) and each scroll
+  // event consumes one mark, so a genuine gesture is never mistaken for ours.
   function onScroll() {
     const el = scrollRef.current;
     if (!el) return;
-    if (Date.now() < progScrollUntil.current) return; // our scrollIntoView, not the user
+    if (consumeProgrammaticScroll()) return; // our scrollIntoView, not the user
     pinnedRef.current = el.scrollHeight - el.scrollTop - el.clientHeight < 80;
   }
   useEffect(() => {
-    // Reel playback follows the newest beat unconditionally — there is no reader to
-    // protect, and ReelCallout's own target scrolls would otherwise unpin us for good.
-    // (Viewers who want to linger have the pause control.)
-    if (!reelMode && !pinnedRef.current) return;
+    if (!pinnedRef.current) return;
+    // A mounted spotlight owns the frame: its layout-effect scroll (to an arbitrary
+    // target) ran before this passive effect in the same commit, and scrolling to the
+    // bottom now would shove the spotlit content back out of view. Playback is held
+    // during the callout, so following resumes on the next beat after it closes.
+    if (document.querySelector(".cl-reel-overlay")) return;
     // If a chooser board is awaiting a pick, keep IT in view instead of scrolling past it
     // to the trailing summary text (Neil: better to miss the summary than have to scroll
     // back up to choose). Otherwise stick to the bottom as before.
-    progScrollUntil.current = Date.now() + 250;
+    markProgrammaticScroll();
     const pendingBoard = items.some((it) => it.role === "board" && !it.resolved && !it.resolvedId);
     if (pendingBoard) {
       const boards = scrollRef.current?.querySelectorAll<HTMLElement>('[data-reel-target^="board-"]');
@@ -331,7 +335,7 @@ export function ClaudeChatView(
       if (last) { last.scrollIntoView({ block: "start" }); return; }
     }
     endRef.current?.scrollIntoView({ block: "end" });
-  }, [items, busy, reelMode]);
+  }, [items, busy]);
 
   const lastIdx = items.length - 1;
   // Enrichment runs a long batch of tools (itinerary, excursions, dining) with

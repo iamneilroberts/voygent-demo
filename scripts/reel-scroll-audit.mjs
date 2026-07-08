@@ -3,8 +3,13 @@
 // fresh content sits fully below the fold and screenshots the worst moments.
 // Exits 1 if any window >100px deep lasts longer than 3s (spotlit content invisible).
 // Usage: node scripts/reel-scroll-audit.mjs <reelId> [baseUrl]
-// Needs a running dev server (npm run dev:web) and Playwright at the path below.
-import { chromium } from "/home/neil/dev/voygent-desktop/node_modules/playwright/index.mjs";
+// Needs a running dev server (npm run dev:web) and Playwright: a repo-local install if
+// present, else set PLAYWRIGHT_PATH to any playwright package entry point.
+const pwPath = process.env.PLAYWRIGHT_PATH ?? "playwright";
+const { chromium } = await import(pwPath).catch(() => {
+  console.error(`playwright not resolvable (tried "${pwPath}") — npm i -D playwright or set PLAYWRIGHT_PATH`);
+  process.exit(2);
+});
 
 const REEL = process.argv[2] ?? "collab";
 const BASE = process.argv[3] ?? "http://localhost:5199";
