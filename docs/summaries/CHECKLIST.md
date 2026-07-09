@@ -15,6 +15,8 @@ Source handoffs: `pause-2026-07-08-c9-a2-b6-lane.md` (newest) · `pause-2026-07-
 - [x] N5: tour drill-down — ch3 beat 3 scripted (link → tour page → CTA scroll → add → 4640→4756) + live on interactive end-states; add-ons carry optional detail content
 - [x] N6: onboarding placeholder → "Any questions or comments? (optional)"
 - [x] B6: Rome hotel fixture price mix DONE — capture now band-picks 3 budget / 3 mid / 2 upscale (3★+) from a price-sorted pool; Rome recaptured $378–$1,486/night
+- [x] N7-N18 (QA rounds 2+3, 2026-07-08 late): edit-marker text, post-callout pacing, cutaway hero + section flips, callout copy ×4 plain-language, derived ready-state, itemized commission section, margin chapter rail + autoplay + breadcrumb, client-scene inbox backdrop + label — commit b4c09aa
+- [ ] N18 asset: Neil generates inbox-blur image (prompt provided) → drop at web/public/scenes/inbox-blur.jpg → redeploy
 - [ ] Paste/gap-fill in CURATED demo — confirm with Neil whether still wanted
 - [ ] Pre-existing main test failure: `worker/info/pages.test.ts:72` em-dash voice rule — small separate fix lane
 - [ ] B4 remainder: per-turn token sanity behind $.27 early-step cost; LLM_MODEL value decision (Neil)
