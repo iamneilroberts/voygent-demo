@@ -1,6 +1,22 @@
 # Demo design lane — checklist
 
-_Updated: 2026-07-08 19:20 — demo-design_ (A2 + N1-N6 SHIPPED prod: Worker d6188ce5, bundle index-BCDZlZ28.js, main = fcc71f9)
+_Updated: 2026-07-09 — demo-design_ (QA4 restructure COMMITTED `1c10d39`, bundle builds clean as index-DM1JJtAW.js; **DEPLOY PENDING — needs Neil**: `cd ~/dev/voygent-demo-demo-design && VITE_API_BASE="" npm run build:web && npx wrangler deploy`)
+
+## QA4 (Neil 2026-07-09, 17-item batch) — spec `docs/superpowers/specs/2026-07-09-reel-restructure-qa4.md`
+- [x] Chapter restructure: 1 `plan` (advisor-only + gap-fill tours + projected commission + Neil's handoff end card) · 2 `client` (invite email → folio w/ pinned advisor note, hotel flips reprice live, tour drill-down, one-click send-back) · 3 `advisor` (inbound reply notification, feedback incorporated, messy confirmation email → paste → ticketed corrections, booked commission $280). Legacy ids collab/run alias in pickReel.
+- [x] Playback: Read mode default at 1x, sticky via localStorage `voygent-reel-speed`; pacing rebalance (slower text/board/folio, faster tool beats); reel tool chips stop the wall-clock "Working… 163s" counter
+- [x] Nav: transport + breadcrumb unified top-right (`.cl-reel-nav`, "3 short demos"), persists playing+ended; orientation hero callout on ch1 frame 0; plain-language titles
+- [x] Chrome permission popup ROOT-CAUSED: live bundle built without VITE_API_BASE baked `http://localhost:8787` → Local Network Access prompt + broken live mode. API_BASE localhost fallback now DEV-only; prod builds can never leak it. (Fix reaches users on next deploy.)
+- [x] Eng peek: representative telemetry (model/tokens/cache/cost) + "representative" tag; callout ring re-measures through entrance animations
+- [x] Scroll/static fixes: selected multi-select boards unpin follow-scroll (folio below fold), missing-target callouts dim light (no gray wall), ch1 commission callout was bound to the wrong folio frame (fixed + binding guards)
+- [x] End cards: interstitials on all chapters, big Build-your-own CTA at arc end
+- [ ] **DEPLOY to demo.voygent.ai** (blocked on Neil: production-deploy permission) — then Neil smokes all 3 chapters in a browser (fresh profile: popup should NOT appear)
+- [ ] After smoke: merge demo-design → main + push
+
+## Carried over
+- [ ] Paste/gap-fill in CURATED demo — confirm with Neil whether still wanted (gap-fill now demoed in reel ch1)
+- [ ] B4 remainder: per-turn token sanity behind $.27 early-step cost; LLM_MODEL value decision (Neil)
+- [ ] voygent-lite #343 setup pages (separate lane, M3)
 
 Source handoffs: `pause-2026-07-08-c9-a2-b6-lane.md` (newest) · `pause-2026-07-08-ch3-client-folio.md` · QA queue: `pause-2026-07-08-neil-demo-qa.md`
 
