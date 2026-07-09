@@ -518,6 +518,31 @@ async function captureRoute(r) {
   };
 }
 
+// Band-pick a realistic price mix from a price-wide pool: split the per-night
+// range into thirds (budget / mid / upscale) and take 3/3/2, choosing the
+// highest-commission property within each band so the advisor's price ladder
+// stays interesting. Unpriced hotels are dropped (a board card needs a price);
+// short pools top up from the cheapest remainder. Output stays price-ascending.
+function pickPriceMix(pool, want) {
+  const allPriced = pool.filter((h) => typeof h.pricePerNight === "number" && h.pricePerNight > 0);
+  // Prefer properties with a real star rating: cpmaxx reports stars:0 for
+  // apartment/suite operators (a data gap), which renders as "0★" on the board.
+  const starred = allPriced.filter((h) => (h.stars ?? 0) >= 3);
+  const priced = (starred.length >= want ? starred : allPriced)
+    .sort((a, b) => a.pricePerNight - b.pricePerNight);
+  if (priced.length <= want) return priced;
+  const third = Math.ceil(priced.length / 3);
+  const bands = [priced.slice(0, third), priced.slice(third, 2 * third), priced.slice(2 * third)];
+  const take = [3, 3, want - 6];
+  const byCommission = (a, b) => (b.commission ?? 0) - (a.commission ?? 0);
+  const picked = bands.flatMap((band, i) => [...band].sort(byCommission).slice(0, take[i]));
+  for (const h of priced) {
+    if (picked.length >= want) break;
+    if (!picked.includes(h)) picked.push(h);
+  }
+  return picked.sort((a, b) => a.pricePerNight - b.pricePerNight);
+}
+
 // Non-destructive cpmaxx hotel capture: spin up a throwaway trip, pull the
 // credentialed ranked hotels, stage+promote to capture the lodging cards, then
 // MERGE the two new fields into the existing fixture — leaving the curated
@@ -530,12 +555,15 @@ async function captureCpmaxxOnly(r) {
     tripId,
     data: { meta: { title: `${r.label} (cpmaxx capture)`, destination: r.city, dates: `${r.depart} – ${r.ret}` }, flights: [], lodging: [], hotels: [] },
   });
+  // B6: a profit-only top-8 returns exclusively ultra-luxury properties (Rome
+  // came back $649–$1,460/night across the board). Pull one wide price-sorted
+  // pool in a single credentialed call, then band-pick a realistic mix locally.
   const out = await callTool("hotel_search", {
     source: "cpmaxx", trip_id: tripId,
     destination: r.city, location: r.city,
     check_in: r.depart, check_out: r.ret,
     travelers: { adults: r.adults }, adults: r.adults,
-    sort_by: "profit", top_n: 8,
+    sort_by: "price_low", top_n: 40,
   });
   // cpmaxx may double-wrap (proxied envelope) — unwrap to reach {hotels:[...]}.
   let body = out.json;
@@ -543,8 +571,9 @@ async function captureCpmaxxOnly(r) {
     try { body = JSON.parse(body.content[0].text); } catch { break; }
   }
   const raw = Array.isArray(body?.hotels) ? body.hotels : [];
-  const cpmaxxHotels = raw.map((c) => slimCpmaxxHotel(c, r)).filter((h) => h.id && h.name);
-  log(`  hotel_search cpmaxx: ${cpmaxxHotels.length} ranked (commission/profit/sheet)`);
+  const pool = raw.map((c) => slimCpmaxxHotel(c, r)).filter((h) => h.id && h.name);
+  const cpmaxxHotels = pickPriceMix(pool, 8);
+  log(`  hotel_search cpmaxx: pool ${pool.length} → ${cpmaxxHotels.length} band-picked (per-night ${cpmaxxHotels.map((h) => h.pricePerNight).join("/")})`);
   if (cpmaxxHotels.length === 0) {
     const note = body?.note ? ` note: ${String(body.note).slice(0, 200)}` : "";
     log(`  ⚠ no cpmaxx hotels for ${r.city} — status=${body?.status ?? "?"}.${note}`);

@@ -34,8 +34,12 @@ Check items off here as they ship.
       the number comes from (real telemetry vs fixture) and correct/calibrate.
 - [ ] B5. Curated demo: candidate list errors when PROMOTING (repro, capture the
       error envelope, fix).
-- [ ] B6. Rome hotel prices per-night insanely high in curated demo — needs a
+- [x] B6. Rome hotel prices per-night insanely high in curated demo — needs a
       realistic mix (data source issue? party-total vs per-night? currency?).
+      DONE 2026-07-08: root cause was the capture's `sort_by:"profit", top_n:8`
+      (returned only $649–$1,460/night luxury). capture-fixtures.mjs now pulls a
+      wide price-sorted pool and band-picks 3 budget / 3 mid / 2 upscale (3★+,
+      commission-preferred within band). Rome recaptured: $378–$1,486/night, 3–5★.
 - [ ] B7. Rome hotel "more details" links to CPMaxx (credentialed) — must go to a
       PUBLIC site. Curated demo: pre-select public detail URLs. Off-menu demo:
       Google Places or similar for hotel details.

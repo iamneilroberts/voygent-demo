@@ -1990,28 +1990,106 @@
   },
   "cpmaxxHotels": [
     {
-      "id": "603803",
+      "id": "457687",
       "source": "cpmaxx",
-      "name": "Roma Luxus Hotel",
-      "stars": 5,
-      "area": "Largo Angelicum, 4 Rome 00184",
-      "pricePerNight": 758,
-      "priceTotal": 7576.35,
+      "name": "Hotel Trecento",
+      "stars": 3,
+      "area": "Via del Corso, 300 Rome 186",
+      "pricePerNight": 378,
+      "priceTotal": 3783.35,
       "nights": 10,
       "currency": "USD",
-      "commission": 2272.91,
-      "commissionPct": 30,
-      "clientPrice": 8182,
+      "commission": 626.64,
+      "commissionPct": 16.6,
+      "clientPrice": 4086,
       "marginPct": 8,
-      "profitScore": 100,
-      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/603803/eyJjaGVja2luIjoiMjAyNi0wOS0xMCIsImNoZWNrb3V0IjoiMjAyNi0wOS0yMCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiUm9tZSIsImNpdHkiOiJSb21lIiwiY291bnRyeV9jb2RlIjoiSVQiLCJsYXQiOiI0MS44OTY3MDY4IiwibG5nIjoiMTIuNDgyMjAyNSIsInJvb21zIjpbeyJudW1fYWR1bHRzIjoiMiIsIm51bV9jaGlsZHJlbiI6IjAifV0sIm51bV9uaWdodHMiOiIxMCJ9",
-      "image": "https://i.travelapi.com/lodging/16000000/15900000/15898500/15898482/f8596e1a_b.jpg",
-      "marketingBlurb": "With a stay at Roma Luxus Hotel, you'll be centrally located in Rome, steps from Via Nazionale and 9 minutes by foot from Trevi Fountain. This luxury hotel is 0.7 mi (1.1 km) from Colosseum and 0.7 mi (1.1 km) from Pantheon.",
-      "pictureCount": 109,
+      "profitScore": 33,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/457687/eyJjaGVja2luIjoiMjAyNi0wOS0xMCIsImNoZWNrb3V0IjoiMjAyNi0wOS0yMCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiUm9tZSIsImNpdHkiOiJSb21lIiwic3RhdGVfY29kZSI6IiIsImNvdW50cnlfY29kZSI6IklUIiwibGF0IjoiNDEuODk2NzA2OCIsImxuZyI6IjEyLjQ4MjIwMjUiLCJyb29tcyI6W3sibnVtX2FkdWx0cyI6IjIiLCJudW1fY2hpbGRyZW4iOiIwIn1dLCJudW1fbmlnaHRzIjoiMTAifQ==",
+      "image": "https://i.travelapi.com/lodging/10000000/9370000/9361600/9361581/444a813d_b.jpg",
+      "marketingBlurb": "View points of interest",
+      "pictureCount": 87,
       "otaPrices": [
         {
           "name": "Expedia.com",
-          "pricePerNight": 758
+          "pricePerNight": 378
+        }
+      ]
+    },
+    {
+      "id": "740624",
+      "source": "cpmaxx",
+      "name": "Otivm Hotel",
+      "stars": 4,
+      "area": "Via D'Aracoeli, 11 Rome 186",
+      "pricePerNight": 513,
+      "priceTotal": 5133.57,
+      "nights": 10,
+      "currency": "USD",
+      "commission": 453.96,
+      "commissionPct": 8.8,
+      "clientPrice": 5544,
+      "marginPct": 8,
+      "profitScore": 22,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/740624/eyJjaGVja2luIjoiMjAyNi0wOS0xMCIsImNoZWNrb3V0IjoiMjAyNi0wOS0yMCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiUm9tZSIsImNpdHkiOiJSb21lIiwic3RhdGVfY29kZSI6IiIsImNvdW50cnlfY29kZSI6IklUIiwibGF0IjoiNDEuODk2NzA2OCIsImxuZyI6IjEyLjQ4MjIwMjUiLCJyb29tcyI6W3sibnVtX2FkdWx0cyI6IjIiLCJudW1fY2hpbGRyZW4iOiIwIn1dLCJudW1fbmlnaHRzIjoiMTAifQ==",
+      "image": "https://i.travelapi.com/lodging/22000000/21390000/21389300/21389240/29bd6d7a_b.jpg",
+      "marketingBlurb": "View points of interest",
+      "pictureCount": 61,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 513
+        }
+      ]
+    },
+    {
+      "id": "424055",
+      "source": "cpmaxx",
+      "name": "Hotel Caravita",
+      "stars": 5,
+      "area": "Via del Caravita 5 Rome 186",
+      "pricePerNight": 569,
+      "priceTotal": 5692.43,
+      "nights": 10,
+      "currency": "USD",
+      "commission": 1628.41,
+      "commissionPct": 28.6,
+      "clientPrice": 6148,
+      "marginPct": 8,
+      "profitScore": 79,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/424055/eyJjaGVja2luIjoiMjAyNi0wOS0xMCIsImNoZWNrb3V0IjoiMjAyNi0wOS0yMCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiUm9tZSIsImNpdHkiOiJSb21lIiwic3RhdGVfY29kZSI6IiIsImNvdW50cnlfY29kZSI6IklUIiwibGF0IjoiNDEuODk2NzA2OCIsImxuZyI6IjEyLjQ4MjIwMjUiLCJyb29tcyI6W3sibnVtX2FkdWx0cyI6IjIiLCJudW1fY2hpbGRyZW4iOiIwIn1dLCJudW1fbmlnaHRzIjoiMTAifQ==",
+      "image": "https://i.travelapi.com/lodging/7000000/6360000/6358700/6358682/77c05412_b.jpg",
+      "marketingBlurb": "View points of interest",
+      "pictureCount": 81,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 569
+        }
+      ]
+    },
+    {
+      "id": "1322463",
+      "source": "cpmaxx",
+      "name": "H10 Palazzo Galla, Rome",
+      "stars": 4,
+      "area": "Via IV Novembre Rome 00187",
+      "pricePerNight": 593,
+      "priceTotal": 5931.05,
+      "nights": 10,
+      "currency": "USD",
+      "commission": 349.03,
+      "commissionPct": 5.9,
+      "clientPrice": 6406,
+      "marginPct": 8,
+      "profitScore": 17,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/1322463/eyJjaGVja2luIjoiMjAyNi0wOS0xMCIsImNoZWNrb3V0IjoiMjAyNi0wOS0yMCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiUm9tZSIsImNpdHkiOiJSb21lIiwic3RhdGVfY29kZSI6IiIsImNvdW50cnlfY29kZSI6IklUIiwibGF0IjoiNDEuODk2NzA2OCIsImxuZyI6IjEyLjQ4MjIwMjUiLCJyb29tcyI6W3sibnVtX2FkdWx0cyI6IjIiLCJudW1fY2hpbGRyZW4iOiIwIn1dLCJudW1fbmlnaHRzIjoiMTAifQ==",
+      "image": "https://i.travelapi.com/lodging/75000000/74980000/74973000/74972957/abd6dc67_b.jpg",
+      "marketingBlurb": "View points of interest",
+      "pictureCount": 87,
+      "otaPrices": [
+        {
+          "name": "Expedia.com",
+          "pricePerNight": 593
         }
       ]
     },
@@ -2021,127 +2099,75 @@
       "name": "NH Collection Roma Fori Imperiali",
       "stars": 5,
       "area": "Via di S. Eufemia 19 Rome 187",
-      "pricePerNight": 987,
-      "priceTotal": 9871.1,
+      "pricePerNight": 920,
+      "priceTotal": 9196.79,
       "nights": 10,
       "currency": "USD",
-      "commission": 2321.9,
-      "commissionPct": 23.5,
-      "clientPrice": 10661,
+      "commission": 2003.88,
+      "commissionPct": 21.8,
+      "clientPrice": 9933,
       "marginPct": 8,
-      "profitScore": 98,
-      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/1080069/eyJjaGVja2luIjoiMjAyNi0wOS0xMCIsImNoZWNrb3V0IjoiMjAyNi0wOS0yMCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiUm9tZSIsImNpdHkiOiJSb21lIiwiY291bnRyeV9jb2RlIjoiSVQiLCJsYXQiOiI0MS44OTY3MDY4IiwibG5nIjoiMTIuNDgyMjAyNSIsInJvb21zIjpbeyJudW1fYWR1bHRzIjoiMiIsIm51bV9jaGlsZHJlbiI6IjAifV0sIm51bV9uaWdodHMiOiIxMCJ9",
+      "profitScore": 88,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/1080069/eyJjaGVja2luIjoiMjAyNi0wOS0xMCIsImNoZWNrb3V0IjoiMjAyNi0wOS0yMCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiUm9tZSIsImNpdHkiOiJSb21lIiwic3RhdGVfY29kZSI6IiIsImNvdW50cnlfY29kZSI6IklUIiwibGF0IjoiNDEuODk2NzA2OCIsImxuZyI6IjEyLjQ4MjIwMjUiLCJyb29tcyI6W3sibnVtX2FkdWx0cyI6IjIiLCJudW1fY2hpbGRyZW4iOiIwIn1dLCJudW1fbmlnaHRzIjoiMTAifQ==",
       "image": "https://i.travelapi.com/lodging/37000000/36880000/36872500/36872416/w3840h2561x0y0-78695639_b.jpg",
-      "marketingBlurb": "With a stay at NH Collection Roma Fori Imperiali, you'll be centrally located in Rome, within a 5-minute walk of Roman Forum and Via del Corso. This luxury hotel is 0.4 mi (0.7 km) from Trevi Fountain and 0.5 mi (0.9 km) from Pantheon.",
+      "marketingBlurb": "View points of interest",
       "pictureCount": 63,
       "otaPrices": [
         {
           "name": "Expedia.com",
-          "pricePerNight": 987
+          "pricePerNight": 920
         }
       ]
     },
     {
-      "id": "1446614",
+      "id": "1343307",
       "source": "cpmaxx",
-      "name": "Je Rome Hotel",
-      "stars": 0,
-      "area": "33 Via dell'Umiltà Rome 00187",
-      "pricePerNight": 806,
-      "priceTotal": 8058.33,
-      "nights": 10,
-      "currency": "USD",
-      "commission": 2249.38,
-      "commissionPct": 27.9,
-      "clientPrice": 8703,
-      "marginPct": 8,
-      "profitScore": 98,
-      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/1446614/eyJjaGVja2luIjoiMjAyNi0wOS0xMCIsImNoZWNrb3V0IjoiMjAyNi0wOS0yMCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiUm9tZSIsImNpdHkiOiJSb21lIiwiY291bnRyeV9jb2RlIjoiSVQiLCJsYXQiOiI0MS44OTY3MDY4IiwibG5nIjoiMTIuNDgyMjAyNSIsInJvb21zIjpbeyJudW1fYWR1bHRzIjoiMiIsIm51bV9jaGlsZHJlbiI6IjAifV0sIm51bV9uaWdodHMiOiIxMCJ9",
-      "image": "https://i.travelapi.com/lodging/108000000/107460000/107458800/107458738/f30fa283_b.jpg",
-      "marketingBlurb": "A stay at Je Rome Hotel places you in the heart of Rome, steps from Trevi Fountain and Via del Corso. This hotel is 0.3 mi (0.5 km) from Pantheon and 0.4 mi (0.7 km) from Roman Forum.",
-      "pictureCount": 82,
-      "otaPrices": [
-        {
-          "name": "Expedia.com",
-          "pricePerNight": 806
-        }
-      ]
-    },
-    {
-      "id": "909276",
-      "source": "cpmaxx",
-      "name": "Rhinoceros by Fendi Rome",
+      "name": "Umilta 36",
       "stars": 5,
-      "area": "Via del Velabro 9 Rome 186",
-      "pricePerNight": 698,
-      "priceTotal": 6982.59,
+      "area": "Via dell'Umiltà 36 Rome 00187",
+      "pricePerNight": 958,
+      "priceTotal": 9576.99,
       "nights": 10,
       "currency": "USD",
-      "commission": 2094.78,
-      "commissionPct": 30,
-      "clientPrice": 7541,
+      "commission": 1316.21,
+      "commissionPct": 13.7,
+      "clientPrice": 10343,
       "marginPct": 8,
-      "profitScore": 93,
-      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/909276/eyJjaGVja2luIjoiMjAyNi0wOS0xMCIsImNoZWNrb3V0IjoiMjAyNi0wOS0yMCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiUm9tZSIsImNpdHkiOiJSb21lIiwiY291bnRyeV9jb2RlIjoiSVQiLCJsYXQiOiI0MS44OTY3MDY4IiwibG5nIjoiMTIuNDgyMjAyNSIsInJvb21zIjpbeyJudW1fYWR1bHRzIjoiMiIsIm51bV9jaGlsZHJlbiI6IjAifV0sIm51bV9uaWdodHMiOiIxMCJ9",
-      "image": "https://i.travelapi.com/lodging/31000000/30010000/30002000/30001917/4faa7c2b_b.jpg",
-      "marketingBlurb": "A stay at Rhinoceros places you in the heart of Rome, within a 15-minute walk of Circus Maximus and Roman Forum. This luxury hotel is 0.7 mi (1.1 km) from Via del Corso and 1.1 mi (1.7 km) from Campo de' Fiori.",
-      "pictureCount": 71,
+      "profitScore": 58,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/1343307/eyJjaGVja2luIjoiMjAyNi0wOS0xMCIsImNoZWNrb3V0IjoiMjAyNi0wOS0yMCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiUm9tZSIsImNpdHkiOiJSb21lIiwic3RhdGVfY29kZSI6IiIsImNvdW50cnlfY29kZSI6IklUIiwibGF0IjoiNDEuODk2NzA2OCIsImxuZyI6IjEyLjQ4MjIwMjUiLCJyb29tcyI6W3sibnVtX2FkdWx0cyI6IjIiLCJudW1fY2hpbGRyZW4iOiIwIn1dLCJudW1fbmlnaHRzIjoiMTAifQ==",
+      "image": "https://i.travelapi.com/lodging/76000000/75640000/75633800/75633743/3560c157_b.jpg",
+      "marketingBlurb": "View points of interest",
+      "pictureCount": 131,
       "otaPrices": [
         {
           "name": "Expedia.com",
-          "pricePerNight": 698
+          "pricePerNight": 958
         }
       ]
     },
     {
-      "id": "1426982",
+      "id": "848174",
       "source": "cpmaxx",
-      "name": "Palazzo Talia",
+      "name": "Singer Palace Hotel Roma",
       "stars": 5,
-      "area": "Largo del Nazareno 25 Rome 00187",
-      "pricePerNight": 1460,
-      "priceTotal": 14596.59,
+      "area": "Via Alessandro Specchi, 10 Rome 186",
+      "pricePerNight": 1159,
+      "priceTotal": 11585.42,
       "nights": 10,
       "currency": "USD",
-      "commission": 2298.87,
-      "commissionPct": 15.8,
-      "clientPrice": 15764,
+      "commission": 1277.1,
+      "commissionPct": 11,
+      "clientPrice": 12512,
       "marginPct": 8,
-      "profitScore": 93,
-      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/1426982/eyJjaGVja2luIjoiMjAyNi0wOS0xMCIsImNoZWNrb3V0IjoiMjAyNi0wOS0yMCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiUm9tZSIsImNpdHkiOiJSb21lIiwiY291bnRyeV9jb2RlIjoiSVQiLCJsYXQiOiI0MS44OTY3MDY4IiwibG5nIjoiMTIuNDgyMjAyNSIsInJvb21zIjpbeyJudW1fYWR1bHRzIjoiMiIsIm51bV9jaGlsZHJlbiI6IjAifV0sIm51bV9uaWdodHMiOiIxMCJ9",
-      "image": "https://i.travelapi.com/lodging/103000000/102050000/102044700/102044649/f072ac12_b.jpg",
-      "marketingBlurb": "Palazzo Talìa - Small Luxury Hotels of the World is in the heart of Rome, within a 5-minute walk of Trevi Fountain and Via del Corso. This luxury hotel is 0.8 mi (1.3 km) from Piazza di Spagna and 1.3 mi (2.2 km) from Roman Forum.",
-      "pictureCount": 101,
+      "profitScore": 54,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/848174/eyJjaGVja2luIjoiMjAyNi0wOS0xMCIsImNoZWNrb3V0IjoiMjAyNi0wOS0yMCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiUm9tZSIsImNpdHkiOiJSb21lIiwic3RhdGVfY29kZSI6IiIsImNvdW50cnlfY29kZSI6IklUIiwibGF0IjoiNDEuODk2NzA2OCIsImxuZyI6IjEyLjQ4MjIwMjUiLCJyb29tcyI6W3sibnVtX2FkdWx0cyI6IjIiLCJudW1fY2hpbGRyZW4iOiIwIn1dLCJudW1fbmlnaHRzIjoiMTAifQ==",
+      "image": "https://i.travelapi.com/lodging/22000000/21120000/21117500/21117476/e641e569_b.jpg",
+      "marketingBlurb": "View points of interest",
+      "pictureCount": 112,
       "otaPrices": [
         {
           "name": "Expedia.com",
-          "pricePerNight": 1460
-        }
-      ]
-    },
-    {
-      "id": "39995",
-      "source": "cpmaxx",
-      "name": "Grand Hotel Palatino",
-      "stars": 4,
-      "area": "Via Cavour 213 Rome 184",
-      "pricePerNight": 649,
-      "priceTotal": 6494.54,
-      "nights": 10,
-      "currency": "USD",
-      "commission": 1873.45,
-      "commissionPct": 28.9,
-      "clientPrice": 7014,
-      "marginPct": 8,
-      "profitScore": 84,
-      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/39995/eyJjaGVja2luIjoiMjAyNi0wOS0xMCIsImNoZWNrb3V0IjoiMjAyNi0wOS0yMCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiUm9tZSIsImNpdHkiOiJSb21lIiwiY291bnRyeV9jb2RlIjoiSVQiLCJsYXQiOiI0MS44OTY3MDY4IiwibG5nIjoiMTIuNDgyMjAyNSIsInJvb21zIjpbeyJudW1fYWR1bHRzIjoiMiIsIm51bV9jaGlsZHJlbiI6IjAifV0sIm51bV9uaWdodHMiOiIxMCJ9",
-      "image": "https://i.travelapi.com/lodging/1000000/110000/107700/107610/9162a9c9_b.jpg",
-      "marketingBlurb": "A stay at FH55 Grand Hotel Palatino places you in the heart of Rome, within a 10-minute walk of Roman Forum and Colosseum. This hotel is 0.4 mi (0.6 km) from Via Nazionale and 0.4 mi (0.7 km) from Basilica di Santa Maria Maggiore.",
-      "pictureCount": 106,
-      "otaPrices": [
-        {
-          "name": "Expedia.com",
-          "pricePerNight": 649
+          "pricePerNight": 1159
         }
       ]
     },
@@ -2151,49 +2177,23 @@
       "name": "Six Senses Rome",
       "stars": 5,
       "area": "Piazza di San Marcello Rome 00187",
-      "pricePerNight": 1434,
-      "priceTotal": 14337.77,
+      "pricePerNight": 1486,
+      "priceTotal": 14862.35,
       "nights": 10,
       "currency": "USD",
-      "commission": 2027.87,
-      "commissionPct": 14.1,
-      "clientPrice": 15485,
+      "commission": 2444.93,
+      "commissionPct": 16.5,
+      "clientPrice": 16051,
       "marginPct": 8,
-      "profitScore": 82,
-      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/1345149/eyJjaGVja2luIjoiMjAyNi0wOS0xMCIsImNoZWNrb3V0IjoiMjAyNi0wOS0yMCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiUm9tZSIsImNpdHkiOiJSb21lIiwiY291bnRyeV9jb2RlIjoiSVQiLCJsYXQiOiI0MS44OTY3MDY4IiwibG5nIjoiMTIuNDgyMjAyNSIsInJvb21zIjpbeyJudW1fYWR1bHRzIjoiMiIsIm51bV9jaGlsZHJlbiI6IjAifV0sIm51bV9uaWdodHMiOiIxMCJ9",
+      "profitScore": 100,
+      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/1345149/eyJjaGVja2luIjoiMjAyNi0wOS0xMCIsImNoZWNrb3V0IjoiMjAyNi0wOS0yMCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiUm9tZSIsImNpdHkiOiJSb21lIiwic3RhdGVfY29kZSI6IiIsImNvdW50cnlfY29kZSI6IklUIiwibGF0IjoiNDEuODk2NzA2OCIsImxuZyI6IjEyLjQ4MjIwMjUiLCJyb29tcyI6W3sibnVtX2FkdWx0cyI6IjIiLCJudW1fY2hpbGRyZW4iOiIwIn1dLCJudW1fbmlnaHRzIjoiMTAifQ==",
       "image": "https://i.travelapi.com/lodging/84000000/83220000/83216200/83216106/6e4e2007_b.jpg",
-      "marketingBlurb": "Six Senses Rome is centrally located in Rome, a 5-minute walk from Trevi Fountain and 5 minutes by foot from Pantheon. This luxury hotel is 0.4 mi (0.6 km) from Roman Forum and 0.8 mi (1.3 km) from Piazza di Spagna.",
+      "marketingBlurb": "View points of interest",
       "pictureCount": 92,
       "otaPrices": [
         {
           "name": "Expedia.com",
-          "pricePerNight": 1434
-        }
-      ]
-    },
-    {
-      "id": "598328",
-      "source": "cpmaxx",
-      "name": "eitch Borromini",
-      "stars": 4,
-      "area": "Via di Santa Maria dell Anima, 30 Rome 00186",
-      "pricePerNight": 1247,
-      "priceTotal": 12466.14,
-      "nights": 10,
-      "currency": "USD",
-      "commission": 1974.3,
-      "commissionPct": 15.8,
-      "clientPrice": 13463,
-      "marginPct": 8,
-      "profitScore": 81,
-      "hotelSheetUrl": "https://cpmaxx.cruiseplannersnet.com/HotelSheets/processor/selectRooms/598328/eyJjaGVja2luIjoiMjAyNi0wOS0xMCIsImNoZWNrb3V0IjoiMjAyNi0wOS0yMCIsImxvY2F0aW9uX3JhZGl1cyI6IjIwIiwibG9jYXRpb25fc2VhcmNoIjoiUm9tZSIsImNpdHkiOiJSb21lIiwiY291bnRyeV9jb2RlIjoiSVQiLCJsYXQiOiI0MS44OTY3MDY4IiwibG5nIjoiMTIuNDgyMjAyNSIsInJvb21zIjpbeyJudW1fYWR1bHRzIjoiMiIsIm51bV9jaGlsZHJlbiI6IjAifV0sIm51bV9uaWdodHMiOiIxMCJ9",
-      "image": "https://i.travelapi.com/lodging/17000000/16170000/16165700/16165651/e32e08a3_b.jpg",
-      "marketingBlurb": "With a stay at Eitch Borromini Palazzo Pamphilj, you'll be centrally located in Rome, steps from Piazza Navona and 6 minutes by foot from Campo de' Fiori. This hotel is 0.3 mi (0.5 km) from Pantheon and 0.7 mi (1.1 km) from Trevi Fountain.",
-      "pictureCount": 129,
-      "otaPrices": [
-        {
-          "name": "Expedia.com",
-          "pricePerNight": 1247
+          "pricePerNight": 1486
         }
       ]
     }

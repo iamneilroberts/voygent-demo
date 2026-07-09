@@ -14,7 +14,7 @@ Source handoffs: `pause-2026-07-08-c9-a2-b6-lane.md` (newest) · `pause-2026-07-
 - [x] N4: "chose this" mark on its own line INSIDE the card (wrap scoped to picked cards; unpicked desktop cards stay single-line)
 - [x] N5: tour drill-down — ch3 beat 3 scripted (link → tour page → CTA scroll → add → 4640→4756) + live on interactive end-states; add-ons carry optional detail content
 - [x] N6: onboarding placeholder → "Any questions or comments? (optional)"
-- [ ] B6: Rome hotel fixture price mix — recapture via `scripts/capture-fixtures.mjs` with a price spread
+- [x] B6: Rome hotel fixture price mix DONE — capture now band-picks 3 budget / 3 mid / 2 upscale (3★+) from a price-sorted pool; Rome recaptured $378–$1,486/night
 - [ ] Paste/gap-fill in CURATED demo — confirm with Neil whether still wanted
 - [ ] Pre-existing main test failure: `worker/info/pages.test.ts:72` em-dash voice rule — small separate fix lane
 - [ ] B4 remainder: per-turn token sanity behind $.27 early-step cost; LLM_MODEL value decision (Neil)
