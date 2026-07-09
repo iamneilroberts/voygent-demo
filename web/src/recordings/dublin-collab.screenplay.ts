@@ -248,7 +248,7 @@ export const dublinCollab = screenplay({ trip: "Dublin · plan", skin: "claude" 
   // Act 7 — The advisor's review: projected commission, itemized on the folio.
   s.agent.says("Before you send it, here's where the trip stands for you.");
   s.agent.folio(advisorReview);
-  s.spotlight({ eventType: "folio", nth: 5 }, { target: "trip-commission", eyebrow: "For the advisor", title: "Your commission, projected", body: "Every component shows its cut: the hotel, the Cliffs day trip, about $219 as proposed. Voygent also shows what the optional extras are worth if the travellers add them, and keeps it all current as the trip changes." });
+  s.spotlight({ eventType: "folio", nth: 6 }, { target: "trip-commission", eyebrow: "For the advisor", title: "Your commission, projected", body: "Every component shows its cut: the hotel, the Cliffs day trip, about $219 as proposed. Voygent also shows what the optional extras are worth if the travellers add them, and keeps it all current as the trip changes." });
 
   // Act 8 — Send: the advisor adds a note and sends the folio to the travellers.
   s.advisor.says("Looks right. I'll add a quick note for them: pick your hotel and tell me what you think, no rush.");

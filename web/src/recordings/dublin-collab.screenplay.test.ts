@@ -89,4 +89,12 @@ describe("dublin-collab chapter 1 (grounding)", () => {
     const idxs = [...resolved.keys()];
     expect(idxs).toEqual([...idxs].sort((a, b) => a - b));
   });
+
+  it("binds the commission callout to the folio frame that actually carries commissions", () => {
+    const hl = dublinCollab.highlights.find((h) => h.target === "trip-commission")!;
+    const resolved = resolveHighlightFrames(frames, [hl]);
+    const [idx] = [...resolved.keys()];
+    const frame = frames[idx];
+    expect(frame.kind === "event" && frame.event.type === "folio" && (frame.event.folio.commissions?.length ?? 0) > 0).toBe(true);
+  });
 });

@@ -71,6 +71,19 @@ describe("dublin-run chapter 3 (grounding)", () => {
     expect(rows.some((r) => r.potential)).toBe(true);
   });
 
+  it("binds the bookings and commission callouts to folio frames that carry that content", () => {
+    for (const [target, has] of [
+      ["folio-bookings", (f: FolioData) => (f.bookings?.length ?? 0) > 0],
+      ["trip-commission", (f: FolioData) => (f.commissions?.length ?? 0) > 0],
+    ] as const) {
+      const hl = dublinRun.highlights.find((h) => h.target === target)!;
+      const resolved = resolveHighlightFrames(frames, [hl]);
+      const [idx] = [...resolved.keys()];
+      const frame = frames[idx];
+      expect(frame.kind === "event" && frame.event.type === "folio" && has(frame.event.folio), target).toBe(true);
+    }
+  });
+
   it("resolves every callout, in ascending frame order", () => {
     expect(dublinRun.highlights.length).toBe(5);
     const resolved = resolveHighlightFrames(frames, dublinRun.highlights);
