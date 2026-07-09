@@ -9,6 +9,17 @@ Main artifact: voygent-demo main `764dec4` · spec `docs/superpowers/specs/2026-
 Took the public "Follow the build" showcase live (real Overview/Architecture/Milestones copy + 12-entry build log, `SHOWCASE_ENABLED=1`, deployed to demo.voygent.ai; comment→moderation loop smoke-verified — held-for-review + honeypot drop, no /info or /blog regression), documented the June features + cueframe on `/info/production-system` (+v2), and added a `/blog` → `/showcase` nav link. Also ran the voygent-hype full refresh and brought the system docs current (`features.md`, voygent-lite `docs/FEATURES.md` + `README.md`).
 
 Main artifact: PR https://github.com/iamneilroberts/voygent-demo/pull/9 · live at https://demo.voygent.ai/showcase
+## 2026-06-18 — Backplanes Spotlight redaction/security evaluation
+
+Tested Backplanes Spotlight v2.3.0 (Claude-Code session-reporting tool) in an isolated, canary-swapped `voygent-demo` session: planted synthetic secrets+PII, captured the exact gRPC upload payload (keylog failed on the tonic path → reconstructed via `strace` of the daemon's `.upload-tmp` staging file), and audited redaction + report quality. Key finding: client-side redaction is **email-only** — phone, SSN, and credit-card left the laptop in cleartext, contradicting "strips PII before anything leaves your laptop"; report also over-claims "no credential leaks" and applies a misleading PR/CI framing. Verdict: do-not-adopt on secret/PII repos. Wrote a calibrated responsible-disclosure report + email. Full teardown done (CLI uninstalled, canaries removed, real secrets restored). Loose ends for Neil: delete the uploaded session server-side; send the disclosure email.
+
+Main artifact: docs/summaries/backplanes-disclosure-report-2026-06-18.md (+ test plan: docs/summaries/backplanes-redaction-test-plan.md; evidence: ~/backplanes-test-backup/)
+
+## 2026-06-16 — Public showcase page + moderated comments (shipped dark)
+
+Built a public "follow the build" showcase page (`GET /showcase`) + self-hosted, no-login, moderated comment system on demo.voygent.ai, via spec→codex-review→plan→subagent-driven TDD (each task two-stage reviewed) + final whole-feature review. Shipped DARK: migration applied to prod D1, `COMMENT_IP_SALT` set, deployed with `SHOWCASE_ENABLED` unset (routes verified inert/404, `/blog` 200 no regression). Security: escape-at-every-sink, HMAC-only IP pseudonymity, fail-closed 503, CSRF-guarded moderation behind adminAuthed, strict `script-src 'none'` CSP. 537 tests/typecheck clean in the build worktree.
+
+Main artifact: PR #8 (merge commit ec1f2f7) · module worker/showcase/ · plan docs/superpowers/plans/2026-06-16-public-showcase-comments.md
 
 ## 2026-06-10 — cpmaxx hotels wired + Inspector rail & surface polish
 
