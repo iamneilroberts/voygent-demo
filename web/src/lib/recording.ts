@@ -52,27 +52,44 @@ export interface ReelFolioSession {
   // tour's page instead of the folio body — the scripted "client clicks the link" beat.
   // Omitted/null → the folio. Interactive mode tracks this locally instead.
   openDetailId?: string | null;
+  // QA4 ch2: a message from the advisor pinned at the top of the window ("pick your
+  // hotel and tell me what you think") — orients the client the moment the folio opens.
+  advisorNote?: string;
+  // QA4 ch2: the client pressed Send — renders the button as sent + a confirmation
+  // line ("your advisor sees this instantly"), the chapter's closing beat.
+  feedbackSent?: boolean;
 }
 
 // A brief peek at the engineering view (reel): a small panel that slides in to show
-// the REAL tools the assistant has called so far (no cost/token data — those would be
-// fabricated on a scripted reel), framed as "full metrics in the interactive demo".
+// the REAL tools the assistant has called so far, plus (QA4) a representative metrics
+// block — cost, tokens, cache savings. The metrics are authored fixtures sized like a
+// real run and labelled as representative; the live demo carries the real numbers.
 export interface ReelEngTool { name: string; status: "done" | "running" }
+export interface ReelEngMetric { label: string; value: string; accent?: boolean }
 export interface ReelEngPanel {
   open: boolean;
   tools: ReelEngTool[];   // the real tool sequence so far
+  metrics?: ReelEngMetric[]; // representative telemetry (cost / tokens / cache)
   footnote?: string;      // pointer to the live demo for the full metrics
 }
+
+// QA4: a raw email shown as an email window — ch2 opens on the advisor's send landing
+// in the Millers' inbox; ch3 shows the airline's messy confirmation before the paste.
+// sceneLabel names whose inbox we're looking at (defaults to "Inbox").
+export interface ReelEmailView { from: string; subject: string; body: string; sceneLabel?: string }
 
 // Reel-only interaction payloads. NEVER a ServerEvent — the worker/live app never sees these.
 export type ReelInteraction =
   | { kind: "pick"; boardId: string; candidateIds: string[]; echo: string }
   | { kind: "edit"; path: string; was: string; now: string; tag: string }
   | { kind: "comment"; anchor: string; threadId: string; text: string }
-  | { kind: "handoff"; channel: "email"; subject: string; reply?: string }
+  // inbound: the notification is the CLIENT's reply arriving (ch3's opening beat) —
+  // the notice renders only the reply card + routing chip, no "folio sent" card.
+  | { kind: "handoff"; channel: "email"; subject: string; reply?: string; inbound?: boolean }
   | { kind: "clientview"; view: ReelClientSession | null }
   | { kind: "folioview"; view: ReelFolioSession | null }
-  | { kind: "engpanel"; view: ReelEngPanel | null };
+  | { kind: "engpanel"; view: ReelEngPanel | null }
+  | { kind: "emailview"; view: ReelEmailView | null };
 
 export type Frame =
   | { delayMs: number; kind: "user"; text: string; actor?: Actor; beatId?: string }

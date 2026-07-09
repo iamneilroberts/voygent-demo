@@ -1,5 +1,5 @@
 import type { ServerEvent, BoardCandidate, FolioData } from "../../../shared/events";
-import type { Recording, Frame, Actor, ReelClientSession, ReelEngPanel, ReelFolioSession } from "./recording";
+import type { Recording, Frame, Actor, ReelClientSession, ReelEngPanel, ReelFolioSession, ReelEmailView } from "./recording";
 import type { Highlight, HighlightMatch } from "./highlights";
 
 interface Meta { trip: string; skin: "claude" }
@@ -66,8 +66,10 @@ class Builder {
         if (!pathExists(this.folio, anchor)) throw new Error(`screenplay: comment anchor "${anchor}" does not exist in the current folio`);
         this.add({ delayMs: 0, kind: "interaction", actor, interaction: { kind: "comment", anchor, threadId, text }, beatId: this.beat() });
       },
-      sendsToClient: (o: { subject: string; reply?: string }) => {
-        this.add({ delayMs: 0, kind: "interaction", actor, interaction: { kind: "handoff", channel: "email", subject: o.subject, reply: o.reply }, beatId: this.beat() });
+      // inbound: true = the notification is the client's reply ARRIVING (ch3's opener);
+      // the notice then renders only the reply card + routing chip, no "sent" card.
+      sendsToClient: (o: { subject: string; reply?: string; inbound?: boolean }) => {
+        this.add({ delayMs: 0, kind: "interaction", actor, interaction: { kind: "handoff", channel: "email", subject: o.subject, reply: o.reply, inbound: o.inbound }, beatId: this.beat() });
       },
       // R4: open/update/close the simulated client browser window. Snapshot-based — each
       // call is one beat; pass null to close. Consecutive snapshots animate the price recalc.
@@ -79,6 +81,11 @@ class Builder {
       // overrides the beat's post-apply dwell (quick section flips vs the 4.2s default).
       folioView: (snapshot: ReelFolioSession | null, opts?: { holdMs?: number }) => {
         this.add({ delayMs: 0, kind: "interaction", actor, interaction: { kind: "folioview", view: snapshot }, beatId: this.beat(), ...(opts?.holdMs != null ? { holdMs: opts.holdMs } : {}) });
+      },
+      // QA4 ch3: open/close the raw-email window — the confirmation exactly as the
+      // airline sent it, shown before the advisor pastes it into the chat.
+      email: (snapshot: ReelEmailView | null) => {
+        this.add({ delayMs: 0, kind: "interaction", actor, interaction: { kind: "emailview", view: snapshot }, beatId: this.beat() });
       },
     };
   }

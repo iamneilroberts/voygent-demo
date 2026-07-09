@@ -16,7 +16,7 @@ export interface ReelEntry {
   highlights: Highlight[];
   // End-card overrides (per reel). Absent → the default "real session" end card,
   // which is honest for dublin-oct (a real recording) but NOT for the scripted
-  // collab walk-through — so collab supplies its own honest framing + recap chips.
+  // chapters — so each chapter supplies its own honest framing + recap chips.
   recap?: string[];
   endCard?: { eyebrow: string; title: string; blurb: string };
   intro?: { eyebrow: string; note: string };
@@ -24,6 +24,9 @@ export interface ReelEntry {
   next?: string;     // id of the chapter to offer when this reel ends
 }
 
+// QA4 arc (2026-07-09): 1 plan (advisor + Voygent build it, projected commission) →
+// 2 client (their window only, picks + note) → 3 advisor (reply in, booking pasted,
+// earned commission). Plain-language titles; the breadcrumb strips the "N · " prefix.
 export const REELS: ReelEntry[] = [
   {
     id: "dublin-oct",
@@ -34,50 +37,57 @@ export const REELS: ReelEntry[] = [
     highlights: (dublinHl as HighlightTrack).highlights,
   },
   {
-    id: "collab",
+    id: "plan",
     chapter: 1,
-    next: "run",
-    title: "Chapter 1 · A trip, built together",
-    blurb: "Watch an advisor, a traveller, and Voygent shape a whole Dublin trip end to end.",
+    next: "client",
+    title: "1 · Plan the trip",
+    blurb: "An advisor and Voygent build a week in Dublin: real searches, a hotel shortlist, the open day sold, and the advisor's commission in view.",
     durationLabel: "~4 min",
     recording: dublinCollab.recording,
     highlights: dublinCollab.highlights,
-    recap: ["👥 advisor + traveller", "✈ badged, expandable flights", "🏨 advisor shortlists 3 hotels", "🗓 day-by-day + extras", "✎ advisor refines", "💷 traveller picks + live price", "💬 their note becomes the plan"],
+    recap: ["✈ six real fares, one pick", "🏨 a 3-hotel shortlist for the clients", "🗓 the week, day by day", "🚌 the open day becomes a $43 commission", "✎ the advisor edits in place", "💷 commission projected, itemized"],
     intro: {
-      eyebrow: "▶ Built together",
-      note: "The collaboration here is a scripted walk-through of the workflow.",
+      eyebrow: "▶ Demo 1 of 3",
+      note: "A scripted walk-through of the workflow. Your own run pulls real live flights and hotels.",
     },
     endCard: {
-      eyebrow: "✓ Built together",
-      title: "How a trip comes together",
-      blurb: "An advisor, the travellers, and Voygent shaping one trip in a single thread. They pick the flight, choose the hotel with live pricing, and leave the note that becomes the plan. The collaboration here is a scripted walk-through of the workflow, and your own run pulls real live flights and hotels.",
+      eyebrow: "✓ Demo 1 · the plan is out",
+      title: "The trip is with the travellers",
+      blurb: "The travellers get a link to a live, detailed portfolio with the advisor's recommendations and transparent pricing. They can try out the alternatives, get more details by clicking an item, or ask a question that is instantly routed back to the advisor. That is demo 2. (This walk-through is scripted; a real run pulls live flights and hotels.)",
     },
-  },
-  {
-    id: "run",
-    chapter: 2,
-    next: "client",
-    title: "Chapter 2 · Run the trip",
-    blurb: "The trip is sold. Watch a confirmation file itself, two empty days become a tour sale, and the travellers shape their own week.",
-    durationLabel: "~2 min",
-    recording: dublinRun.recording,
-    highlights: dublinRun.highlights,
-    recap: ["📋 pasted confirmation, filed", "🗓 two open days → a $142 tour", "💷 client adds an extra, price updates", "✓ one-click confirm"],
-    intro: { eyebrow: "▶ Chapter 2", note: "This walk-through is scripted, like chapter 1. A real Voygent run files real confirmations and sells real tours." },
-    endCard: { eyebrow: "✓ The week after", title: "Hours of admin. Zero typing.",
-      blurb: "A pasted email became a filed confirmation. Two empty days became a commissionable tour. The travellers added an extra themselves. The advisor clicked twice. The collaboration here is a scripted walk-through of the workflow." },
   },
   {
     id: "client",
-    chapter: 3,
-    title: "Chapter 3 · Their trip, their window",
-    blurb: "The proposal lands with the Millers. Watch them explore it, make it theirs, and send it back ready to book.",
-    durationLabel: "~2 min",
+    chapter: 2,
+    next: "advisor",
+    title: "2 · The client's view",
+    blurb: "The proposal lands with the Millers. Watch them explore it in their own window, pick a hotel, watch the price follow every click, and send their answer back.",
+    durationLabel: "~3 min",
     recording: dublinClient.recording,
     highlights: dublinClient.highlights,
-    recap: ["📬 a living page, not a PDF", "💷 priced add-ons, toggled live", "💬 their note, on the day itself", "✓ back to the advisor ready to book"],
-    intro: { eyebrow: "▶ Chapter 3", note: "This walk-through is scripted, like chapters 1 and 2. A real Voygent folio is a live page your clients open, change, and annotate." },
-    // No endCard: the chapter ends on the folio surface itself (ReelFolioView interactive).
+    recap: ["📬 a living page, not a PDF", "📝 the advisor's note on top", "🏨 their hotel pick reprices the trip", "🔍 a tour page one click deep", "💬 their question, on the day itself", "✓ one click back to the advisor"],
+    intro: { eyebrow: "▶ Demo 2 of 3", note: "This walk-through is scripted, like demo 1. A real Voygent folio is a live page your clients open, change, and annotate." },
+    endCard: {
+      eyebrow: "✓ Demo 2 · the clients answered",
+      title: "They shaped their own trip",
+      blurb: "The Millers picked their hotel, added a tour and the transfers, and asked one question. All of it went back to the advisor in one click. Demo 3 is what the advisor does with it: the reply, the booking, and the commission. (Scripted walk-through; the live folio is a real page.)",
+    },
+  },
+  {
+    id: "advisor",
+    chapter: 3,
+    title: "3 · Book the trip",
+    blurb: "The Millers' answer lands back with the advisor. Voygent folds it in, files the airline's messy confirmation email, and itemizes the commission.",
+    durationLabel: "~2 min",
+    recording: dublinRun.recording,
+    highlights: dublinRun.highlights,
+    recap: ["📥 the reply, routed to the trip", "🤝 their note becomes the plan", "📋 a messy confirmation, pasted, filed", "💵 $280 commission, itemized"],
+    intro: { eyebrow: "▶ Demo 3 of 3", note: "This walk-through is scripted, like demos 1 and 2. A real Voygent run files real confirmations against real trips." },
+    endCard: {
+      eyebrow: "✓ That's the whole loop",
+      title: "Plan it, share it, book it, get paid",
+      blurb: "One thread planned the trip, the clients shaped it in their own window, the booking filed itself from a pasted email, and the commission stayed itemized the whole way. The walk-through was scripted; the demo behind the button below is live.",
+    },
   },
 ];
 
@@ -86,9 +96,17 @@ export const CHAPTERS: ReelEntry[] = REELS
   .filter((r) => r.chapter != null)
   .sort((a, b) => a.chapter! - b.chapter!);
 
-// Pure: explicit id wins; else chapter 1; else the first reel. Never throws.
+// Old chapter ids that shipped in links (?reel=collab, ?reel=run) map onto the QA4 arc.
+const LEGACY_IDS: Record<string, string> = { collab: "plan", run: "advisor" };
+
+// Pure: explicit id wins (legacy ids remapped); else chapter 1; else the first reel.
+// Never throws.
 export function pickReel(reels: ReelEntry[], param: string | null): ReelEntry {
-  if (param) { const hit = reels.find((r) => r.id === param); if (hit) return hit; }
+  if (param) {
+    const id = LEGACY_IDS[param] ?? param;
+    const hit = reels.find((r) => r.id === id);
+    if (hit) return hit;
+  }
   return reels.find((r) => r.chapter === 1) ?? reels[0];
 }
 

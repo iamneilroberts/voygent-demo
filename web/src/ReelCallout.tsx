@@ -52,7 +52,14 @@ export function ReelCallout(
       setRect(visible ? { top: r.top, left: r.left, width: r.width, height: r.height } : null);
     };
     measure();
-    const raf = requestAnimationFrame(measure); // re-measure after scrollIntoView settles
+    // Re-measure through the target's ENTRANCE animation, not just once: the eng panel
+    // slides in over 320ms (a transform, so no resize/scroll event fires) and a single
+    // rAF snapshot froze the ring where the panel was mid-flight (QA4 image 3). Track
+    // for ~800ms after mount, then settle.
+    let raf = 0;
+    const t0 = performance.now();
+    const track = () => { measure(); if (performance.now() - t0 < 800) raf = requestAnimationFrame(track); };
+    raf = requestAnimationFrame(track);
     window.addEventListener("resize", measure);
     // Capture-phase scroll: inner containers (the cutaway window's own scroller) smooth-
     // scroll AFTER mount, and without this the ring stays where the target USED to be —
@@ -120,7 +127,10 @@ export function ReelCallout(
     <div className="cl-reel-overlay" role="note" aria-live="polite">
       {rect
         ? <div className="cl-reel-spot" style={{ position: "fixed", top: rect.top - 6, left: rect.left - 6, width: rect.width + 12, height: rect.height + 12 }} />
-        : <div className="cl-reel-dim" />}
+        // Deliberate scene-setters (target "none") dim hard; a MISSING target (e.g. the
+        // anchor is off-DOM at this width) dims lightly — a full gray wall over nothing
+        // read as a broken screen (QA4 image 14).
+        : <div className={`cl-reel-dim${highlight.target === "none" ? "" : " cl-reel-dim-light"}`} />}
       <div className={`cl-reel-callout${highlight.variant === "hero" ? " cl-reel-callout-hero" : ""}`} style={cardStyle}>
         <div className="cl-reel-callout-ey">{highlight.eyebrow}</div>
         <h4 className="cl-reel-callout-h">{highlight.title}</h4>

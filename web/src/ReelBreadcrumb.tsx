@@ -13,7 +13,7 @@ export function ReelBreadcrumb({ chapters, currentId, onChapter }: {
     <nav className="cl-reel-crumb" aria-label="Demo chapters">
       {chapters.map((c) => {
         const state = c.chapter < cur.chapter ? "done" : c.id === currentId ? "on" : "todo";
-        const short = c.title.replace(/^Chapter \d+ · /, "");
+        const short = c.title.replace(/^(Chapter )?\d+ · /, "");
         return c.id === currentId
           ? <span key={c.id} className={`cl-reel-crumb-c ${state}`} aria-current="step"><b>{c.chapter}</b> {short}</span>
           : (

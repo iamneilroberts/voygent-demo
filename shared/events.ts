@@ -46,6 +46,9 @@ export interface FolioData {
   includes?: FolioInclude[];  // NEW — boilerplate "what's included / tips"
   bookings?: FolioBooking[];  // NEW — confirmed/pending third-party bookings (e.g. a tour add-on)
   commissions?: FolioCommissionRow[]; // NEW — advisor-view per-component commission breakdown
+  // How to headline the commission total: "booked" (default, post-sale) vs "projected"
+  // (pre-sale, ch1's plan-stage view — nothing is sold yet, so "booked" would overclaim).
+  commissionsKind?: "projected" | "booked";
 }
 
 // One segment of a flight itinerary — the expandable detail behind a flight option.

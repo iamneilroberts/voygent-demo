@@ -3,14 +3,17 @@ import type { Frame, ReelInteraction } from "./recording";
 
 export interface PacingOpts { speed: number; reducedMotion?: boolean }
 
-const MS_PER_CHAR = 16;
-const TEXT_MIN = 120, TEXT_MAX = 2500;
-const BOARD_DWELL = 2600;
-const FOLIO_DWELL = 1800;
-const TOOL_BEAT = 700;
+// QA4 rebalance: MORE time where there is content to absorb (text, boards, folio),
+// LESS on the no-output beats (tool chips, turn gaps) — "skip the thinking, hold the
+// information". 2× divides all of these; Read mode additionally holds every callout.
+const MS_PER_CHAR = 22;
+const TEXT_MIN = 160, TEXT_MAX = 3600;
+const BOARD_DWELL = 3600;
+const FOLIO_DWELL = 2600;
+const TOOL_BEAT = 450;
 const MICRO = 90;
 const USER_BEAT = 650;
-const TURN_BEAT = 500;
+const TURN_BEAT = 350;
 const REDUCED = 90;
 
 // Post-apply dwell floors per interaction kind (ms at 1x). The interaction is already
@@ -19,7 +22,7 @@ const REDUCED = 90;
 // between consecutive snapshots); the closing snapshot (open:false) shares the floor.
 // engpanel's open beat is held by its callout; the only un-spotlit engpanel beat is the
 // close (panel already gone), so keep that short — a long floor there is just dead air.
-const INTERACTION_DWELL: Record<ReelInteraction["kind"], number> = { pick: 3500, edit: 3200, comment: 4200, handoff: 5200, clientview: 4200, folioview: 4200, engpanel: 600 };
+const INTERACTION_DWELL: Record<ReelInteraction["kind"], number> = { pick: 3500, edit: 3200, comment: 4200, handoff: 5200, clientview: 4200, folioview: 4200, engpanel: 600, emailview: 5200 };
 const INTERACTION_PREBEAT = 320;       // small delay BEFORE an interaction frame appears
 const INTERACTION_REDUCED_DWELL = 1500; // reduced-motion still needs reading time
 

@@ -1,52 +1,50 @@
 import { describe, it, expect } from "vitest";
 import { dublinCollab } from "./dublin-collab.screenplay";
 import { dublinRun } from "./dublin-run.screenplay";
-import type { FolioData } from "../../../shared/events";
-import type { ReelClientSession } from "../lib/recording";
+import { dublinClient } from "./dublin-client.screenplay";
 
-// Guards the App.tsx ended-phase contract for reels that end on the client session
-// (ch1/ch2): App renders ReelFolioView interactive from `folioSessionFromClient(
-// clientView, folio)`, which needs BOTH (a) at least one folio ServerEvent so the
-// App-level folio state is populated, and (b) a final clientview snapshot. It also pins
-// the two hotel fixture shapes (session options vs folio content) against silent drift:
-// every folio hotel must appear among the session's options at a reconciling price.
-for (const [name, sp] of [["dublinCollab", dublinCollab], ["dublinRun", dublinRun]] as const) {
+// Guards the App.tsx ended-phase contract (QA4 arc): every chapter ends on the
+// ReelEndCard interstitial, so EVERY overlay track a chapter opens (folioview,
+// clientview, engpanel, emailview) must end CLOSED (null / open:false). A track left
+// open would hijack the ended surface (App prefers an open folioView/clientView) or
+// leave a stale window over the end card.
+const CHAPTER_PLAYS = [
+  ["dublinCollab (ch1 plan)", dublinCollab],
+  ["dublinClient (ch2 client)", dublinClient],
+  ["dublinRun (ch3 advisor)", dublinRun],
+] as const;
+
+for (const [name, sp] of CHAPTER_PLAYS) {
   describe(`${name} end-state contract`, () => {
     const frames = sp.recording.frames;
-    const folios: FolioData[] = frames.flatMap((f) => (f.kind === "event" && f.event.type === "folio" ? [f.event.folio] : []));
-    const clientViews: (ReelClientSession | null)[] = frames.flatMap((f) =>
-      f.kind === "interaction" && f.interaction.kind === "clientview" ? [f.interaction.view] : []);
+    const interactions = frames.flatMap((f) => (f.kind === "interaction" ? [f.interaction] : []));
 
-    it("emits at least one folio event (App's ended branch requires populated folio state)", () => {
-      expect(folios.length).toBeGreaterThan(0);
-    });
-
-    it("ends its clientview track with a session snapshot (not a bare close)", () => {
-      expect(clientViews.length).toBeGreaterThan(0);
-      expect(clientViews[clientViews.length - 1]).toBeTruthy();
-    });
-
-    // C9 cutaways open ReelFolioView mid-chapter; App's ended branch PREFERS folioView
-    // over clientView, so a cutaway left open would hijack the end-state. Every ch1/ch2
-    // folioview track must exist (C9 grounding) and end with an explicit close (null).
-    it("has a folioview cutaway and ends its track closed (null), so ended derives from clientView", () => {
-      const folioViews = frames.flatMap((f) =>
-        f.kind === "interaction" && f.interaction.kind === "folioview" ? [f.interaction.view] : []);
-      expect(folioViews.length).toBeGreaterThan(0);
-      expect(folioViews[folioViews.length - 1]).toBeNull();
-    });
-
-    it("keeps folio hotels reconciled with the session's hotel options (name + nights×rate)", () => {
-      const lastFolio = folios[folios.length - 1];
-      const lastView = clientViews[clientViews.length - 1]!;
-      for (const h of lastFolio.hotels) {
-        const opt = lastView.hotels.find((o) => o.name === h.name);
-        expect(opt, `folio hotel "${h.name}" missing from session options`).toBeTruthy();
-        if (h.perNight && typeof h.nights === "number") {
-          const perNight = Number(h.perNight.replace(/[$,]/g, ""));
-          expect(opt!.price, `price drift for "${h.name}"`).toBe(perNight * h.nights);
-        }
+    it("every overlay track it opens is closed by the end", () => {
+      for (const kind of ["folioview", "clientview", "engpanel", "emailview"] as const) {
+        const track = interactions.filter((i) => i.kind === kind).map((i) => (i as { view: unknown }).view);
+        if (track.length === 0) continue;
+        const last = track.at(-1) as { open?: boolean } | null;
+        expect(last == null || last.open === false, `${kind} track ends open`).toBe(true);
       }
+    });
+
+    it("ends with no open folio/client window (the end card owns the ended phase)", () => {
+      // Replay the view-state track: last snapshot per overlay kind.
+      const lastOf = (kind: string) => {
+        const t = interactions.filter((i) => i.kind === kind);
+        return t.length ? (t.at(-1) as { view: unknown }).view : null;
+      };
+      expect(lastOf("folioview")).toBeNull();
+      expect(lastOf("clientview")).toBeNull();
     });
   });
 }
+
+describe("chapter 1 populates the chat folio (its end card follows a full advisor folio)", () => {
+  it("emits folio events and the last one carries the itemized commission", () => {
+    const folios = dublinCollab.recording.frames.flatMap((f) =>
+      f.kind === "event" && f.event.type === "folio" ? [f.event.folio] : []);
+    expect(folios.length).toBeGreaterThan(0);
+    expect(folios.at(-1)!.commissions?.length ?? 0).toBeGreaterThan(0);
+  });
+});

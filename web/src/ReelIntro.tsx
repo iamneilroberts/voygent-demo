@@ -18,7 +18,7 @@ export function ReelIntro(
         <h2 className="cl-reel-h">{title}</h2>
         <p className="cl-reel-p">{blurb}{nt ? ` ${nt}` : ""}</p>
         <button type="button" className="cl-reel-btn cl-reel-btn-primary" onClick={onWatch}>
-          Watch the 2× replay<span className="cl-reel-btn-meta">{durationLabel}</span>
+          Watch the demo<span className="cl-reel-btn-meta">{durationLabel} · you control the pace</span>
         </button>
         <button type="button" className="cl-reel-btn cl-reel-btn-secondary" onClick={onPlanYourOwn}>
           Plan your own trip instead<span className="cl-reel-btn-meta">live · type anything</span>

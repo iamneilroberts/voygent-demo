@@ -27,7 +27,12 @@ export function ReelEndCard(
         {nextChapter && (
           <button type="button" className="cl-reel-btn cl-reel-btn-primary" onClick={nextChapter.onClick}>{nextChapter.label}</button>
         )}
-        <button type="button" className={`cl-reel-btn ${nextChapter ? "cl-reel-btn-secondary" : "cl-reel-btn-primary"}`} onClick={onTryYourself}>Build your own trip →</button>
+        {/* End of the arc (no next chapter): "Build your own trip" is THE next step, so
+            it gets the big treatment — the viewer must never wonder what to do next. */}
+        <button type="button" className={`cl-reel-btn ${nextChapter ? "cl-reel-btn-secondary" : "cl-reel-btn-primary cl-reel-btn-big"}`} onClick={onTryYourself}>
+          Build your own trip →
+          {!nextChapter && <span className="cl-reel-btn-meta">live · real flights and hotels · type anything</span>}
+        </button>
         <button type="button" className="cl-reel-btn cl-reel-btn-secondary" onClick={onReplay}>↺ Replay the demo</button>
       </div>
     </div>

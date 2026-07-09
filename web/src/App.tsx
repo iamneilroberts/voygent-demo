@@ -37,12 +37,17 @@ import { ReelHandoffNotice } from "./ReelHandoffNotice";
 import { ReelClientView } from "./ReelClientView";
 import { ReelFolioView } from "./ReelFolioView";
 import { ReelEngPanel } from "./ReelEngPanel";
+import { ReelEmailView } from "./ReelEmailView";
 import { ReelEndCard } from "./ReelEndCard";
 import { folioSessionFromClient } from "./lib/folio-session";
 import type { Highlight } from "./lib/highlights";
 import { isChatMessage, type TimelineItem, type BoardItem } from "./timeline";
 
-const API_BASE = import.meta.env.VITE_API_BASE ?? "http://localhost:8787";
+// Dev-only localhost fallback. A production build must NEVER bake localhost in: the
+// public page then fetches http://localhost:8787 on load, and Chrome's Local Network
+// Access permission prompt ("wants to access other apps and services on this device")
+// appears for every visitor. Same-origin ("") is the correct prod default.
+const API_BASE = import.meta.env.VITE_API_BASE ?? (import.meta.env.DEV ? "http://localhost:8787" : "");
 
 export function App() {
   // Timeline: user/assistant messages plus (claude skin only) inline toolchip +
@@ -126,14 +131,27 @@ export function App() {
     try { if (new URLSearchParams(window.location.search).get("autoplay") === "1") return "playing"; } catch { /* intro */ }
     return "intro";
   });
-  const [speed, setSpeed] = useState<number>(2);          // default 2x
+  // Speed preference is STICKY (QA round 4): chapter navigation reloads the page, and
+  // a viewer who chose 1×/Read must not be reset to a default in chapter 2. Default is
+  // Read at 1× — first-time viewers keep every callout until they click Continue.
+  type SpeedPref = "1" | "2" | "read";
+  const speedPref = ((): SpeedPref => {
+    try { const v = localStorage.getItem("voygent-reel-speed"); if (v === "1" || v === "2" || v === "read") return v; } catch { /* default */ }
+    return "read";
+  })();
+  const [speed, setSpeed] = useState<number>(speedPref === "2" ? 2 : 1);
   const speedRef = useRef(speed); useEffect(() => { speedRef.current = speed; }, [speed]);
   // Third speed control (Neil QA 07-08): "Read" plays beats at 1× but HOLDS every
   // callout until the viewer clicks Continue — even 1× auto-continue is too fast to
   // finish a callout. Wired via ReelCallout's `hold` prop (NOT `paused`): hold disarms
   // the auto-continue timer while keeping the target-recovery scroll live; paused is
   // reserved for the viewer's pause button, which must never fight their scrolling.
-  const [readMode, setReadMode] = useState(false);
+  const [readMode, setReadMode] = useState(speedPref === "read");
+  function pickSpeed(pref: SpeedPref) {
+    setSpeed(pref === "2" ? 2 : 1);
+    setReadMode(pref === "read");
+    try { localStorage.setItem("voygent-reel-speed", pref); } catch { /* session-only */ }
+  }
   const [activeHighlight, setActiveHighlight] = useState<Highlight | null>(null);
   // Playback transport: pause/resume gate (a ref so the replay closure reads the live
   // value) + waiters resolved on resume; progress = (framesDone, framesTotal).
@@ -404,7 +422,7 @@ export function App() {
     reloadWith((u) => { u.searchParams.set("reel", id); u.searchParams.set("mode", "auto"); u.searchParams.set("autoplay", "1"); u.searchParams.delete("greet"); });
   }
   const nextReel = selectedReel.next ? REELS.find((r) => r.id === selectedReel.next) : undefined;
-  const nextChapter = nextReel ? { label: `Watch ${nextReel.title} →`, onClick: () => gotoReel(nextReel.id) } : undefined;
+  const nextChapter = nextReel ? { label: `Next: ${nextReel.title} →`, onClick: () => gotoReel(nextReel.id) } : undefined;
 
   // The actual live transition — a clean reload that re-latches the session.
   // No session check here: callers either already gated (goLive) or just
@@ -555,34 +573,47 @@ export function App() {
           {skin === "claude" && mode === "auto" && reelPhase === "playing" && reelView.engPanel?.open && (
             <ReelEngPanel view={reelView.engPanel} />
           )}
-          {skin === "claude" && mode === "auto" && reelPhase === "playing" && (
-            <div className="cl-reel-controls" role="group" aria-label="Playback controls">
-              <button type="button" className="cl-reel-ctl" aria-pressed={paused} aria-label={paused ? "Play" : "Pause"} onClick={togglePause}>{paused ? "▶" : "❚❚"}</button>
-              <button type="button" className="cl-reel-ctl" aria-label="Restart" onClick={startReel}>↺</button>
-              <div className="cl-reel-track">
-                <i style={{ width: `${reelSeekPct}%` }} />
-                <input
-                  type="range" className="cl-reel-seek" min={0} max={100} step={1}
-                  value={reelSeekPct} aria-label="Seek through the reel"
-                  onPointerDown={() => { scrubbingRef.current = true; }}
-                  onChange={(e) => { const v = Number(e.currentTarget.value); scrubValRef.current = v; setScrubPct(v); if (!scrubbingRef.current) commitSeek(v); }}
-                  onPointerUp={() => { if (scrubbingRef.current) { scrubbingRef.current = false; commitSeek(scrubValRef.current); } }}
-                />
-              </div>
-              <div className="cl-reel-speed">
-                <button type="button" aria-pressed={speed === 1 && !readMode} onClick={() => { setSpeed(1); setReadMode(false); }}>1×</button>
-                <button type="button" aria-pressed={speed === 2 && !readMode} onClick={() => { setSpeed(2); setReadMode(false); }}>2×</button>
-                <button type="button" aria-pressed={readMode} title="Play at 1× and hold every callout until you click Continue" onClick={() => { setSpeed(1); setReadMode(true); }}>Read</button>
-              </div>
-              <button type="button" className="cl-reel-ctl" aria-pressed={showFrameNum} aria-label="Toggle frame number" title="Frame number" onClick={toggleFrameNum}>#</button>
-              {showFrameNum && <span className="cl-reel-frameno" aria-live="off">{reelProg.done}/{reelProg.total}</span>}
-            </div>
+          {skin === "claude" && mode === "auto" && reelPhase === "playing" && reelView.emailView && (
+            <ReelEmailView view={reelView.emailView} />
           )}
-          {skin === "claude" && mode === "auto" && (reelPhase === "playing" || reelPhase === "ended") && selectedReel.chapter != null && (
-            <ReelBreadcrumb
-              chapters={CHAPTERS.map((c) => ({ id: c.id, title: c.title, chapter: c.chapter! }))}
-              currentId={selectedReel.id} onChapter={gotoReel}
-            />
+          {/* QA4: one navigation cluster — transport + chapter list live together in the
+              top-right and stay in the same spot across chapters (playing AND ended),
+              so the viewer always knows where they are and where the next demo is. */}
+          {skin === "claude" && mode === "auto" && (reelPhase === "playing" || reelPhase === "ended") && (
+            <div className="cl-reel-nav" data-reel-target="reel-controls">
+              {reelPhase === "playing" && (
+                <div className="cl-reel-controls" role="group" aria-label="Playback controls">
+                  <button type="button" className="cl-reel-ctl" aria-pressed={paused} aria-label={paused ? "Play" : "Pause"} onClick={togglePause}>{paused ? "▶" : "❚❚"}</button>
+                  <button type="button" className="cl-reel-ctl" aria-label="Restart" onClick={startReel}>↺</button>
+                  <div className="cl-reel-track">
+                    <i style={{ width: `${reelSeekPct}%` }} />
+                    <input
+                      type="range" className="cl-reel-seek" min={0} max={100} step={1}
+                      value={reelSeekPct} aria-label="Seek through the reel"
+                      onPointerDown={() => { scrubbingRef.current = true; }}
+                      onChange={(e) => { const v = Number(e.currentTarget.value); scrubValRef.current = v; setScrubPct(v); if (!scrubbingRef.current) commitSeek(v); }}
+                      onPointerUp={() => { if (scrubbingRef.current) { scrubbingRef.current = false; commitSeek(scrubValRef.current); } }}
+                    />
+                  </div>
+                  <div className="cl-reel-speed">
+                    <button type="button" aria-pressed={speed === 1 && !readMode} onClick={() => pickSpeed("1")}>1×</button>
+                    <button type="button" aria-pressed={speed === 2 && !readMode} onClick={() => pickSpeed("2")}>2×</button>
+                    <button type="button" aria-pressed={readMode} title="Play at 1× and hold every callout until you click Continue" onClick={() => pickSpeed("read")}>Read</button>
+                  </div>
+                  <button type="button" className="cl-reel-ctl" aria-pressed={showFrameNum} aria-label="Toggle frame number" title="Frame number" onClick={toggleFrameNum}>#</button>
+                  {showFrameNum && <span className="cl-reel-frameno" aria-live="off">{reelProg.done}/{reelProg.total}</span>}
+                </div>
+              )}
+              {selectedReel.chapter != null && (
+                <>
+                  <span className="cl-reel-nav-label">3 short demos</span>
+                  <ReelBreadcrumb
+                    chapters={CHAPTERS.map((c) => ({ id: c.id, title: c.title, chapter: c.chapter! }))}
+                    currentId={selectedReel.id} onChapter={gotoReel}
+                  />
+                </>
+              )}
+            </div>
           )}
           {skin === "claude" && mode === "auto" && reelPhase === "ended" && (
             reelView.folioView?.open

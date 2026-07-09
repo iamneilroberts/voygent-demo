@@ -13,21 +13,27 @@ export function ReelHandoffNotice({ handoff }: { handoff: ReelHandoff }) {
   const [visible, setVisible] = useState(true);
   useEffect(() => {
     // Cosmetic dwell-and-tuck (just past the 5.2s handoff dwell). Reduced-motion only
-    // drops the entrance animation (handled in CSS); the timing is preserved.
-    const t = setTimeout(() => setVisible(false), 5600);
+    // drops the entrance animation (handled in CSS); the timing is preserved. An
+    // INBOUND notice (ch3's opening reply) is the scene itself, so it lingers much
+    // longer — a Read-mode hold on its callout must not outlive the thing it points at.
+    const t = setTimeout(() => setVisible(false), handoff.inbound ? 30000 : 5600);
     return () => clearTimeout(t);
-  }, []);
+  }, [handoff.inbound]);
   if (!visible) return null;
   return (
     <div className="cl-handoff" role="status" aria-live="polite" data-reel-target="handoff-notice">
-      <div className="cl-handoff-card">
-        <span className="cl-handoff-icon" aria-hidden="true">✉</span>
-        <span className="cl-handoff-txt">
-          <span className="cl-handoff-meta">Email · to client <span className="cl-handoff-sim">simulated</span></span>
-          <span className="cl-handoff-title">{handoff.subject ?? "Your trip is ready to review"}</span>
-          <span className="cl-handoff-sub">Voygent sent the folio. The client can pick options and comment.</span>
-        </span>
-      </div>
+      {/* An inbound handoff (ch3's opener: the client's reply arriving) shows ONLY the
+          reply card + routing chip — there is no "folio sent" moment on that beat. */}
+      {!handoff.inbound && (
+        <div className="cl-handoff-card">
+          <span className="cl-handoff-icon" aria-hidden="true">✉</span>
+          <span className="cl-handoff-txt">
+            <span className="cl-handoff-meta">Email · to client <span className="cl-handoff-sim">simulated</span></span>
+            <span className="cl-handoff-title">{handoff.subject ?? "Your trip is ready to review"}</span>
+            <span className="cl-handoff-sub">Voygent sent the folio. The client can pick options and comment.</span>
+          </span>
+        </div>
+      )}
       {handoff.routedBack && (
         <>
           <div className="cl-handoff-card cl-handoff-card-2">

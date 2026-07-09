@@ -9,21 +9,25 @@ import type { ToolChipItem } from "./timeline";
 // While running, the chip shows live progress — an elapsed-seconds counter, an
 // indeterminate sweep bar, and a reassurance line once a call runs long — so a
 // slow real tool call never reads as a hung UI.
-export function ClaudeToolChip({ item }: { item: ToolChipItem }) {
+//
+// In the reel (`reel`), the counter and reassurance line are suppressed: scripted
+// beats resolve in under a second, but a Read-mode hold on the same frame kept the
+// wall-clock counter ticking ("Working… 163s") on a chip that isn't working at all.
+export function ClaudeToolChip({ item, reel }: { item: ToolChipItem; reel?: boolean }) {
   const [open, setOpen] = useState(false);
   const running = item.status === "running";
   const [elapsed, setElapsed] = useState(0);
   const startRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!running) { startRef.current = null; setElapsed(0); return; }
+    if (!running || reel) { startRef.current = null; setElapsed(0); return; }
     startRef.current = performance.now();
     setElapsed(0);
     const id = setInterval(() => {
       if (startRef.current != null) setElapsed(Math.floor((performance.now() - startRef.current) / 1000));
     }, 1000);
     return () => clearInterval(id);
-  }, [running]);
+  }, [running, reel]);
 
   const stateText = running ? (elapsed >= 1 ? `Working… ${elapsed}s` : "Working…") : "Done";
   return (

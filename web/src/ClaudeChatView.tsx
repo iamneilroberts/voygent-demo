@@ -253,7 +253,7 @@ function FolioArtifact({ folio, advisor, edits, threads, showSend, sent, onReque
           ))}
           {commEarned != null && (
             <div className="cl-artifact-row cl-comm-total">
-              <span className="cl-artifact-main"><span className="cl-artifact-name">Booked so far</span></span>
+              <span className="cl-artifact-main"><span className="cl-artifact-name">{folio.commissionsKind === "projected" ? "Projected on this trip" : "Booked so far"}</span></span>
               <span className="cl-artifact-comm cl-comm-total-amt">{fmtUsd(commEarned)}</span>
             </div>
           )}
@@ -360,7 +360,11 @@ export function ClaudeChatView(
     // to the trailing summary text (Neil: better to miss the summary than have to scroll
     // back up to choose). Otherwise stick to the bottom as before.
     markProgrammaticScroll();
-    const pendingBoard = items.some((it) => it.role === "board" && !it.resolved && !it.resolvedId);
+    // A multi-select board (hotel shortlist, includes) never gets a resolving folio of
+    // its kind, so it stayed "pending" forever and pinned the viewport to itself while
+    // the folio grew BELOW the fold (QA4 images 5/16). A reel selection on the board
+    // counts as resolved for pinning purposes.
+    const pendingBoard = items.some((it) => it.role === "board" && !it.resolved && !it.resolvedId && !reelView.selected[it.boardId]);
     if (pendingBoard) {
       const boards = scrollRef.current?.querySelectorAll<HTMLElement>('[data-reel-target^="board-"]');
       const last = boards && boards[boards.length - 1];
@@ -402,7 +406,7 @@ export function ClaudeChatView(
           )}
           {firstRun && <Welcome presets={presets} geoCity={geoCity} onSend={onSend} busy={busy} postReel={postReel} />}
           {items.map((it, i) => {
-            if (it.role === "toolchip") return <ClaudeToolChip key={i} item={it} />;
+            if (it.role === "toolchip") return <ClaudeToolChip key={i} item={it} reel={!!reelMode} />;
             if (it.role === "board") return <BoardView key={it.boardId} board={it} busy={busy} advisor={advisor} onPick={onPick} selectedCandidate={reelView.selected[it.boardId]} reelMode={reelMode} />;
             if (it.role === "user") return <div key={i} className="cl-msg-user">{it.text}</div>;
             if (it.text) return <div key={i} className="cl-prose"><Prose text={it.text} /></div>;

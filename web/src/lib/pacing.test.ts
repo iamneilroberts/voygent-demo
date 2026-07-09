@@ -17,8 +17,8 @@ describe("computeDelay", () => {
     const short = computeDelay(ev({ type: "text", delta: "Hi" }), null, { speed: 1 });
     const long = computeDelay(ev({ type: "text", delta: "x".repeat(400) }), null, { speed: 1 });
     expect(long).toBeGreaterThan(short);
-    expect(long).toBeLessThanOrEqual(2500); // TEXT_MAX
-    expect(short).toBeGreaterThanOrEqual(120); // TEXT_MIN
+    expect(long).toBeLessThanOrEqual(3600); // TEXT_MAX
+    expect(short).toBeGreaterThanOrEqual(160); // TEXT_MIN
   });
 
   it("2x is ~half of 1x", () => {

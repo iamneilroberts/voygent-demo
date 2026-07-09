@@ -1,21 +1,20 @@
 import { screenplay } from "../lib/screenplay";
 import type { BoardCandidate, FolioData, FolioDay, FolioInclude } from "../../../shared/events";
-import type { ReelClientSession, ReelFolioSession } from "../lib/recording";
+import type { ReelHotelOption } from "../lib/recording";
 
-// "Dublin, built together" — the full collaboration reel (R5). One honest thread that
-// walks an advisor, a traveler, and Voygent through a whole trip: a loose brief that
-// firms up, flights the traveler picks, a hotel shortlist the advisor curates, a
-// day-by-day plan, an advisor refinement, a "what's included" pass, then the folio sent
-// to the traveler. The traveler opens it in their own window, picks one of the three
-// hotels, toggles an add-on (the price recalcs live), and asks for one change. That
-// routes back, Voygent makes it, and the trip is done.
+// Chapter 1 · "Plan the trip" (QA4 restructure, 2026-07-09). The advisor and Voygent
+// build the whole Dublin week INSIDE the chat: a loose brief that firms up, flights the
+// advisor picks, a hotel shortlist for the travellers to choose from later, the
+// day-by-day plan, Voygent flagging the open day and selling a tour into it, an
+// in-place advisor edit, the "what's included" pass, the advisor's PROJECTED commission
+// itemized on the folio, and the send. What the travellers do with it is chapter 2
+// (client window only); the reply, the booking and the earned commission are chapter 3.
 //
 // Everything here is an AUTHORED fixture — a scripted walk-through of the workflow. The
 // intro and end card say so; a real Voygent run pulls live flights and hotels.
 //
 // Cast: Voygent = s.agent (prose / tools / boards / folio). Advisor = s.advisor
-// (terracotta) — drives the chat, curates, refines, sends. Traveler = s.client
-// (slate-teal) — picks the flight, then acts in their own client window + leaves a note.
+// (terracotta) — drives the chat, curates, refines, sends.
 
 // ── Flights: six options, MOB→DUB, Oct 4-11. Each carries full routing (legs +
 //    layovers + aircraft) that expands on the board, and a Voygent editorial badge. ────
@@ -81,7 +80,26 @@ const hotels: BoardCandidate[] = [
   { id: "serp:h3", title: "The Mayson",       price: "$159/night", badge: "Waterfront",    meta: "North Quays · waterfront",      summary: "The Mayson $159/night", commission: 167, commissionPct: 15 },
   { id: "serp:h4", title: "Hilton Garden Inn", price: "$182/night",                        meta: "O'Connell St · chain",         summary: "Hilton Garden Inn $182/night" },
 ];
-const HOTEL_SHORTLIST = ["serp:h1", "serp:h2", "serp:h3"]; // the three the advisor sends the traveler
+const HOTEL_SHORTLIST = ["serp:h1", "serp:h2", "serp:h3"]; // the three the advisor sends the travellers
+
+// The shortlist as the CLIENT's choice (chapter 2's folio window options): per-night ×
+// 7 nights, so the prices reconcile with the hotel board above. Exported for ch2.
+export const shortlistOptions: ReelHotelOption[] = [
+  { id: "serp:h1", name: "The Dean Dublin", price: 168 * 7, meta: "$168/night · Camden St" },
+  { id: "serp:h2", name: "Beckett Locke",   price: 137 * 7, meta: "$137/night · Docklands" },
+  { id: "serp:h3", name: "The Mayson",       price: 159 * 7, meta: "$159/night · North Quays" },
+];
+
+// ── Tours for the open day (QA4: the gap-fill beat lives in ch1 now — planning is
+//    where the advisor sells the empty day). Commission is on the board, advisor view. ─
+const tours: BoardCandidate[] = [
+  { id: "tour:cliffs", title: "Cliffs of Moher & Galway day trip", price: "$142 pp", badge: "Best fit",
+    meta: "Day 3 · 8h · coach + easy walking", summary: "Cliffs of Moher day trip $142", commission: 43, commissionPct: 15 },
+  { id: "tour:kilmainham", title: "Kilmainham Gaol & Museum tour", price: "$58 pp", badge: "Sells out",
+    meta: "2h 30m · small group", summary: "Kilmainham Gaol $58", commission: 17, commissionPct: 15 },
+  { id: "tour:whiskey", title: "Dublin whiskey tasting walk", price: "$95 pp",
+    meta: "Evening · 3h", summary: "Whiskey walk $95", commission: 23, commissionPct: 12 },
+];
 
 // ── "What's included" candidates; the advisor keeps four. ─────────────────────────────
 const includeCandidates: BoardCandidate[] = [
@@ -99,99 +117,58 @@ const chosenIncludes: FolioInclude[] = [
   { key: "inc:apps",    title: "Handy apps",              body: "Free Now for taxis, Dublin Bus for live times, Revolut if they'd rather not carry cash." },
 ];
 
-// ── The week, day by day. Activities favour history and stay step-free per the brief. ──
+// ── The week, day by day. Day 3 lands OPEN (Voygent flags it and offers tours); day 4's
+//    first draft has the cliff path, which the advisor edits to the step-free walk. ─────
 const days: FolioDay[] = [
   { title: "Day 1 · Arrive in Dublin", date: "Sat Oct 4", activities: [{ name: "Evening stroll along the Liffey" }], dining: [{ name: "The Woollen Mills", cuisine: "Irish" }] },
   { title: "Day 2 · History in the old city", date: "Sun Oct 5", activities: [{ name: "Trinity College & the Book of Kells" }, { name: "EPIC: the Irish emigration museum" }], dining: [{ name: "Fade Street Social", cuisine: "Modern Irish" }] },
   { title: "Day 3 · Open day", date: "Mon Oct 6", activities: [{ name: "Free morning in Temple Bar" }], dining: [{ name: "Klaw", cuisine: "Seafood" }] },
-  { title: "Day 4 · The coast, gently", date: "Tue Oct 7", activities: [{ name: "Howth village & harbour stroll" }], dining: [{ name: "Octopussys Seafood Tapas", cuisine: "Seafood" }] },
+  { title: "Day 4 · The coast, gently", date: "Tue Oct 7", activities: [{ name: "Howth cliff path walk" }], dining: [{ name: "Octopussys Seafood Tapas", cuisine: "Seafood" }] },
   { title: "Day 5 · Temple Bar evening", date: "Wed Oct 8", activities: [{ name: "Chester Beatty Library (step-free)" }], dining: [{ name: "The Boxty House", cuisine: "Irish" }] },
   { title: "Day 6 · Easy last day", date: "Thu Oct 9", activities: [{ name: "National Museum of Ireland" }], dining: [{ name: "Glovers Alley", cuisine: "Modern Irish" }] },
 ];
 
-// ── Folio progression. Hotels are NOT committed until the traveler picks one in their
-//    window (R2 shortlist model), so a single hotel only lands in the FINAL folio — which
-//    keeps the chat folio honest and the "no flicker" invariant intact. ────────────────
+// ── Folio progression. Hotels are NOT committed in this chapter — the travellers pick
+//    one of the shortlist in THEIR window (chapter 2), and the advisor locks it in
+//    chapter 3. That keeps the chat folio honest (no flicker, nothing pre-empted). ─────
 const base: FolioData     = { tripId: "dublin", title: "A week in Dublin", flights: [], hotels: [] };
 const withFlight: FolioData = { ...base, flights: [{ label: "Aer Lingus · MOB→DUB", price: "$3,180", date: "Oct 4-11", stops: 1 }] };
 const withDays: FolioData   = { ...withFlight, days };
-const edited: FolioData     = { ...withDays, days: days.map((d, i) => i === 2 ? { ...d, activities: [{ name: "Cliffs of Moher day trip" }] } : d) };
-const withIncludes: FolioData = { ...edited, includes: chosenIncludes };
-const finalFolio: FolioData = {
+const withTour: FolioData   = { ...withDays, days: days.map((d, i) => i === 2 ? { ...d, activities: [{ name: "Cliffs of Moher day trip" }] } : d) };
+const withEdit: FolioData   = { ...withTour, days: withTour.days!.map((d, i) => i === 3 ? { ...d, activities: [{ name: "Howth village & harbour stroll" }] } : d) };
+const withIncludes: FolioData = { ...withEdit, includes: chosenIncludes };
+
+// The folio as it goes OUT to the travellers (chapters 2 and 3 start from this).
+export const sentFolio: FolioData = { ...withIncludes };
+
+// The advisor's plan-stage review: the same folio with the PROJECTED commission
+// itemized. Nothing is sold yet, so the kind is "projected", never "booked". Numbers
+// reconcile with the boards: Dean $176 (15%), Cliffs $43 on $284 for two (15%); the
+// optional extras are listed at what they are worth if the travellers add them.
+const advisorReview: FolioData = {
   ...withIncludes,
-  hotels: [{ name: "The Dean Dublin", area: "Camden St", stars: 4, nights: 7, perNight: "$168", commission: 176, commissionPct: 15 }],
-  days: withIncludes.days!.map((d, i) => i === 4 ? { ...d, activities: [...d.activities, { name: "Temple Bar food tour" }] } : d),
-  // N12: the itemized advisor breakdown — every sold component's cut, plus what the
-  // untaken extra is still worth. Numbers stay consistent with the fixture: Dean 15%,
-  // food tour $170 for two at 15%, transfers $120 at 15%, insurance $210 at 30%.
+  commissionsKind: "projected",
   commissions: [
-    { label: "The Dean Dublin · 7 nights", amount: 176, pct: 15 },
-    { label: "Temple Bar food tour", amount: 26, pct: 15 },
-    { label: "Private airport transfers", amount: 18, pct: 15 },
+    { label: "Hotel · 7 nights (their pick of 3)", amount: 176, pct: 15 },
+    { label: "Cliffs of Moher & Galway day trip", amount: 43, pct: 15 },
+    { label: "Private airport transfers", amount: 18, pct: 15, potential: true },
     { label: "Travel insurance", amount: 63, pct: 30, potential: true },
   ],
 };
 
-// ── The traveler's window (R4). Hotel prices are the shortlist × 7 nights, so they match
-//    the hotel board the advisor sent. The total = flights + chosen hotel + activities +
-//    toggled add-ons; consecutive snapshots animate the recalc. ─────────────────────────
-const cvHotels = [
-  { id: "serp:h1", name: "The Dean Dublin", price: 168 * 7, meta: "$168/night · Camden St" },
-  { id: "serp:h2", name: "Beckett Locke",   price: 137 * 7, meta: "$137/night · Docklands" },
-  { id: "serp:h3", name: "The Mayson",       price: 159 * 7, meta: "$159/night · North Quays" },
-];
-const cvBase: ReelClientSession = {
-  open: true,
-  url: "voygent.app/t/dublin",
-  tripTitle: "A week in Dublin · for two",
-  flightsPrice: 3180,
-  activitiesPrice: 740,
-  hotels: cvHotels,
-  pickedHotelId: null,
-  addons: [
-    { id: "transfers", label: "Private airport transfers", price: 120, on: false },
-    { id: "insurance", label: "Travel insurance (2 travellers)", price: 210, on: false },
-  ],
-  question: null,
-  progress: 0.45,
-};
-const cvPicked: ReelClientSession  = { ...cvBase, pickedHotelId: "serp:h1", progress: 0.8 };
-const cvAddon: ReelClientSession   = { ...cvPicked, addons: cvBase.addons.map((a) => a.id === "transfers" ? { ...a, on: true } : a), progress: 0.92 };
-const cvNote: ReelClientSession    = { ...cvAddon, question: "Could we add a food tour our last evening? We loved the one in Lisbon.", progress: 1 };
-const cvClosed: ReelClientSession  = { ...cvNote, open: false };
+export const dublinCollab = screenplay({ trip: "Dublin · plan", skin: "claude" }, (s) => {
+  // Act 0 — orientation. Binds to the very first frame ("b0" = the opening line) and
+  // spotlights the navigation cluster: how Read/1x/2x work and where the chapters live.
+  s.advisor.says("I've got clients who want to do Dublin this fall. Can you help me put a week together?");
+  s.spotlight({ beatId: "b0" }, {
+    target: "reel-controls", eyebrow: "How this demo works",
+    title: "Three short demos, at your pace",
+    body: "You are watching demo 1 of 3. In Read mode it stops at every note like this one until you click Continue. Want it to run on its own? Pick 1x or 2x up here. The numbered chips jump between the demos any time.",
+    variant: "hero", dwellMs: 7000,
+  });
 
-// ── C9 cutaway (spec Decision 7): the folio as it LANDS in the Millers' window, right
-//    after the Act-7 send. The sent folio is withIncludes — no hotel committed yet — so
-//    the shortlist renders as the client's choice with nothing picked, and the total
-//    matches cvBase's un-picked $3,920. Cutaway spotlights may only target anchors the
-//    chat folio can't emit (reel-targets guard); the track must end closed (null) so the
-//    ended phase still derives from the client session (end-state guard).
-const fvSent: ReelFolioSession = {
-  open: true,
-  url: "voygent.app/t/dublin",
-  folio: withIncludes,
-  flightsPrice: 3180,
-  activitiesPrice: 740,
-  hotels: cvHotels,
-  pickedHotelId: null,
-  addons: cvBase.addons,
-  notes: [],
-  status: "draft",
-  advisorUpdating: false,
-  focus: "folio-hero",
-  expandedDay: null,
-};
-const fvChoice: ReelFolioSession = { ...fvSent, focus: "folio-hotel-choice" };
-// N10: quick section flips inside the cutaway — expand a couple of days and the
-// good-to-know section so the depth of the document reads, fast.
-const fvDay2Open: ReelFolioSession = { ...fvSent, focus: "folio-day-2", expandedDay: 2 };
-const fvDay4Open: ReelFolioSession = { ...fvSent, focus: "folio-day-4", expandedDay: 4 };
-const fvGoodToKnow: ReelFolioSession = { ...fvSent, focus: "folio-includes", expandedDay: null };
-
-export const dublinCollab = screenplay({ trip: "Dublin · collab", skin: "claude" }, (s) => {
   // Act 1 — Intake: a loose brief that firms up. The advisor forgets the dates; Voygent
   // asks; the advisor adds one more requirement on the way back.
-  s.advisor.says("I've got clients who want to do Dublin this fall. Can you help me put a week together?");
   s.agent.tool("start_trip_interview", { summary: "New trip · Dublin · gathering the brief" });
   s.agent.says("Happy to. Who's travelling, and roughly when?");
   s.advisor.says("Two of them, a couple. Mid-range budget, and they love food and a bit of coastline.");
@@ -199,9 +176,9 @@ export const dublinCollab = screenplay({ trip: "Dublin · collab", skin: "claude
   s.advisor.says("October 4 to 11. One more thing, keep them central. They don't want to be commuting in and out.");
   s.agent.tool("save_trip", { summary: "Dublin · Oct 4-11 · 2 travelers · central, mid-range" });
   s.agent.says("Perfect. Dublin, October 4 to 11, two travellers, mid-range, central, food and coast. Setting that up now.");
-  s.spotlight({ eventType: "tool", where: { tool: "save_trip" }, nth: 1 }, { target: "tool-save_trip", eyebrow: "The brief", title: "It starts with a rough idea", body: "The advisor gives a loose brief and forgets the dates. Voygent asks for what it needs and opens a trip to work in." });
+  s.spotlight({ eventType: "tool", where: { tool: "save_trip" }, nth: 2 }, { target: "tool-save_trip", eyebrow: "The brief", title: "It starts with a rough idea", body: "The advisor gives a loose brief and forgets the dates. Voygent asks for what it needs and opens a trip to work in." });
 
-  // Act 2 — Flights: search, a brief rec, the traveler picks their own flight.
+  // Act 2 — Flights: search, a brief rec, the advisor picks.
   s.agent.tool("flight_search", { summary: "MOB→DUB · Oct 4-11 · 2 travelers" });
   s.agent.says("Six that fit the dates, Mobile to Dublin. Delta is the cheapest but it's two stops and a long day. United is the quickest at 11h 20. I'd flag the Aer Lingus as best value: one stop, and only $200 over the floor. Tap any of them for the full routing.");
   s.agent.board("flight", "b-flight", flights);
@@ -209,13 +186,13 @@ export const dublinCollab = screenplay({ trip: "Dublin · collab", skin: "claude
   s.agent.says("Good call. Added it and locked the dates around it.");
   s.spotlight({ interactionKind: "pick", nth: 1 }, { target: "board-flight", eyebrow: "Voygent recommends", title: "Options, with a recommendation", body: "Voygent tags each flight with why it stands out, like best value or quickest. Open any of them for the full routing and aircraft. The advisor makes the call." });
 
-  // Act 3 — Hotels: the advisor curates a shortlist for the traveler to choose from later.
+  // Act 3 — Hotels: the advisor curates a shortlist for the travellers to choose from later.
   s.agent.tool("hotel_search", { summary: "Dublin · 7 nights · central · mid-range" });
   s.agent.says("And places to stay, all central and in range. The Hilton is the only big chain in the set.");
   s.agent.board("hotel", "b-hotel", hotels);
   s.advisor.picksMany("b-hotel", HOTEL_SHORTLIST, "Shortlisted the Dean, Beckett Locke and the Mayson for them");
   s.agent.says("Three good ones, no chains. I'll put all three in front of the travellers so they can pick the feel they want.");
-  s.spotlight({ interactionKind: "pick", nth: 2 }, { target: "board-hotel", eyebrow: "The advisor curates", title: "The advisor builds a shortlist", body: "The advisor keeps three hotels and drops the big chain. The travellers will choose the one they want later, in their own view, with live pricing." });
+  s.spotlight({ interactionKind: "pick", nth: 2 }, { target: "board-hotel", eyebrow: "The advisor curates", title: "The advisor builds a shortlist", body: "The advisor keeps three hotels and drops the big chain. The travellers will choose the one they want later, in their own view, with live pricing. That's demo 2." });
 
   // Act 4 — Itinerary: Voygent assembles the week and validates it against the brief.
   s.agent.tool("excursion_search", { summary: "Dublin + day trips · history-leaning" });
@@ -223,9 +200,8 @@ export const dublinCollab = screenplay({ trip: "Dublin · collab", skin: "claude
   s.agent.says("Here's the week, day by day, with food worked in. I kept it history-leaning and stayed away from anything strenuous.");
   s.agent.folio(withDays);
   s.spotlight({ eventType: "folio", nth: 2 }, { target: "folio-days", eyebrow: "The build", title: "The week, day by day", body: "Voygent lays out the whole week with sights, food and downtime, then checks it against the brief." });
-  // Brief peek at the engineering view — the REAL tools called so far. No cost/token
-  // numbers (those would be fabricated on a scripted reel); the footnote points to the
-  // interactive demo, where they're real. Open, spotlight, then close.
+  // Engineering peek: the real tool sequence PLUS representative run telemetry (QA4) —
+  // cost, tokens, cache savings — sized like a real run and labelled as representative.
   s.agent.engPanel({
     open: true,
     tools: [
@@ -236,16 +212,30 @@ export const dublinCollab = screenplay({ trip: "Dublin · collab", skin: "claude
       { name: "excursion_search", status: "done" },
       { name: "validate_trip", status: "done" },
     ],
-    footnote: "Full cost and context metrics live in the interactive demo.",
+    metrics: [
+      { label: "Model", value: "claude-haiku-4-5" },
+      { label: "Tokens in / out", value: "48.2k / 3.9k" },
+      { label: "Served from cache", value: "41.5k (86%)" },
+      { label: "Saved by caching", value: "$0.11" },
+      { label: "Cost so far", value: "$0.19", accent: true },
+    ],
+    footnote: "Representative numbers for a run like this one. The interactive demo meters your own run live.",
   });
-  s.spotlight({ interactionKind: "engpanel", nth: 1 }, { target: "eng-panel", eyebrow: "Under the hood", title: "Every step is a real tool call", body: "Behind the chat, Voygent is calling real search tools in order. Six real fares came back from a live search. Every price on the board has a source, not a guess." });
+  s.spotlight({ interactionKind: "engpanel", nth: 1 }, { target: "eng-panel", eyebrow: "Under the hood", title: "Real tool calls, metered", body: "Behind the chat, Voygent calls real search tools in order, and every run is metered: about 48k tokens in, 86% of them served from cache, 19 cents so far. Every price on the board has a source, not a guess." });
   s.agent.engPanel(null);
 
+  // Act 4.5 — The open day (moved here from the old chapter 2: gaps belong in planning).
+  s.agent.says("Day 3 is still open. Here are three tours that fit the brief and the season, with your commission on each.");
+  s.agent.board("tour", "b-tours", tours);
+  s.advisor.picks("b-tours", "tour:cliffs", "Cliffs of Moher and Galway on day 3.", withTour);
+  s.agent.says("Added. Day 3 is the Cliffs of Moher and Galway day trip, $142 a person, $43 commission on this booking. The coach does the driving, so it stays easy.");
+  s.spotlight({ interactionKind: "pick", nth: 3 }, { target: "board-tour", eyebrow: "Empty days are money", title: "Voygent sees the empty day and suggests profitable tours", body: "Day 3 had nothing sold into it. Voygent flags it and pulls real, commissionable tours that fit the brief. The advisor clicks one and it is in the plan." });
+
   // Act 5 — Refine: the advisor edits a single day in place, with a note on why.
-  s.advisor.edits("days[2].activities[0]", { was: "Free morning in Temple Bar", now: "Cliffs of Moher day trip", tag: "Advisor edited" }, edited);
-  s.advisor.comments("days[3]", "Swapped the Howth cliff path for the village and harbour walk, to keep it step-free for them.", "thread-access");
-  s.agent.says("Updated Day 3 with the Cliffs of Moher day trip, and noted the Day 4 swap. The coach handles the driving so it stays easy.");
-  s.spotlight({ interactionKind: "edit", nth: 1 }, { target: "folio-day-2", eyebrow: "The advisor's touch", title: "The advisor edits one day", body: "The advisor just retyped the line, the way you'd fix a document. No prompt, no paragraph. The change is marked as hers and the rest of the week stays put." });
+  s.advisor.edits("days[3].activities[0]", { was: "Howth cliff path walk", now: "Howth village & harbour stroll", tag: "Advisor edited" }, withEdit);
+  s.advisor.comments("days[3]", "Swapped the cliff path for the village and harbour walk, to keep day 4 step-free for them.", "thread-access");
+  s.agent.says("Updated day 4 to the village and harbour walk, and kept your note on the day so the reason travels with the plan.");
+  s.spotlight({ interactionKind: "edit", nth: 1 }, { target: "folio-day-3", eyebrow: "The advisor's touch", title: "The advisor edits one day", body: "The advisor just retyped the line, the way you'd fix a document. No prompt, no paragraph. The change is marked as hers and the rest of the week stays put." });
 
   // Act 6 — What's included: a quick chooser the advisor curates into the folio.
   s.agent.tool("get_help", { summary: "Trip extras · tips, customs, weather" });
@@ -253,45 +243,15 @@ export const dublinCollab = screenplay({ trip: "Dublin · collab", skin: "claude
   s.agent.board("includes", "b-incl", includeCandidates);
   s.advisor.picksMany("b-incl", INCLUDE_KEEP, "Keep weather, transit, customs and apps");
   s.agent.folio(withIncludes);
-  s.spotlight({ interactionKind: "pick", nth: 3 }, { target: "board-includes", eyebrow: "The finishing pass", title: "What to include", body: "Weather, getting around, tipping, handy apps. The advisor typed none of it. She just chose which of the ready-written extras are worth sending." });
+  s.spotlight({ interactionKind: "pick", nth: 4 }, { target: "board-includes", eyebrow: "The finishing pass", title: "What to include", body: "Weather, getting around, tipping, handy apps. The advisor typed none of it. She just chose which of the ready-written extras are worth sending." });
 
-  // Act 7 — Send: the advisor adds a note and sends the folio to the travelers.
-  s.advisor.says("I'll add a quick note for them: pick your hotel and tell me what you think, no rush.");
+  // Act 7 — The advisor's review: projected commission, itemized on the folio.
+  s.agent.says("Before you send it, here's where the trip stands for you.");
+  s.agent.folio(advisorReview);
+  s.spotlight({ eventType: "folio", nth: 5 }, { target: "trip-commission", eyebrow: "For the advisor", title: "Your commission, projected", body: "Every component shows its cut: the hotel, the Cliffs day trip, about $219 as proposed. Voygent also shows what the optional extras are worth if the travellers add them, and keeps it all current as the trip changes." });
+
+  // Act 8 — Send: the advisor adds a note and sends the folio to the travellers.
+  s.advisor.says("Looks right. I'll add a quick note for them: pick your hotel and tell me what you think, no rush.");
   s.advisor.sendsToClient({ subject: "Your Dublin trip is ready to look over" });
-  s.spotlight({ interactionKind: "handoff", nth: 1 }, { target: "handoff-notice", eyebrow: "Out to the travellers", title: "Sent for review", body: "The advisor adds a note and sends the folio. The travellers get it by email and can reply straight back into Voygent. Simulated here." });
-
-  // Act 7.5 — cutaway (C9): what that send actually delivers. Their window: a big
-  // scene-setting callout frames the page as the travel document, then quick section
-  // flips (two days + good-to-know) show the depth, then the shortlist-as-choice; close.
-  s.client.folioView(fvSent);
-  s.spotlight({ interactionKind: "folioview", nth: 1 }, {
-    target: "folio-hero", eyebrow: "What lands with the Millers",
-    title: "This is their travel document",
-    body: "The email carries a link to this living page, not an attachment — the flight, all six days, the extras, and the three hotels she shortlisted, ready to choose. Watch how much detail is inside.",
-    variant: "hero", dwellMs: 5200,
-  });
-  s.client.folioView(fvDay2Open, { holdMs: 1600 });
-  s.client.folioView(fvDay4Open, { holdMs: 1600 });
-  s.client.folioView(fvGoodToKnow, { holdMs: 1600 });
-  s.client.folioView(fvChoice);
-  s.client.folioView(null);
-
-  // Act 8 — The traveler's window: they pick a hotel and toggle an add-on; the price
-  // recalcs live; then they leave a note and send it back.
-  s.client.view(cvBase);
-  s.client.view(cvPicked);
-  s.client.view(cvAddon);
-  s.client.view(cvNote);
-  s.client.view(cvClosed);
-  s.spotlight({ interactionKind: "clientview", nth: 1 }, { target: "client-view", eyebrow: "What the traveller sees", title: "The travellers' own view", body: "The travellers open the folio in their own window. As they choose a hotel and add an extra, the price updates live." });
-
-  // Act 9 — Back in the thread: the note lands, Voygent makes the change, the trip is done.
-  s.advisor.says("They wrote back. They picked the Dean, and they'd love a food tour on the last evening, like the one they did in Lisbon.");
-  s.client.comments("days[4]", "Could we add a food tour our last evening? We loved the one in Lisbon.", "thread-food");
-  s.agent.tool("excursion_search", { summary: "Temple Bar food tour · evening" });
-  s.agent.says("Picking up the note. The Dean is locked in, and I've added a Temple Bar food tour to the last evening. Checked it against dinner, no conflict.");
-  s.agent.folio(finalFolio);
-  s.spotlight({ interactionKind: "comment", nth: 2 }, { target: "comment-thread-food", eyebrow: "Shaped together", title: "The note becomes the plan", body: "Their pick and their request land back in the same thread, Voygent makes the change, and the trip is done." });
-  // Closing value-prop: the advisor's commission, itemized per component (advisor view).
-  s.spotlight({ eventType: "folio", nth: 5 }, { target: "trip-commission", eyebrow: "For the advisor", title: "Your commission, itemized", body: "The hotel, the food tour, the transfers — every component shows its cut, $220 booked on this trip so far. Voygent also shows what the extras they haven't taken are still worth, and keeps it all current as the trip changes." });
+  s.spotlight({ interactionKind: "handoff", nth: 1 }, { target: "handoff-notice", eyebrow: "Out to the travellers", title: "Sent for review", body: "The advisor adds a note and sends the folio. The travellers get it by email and can reply straight back into Voygent. Simulated here. What they see when they open it is demo 2." });
 });

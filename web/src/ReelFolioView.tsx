@@ -90,6 +90,12 @@ export function ReelFolioView({ view, mode, cta }: {
       <div className="cl-scene-label"><span aria-hidden="true">📥</span> The clients&#39; view — the Millers&#39; window</div>
       <div className="cl-fv-window" onPointerDownCapture={interactive ? cancelAuto : undefined}>
         <div className="cl-fv-bar" aria-hidden="true"><span className="cl-fv-dots">● ● ●</span><span className="cl-fv-url">{view.url}</span></div>
+        {view.advisorNote && (
+          <div className="cl-fv-advisor-note" data-reel-target="folio-advisor-note">
+            <span className="cl-fv-advisor-note-who" aria-hidden="true">A</span>
+            <span><b>From your advisor</b> {view.advisorNote}</span>
+          </div>
+        )}
         <div className="cl-fv-scroll" ref={rootRef}>
           {openDetail ? (
             // N5: the tour page — what the client's "tour details" link opens. Replaces
@@ -195,6 +201,16 @@ export function ReelFolioView({ view, mode, cta }: {
 
         {view.advisorUpdating && <div className="cl-fv-updating" role="status"><span className="cl-fv-pulse" aria-hidden="true" />Advisor is updating…</div>}
         <div className="cl-fv-total" data-reel-target="folio-total"><span>Trip total · two travellers</span><b key={total}>{usd(total)}</b></div>
+        {/* QA4 ch2 closing beat: the scripted Send — button flips to sent + a
+            confirmation line, so the "back to the advisor" moment is visible. */}
+        {!interactive && view.feedbackSent != null && (
+          <div className="cl-fv-cta" data-reel-target="folio-sendback">
+            <button type="button" className={`cl-reel-btn cl-reel-btn-primary${view.feedbackSent ? " cl-fv-sent" : ""}`} aria-disabled="true">
+              {view.feedbackSent ? "✓ Sent to your advisor" : "Send to your advisor →"}
+            </button>
+            {view.feedbackSent && <p className="cl-fv-sent-note">Their picks and their note land back in the advisor&#39;s thread instantly.</p>}
+          </div>
+        )}
         {/* N13: only the DIEGETIC action stays inside the folio window — everything
             about driving the demo lives in the margin rail below, so the folio reads
             as the client's page, not a menu of demo buttons. */}

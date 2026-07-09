@@ -5,64 +5,79 @@ import { resolveHighlightFrames } from "../lib/highlights";
 import type { ReelFolioSession } from "../lib/recording";
 
 const frames = dublinClient.recording.frames;
-const views: ReelFolioSession[] = frames.flatMap((f) =>
-  f.kind === "interaction" && f.interaction.kind === "folioview" && f.interaction.view ? [f.interaction.view] : []);
+const interactions = frames.flatMap((f) => (f.kind === "interaction") ? [f.interaction] : []);
+const views: ReelFolioSession[] = interactions.flatMap((i) =>
+  i.kind === "folioview" && i.view ? [i.view] : []);
 
-describe("dublin-client screenplay (ch3)", () => {
-  it("produces frames, folio-window snapshots and highlights", () => {
-    expect(frames.length).toBeGreaterThan(10);
+// Grounding test for chapter 2 · "The client's view" (QA4 arc): all client, no advisor
+// surfaces. The invite email opens the chapter, the advisor's note is pinned on the
+// folio, the hotel choice reprices the trip live (flip, flip back), the tour page is
+// one click deep, and the chapter closes on the one-click send back to the advisor.
+describe("dublin-client chapter 2 (grounding)", () => {
+  it("stays entirely in the client's world: no chat events at all", () => {
+    expect(frames.filter((f) => f.kind === "event")).toEqual([]);
+  });
+
+  it("opens in the inbox: the invite email shows first, then closes before the folio opens", () => {
+    const kinds = interactions.map((i) => i.kind);
+    expect(kinds[0]).toBe("emailview");
+    const emails = interactions.flatMap((i) => (i.kind === "emailview" ? [i.view] : []));
+    expect(emails[0]?.sceneLabel).toContain("Millers");
+    expect(emails[0]?.body).toContain("voygent.app/t/dublin");
+    expect(kinds.indexOf("folioview")).toBeGreaterThan(kinds.lastIndexOf("emailview"));
+    expect(emails.at(-1)).toBeNull();
+  });
+
+  it("pins the advisor's note on every open folio snapshot", () => {
     expect(views.length).toBeGreaterThanOrEqual(10);
-    expect(dublinClient.highlights.length).toBeGreaterThanOrEqual(5);
+    expect(views.every((v) => !!v.advisorNote)).toBe(true);
   });
 
-  it("stays in the client's window: emits no chat folio events", () => {
-    expect(frames.filter((f) => f.kind === "event" && f.event.type === "folio")).toEqual([]);
-  });
-
-  it("animates the total as Julie toggles add-ons (4640 → 4756 → 4946 → 4756)", () => {
+  it("reprices the trip as the hotel choice flips (3920 → 5096 → 4879 → 5096)", () => {
     const totals = views.map((v) => computeTripTotal(v));
-    expect(totals[0]).toBe(4640);
-    const idx = totals.indexOf(4756);
-    expect(idx).toBeGreaterThan(0);
-    expect(totals.slice(idx)).toContain(4946);
-    expect(totals[totals.length - 1]).toBe(4756);
+    expect(totals[0]).toBe(3180 + 740);                 // nothing picked
+    const dean = totals.indexOf(3920 + 1176);           // Dean picked
+    expect(dean).toBeGreaterThan(0);
+    expect(totals.slice(dean)).toContain(3920 + 959);   // flipped to Beckett Locke
+    const picks = views.map((v) => v.pickedHotelId);
+    expect(picks).toContain("serp:h2");
+    expect(picks.at(-1)).toBe("serp:h1");               // settled back on The Dean
   });
 
-  it("drills into the Kilmainham tour page before adding it (link → details → select → price)", () => {
+  it("drills into the Kilmainham tour page before adding it (link → details → CTA → price)", () => {
     const detailIdx = views.findIndex((v) => v.openDetailId === "tour:kilmainham");
     expect(detailIdx).toBeGreaterThan(0);
-    expect(views[detailIdx].url).toContain("/tours/");           // the simulated link click navigates
+    expect(views[detailIdx].url).toContain("/tours/");
     expect(views[detailIdx].addons.find((a) => a.id === "tour:kilmainham")?.detail?.blurb).toBeTruthy();
-    // a later beat scrolls the page to its CTA…
     expect(views.slice(detailIdx).some((v) => v.openDetailId && v.focus === "tour-detail-cta")).toBe(true);
-    // …then the client selects it: back on the folio, tour ON, total moved 4640 → 4756
     const after = views.slice(detailIdx).find((v) => !v.openDetailId);
     expect(after?.addons.find((a) => a.id === "tour:kilmainham")?.on).toBe(true);
-    expect(after && computeTripTotal(after)).toBe(4756);
   });
 
-  it("lands Julie's note on day 2 and the advisor's reply in the same thread", () => {
-    const last = views[views.length - 1];
-    expect(last.notes.map((n) => n.author)).toEqual(["client", "advisor"]);
-    expect(last.notes.every((n) => n.anchor === "folio-day-2")).toBe(true);
+  it("settles the extras: gaol tour + transfers on, whiskey walk tried and dropped", () => {
+    const last = views.at(-1)!;
+    const on = last.addons.filter((a) => a.on).map((a) => a.id).sort();
+    expect(on).toEqual(["tour:kilmainham", "transfers"]);
+    expect(computeTripTotal(last)).toBe(3180 + 740 + 1176 + 116 + 120);
   });
 
-  it("swaps day 2 step-free and settles to Final with the window open (ends on the folio)", () => {
-    const last = views[views.length - 1];
-    expect(last.status).toBe("final");
-    expect(last.open).toBe(true);
-    const day2 = last.folio.days![1];
-    const names = day2.activities.map((a) => a.name).join(" · ");
-    expect(names).not.toContain("EPIC");
-    expect(names).toContain("step-free");
+  it("lands Julie's note on the last evening (day 6), client-authored", () => {
+    const last = views.at(-1)!;
+    expect(last.notes).toHaveLength(1);
+    expect(last.notes[0].author).toBe("client");
+    expect(last.notes[0].anchor).toBe("folio-day-6");
+    expect(last.notes[0].text).toContain("Lisbon");
   });
 
-  it("keeps the honesty rule in the beat-4 spotlight (scripted rendering, not live)", () => {
-    const relay = dublinClient.highlights.find((h) => h.target === "folio-day-2");
-    expect(relay?.body).toContain("scripted rendering");
+  it("closes on the send: feedbackSent flips true, then the window closes (end card next)", () => {
+    expect(views.at(-2)?.feedbackSent).toBe(false);
+    expect(views.at(-1)?.feedbackSent).toBe(true);
+    const track = interactions.flatMap((i) => (i.kind === "folioview" ? [i.view] : []));
+    expect(track.at(-1)).toBeNull();
   });
 
   it("resolves every callout, in ascending frame order", () => {
+    expect(dublinClient.highlights.length).toBe(8);
     const hits = resolveHighlightFrames(frames, dublinClient.highlights);
     const total = [...hits.values()].reduce((n, hl) => n + hl.length, 0);
     expect(total).toBe(dublinClient.highlights.length);
