@@ -8,9 +8,15 @@ import { computeTripTotal, usd } from "./lib/reel-pricing";
 // radios/toggles reflect the snapshot, the "simulated" tag keeps it honest.
 export function ReelClientView({ view }: { view: ReelClientSession }) {
   const total = computeTripTotal(view);
-  const pct = Math.round(Math.max(0, Math.min(1, view.progress)) * 100);
+  // N11: the status line is DERIVED from real state (is the hotel chosen?), not from
+  // the authored `progress` number — a bar that crept up per snapshot read as movement
+  // for no reason. One choice gates readiness; it flips exactly when they pick.
+  const hasChoice = view.hotels.length > 1;
+  const ready = !hasChoice || view.pickedHotelId != null;
   return (
-    <div className="cl-cv-scrim" role="dialog" aria-modal="false" aria-label="What the client sees">
+    <div className="cl-cv-scrim cl-scene-client" role="dialog" aria-modal="false" aria-label="What the client sees">
+      {/* N18: scene shift — blurred inbox backdrop + label say "we're in the clients' window now". */}
+      <div className="cl-scene-label"><span aria-hidden="true">📥</span> The clients&#39; view — the Millers&#39; window</div>
       <div className="cl-cv-window" data-reel-target="client-view">
         <div className="cl-cv-chrome">
           <span className="cl-cv-dots" aria-hidden="true"><i /><i /><i /></span>
@@ -22,9 +28,8 @@ export function ReelClientView({ view }: { view: ReelClientSession }) {
             <h3 className="cl-cv-title">{view.tripTitle}</h3>
             <span className="cl-cv-total" key={total}>{usd(total)}</span>
           </div>
-          <div className="cl-cv-progress" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={pct}>
-            <i style={{ width: `${pct}%` }} />
-            <span className="cl-cv-progress-l">{pct >= 100 ? "Ready to book" : "Almost ready to book"}</span>
+          <div className={`cl-cv-progress ${ready ? "ready" : ""}`}>
+            <span className="cl-cv-progress-l">{ready ? "✓ Ready to book — send it back to your advisor" : "Pick your hotel to finish"}</span>
           </div>
 
           <div className="cl-cv-line"><span>Flights</span><span>{usd(view.flightsPrice)}</span></div>

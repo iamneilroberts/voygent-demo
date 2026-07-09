@@ -78,7 +78,9 @@ export type Frame =
   | { delayMs: number; kind: "user"; text: string; actor?: Actor; beatId?: string }
   | { delayMs: number; kind: "event"; event: ServerEvent; beatId?: string }
   | { delayMs: number; kind: "turn-end" }
-  | { delayMs: number; kind: "interaction"; actor: Actor; interaction: ReelInteraction; beatId?: string };
+  // holdMs: authored post-apply dwell override (1× ms) for beats that should read
+  // faster or slower than their kind's default — e.g. quick section flips in a cutaway.
+  | { delayMs: number; kind: "interaction"; actor: Actor; interaction: ReelInteraction; beatId?: string; holdMs?: number };
 
 export interface Recording {
   skin: "claude";
@@ -138,6 +140,11 @@ export async function replayChat(rec: Recording, h: ReplayHandlers, opts: Replay
   // The caller resets state first, so a seek is reset + fast-forward + play-on.
   const startFrom = opts.seekTo && opts.seekTo > 0 ? opts.seekTo : 0;
   let prev: Frame | null = null;
+  // The viewer has stared at the current screen for a whole callout — after one
+  // resolves, cap the next frame's pre-delay so the reel moves on instead of
+  // holding a screen where nothing is changing.
+  const POST_CALLOUT_CAP = 250;
+  let afterCallout = false;
   for (let i = 0; i < rec.frames.length; i++) {
     const f = rec.frames[i];
     if (opts.signal?.aborted) return;
@@ -146,7 +153,9 @@ export async function replayChat(rec: Recording, h: ReplayHandlers, opts: Replay
       // Hold here while paused (abort-safe). When not paused this resolves immediately.
       if (opts.pauseGate) { await Promise.race([opts.pauseGate(), waitForAbort(opts.signal)]); if (opts.signal?.aborted) return; }
       opts.onProgress?.(i, rec.frames.length);
-      await wait(computeDelay(f, prev, { speed: getSpeed(), reducedMotion: opts.reducedMotion }));
+      const delay = computeDelay(f, prev, { speed: getSpeed(), reducedMotion: opts.reducedMotion });
+      await wait(afterCallout ? Math.min(delay, POST_CALLOUT_CAP) : delay);
+      afterCallout = false;
       if (opts.signal?.aborted) return;
     }
     if (f.kind === "user") { h.pushUser(f.text); h.setBusy(true); }
@@ -159,7 +168,11 @@ export async function replayChat(rec: Recording, h: ReplayHandlers, opts: Replay
     // Interactions HOLD after applying (post-apply dwell) unless a spotlight on this
     // same frame provides the hold (handled below) — avoids double-dwell.
     if (f.kind === "interaction" && !(hits && hits.length)) {
-      await wait(interactionDwell(f.interaction.kind, { speed: getSpeed(), reducedMotion: opts.reducedMotion }));
+      const speed = Math.max(1, getSpeed());
+      const hold = f.holdMs != null && !opts.reducedMotion
+        ? Math.round(f.holdMs / speed)
+        : interactionDwell(f.interaction.kind, { speed: getSpeed(), reducedMotion: opts.reducedMotion });
+      await wait(hold);
       if (opts.signal?.aborted) return;
     }
     if (hits && hits.length && h.onHighlight) {
@@ -170,6 +183,7 @@ export async function replayChat(rec: Recording, h: ReplayHandlers, opts: Replay
         await Promise.race([h.onHighlight(hl), waitForAbort(opts.signal)]);
         if (opts.signal?.aborted) return;
       }
+      afterCallout = true;
     }
   }
   opts.onProgress?.(rec.frames.length, rec.frames.length);

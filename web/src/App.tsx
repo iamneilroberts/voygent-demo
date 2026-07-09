@@ -30,6 +30,7 @@ import { replayChat } from "./lib/recording";
 import { emptyReelViewState, applyInteraction, reconcileEdits, type ReelViewState } from "./lib/interaction";
 import { isPickTool, resolveBoardPickId } from "./lib/board-match";
 import { selectReel, CHAPTERS, REELS } from "./recordings/registry";
+import { ReelBreadcrumb } from "./ReelBreadcrumb";
 import { ReelIntro } from "./ReelIntro";
 import { ReelCallout } from "./ReelCallout";
 import { ReelHandoffNotice } from "./ReelHandoffNotice";
@@ -117,7 +118,14 @@ export function App() {
   if (!selectedReelRef.current) selectedReelRef.current = selectReel();
   const selectedReel = selectedReelRef.current;
   type ReelPhase = "intro" | "playing" | "ended";
-  const [reelPhase, setReelPhase] = useState<ReelPhase>(() => (resolveInitialMode() === "auto" ? "intro" : "ended"));
+  // N14: chapter-to-chapter navigation (?autoplay=1, set by gotoReel) skips the intro
+  // modal — a second look-alike modal between chapters read as a bug. The intro only
+  // greets a fresh landing.
+  const [reelPhase, setReelPhase] = useState<ReelPhase>(() => {
+    if (resolveInitialMode() !== "auto") return "ended";
+    try { if (new URLSearchParams(window.location.search).get("autoplay") === "1") return "playing"; } catch { /* intro */ }
+    return "intro";
+  });
   const [speed, setSpeed] = useState<number>(2);          // default 2x
   const speedRef = useRef(speed); useEffect(() => { speedRef.current = speed; }, [speed]);
   // Third speed control (Neil QA 07-08): "Read" plays beats at 1× but HOLDS every
@@ -390,9 +398,10 @@ export function App() {
   }
 
   // Chapter navigation — mode=auto is pinned (the URL param beats persisted mode).
+  // autoplay=1 → the next chapter starts playing directly (no intro modal, N14).
   function gotoReel(id: string) {
     persistMode("auto");
-    reloadWith((u) => { u.searchParams.set("reel", id); u.searchParams.set("mode", "auto"); u.searchParams.delete("greet"); });
+    reloadWith((u) => { u.searchParams.set("reel", id); u.searchParams.set("mode", "auto"); u.searchParams.set("autoplay", "1"); u.searchParams.delete("greet"); });
   }
   const nextReel = selectedReel.next ? REELS.find((r) => r.id === selectedReel.next) : undefined;
   const nextChapter = nextReel ? { label: `Watch ${nextReel.title} →`, onClick: () => gotoReel(nextReel.id) } : undefined;
@@ -568,6 +577,12 @@ export function App() {
               <button type="button" className="cl-reel-ctl" aria-pressed={showFrameNum} aria-label="Toggle frame number" title="Frame number" onClick={toggleFrameNum}>#</button>
               {showFrameNum && <span className="cl-reel-frameno" aria-live="off">{reelProg.done}/{reelProg.total}</span>}
             </div>
+          )}
+          {skin === "claude" && mode === "auto" && (reelPhase === "playing" || reelPhase === "ended") && selectedReel.chapter != null && (
+            <ReelBreadcrumb
+              chapters={CHAPTERS.map((c) => ({ id: c.id, title: c.title, chapter: c.chapter! }))}
+              currentId={selectedReel.id} onChapter={gotoReel}
+            />
           )}
           {skin === "claude" && mode === "auto" && reelPhase === "ended" && (
             reelView.folioView?.open

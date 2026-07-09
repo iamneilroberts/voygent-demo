@@ -69,6 +69,14 @@ const withTour: FolioData = {
 const finalFolio: FolioData = {
   ...withTour,
   days: withTour.days!.map((d, i) => i === 5 ? { ...d, activities: [...d.activities, { name: "Dublin whiskey tasting walk" }] } : d),
+  // N12: itemized advisor breakdown — the tour board's own commission numbers, plus
+  // the one tour still on offer as a "worth +$17 if they add it" row.
+  commissions: [
+    { label: "The Dean Dublin · 7 nights", amount: 176, pct: 15 },
+    { label: "Wicklow Mountains day trip", amount: 43, pct: 15 },
+    { label: "Dublin whiskey tasting walk", amount: 23, pct: 12 },
+    { label: "Kilmainham Gaol & Museum tour", amount: 17, pct: 15, potential: true },
+  ],
 };
 
 // Beat 3 fixture: the travellers' own window (mirror dublin-collab's client-view
@@ -118,14 +126,24 @@ const fvDay6: ReelFolioSession = {
 
 export const dublinRun = screenplay({ trip: "Dublin · run", skin: "claude" }, (s) => {
   // Beat 1: the paste. A messy airline email becomes a filed, structured booking.
+  // N15: a scene-setting callout BEFORE the paste prepares the viewer for what's about
+  // to happen (the paste otherwise reads as noise). It binds to the framing line's
+  // beatId — the first frame of the reel, so "b0" is stable while this line stays first.
+  s.advisor.says("The airline just sent the Millers' confirmation. I'll paste it straight in.");
+  s.spotlight({ beatId: "b0" }, {
+    target: "none", eyebrow: "Watch this",
+    title: "Copy an email, paste it in",
+    body: "Next, the advisor pastes the airline's confirmation email exactly as it landed in her inbox — messy formatting and all. Voygent figures out what it is and applies it to the trip.",
+    variant: "hero", dwellMs: 5200,
+  });
   s.advisor.says(CONF_EMAIL);
   s.agent.says("That's the Millers' flight confirmation. Filing it.");
   s.agent.tool("add_booking", { summary: "Booking filed · EI 106 · conf 6XKPTR" });
   s.agent.folio(withBooking);
   s.spotlight({ eventType: "folio", nth: 1 }, {
     target: "folio-bookings", eyebrow: "Paste it, it's filed",
-    title: "The confirmation reads itself",
-    body: "The advisor pastes the airline email exactly as it arrived. The confirmation number, times and total land in the right places in the proposal. Nothing retyped.",
+    title: "Paste it as messy as it comes",
+    body: "You can paste the confirmation exactly as it arrives in your email, no matter how messy it is. The confirmation number, times and total land in the right places in the proposal. Nothing retyped.",
   });
 
   // Beat 2: the gap. Voygent notices the open days and pulls real tours into them.
@@ -135,16 +153,16 @@ export const dublinRun = screenplay({ trip: "Dublin · run", skin: "claude" }, (
   s.agent.says("Added. Day 6 is the Wicklow Mountains and Glendalough trip, $142 a person, $43 commission on this booking.");
   s.spotlight({ interactionKind: "pick", nth: 1 }, {
     target: "board-tour", eyebrow: "Empty days are money",
-    title: "Voygent notices first",
-    body: "Open days in a sold trip are unsold inventory. Voygent flags them and pulls real, commissionable tours that fit. The advisor clicks one and it is in the plan.",
+    title: "Voygent sees the empty days and suggests profitable tours",
+    body: "Days 4 and 6 had nothing sold into them. Voygent flags them and pulls real, commissionable tours that fit. The advisor clicks one and it is in the plan.",
   });
 
   // Beat 2.5 — cutaway (C9): meanwhile, on the Millers' page, day 6 is already current.
   s.client.folioView(fvDay6);
   s.spotlight({ interactionKind: "folioview", nth: 1 }, {
     target: "folio-day-6", eyebrow: "Meanwhile, in their window",
-    title: "Same link, already current",
-    body: "One click in chat, and day 6 on the Millers' page carries the Wicklow trip. No new PDF to send, no version two — the folio they already have stays current.",
+    title: "Their page updates automatically",
+    body: "The advisor clicked once in chat, and day 6 on the Millers' page already shows the Wicklow trip. Voygent keeps the client's copy current by itself — and the advisor stays in control of what ends up on the proposal.",
   });
   s.client.folioView(null);
 

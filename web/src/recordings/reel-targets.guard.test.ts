@@ -42,6 +42,7 @@ const DYNAMIC_PATTERNS: RegExp[] = [
   /^comment-.+$/,
   /^folio-day-\d+$/,
   /^board-(flight|hotel|includes|tour)$/,
+  /^none$/, // explicit no-target: ReelCallout dims the screen and centers the card
 ];
 
 function isValidTarget(target: string, staticTargets: Set<string>): boolean {

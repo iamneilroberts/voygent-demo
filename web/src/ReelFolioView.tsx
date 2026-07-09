@@ -17,6 +17,21 @@ export function ReelFolioView({ view, mode, cta }: {
   cta?: { nextChapter?: NextChapterCta; onTryYourself: () => void; onReplay: () => void; sendFunnel?: boolean };
 }) {
   const interactive = mode === "interactive";
+  // N13: when a next chapter exists, the ended surface auto-advances after a visible
+  // countdown. Any interaction with the folio window cancels it — the viewer chose to
+  // explore, so the demo must not yank them forward.
+  const AUTO_ADVANCE_S = 12;
+  const [autoLeft, setAutoLeft] = useState<number | null>(
+    mode === "interactive" && cta?.nextChapter ? AUTO_ADVANCE_S : null,
+  );
+  const nextChapterClick = cta?.nextChapter?.onClick;
+  useEffect(() => {
+    if (autoLeft == null || !nextChapterClick) return;
+    if (autoLeft <= 0) { nextChapterClick(); return; }
+    const t = setTimeout(() => setAutoLeft((s) => (s == null ? null : s - 1)), 1000);
+    return () => clearTimeout(t);
+  }, [autoLeft, nextChapterClick]);
+  const cancelAuto = () => setAutoLeft(null);
   const [localAddons, setLocalAddons] = useState(view.addons);
   const [localDay, setLocalDay] = useState<number | null>(view.expandedDay);
   // N5 drill-down: which addon's tour page is open. Scripted mode reads the snapshot;
@@ -69,8 +84,11 @@ export function ReelFolioView({ view, mode, cta }: {
   const days = view.folio.days ?? [];
   const looseAddons = addons.filter((a) => a.day == null);
   return (
-    <div className="cl-fv-scrim" role="dialog" aria-modal="true" aria-label="The client's folio window">
-      <div className="cl-fv-window">
+    <div className="cl-fv-scrim cl-scene-client" role="dialog" aria-modal="true" aria-label="The client's folio window">
+      {/* N18: scene shift — the blurred inbox backdrop + label make it unmistakable that
+          we've left the advisor's chat and are looking over the clients' shoulder. */}
+      <div className="cl-scene-label"><span aria-hidden="true">📥</span> The clients&#39; view — the Millers&#39; window</div>
+      <div className="cl-fv-window" onPointerDownCapture={interactive ? cancelAuto : undefined}>
         <div className="cl-fv-bar" aria-hidden="true"><span className="cl-fv-dots">● ● ●</span><span className="cl-fv-url">{view.url}</span></div>
         <div className="cl-fv-scroll" ref={rootRef}>
           {openDetail ? (
@@ -177,16 +195,34 @@ export function ReelFolioView({ view, mode, cta }: {
 
         {view.advisorUpdating && <div className="cl-fv-updating" role="status"><span className="cl-fv-pulse" aria-hidden="true" />Advisor is updating…</div>}
         <div className="cl-fv-total" data-reel-target="folio-total"><span>Trip total · two travellers</span><b key={total}>{usd(total)}</b></div>
-        {cta && (
+        {/* N13: only the DIEGETIC action stays inside the folio window — everything
+            about driving the demo lives in the margin rail below, so the folio reads
+            as the client's page, not a menu of demo buttons. */}
+        {cta?.sendFunnel && (
           <div className="cl-fv-cta">
-            <p className="cl-fv-disclosure">This is the scripted demo trip; the live demo pulls real flights and hotels.</p>
-            {cta.sendFunnel && <button type="button" className="cl-reel-btn cl-reel-btn-primary" onClick={() => setSent(true)}>Send to your advisor →</button>}
-            {cta.nextChapter && <button type="button" className={`cl-reel-btn ${cta.sendFunnel ? "cl-reel-btn-secondary" : "cl-reel-btn-primary"}`} onClick={cta.nextChapter.onClick}>{cta.nextChapter.label}</button>}
-            <button type="button" className={`cl-reel-btn ${cta.sendFunnel || cta.nextChapter ? "cl-reel-btn-secondary" : "cl-reel-btn-primary"}`} onClick={cta.onTryYourself}>Build your own trip →</button>
-            <button type="button" className="cl-reel-btn cl-reel-btn-secondary" onClick={cta.onReplay}>↺ Replay the chapter</button>
+            <button type="button" className="cl-reel-btn cl-reel-btn-primary" onClick={() => setSent(true)}>Send to your advisor →</button>
           </div>
         )}
       </div>
+
+      {cta && (
+        <aside className="cl-reel-nextrail" aria-label="Demo controls">
+          <p className="cl-fv-disclosure">Scripted demo trip — the live demo pulls real flights and hotels.</p>
+          {cta.nextChapter && (
+            <button type="button" className="cl-reel-btn cl-reel-btn-primary" onClick={cta.nextChapter.onClick}>
+              {cta.nextChapter.label}
+              {autoLeft != null && <span className="cl-reel-btn-meta">auto in {autoLeft}s</span>}
+            </button>
+          )}
+          {autoLeft != null && (
+            <button type="button" className="cl-reel-stay" onClick={cancelAuto}>Stay and explore this page</button>
+          )}
+          <div className="cl-reel-nextrail-links">
+            <button type="button" onClick={cta.onTryYourself}>Build your own trip →</button>
+            <button type="button" onClick={cta.onReplay}>↺ Replay the chapter</button>
+          </div>
+        </aside>
+      )}
 
       {sent && (
         <div className="cl-fv-dialog-scrim" role="dialog" aria-modal="true" aria-label="Open the live demo">

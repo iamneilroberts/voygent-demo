@@ -75,9 +75,10 @@ class Builder {
         this.add({ delayMs: 0, kind: "interaction", actor, interaction: { kind: "clientview", view: snapshot }, beatId: this.beat() });
       },
       // Ch3: open/update/close the simulated client FOLIO window (the full folio, not the
-      // pricing widget). Snapshot-based like view(); pass null to close.
-      folioView: (snapshot: ReelFolioSession | null) => {
-        this.add({ delayMs: 0, kind: "interaction", actor, interaction: { kind: "folioview", view: snapshot }, beatId: this.beat() });
+      // pricing widget). Snapshot-based like view(); pass null to close. opts.holdMs
+      // overrides the beat's post-apply dwell (quick section flips vs the 4.2s default).
+      folioView: (snapshot: ReelFolioSession | null, opts?: { holdMs?: number }) => {
+        this.add({ delayMs: 0, kind: "interaction", actor, interaction: { kind: "folioview", view: snapshot }, beatId: this.beat(), ...(opts?.holdMs != null ? { holdMs: opts.holdMs } : {}) });
       },
     };
   }
@@ -93,7 +94,7 @@ class Builder {
     if (resultingFolio) this.agent.folio(resultingFolio); // explicit folio event for any data change
   }
 
-  spotlight(match: HighlightMatch, card: { target: string; eyebrow: string; title: string; body: string; dwellMs?: number }): void {
+  spotlight(match: HighlightMatch, card: { target: string; eyebrow: string; title: string; body: string; dwellMs?: number; variant?: "hero" }): void {
     this.highlights.push({ match, ...card });
   }
 }

@@ -28,6 +28,15 @@ export interface FolioBooking {
   detail?: string;           // "Oct 4 · 8:55p JFK→DUB · 2 adults · $3,180"
   status?: "confirmed" | "pending";
 }
+// One row of the advisor's commission breakdown: what a component of the trip pays.
+// `potential: true` = not sold yet — worth +$X if the travellers add it (a tour still
+// on offer, insurance not taken). Advisor view only; the client folio never sees these.
+export interface FolioCommissionRow {
+  label: string;        // "The Dean Dublin · 7 nights"
+  amount: number;       // USD
+  pct?: number;         // commission percentage when known
+  potential?: boolean;
+}
 export interface FolioData {
   tripId: string;
   title: string;
@@ -36,6 +45,7 @@ export interface FolioData {
   days?: FolioDay[];          // NEW — day-by-day (activities = excursions + free things; dining)
   includes?: FolioInclude[];  // NEW — boilerplate "what's included / tips"
   bookings?: FolioBooking[];  // NEW — confirmed/pending third-party bookings (e.g. a tour add-on)
+  commissions?: FolioCommissionRow[]; // NEW — advisor-view per-component commission breakdown
 }
 
 // One segment of a flight itinerary — the expandable detail behind a flight option.

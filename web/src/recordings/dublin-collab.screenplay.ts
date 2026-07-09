@@ -121,6 +121,15 @@ const finalFolio: FolioData = {
   ...withIncludes,
   hotels: [{ name: "The Dean Dublin", area: "Camden St", stars: 4, nights: 7, perNight: "$168", commission: 176, commissionPct: 15 }],
   days: withIncludes.days!.map((d, i) => i === 4 ? { ...d, activities: [...d.activities, { name: "Temple Bar food tour" }] } : d),
+  // N12: the itemized advisor breakdown — every sold component's cut, plus what the
+  // untaken extra is still worth. Numbers stay consistent with the fixture: Dean 15%,
+  // food tour $170 for two at 15%, transfers $120 at 15%, insurance $210 at 30%.
+  commissions: [
+    { label: "The Dean Dublin · 7 nights", amount: 176, pct: 15 },
+    { label: "Temple Bar food tour", amount: 26, pct: 15 },
+    { label: "Private airport transfers", amount: 18, pct: 15 },
+    { label: "Travel insurance", amount: 63, pct: 30, potential: true },
+  ],
 };
 
 // ── The traveler's window (R4). Hotel prices are the shortlist × 7 nights, so they match
@@ -173,6 +182,11 @@ const fvSent: ReelFolioSession = {
   expandedDay: null,
 };
 const fvChoice: ReelFolioSession = { ...fvSent, focus: "folio-hotel-choice" };
+// N10: quick section flips inside the cutaway — expand a couple of days and the
+// good-to-know section so the depth of the document reads, fast.
+const fvDay2Open: ReelFolioSession = { ...fvSent, focus: "folio-day-2", expandedDay: 2 };
+const fvDay4Open: ReelFolioSession = { ...fvSent, focus: "folio-day-4", expandedDay: 4 };
+const fvGoodToKnow: ReelFolioSession = { ...fvSent, focus: "folio-includes", expandedDay: null };
 
 export const dublinCollab = screenplay({ trip: "Dublin · collab", skin: "claude" }, (s) => {
   // Act 1 — Intake: a loose brief that firms up. The advisor forgets the dates; Voygent
@@ -246,14 +260,19 @@ export const dublinCollab = screenplay({ trip: "Dublin · collab", skin: "claude
   s.advisor.sendsToClient({ subject: "Your Dublin trip is ready to look over" });
   s.spotlight({ interactionKind: "handoff", nth: 1 }, { target: "handoff-notice", eyebrow: "Out to the travellers", title: "Sent for review", body: "The advisor adds a note and sends the folio. The travellers get it by email and can reply straight back into Voygent. Simulated here." });
 
-  // Act 7.5 — cutaway (C9): what that send actually delivers. Their window, briefly:
-  // the folio page arrives, then a scroll to the shortlist-as-their-choice; then close.
+  // Act 7.5 — cutaway (C9): what that send actually delivers. Their window: a big
+  // scene-setting callout frames the page as the travel document, then quick section
+  // flips (two days + good-to-know) show the depth, then the shortlist-as-choice; close.
   s.client.folioView(fvSent);
   s.spotlight({ interactionKind: "folioview", nth: 1 }, {
     target: "folio-hero", eyebrow: "What lands with the Millers",
-    title: "A living page, not an attachment",
-    body: "The email carries a link to this page — the flight, every day, the extras, and the three hotels she shortlisted, ready to choose. Chapter 3 rides along in their window.",
+    title: "This is their travel document",
+    body: "The email carries a link to this living page, not an attachment — the flight, all six days, the extras, and the three hotels she shortlisted, ready to choose. Watch how much detail is inside.",
+    variant: "hero", dwellMs: 5200,
   });
+  s.client.folioView(fvDay2Open, { holdMs: 1600 });
+  s.client.folioView(fvDay4Open, { holdMs: 1600 });
+  s.client.folioView(fvGoodToKnow, { holdMs: 1600 });
   s.client.folioView(fvChoice);
   s.client.folioView(null);
 
@@ -273,6 +292,6 @@ export const dublinCollab = screenplay({ trip: "Dublin · collab", skin: "claude
   s.agent.says("Picking up the note. The Dean is locked in, and I've added a Temple Bar food tour to the last evening. Checked it against dinner, no conflict.");
   s.agent.folio(finalFolio);
   s.spotlight({ interactionKind: "comment", nth: 2 }, { target: "comment-thread-food", eyebrow: "Shaped together", title: "The note becomes the plan", body: "Their pick and their request land back in the same thread, Voygent makes the change, and the trip is done." });
-  // Closing value-prop: the advisor's commission, tracked the whole way (advisor view).
-  s.spotlight({ eventType: "folio", nth: 5 }, { target: "trip-commission", eyebrow: "For the advisor", title: "Your commission, tracked", body: "In advisor mode, Voygent keeps your commission in view and updates it as the trip changes, so the number is current when it is time to book." });
+  // Closing value-prop: the advisor's commission, itemized per component (advisor view).
+  s.spotlight({ eventType: "folio", nth: 5 }, { target: "trip-commission", eyebrow: "For the advisor", title: "Your commission, itemized", body: "The hotel, the food tour, the transfers — every component shows its cut, $220 booked on this trip so far. Voygent also shows what the extras they haven't taken are still worth, and keeps it all current as the trip changes." });
 });

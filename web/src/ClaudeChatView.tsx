@@ -96,7 +96,12 @@ function WorkingIndicator({ live }: { live: boolean }) {
 }
 
 function FolioArtifact({ folio, advisor, edits, threads, showSend, sent, onRequestAccess }: { folio: FolioData; advisor: boolean; edits: ReelEditMarker[]; threads: ReelThread[]; showSend?: boolean; sent?: boolean; onRequestAccess?: () => void }) {
-  const commTotal = advisor ? commissionTotal(folio.hotels) : null;
+  // N12: an authored breakdown supersedes the hotels-derived total — the header pill
+  // then shows earned commission across ALL components, and the itemized section below
+  // carries the per-component rows (the section owns the trip-commission anchor then).
+  const commRows = advisor && folio.commissions && folio.commissions.length > 0 ? folio.commissions : null;
+  const commEarned = commRows ? commissionTotal(commRows.filter((r) => !r.potential).map((r) => ({ commission: r.amount }))) : null;
+  const commTotal = advisor ? (commEarned ?? commissionTotal(folio.hotels)) : null;
   // A title-only card (trip created, nothing promoted yet) is just noise inline.
   const hasDays = !!folio.days && folio.days.length > 0;
   const hasIncludes = !!folio.includes && folio.includes.length > 0;
@@ -116,7 +121,7 @@ function FolioArtifact({ folio, advisor, edits, threads, showSend, sent, onReque
         <span className="cl-artifact-titlerow">
           <span className="cl-artifact-kicker">Folio</span>
           <span className="cl-artifact-title">{folio.title}</span>
-          {commTotal != null && <span className="cl-artifact-comm cl-artifact-headcomm" data-reel-target="trip-commission">{fmtUsd(commTotal)} comm.</span>}
+          {commTotal != null && <span className="cl-artifact-comm cl-artifact-headcomm" data-reel-target={commRows ? undefined : "trip-commission"}>{fmtUsd(commTotal)} comm.</span>}
         </span>
         {summaryChips.length > 0 && (
           <span className="cl-artifact-summary">
@@ -183,6 +188,10 @@ function FolioArtifact({ folio, advisor, edits, threads, showSend, sent, onReque
                   {d.activities.map((a, j) => {
                     const au = safeHttpUrl(a.url);
                     const edit = editForActivity(edits, i, j);
+                    // The edit marker can land a frame before the folio event that carries
+                    // the new text — show the marker's `now` so the strikethrough never
+                    // points at an identical "new" line while a callout dwells here.
+                    const name = edit && a.name === edit.was ? edit.now : a.name;
                     return (
                       <span key={j} className={`cl-day-act${edit ? ` cl-day-edited ${actorClass(edit.actor)}${edit.reconciled ? " reconciled" : ""}` : ""}`}>
                         {edit && (
@@ -193,7 +202,7 @@ function FolioArtifact({ folio, advisor, edits, threads, showSend, sent, onReque
                             <span className="cl-edit-tag">{actorLabel(edit.actor)} edited</span>
                           </span>
                         )}
-                        {au ? <a href={au} target="_blank" rel="noopener noreferrer">{a.name}</a> : a.name}
+                        {au ? <a href={au} target="_blank" rel="noopener noreferrer">{name}</a> : name}
                       </span>
                     );
                   })}
@@ -231,6 +240,29 @@ function FolioArtifact({ folio, advisor, edits, threads, showSend, sent, onReque
               </details>
             ))}
           </div>
+        </div>
+      )}
+      {commRows && (
+        <div className="cl-artifact-sec cl-artifact-commsec" data-reel-target="trip-commission">
+          <h4>Your commission</h4>
+          {commRows.filter((r) => !r.potential).map((r, i) => (
+            <div key={`c${i}`} className="cl-artifact-row">
+              <span className="cl-artifact-main"><span className="cl-artifact-name">{r.label}</span></span>
+              <span className="cl-artifact-comm">{commissionLabel(r.amount, r.pct)}</span>
+            </div>
+          ))}
+          {commEarned != null && (
+            <div className="cl-artifact-row cl-comm-total">
+              <span className="cl-artifact-main"><span className="cl-artifact-name">Booked so far</span></span>
+              <span className="cl-artifact-comm cl-comm-total-amt">{fmtUsd(commEarned)}</span>
+            </div>
+          )}
+          {commRows.filter((r) => r.potential).map((r, i) => (
+            <div key={`p${i}`} className="cl-artifact-row cl-comm-potential">
+              <span className="cl-artifact-main"><span className="cl-artifact-name">{r.label}</span><span className="cl-artifact-meta">if they add it</span></span>
+              <span className="cl-artifact-comm">{commissionLabel(r.amount, r.pct)}</span>
+            </div>
+          ))}
         </div>
       )}
       {showSend && (

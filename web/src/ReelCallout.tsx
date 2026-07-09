@@ -4,9 +4,11 @@ import type { Highlight } from "./lib/highlights";
 import { markProgrammaticScroll } from "./lib/scroll-intent";
 
 // Resolve a highlight target key to a live DOM element.
+//   "none"        -> no target on purpose: dimmed screen + centered card (scene-setting)
 //   "stat:<key>"  -> the engineering-panel stat card [data-stat="<key>"]
 //   "<other>"     -> [data-reel-target="<other>"] (e.g. "board-flight")
 function findTarget(target: string): HTMLElement | null {
+  if (target === "none") return null;
   if (target.startsWith("stat:")) return document.querySelector<HTMLElement>(`[data-stat="${target.slice(5)}"]`);
   return document.querySelector<HTMLElement>(`[data-reel-target="${target}"]`);
 }
@@ -52,6 +54,10 @@ export function ReelCallout(
     measure();
     const raf = requestAnimationFrame(measure); // re-measure after scrollIntoView settles
     window.addEventListener("resize", measure);
+    // Capture-phase scroll: inner containers (the cutaway window's own scroller) smooth-
+    // scroll AFTER mount, and without this the ring stays where the target USED to be —
+    // visibly wrapping the wrong section (N17).
+    window.addEventListener("scroll", measure, true);
     // A2: the target can GROW after mount — a folio spotlight fires on the same beat
     // that renders the folio's new content, and on a phone that growth pushed the whole
     // artifact below the fold AFTER the mount-time scroll (spotlit content invisible for
@@ -66,7 +72,7 @@ export function ReelCallout(
         })
       : null;
     ro?.observe(el);
-    return () => { cancelAnimationFrame(raf); ro?.disconnect(); window.removeEventListener("resize", measure); };
+    return () => { cancelAnimationFrame(raf); ro?.disconnect(); window.removeEventListener("resize", measure); window.removeEventListener("scroll", measure, true); };
   }, [highlight.target]);
 
   // Auto-resume after dwell (reduced-motion = instant). While paused or held, no timer
@@ -82,7 +88,9 @@ export function ReelCallout(
   // narrow screen a full-width target leaves no side room, so the card would cover it —
   // instead drop to the opposite vertical half (default low, so the TOP of a tall target
   // like the flight board, where the chosen option sits, stays visible).
-  const CARD_W = 272, GAP = 14, MARGIN = 12;
+  // Hero width 330 keeps side placement viable at 1280px wide (360px margins beside
+  // the 560px cutaway window) — 380 forced the card to overlap the window there.
+  const CARD_W = highlight.variant === "hero" ? 330 : 272, GAP = 14, MARGIN = 12;
   let cardStyle: CSSProperties;
   if (rect) {
     const vw = window.innerWidth, vh = window.innerHeight;
@@ -113,7 +121,7 @@ export function ReelCallout(
       {rect
         ? <div className="cl-reel-spot" style={{ position: "fixed", top: rect.top - 6, left: rect.left - 6, width: rect.width + 12, height: rect.height + 12 }} />
         : <div className="cl-reel-dim" />}
-      <div className="cl-reel-callout" style={cardStyle}>
+      <div className={`cl-reel-callout${highlight.variant === "hero" ? " cl-reel-callout-hero" : ""}`} style={cardStyle}>
         <div className="cl-reel-callout-ey">{highlight.eyebrow}</div>
         <h4 className="cl-reel-callout-h">{highlight.title}</h4>
         <p className="cl-reel-callout-b">{highlight.body}</p>

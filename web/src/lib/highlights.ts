@@ -19,6 +19,7 @@ export interface Highlight {
   title: string;
   body: string;
   dwellMs?: number;                       // default applied by the player (~4000)
+  variant?: "hero";                       // "hero" = larger card for scene-setting callouts
 }
 
 export interface HighlightTrack { trip: string; highlights: Highlight[] }
