@@ -1,6 +1,6 @@
 # Demo design lane — checklist
 
-_Updated: 2026-07-09 — demo-design_ (QA4 restructure COMMITTED `1c10d39`, bundle builds clean as index-DM1JJtAW.js; **DEPLOY PENDING — needs Neil**: `cd ~/dev/voygent-demo-demo-design && VITE_API_BASE="" npm run build:web && npx wrangler deploy`)
+_Updated: 2026-07-09 23:15 — main_ (QA4 restructure **SHIPPED**: merged to main `41d1d27`, pushed, deployed — live bundle `index-DM1JJtAW.js` verified served; demo-design worktree + branch pruned, local and origin)
 
 ## QA4 (Neil 2026-07-09, 17-item batch) — spec `docs/superpowers/specs/2026-07-09-reel-restructure-qa4.md`
 - [x] Chapter restructure: 1 `plan` (advisor-only + gap-fill tours + projected commission + Neil's handoff end card) · 2 `client` (invite email → folio w/ pinned advisor note, hotel flips reprice live, tour drill-down, one-click send-back) · 3 `advisor` (inbound reply notification, feedback incorporated, messy confirmation email → paste → ticketed corrections, booked commission $280). Legacy ids collab/run alias in pickReel.
@@ -10,8 +10,9 @@ _Updated: 2026-07-09 — demo-design_ (QA4 restructure COMMITTED `1c10d39`, bund
 - [x] Eng peek: representative telemetry (model/tokens/cache/cost) + "representative" tag; callout ring re-measures through entrance animations
 - [x] Scroll/static fixes: selected multi-select boards unpin follow-scroll (folio below fold), missing-target callouts dim light (no gray wall), ch1 commission callout was bound to the wrong folio frame (fixed + binding guards)
 - [x] End cards: interstitials on all chapters, big Build-your-own CTA at arc end
-- [ ] **DEPLOY to demo.voygent.ai** (blocked on Neil: production-deploy permission) — then Neil smokes all 3 chapters in a browser (fresh profile: popup should NOT appear)
-- [ ] After smoke: merge demo-design → main + push
+- [x] DEPLOYED to demo.voygent.ai 2026-07-09 (wrangler re-login by Neil; bundle `index-DM1JJtAW.js` live, `/` `/blog` `/stats` 200, no localhost in bundle)
+- [x] Merged demo-design → main (`41d1d27`), pushed; worktree + branch pruned (local + origin)
+- [ ] **Neil smokes all 3 chapters in a fresh browser profile**: no permission popup, Read-mode default + orientation callout, speed choice sticky into ch2, ch2 invite-email + advisor-note + hotel-flip repricing, ch3 inbound reply + messy-email paste + itemized commission, big final CTA
 
 ## Carried over
 - [ ] Paste/gap-fill in CURATED demo — confirm with Neil whether still wanted (gap-fill now demoed in reel ch1)
