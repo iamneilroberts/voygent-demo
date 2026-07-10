@@ -35,6 +35,6 @@ Source handoffs: `pause-2026-07-08-c9-a2-b6-lane.md` (newest) · `pause-2026-07-
 - [x] N7-N18 (QA rounds 2+3, 2026-07-08 late): edit-marker text, post-callout pacing, cutaway hero + section flips, callout copy ×4 plain-language, derived ready-state, itemized commission section, margin chapter rail + autoplay + breadcrumb, client-scene inbox backdrop + label — commit b4c09aa
 - [ ] N18 asset: Neil generates inbox-blur image (prompt provided) → drop at web/public/scenes/inbox-blur.jpg → redeploy
 - [ ] Paste/gap-fill in CURATED demo — confirm with Neil whether still wanted
-- [ ] Pre-existing main test failure: `worker/info/pages.test.ts:72` em-dash voice rule — small separate fix lane
+- [x] Pre-existing main test failure: `worker/info/pages.test.ts:72` em-dash voice rule — FIXED on main (`b48a3c4`); re-verified 17/17 green 2026-07-09 (sweep SW-D4)
 - [ ] B4 remainder: per-turn token sanity behind $.27 early-step cost; LLM_MODEL value decision (Neil)
 - [ ] voygent-lite #343 setup pages (separate lane, M3)
