@@ -11,9 +11,9 @@ Plan: `docs/superpowers/plans/2026-07-10-reel-system-improvements.md` · handoff
 - [x] Task 5: chapter copy → screenplay meta exports (`9091609`)
 - [x] Task 6 (Neil APPROVED): DIY discoverability on intro card (`70b96fe`, with Task 7)
 - [x] Task 7 (Neil live QA): split note line, DIY-aware chapter lists, free-signup CTAs intro+end card (`70b96fe` + fixes `ebc5abe`, signup-style fix pending)
-- [ ] Task 8 (Neil live QA): hotel sources → Booking.com/Expedia (wise-travel does NOT do hotels), folio Book affordance, in-folio signup CTA, cruise dead-air trim — brief `.superpowers/sdd/task-8-brief.md`
-- [ ] Final whole-branch review (opus)
-- [ ] Merge to main + deploy + verify served bundle hash changed
+- [x] Task 8 (Neil live QA): hotel sources → Booking.com/Expedia, folio Book affordance, in-folio signup CTA, cruise dead-air trim (`50559eb`)
+- [x] Final whole-branch review (opus): READY TO MERGE + a11y nits fixed (`687e867`)
+- [x] Merge to main (ff `687e867`, pushed) + deployed 2026-07-10 + bundle `index-CcR1C74D.js` verified served
 - [ ] Neil browser smoke: ?reel=ireland and ?reel=cruise (incl. new CTAs + hierarchy)
 
 ## Carried over (from demo-design lane)
