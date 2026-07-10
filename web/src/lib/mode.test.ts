@@ -17,3 +17,16 @@ describe("mode resolution", () => {
     expect(resolveMode(undefined, undefined)).toBe("auto");
   });
 });
+
+describe("resolveMode with a ?reel= link", () => {
+  it("an explicit reel link wins over persisted live mode", () => {
+    expect(resolveMode(null, "live", "plan")).toBe("auto");
+  });
+  it("an explicit ?mode= still outranks the reel param", () => {
+    expect(resolveMode("live", "auto", "plan")).toBe("live");
+  });
+  it("no reel param keeps the stored-mode behavior", () => {
+    expect(resolveMode(null, "live", null)).toBe("live");
+    expect(resolveMode(null, "live", undefined)).toBe("live");
+  });
+});

@@ -13,8 +13,13 @@ export function normalizeMode(raw: string | null | undefined): ModeId {
   return (MODE_IDS as readonly string[]).includes(raw ?? "") ? (raw as ModeId) : DEFAULT_MODE;
 }
 
-export function resolveMode(param: string | null | undefined, stored: string | null | undefined): ModeId {
+export function resolveMode(param: string | null | undefined, stored: string | null | undefined, reelParam?: string | null): ModeId {
   if (param && (MODE_IDS as readonly string[]).includes(param)) return param as ModeId;
+  // An explicit ?reel= link is a request to WATCH that reel — it must not be
+  // silently overridden by a persisted "live" from an earlier "build your own"
+  // click (shared reel links would otherwise land returning visitors on the
+  // live surface with no visible way back).
+  if (reelParam) return "auto";
   return normalizeMode(stored);
 }
 
@@ -24,8 +29,13 @@ export function persistMode(id: ModeId): void {
 
 export function resolveInitialMode(): ModeId {
   let param: string | null = null;
+  let reel: string | null = null;
   let stored: string | null = null;
-  try { param = new URLSearchParams(window.location.search).get("mode"); } catch { /* default */ }
+  try {
+    const search = new URLSearchParams(window.location.search);
+    param = search.get("mode");
+    reel = search.get("reel");
+  } catch { /* default */ }
   try { stored = localStorage.getItem(MODE_STORAGE_KEY); } catch { /* ignore */ }
-  return resolveMode(param, stored);
+  return resolveMode(param, stored, reel);
 }
