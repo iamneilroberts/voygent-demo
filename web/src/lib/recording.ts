@@ -78,6 +78,9 @@ export interface ReelFolioSession {
   sceneLabel?: string;   // the cutaway scene label (default "The clients' view — the Millers' window")
   totalLabel?: string;   // the trip-total caption (default "Trip total · two travellers")
   helperLine?: string;   // the interactive end-state "send back" CTA label (default "Send to your advisor →")
+  // Free-signup pitch line rendered as a real link at the foot of the window (8c). Omitted
+  // → no CTA row, unchanged rendering. Only set on the FINAL folio snapshot of a reel.
+  ctaLine?: string;
 }
 
 // A brief peek at the engineering view (reel): a small panel that slides in to show

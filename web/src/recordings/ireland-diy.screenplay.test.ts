@@ -54,7 +54,7 @@ describe("ireland-diy (grounding)", () => {
     expect(searchCandidates.length).toBe(3 + 3 + 3 + 3 + 3); // flight, hotel-dub, hotel-kil, car, tours
     expect(searchCandidates.every((c) => !!c.source)).toBe(true);
     const sources = new Set(searchCandidates.map((c) => c.source));
-    expect(sources).toEqual(new Set(["Travelpayouts", "Kiwi.com", "wise-travel.com", "LiteAPI", "Viator", "GetYourGuide"]));
+    expect(sources).toEqual(new Set(["Travelpayouts", "Kiwi.com", "Booking.com", "LiteAPI", "Viator", "GetYourGuide"]));
   });
 
   it("the tips board is Voygent's own curation, not a supplier search — no source attribution", () => {

@@ -51,7 +51,7 @@ describe("caribbean-cruise screenplay (grounding)", () => {
         sources.add(c.source as string);
       }
     }
-    expect(sources).toEqual(new Set(["Widgety", "Viator", "GetYourGuide", "Shore Excursions Group", "wise-travel.com"]));
+    expect(sources).toEqual(new Set(["Widgety", "Viator", "GetYourGuide", "Shore Excursions Group", "Expedia"]));
   });
 
   it("declines the cheaper later week and keeps March 29, but banks the connecting-cabin saving", () => {

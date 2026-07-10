@@ -69,17 +69,17 @@ const hotels: BoardCandidate[] = [
   {
     id: "hotel:holidayinn", title: "Holiday Inn Port of Miami", price: "$189/night",
     meta: "Downtown · walk to the terminal", summary: "Holiday Inn Port of Miami, $189/night",
-    source: "wise-travel.com", badge: "Walk to port",
+    source: "Expedia", badge: "Walk to port",
   },
   {
     id: "hotel:aloft", title: "Aloft Brickell", price: "$172/night",
     meta: "Brickell · 10 min ride to the terminal", summary: "Aloft Brickell, $172/night",
-    source: "wise-travel.com",
+    source: "Expedia",
   },
   {
     id: "hotel:intercontinental", title: "InterContinental Miami", price: "$246/night",
     meta: "Downtown · 10 min ride to the terminal", summary: "InterContinental Miami, $246/night",
-    source: "wise-travel.com",
+    source: "Expedia",
   },
 ];
 
@@ -152,7 +152,7 @@ const fvBase: ReelFolioSession = {
 const fvDays: ReelFolioSession = { ...fvBase, focus: "folio-days" };
 const fvDay3: ReelFolioSession = { ...fvBase, focus: "folio-day-3", expandedDay: 3 };
 const fvExtras: ReelFolioSession = { ...fvBase, focus: "folio-addons" };
-const fvWifiOn: ReelFolioSession = { ...fvExtras, addons: fvExtras.addons.map((a) => (a.id === "addon-wifi" ? { ...a, on: true } : a)) };
+const fvWifiOn: ReelFolioSession = { ...fvExtras, addons: fvExtras.addons.map((a) => (a.id === "addon-wifi" ? { ...a, on: true } : a)), ctaLine: "Plan yours free at voygent.ai" };
 
 export const caribbeanCruise = screenplay({ trip: "Caribbean cruise", skin: "claude" }, (s) => {
   // Beat 1 — the brief, straight from the family. No advisor anywhere in this reel.
@@ -205,7 +205,7 @@ export const caribbeanCruise = screenplay({ trip: "Caribbean cruise", skin: "cla
 
   // Beat 5 — the pre-cruise hotel: an honest tip, not a sales pitch.
   s.agent.says("One more honest tip. Do not try to drive down from Orlando the morning you sail. The Turnpike into PortMiami on an embarkation day is a bad gamble, one accident and you are chasing the ship to its next port. Stay the night before instead.");
-  s.agent.tool("hotel_search", { summary: "wise-travel.com. 41 stays near PortMiami" });
+  s.agent.tool("hotel_search", { summary: "Expedia. 41 stays near PortMiami" });
   s.agent.says("A few options here, all a short ride or a walk from the terminal, so the morning of embarkation stays boring, in a good way, which is exactly what you want with two kids and a pile of luggage.");
   s.agent.board("hotel", "b-hotel-mia", hotels);
   s.client.picks("b-hotel-mia", "hotel:holidayinn", "The Holiday Inn, we can walk to the terminal with the kids and the bags.", withHotel);
@@ -241,7 +241,10 @@ export const caribbeanCruise = screenplay({ trip: "Caribbean cruise", skin: "cla
     body: "Cruise fare with the connecting cabin saving, one night at the port hotel, both excursions. Add the wifi package and watch the total answer right away.",
     dwellMs: 7000,
   });
-  s.client.folioView(null);
+  // 8d: the wifi total-pop callout above already holds 7000ms so the total reads;
+  // closing the window afterward has nothing new to show, so it only needs long
+  // enough to register the close, not the folioview kind's full 4200ms floor.
+  s.client.folioView(null, { holdMs: 2800 });
 
   // Beat 8 — the wrap.
   s.agent.says("This walkthrough was scripted, sources named the whole way. Sign up free and Voygent pulls live sailings, live hotels and live excursions for your own dates, no advisor required.");

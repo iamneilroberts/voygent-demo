@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type { ReelAddon, ReelFolioSession } from "./lib/recording";
 import type { NextChapterCta } from "./ReelEndCard";
 import { computeTripTotal, usd } from "./lib/reel-pricing";
+import { SIGNUP_URL } from "./lib/reel-render";
 
 // Full-screen client folio window: the production-faithful folio the trip's clients see,
 // rendered from a ReelFolioSession snapshot. Mode-aware (spec Decision 4): "scripted"
@@ -71,6 +72,7 @@ export function ReelFolioView({ view, mode, cta }: {
         <span className="cl-fv-check" aria-hidden="true">{a.on ? "☑" : "☐"}</span>
         <span className="cl-fv-addon-label">{a.label}{hint && <i>{hint}</i>}</span>
         <span className="cl-fv-addon-price">+{usd(a.price)}</span>
+        {a.on && <span className="cl-fv-book" aria-hidden="true">Book ↗</span>}
       </button>
       {a.detail && (
         <button type="button" className="cl-fv-addon-more" disabled={!interactive}
@@ -154,7 +156,10 @@ export function ReelFolioView({ view, mode, cta }: {
             <section className="cl-fv-components" data-reel-target="folio-components">
               <h3 className="cl-fv-sec-h">In this trip</h3>
               {view.components!.map((c) => (
-                <div key={c.id} className="cl-fv-component"><span>{c.label}</span><b>{usd(c.price)}</b></div>
+                <div key={c.id} className="cl-fv-component">
+                  <span>{c.label}</span><b>{usd(c.price)}</b>
+                  <span className="cl-fv-book" aria-hidden="true">Book ↗</span>
+                </div>
               ))}
             </section>
           )}
@@ -204,6 +209,10 @@ export function ReelFolioView({ view, mode, cta }: {
                 </details>
               ))}
             </section>
+          )}
+
+          {view.ctaLine && (
+            <a className="cl-fv-cta" href={SIGNUP_URL} target="_blank" rel="noopener noreferrer">{view.ctaLine} →</a>
           )}
           </>)}
         </div>

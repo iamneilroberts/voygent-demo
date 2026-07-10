@@ -26,9 +26,9 @@ const flights: BoardCandidate[] = [
 
 // ── Dublin hotels: three central, walkable options, one supplier. ─────────────────────
 const hotelsDub: BoardCandidate[] = [
-  { id: "hotel:alex", title: "The Alex", price: "$164/night", meta: "Merrion Square, a short walk to Temple Bar", source: "wise-travel.com", summary: "The Alex $164/night" },
-  { id: "hotel:wren", title: "Wren Urban Nest", price: "$139/night", meta: "Custom House Quay, compact and central", badge: "Walkable", source: "wise-travel.com", summary: "Wren Urban Nest $139/night" },
-  { id: "hotel:clayton-cardiff", title: "Clayton Hotel Cardiff Lane", price: "$151/night", meta: "Grand Canal Dock", source: "wise-travel.com", summary: "Clayton Cardiff Lane $151/night" },
+  { id: "hotel:alex", title: "The Alex", price: "$164/night", meta: "Merrion Square, a short walk to Temple Bar", source: "Booking.com", summary: "The Alex $164/night" },
+  { id: "hotel:wren", title: "Wren Urban Nest", price: "$139/night", meta: "Custom House Quay, compact and central", badge: "Walkable", source: "Booking.com", summary: "Wren Urban Nest $139/night" },
+  { id: "hotel:clayton-cardiff", title: "Clayton Hotel Cardiff Lane", price: "$151/night", meta: "Grand Canal Dock", source: "Booking.com", summary: "Clayton Cardiff Lane $151/night" },
 ];
 
 // ── Killarney hotels: three near the National Park, a different supplier. ─────────────
@@ -128,6 +128,7 @@ const finaleWithInsurance: ReelFolioSession = {
   ...finaleBase,
   focus: "folio-total",
   addons: finaleBase.addons.map((a) => (a.id === "insurance" ? { ...a, on: true } : a)),
+  ctaLine: "Plan yours free at voygent.ai",
 };
 
 export const irelandDiy = screenplay({ trip: "Ireland · DIY", skin: "claude" }, (s) => {
@@ -168,7 +169,7 @@ export const irelandDiy = screenplay({ trip: "Ireland · DIY", skin: "claude" },
   });
 
   // Act 3 — Dublin hotels.
-  s.agent.tool("hotel_search", { summary: "wise-travel.com, 62 stays, Temple Bar to the Docklands" });
+  s.agent.tool("hotel_search", { summary: "Booking.com, 62 stays, Temple Bar to the Docklands" });
   s.agent.says("For Dublin, three central options, all an easy walk to Temple Bar.");
   s.agent.board("hotel", "b-hotel-dub", hotelsDub);
   s.client.picks("b-hotel-dub", "hotel:wren", "Wren Urban Nest, the walkable one", withDubHotel);
