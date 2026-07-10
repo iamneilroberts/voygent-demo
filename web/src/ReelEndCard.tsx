@@ -2,7 +2,7 @@
 // The next-chapter CTA shape shared by both end surfaces (ReelEndCard, ReelFolioView).
 export interface NextChapterCta { label: string; onClick: () => void }
 
-const DEFAULT_RECAP = ["✈ live flights", "🏨 live hotels", "↩ self-corrected", "◇ context cached", "low cost"];
+const DEFAULT_RECAP = ["live flights", "live hotels", "self-corrected", "context cached", "low cost"];
 const DEFAULT_EYEBROW = "✓ That was a real session";
 const DEFAULT_TITLE = "Now it's your turn";
 const DEFAULT_BLURB = "Everything you just watched was a real Voygent run. Nothing in the results was scripted.";

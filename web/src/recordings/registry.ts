@@ -45,7 +45,7 @@ export const REELS: ReelEntry[] = [
     durationLabel: "~4 min",
     recording: dublinCollab.recording,
     highlights: dublinCollab.highlights,
-    recap: ["✈ six real fares, one pick", "🏨 a 3-hotel shortlist for the clients", "🗓 the week, day by day", "🚌 the open day becomes a $43 commission", "✎ the advisor edits in place", "💷 commission projected, itemized"],
+    recap: ["six real fares, one pick", "a 3-hotel shortlist for the clients", "the week, day by day", "the open day becomes a $43 commission", "the advisor edits in place", "commission projected, itemized"],
     intro: {
       eyebrow: "▶ Demo 1 of 3",
       note: "A scripted walk-through of the workflow. Your own run pulls real live flights and hotels.",
@@ -65,7 +65,7 @@ export const REELS: ReelEntry[] = [
     durationLabel: "~3 min",
     recording: dublinClient.recording,
     highlights: dublinClient.highlights,
-    recap: ["📬 a living page, not a PDF", "📝 the advisor's note on top", "🏨 their hotel pick reprices the trip", "🔍 a tour page one click deep", "💬 their question, on the day itself", "✓ one click back to the advisor"],
+    recap: ["a living page, not a PDF", "the advisor's note on top", "their hotel pick reprices the trip", "a tour page one click deep", "their question, on the day itself", "one click back to the advisor"],
     intro: { eyebrow: "▶ Demo 2 of 3", note: "This walk-through is scripted, like demo 1. A real Voygent folio is a live page your clients open, change, and annotate." },
     endCard: {
       eyebrow: "✓ Demo 2 · the clients answered",
@@ -81,7 +81,7 @@ export const REELS: ReelEntry[] = [
     durationLabel: "~2 min",
     recording: dublinRun.recording,
     highlights: dublinRun.highlights,
-    recap: ["📥 the reply, routed to the trip", "🤝 their note becomes the plan", "📋 a messy confirmation, pasted, filed", "💵 $280 commission, itemized"],
+    recap: ["the reply, routed to the trip", "their note becomes the plan", "a messy confirmation, pasted, filed", "$280 commission, itemized"],
     intro: { eyebrow: "▶ Demo 3 of 3", note: "This walk-through is scripted, like demos 1 and 2. A real Voygent run files real confirmations against real trips." },
     endCard: {
       eyebrow: "✓ That's the whole loop",
