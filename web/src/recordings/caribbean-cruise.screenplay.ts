@@ -258,7 +258,7 @@ export const meta = {
   endCard: {
     eyebrow: "✓ A family cruise, planned in one chat",
     title: "Build your own trip",
-    blurb: "A free account takes about a minute, and adding the Voygent connector in claude.ai is one click. This walk-through was scripted, a real run pulls live results.",
+    blurb: "Adding the Voygent connector in claude.ai is one click. This walk-through was scripted, a real run pulls live results.",
   },
   recap: ["31 sailings, sources named", "$284 saved with connecting cabins", "excursions from three suppliers", "free port mornings mapped", "one folio, family total"],
 } as const;

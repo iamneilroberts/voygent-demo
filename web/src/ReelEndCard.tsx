@@ -35,7 +35,7 @@ export function ReelEndCard(
           Build your own trip →
           {!nextChapter && <span className="cl-reel-btn-meta">live · real flights and hotels · type anything</span>}
         </button>
-        <a className="cl-reel-btn cl-reel-btn-secondary cl-reel-signup" href={SIGNUP_URL} target="_blank" rel="noopener noreferrer">
+        <a className="cl-reel-btn cl-reel-btn-signup cl-reel-signup" href={SIGNUP_URL} target="_blank" rel="noopener noreferrer">
           Create a free account<span className="cl-reel-btn-meta">voygent.ai · takes about a minute</span>
         </a>
         <button type="button" className="cl-reel-btn cl-reel-btn-tertiary" onClick={onReplay}>↺ Replay the demo</button>
