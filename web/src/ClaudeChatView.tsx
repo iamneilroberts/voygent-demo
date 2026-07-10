@@ -371,7 +371,12 @@ export function ClaudeChatView(
       if (last) { last.scrollIntoView({ block: "start" }); return; }
     }
     endRef.current?.scrollIntoView({ block: "end" });
-  }, [items, busy]);
+    // Reel only: a folio-only update re-runs the follow too. The inline folio artifact
+    // sits ABOVE the transcript tail, so its re-renders change height with no items
+    // change — during ch1's extras beat that left the tail growing below the fold for
+    // ~14s of visible dead air (QA 07-10 scroll probe). Live mode keeps the original
+    // "never follow on folio-only updates" rule (the mobile anti-yank).
+  }, [items, busy, reelMode ? folio : null]);
 
   const lastIdx = items.length - 1;
   // Enrichment runs a long batch of tools (itinerary, excursions, dining) with
