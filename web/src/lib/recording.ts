@@ -13,6 +13,10 @@ export interface ReelHotelOption { id: string; name: string; price: number; meta
 // themselves before selecting it). Fixture copy only; prices stay on the addon.
 export interface ReelAddonDetail { blurb: string; bullets: string[] }
 export interface ReelAddon { id: string; label: string; price: number; on: boolean; day?: number; detail?: ReelAddonDetail }
+// A fixed, priced line item in the folio window (a cruise fare, a package, a
+// transfer already committed). Unlike ReelAddon it has no on/off toggle; it is
+// part of the trip and always counts toward the total.
+export interface ReelComponent { id: string; label: string; price: number }
 export interface ReelClientSession {
   open: boolean;
   url: string;            // simulated address-bar URL, e.g. voygent.app/t/dublin
@@ -50,6 +54,9 @@ export interface ReelFolioSession {
   hotels: ReelHotelOption[];
   pickedHotelId: string | null;
   addons: ReelAddon[];
+  // Fixed, priced line items (a cruise fare, a committed package) that always count
+  // toward the total. Omitted -> unchanged rendering/total for every existing reel.
+  components?: ReelComponent[];
   notes: ReelFolioNote[];
   status: "draft" | "final";
   advisorUpdating: boolean;

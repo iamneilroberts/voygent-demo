@@ -1,6 +1,6 @@
 import { screenplay } from "../lib/screenplay";
 import type { BoardCandidate, FolioData, FolioDay, FolioInclude } from "../../../shared/events";
-import type { ReelFolioSession, ReelHotelOption, ReelAddon } from "../lib/recording";
+import type { ReelFolioSession, ReelHotelOption, ReelAddon, ReelComponent } from "../lib/recording";
 
 // "A family cruise, planned in one chat" (DIY reel, 2026-07-10). Traveller-only: a
 // family of four plans a 7-night Caribbean cruise themselves, no advisor anywhere.
@@ -13,8 +13,10 @@ import type { ReelFolioSession, ReelHotelOption, ReelAddon } from "../lib/record
 // Money mapping note (read before touching numbers): FolioData has no "cruise" field,
 // only flights/hotels/days/includes. ReelFolioView renders a literal flight/hotel
 // section straight off those arrays, so a cruise fare forced into `flights` would read
-// as a plane ticket. Instead the cruise fare, and the two excursions, ride as free-text
-// `ReelAddon` rows in the finale's folio window ("Optional extras"); only the one-night
+// as a plane ticket. Instead the cruise fare and the two excursions are fixed
+// `ReelComponent` line items in the finale's folio window ("In this trip") — they are
+// committed, not optional, so they don't belong under "Optional extras". Only the ship
+// wifi package stays a toggleable `ReelAddon` (the total-pop beat). The one-night
 // pre-cruise hotel uses the real hotel slot, since "Hotel · one night" reads honestly.
 // flightsPrice/activitiesPrice stay 0 so nothing invisible sneaks into the total.
 
@@ -125,20 +127,23 @@ const withHotel: FolioData = { ...withExcursions, hotels: [{ name: "Holiday Inn 
 const withIncludes: FolioData = { ...withHotel, includes: chosenIncludes };
 export const sentFolio: FolioData = { ...withIncludes };
 
-// ── The finale cutaway: the whole trip, one page, priced. All money lives as loose
-//    addons (see the mapping note up top) so nothing mislabels the cruise as a flight.
+// ── The finale cutaway: the whole trip, one page, priced. The cruise fare and the two
+//    excursions are fixed components (see the mapping note up top); only the wifi
+//    package stays a toggleable addon, since it's the one thing not already committed.
 const finaleHotels: ReelHotelOption[] = [{ id: "hotel:holidayinn", name: "Holiday Inn Port of Miami", price: 189, meta: "$189 · one night, walk to the terminal" }];
+const finaleComponents: ReelComponent[] = [
+  { id: "comp-fare", label: "Cruise fare, 2 connecting cabins, 4 guests", price: CRUISE_FARE },
+  { id: "comp-chankanaab", label: "Chankanaab beach and snorkel day, Cozumel", price: 39 * 2 + 19.5 * 2 },
+  { id: "comp-dunns", label: "Dunn's River Falls climb, Falmouth", price: 45 * 4 },
+];
 const finaleAddons: ReelAddon[] = [
-  { id: "cruise-fare", label: "Cruise fare, 2 connecting cabins, 4 guests", price: CRUISE_FARE, on: true },
-  { id: "exc-chankanaab", label: "Chankanaab beach and snorkel day, Cozumel", price: 39 * 2 + 19.5 * 2, on: true },
-  { id: "exc-dunns", label: "Dunn's River Falls climb, Falmouth", price: 45 * 4, on: true },
   { id: "addon-wifi", label: "Cruise wifi package, whole family", price: 89, on: false },
 ];
 const fvBase: ReelFolioSession = {
   open: true, url: "voygent.app/t/cruise", folio: sentFolio,
   flightsPrice: 0, activitiesPrice: 0,
   hotels: finaleHotels, pickedHotelId: "hotel:holidayinn",
-  addons: finaleAddons, notes: [], status: "final", advisorUpdating: false,
+  addons: finaleAddons, components: finaleComponents, notes: [], status: "final", advisorUpdating: false,
   focus: "folio-hero", expandedDay: null,
   audienceLine: "Prepared for the Rivera family, Mar 29 to Apr 5",
   sceneLabel: "Your trip, your window",

@@ -46,7 +46,7 @@ export function ReelFolioView({ view, mode, cta }: {
   const pickedHotelId = interactive ? localPicked : view.pickedHotelId;
   const openDetailId = interactive ? localDetail : (view.openDetailId ?? null);
   const openDetail = addons.find((a) => a.id === openDetailId && a.detail);
-  const total = computeTripTotal({ flightsPrice: view.flightsPrice, activitiesPrice: view.activitiesPrice, hotels: view.hotels, pickedHotelId, addons });
+  const total = computeTripTotal({ flightsPrice: view.flightsPrice, activitiesPrice: view.activitiesPrice, hotels: view.hotels, pickedHotelId, addons, components: view.components });
   const rootRef = useRef<HTMLDivElement>(null);
 
   // Scripted section cuts: bring the focused anchor into view (smooth unless reduced).
@@ -148,6 +148,15 @@ export function ReelFolioView({ view, mode, cta }: {
             view.folio.hotels.map((h) => (
               <div key={h.name} className="cl-fv-line"><span>🏨 {h.name}{h.area ? ` · ${h.area}` : ""}{h.nights ? ` · ${h.nights} nights` : ""}</span><b>{h.perNight}/night</b></div>
             ))
+          )}
+
+          {(view.components ?? []).length > 0 && (
+            <section className="cl-fv-components" data-reel-target="folio-components">
+              <h3 className="cl-fv-sec-h">In this trip</h3>
+              {view.components!.map((c) => (
+                <div key={c.id} className="cl-fv-component"><span>{c.label}</span><b>{usd(c.price)}</b></div>
+              ))}
+            </section>
           )}
 
           <section className="cl-fv-days" data-reel-target="folio-days">

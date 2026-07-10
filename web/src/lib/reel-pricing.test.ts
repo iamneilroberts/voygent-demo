@@ -56,6 +56,24 @@ describe("computeTripTotal over the TripPricing slice", () => {
   });
 });
 
+describe("computeTripTotal with fixed components", () => {
+  it("sums fixed components", () => {
+    const v = {
+      flightsPrice: 0, activitiesPrice: 0, hotels: [], pickedHotelId: null, addons: [],
+      components: [
+        { id: "fare", label: "Cruise fare, 2 connecting cabins, 4 guests", price: 3180 },
+        { id: "exc", label: "Chankanaab beach day, 4 guests", price: 117 },
+      ],
+    };
+    expect(computeTripTotal(v)).toBe(3297);
+  });
+
+  it("components absent means unchanged totals", () => {
+    const v = { flightsPrice: 100, activitiesPrice: 0, hotels: [], pickedHotelId: null, addons: [] };
+    expect(computeTripTotal(v)).toBe(100);
+  });
+});
+
 describe("usd", () => {
   it("formats whole dollars with a thousands separator", () => {
     expect(usd(4739)).toBe("$4,739");
