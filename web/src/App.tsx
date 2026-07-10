@@ -429,6 +429,7 @@ export function App() {
   }
   const nextReel = selectedReel.next ? REELS.find((r) => r.id === selectedReel.next) : undefined;
   const nextChapter = nextReel ? { label: `Next: ${nextReel.title} →`, onClick: () => gotoReel(nextReel.id) } : undefined;
+  const travellerReels = REELS.filter((r) => r.audience === "traveller");
 
   // The actual live transition — a clean reload that re-latches the session.
   // No session check here: callers either already gated (goLive) or just
@@ -555,7 +556,16 @@ export function App() {
               title={selectedReel.title} blurb={selectedReel.blurb} durationLabel={selectedReel.durationLabel}
               eyebrow={selectedReel.intro?.eyebrow} note={selectedReel.intro?.note}
               onWatch={startReel} onPlanYourOwn={planYourOwn}
-              chapters={CHAPTERS.map((c) => ({ id: c.id, title: c.title, durationLabel: c.durationLabel, current: c.id === selectedReel.id }))}
+              {...(selectedReel.audience === "traveller"
+                ? {
+                    chapters: travellerReels.map((r) => ({ id: r.id, title: r.title, durationLabel: r.durationLabel, current: r.id === selectedReel.id })),
+                    more: [{ id: "plan", title: "Watch the advisor demos", durationLabel: "3 parts" }],
+                    moreLabel: "Working with an advisor?",
+                  }
+                : {
+                    chapters: CHAPTERS.map((c) => ({ id: c.id, title: c.title, durationLabel: c.durationLabel, current: c.id === selectedReel.id })),
+                    more: travellerReels.map((r) => ({ id: r.id, title: r.title, durationLabel: r.durationLabel })),
+                  })}
               onChapter={gotoReel}
             />
           )}

@@ -223,7 +223,7 @@ export const irelandDiy = screenplay({ trip: "Ireland · DIY", skin: "claude" },
 export const meta = {
   id: "ireland",
   title: "A week in Ireland, planned in one chat",
-  blurb: "Two travellers plan a week in Ireland with live searches across six real sources, a date shift that saves $228, a rental car, and free Voygent-built extras.",
+  blurb: "Two travellers plan a week in Ireland in one chat. Live searches across six real sources, a $228 date shift saving, a rental car, and free Voygent built extras.",
   intro: {
     eyebrow: "▶ DIY demo",
     note: "A scripted walk-through of the free tier. Your own run pulls live flights, hotels, cars and tours.",

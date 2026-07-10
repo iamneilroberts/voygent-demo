@@ -1,6 +1,9 @@
 import type { Actor } from "./recording";
 import type { ReelEditMarker, ReelThread } from "./interaction";
 
+// Single source for the free-signup CTA link (intro card + end card).
+export const SIGNUP_URL = "https://voygent.ai";
+
 // Scoped CSS class for an actor's color treatment (defined in skin-claude.css).
 export function actorClass(actor: Actor): string {
   return `cl-actor-${actor}`;

@@ -37,6 +37,9 @@ export interface ReelEntry {
   // your own run pulls live results". Absent -> no chip (dublin-oct is a real
   // recording and needs none; the advisor chapters adopt it in a later pass).
   honestyChip?: string;
+  // Which audience a non-chapter reel is authored for. "traveller" reels are
+  // listed under "Planning it yourself?" on the intro card. Absent -> unlisted.
+  audience?: "traveller";
 }
 
 // QA4 arc (2026-07-09): 1 plan (advisor + Voygent build it, projected commission) →
@@ -95,6 +98,7 @@ export const REELS: ReelEntry[] = [
     id: irelandMeta.id,
     next: "cruise",
     showSend: false,
+    audience: "traveller",
     actorLabels: { client: "You" },
     honestyChip: "Scripted walk-through · your own run pulls live results",
     title: irelandMeta.title,
@@ -109,6 +113,7 @@ export const REELS: ReelEntry[] = [
   {
     id: cruiseMeta.id,
     showSend: false,
+    audience: "traveller",
     actorLabels: { client: "You" },
     honestyChip: "Scripted walk-through · your own run pulls live results",
     title: cruiseMeta.title,
