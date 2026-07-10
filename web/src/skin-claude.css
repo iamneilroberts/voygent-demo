@@ -437,6 +437,9 @@
   position: absolute; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center;
   padding: 20px; background: #1f1e1c40; backdrop-filter: blur(2px);
 }
+/* Stop card: a mid-playback takeover, so it must cover the callout overlay (65)
+   and the transport/nav cluster (66), not just the base surfaces. */
+:root[data-skin="claude"] .cl-reel-scrim.cl-reel-stop { position: fixed; z-index: 70; }
 :root[data-skin="claude"] .cl-reel-card {
   background: var(--cl-surface); border: 1px solid var(--cl-line); border-radius: 16px;
   max-width: 480px; width: 100%; padding: 26px 28px 22px; box-shadow: 0 24px 60px #00000026; text-align: center;

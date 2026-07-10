@@ -39,6 +39,7 @@ import { ReelFolioView } from "./ReelFolioView";
 import { ReelEngPanel } from "./ReelEngPanel";
 import { ReelEmailView } from "./ReelEmailView";
 import { ReelEndCard } from "./ReelEndCard";
+import { ReelStopCard } from "./ReelStopCard";
 import { folioSessionFromClient } from "./lib/folio-session";
 import type { Highlight } from "./lib/highlights";
 import { isChatMessage, type TimelineItem, type BoardItem } from "./timeline";
@@ -172,6 +173,11 @@ export function App() {
   function flushResume() { const ws = resumeWaiters.current; resumeWaiters.current = []; ws.forEach((r) => r()); }
   function pauseGate(): Promise<void> { return pausedRef.current ? new Promise<void>((res) => resumeWaiters.current.push(res)) : Promise.resolve(); }
   function togglePause() { setPaused((p) => { const next = !p; pausedRef.current = next; if (!next) flushResume(); return next; }); }
+  // Stop control: freeze playback and show the free-trial exit ramp. "Keep watching"
+  // resumes exactly where the viewer left off (it reuses the pause gate).
+  const [stopCta, setStopCta] = useState(false);
+  function stopDemo() { if (!pausedRef.current) togglePause(); setStopCta(true); }
+  function resumeDemo() { setStopCta(false); if (pausedRef.current) togglePause(); }
   // Reset + fast-forward to `target` (instant rebuild), then play on. resetReelState
   // clears the accumulated timeline so the rebuild starts clean; the effect (keyed on
   // replayNonce) reads seekFrameRef and passes it as replayChat's seekTo.
@@ -584,6 +590,7 @@ export function App() {
               {reelPhase === "playing" && (
                 <div className="cl-reel-controls" role="group" aria-label="Playback controls">
                   <button type="button" className="cl-reel-ctl" aria-pressed={paused} aria-label={paused ? "Play" : "Pause"} onClick={togglePause}>{paused ? "▶" : "❚❚"}</button>
+                  <button type="button" className="cl-reel-ctl" aria-label="Stop the demo" title="Stop the demo" onClick={stopDemo}>■</button>
                   <button type="button" className="cl-reel-ctl" aria-label="Restart" onClick={startReel}>↺</button>
                   <div className="cl-reel-track">
                     <i style={{ width: `${reelSeekPct}%` }} />
@@ -615,6 +622,9 @@ export function App() {
               )}
             </div>
           )}
+          {skin === "claude" && mode === "auto" && reelPhase === "playing" && stopCta && (
+            <ReelStopCard onTrial={tryYourself} onResume={resumeDemo} onReplay={() => { setStopCta(false); startReel(); }} />
+          )}
           {skin === "claude" && mode === "auto" && reelPhase === "ended" && (
             reelView.folioView?.open
               // Ch3 ends on the folio itself: same surface, now interactive, standard CTA row.
@@ -641,8 +651,6 @@ export function App() {
           )}
           <Inspector
             state={eng}
-            // Manual collapse only applies once live; toggling during the pre-trip idle rail is a
-            // no-op so a stray click can't latch `collapsed` and suppress the first-tool reveal.
             onToggleCollapse={() => setExpanded((x) => !x)}
             tools={insTools} turns={insTurns} summaries={insSummaries}
             savings={insSavings} overhead={insOverhead} stats={stats}
