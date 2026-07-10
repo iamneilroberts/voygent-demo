@@ -128,3 +128,18 @@ export const dublinRun = screenplay({ trip: "Dublin · advisor", skin: "claude" 
     body: "The hotel, both tours, the transfers, the food tour: $280 booked on this trip, each component showing its cut. Voygent keeps the number current as the trip changes, and still shows what the untaken extras are worth.",
   });
 });
+
+// Registry copy for this chapter. Lives here so the walk-through's words and its
+// content change in the same file; registry.ts only wires ids and ordering.
+export const meta = {
+  id: "advisor",
+  title: "3 · Book the trip",
+  blurb: "The Millers' answer lands back with the advisor. Voygent folds it in, files the airline's messy confirmation email, and itemizes the commission.",
+  intro: { eyebrow: "▶ Demo 3 of 3", note: "This walk-through is scripted, like demos 1 and 2. A real Voygent run files real confirmations against real trips." },
+  endCard: {
+    eyebrow: "✓ That's the whole loop",
+    title: "Plan it, share it, book it, get paid",
+    blurb: "One thread planned the trip, the clients shaped it in their own window, the booking filed itself from a pasted email, and the commission stayed itemized the whole way. The walk-through was scripted; the demo behind the button below is live.",
+  },
+  recap: ["the reply, routed to the trip", "their note becomes the plan", "a messy confirmation, pasted, filed", "$280 commission, itemized"],
+} as const;

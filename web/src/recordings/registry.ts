@@ -3,9 +3,9 @@ import type { Recording } from "../lib/recording";
 import type { Highlight, HighlightTrack } from "../lib/highlights";
 import dublin from "./dublin-oct.json";
 import dublinHl from "./dublin-oct.highlights.json";
-import { dublinCollab } from "./dublin-collab.screenplay";
-import { dublinRun } from "./dublin-run.screenplay";
-import { dublinClient } from "./dublin-client.screenplay";
+import { dublinCollab, meta as planMeta } from "./dublin-collab.screenplay";
+import { dublinRun, meta as advisorMeta } from "./dublin-run.screenplay";
+import { dublinClient, meta as clientMeta } from "./dublin-client.screenplay";
 import { irelandDiy, meta as irelandMeta } from "./ireland-diy.screenplay";
 import { caribbeanCruise, meta as cruiseMeta } from "./caribbean-cruise.screenplay";
 import { reelDurationLabel } from "../lib/reel-duration";
@@ -52,57 +52,42 @@ export const REELS: ReelEntry[] = [
     highlights: (dublinHl as HighlightTrack).highlights,
   },
   {
-    id: "plan",
+    id: planMeta.id,
     chapter: 1,
     next: "client",
-    title: "1 · Plan the trip",
-    blurb: "An advisor and Voygent build a week in Dublin: real searches, a hotel shortlist, the open day sold, and the advisor's commission in view.",
+    title: planMeta.title,
+    blurb: planMeta.blurb,
     durationLabel: reelDurationLabel(dublinCollab.recording, dublinCollab.highlights),
     recording: dublinCollab.recording,
     highlights: dublinCollab.highlights,
-    recap: ["six real fares, one pick", "a 3-hotel shortlist for the clients", "the week, day by day", "the open day becomes a $43 commission", "the advisor edits in place", "commission projected, itemized"],
-    intro: {
-      eyebrow: "▶ Demo 1 of 3",
-      note: "A scripted walk-through of the workflow. Your own run pulls real live flights and hotels.",
-    },
-    endCard: {
-      eyebrow: "✓ Demo 1 · the plan is out",
-      title: "The trip is with the travellers",
-      blurb: "The travellers get a link to a live, detailed portfolio with the advisor's recommendations and transparent pricing. They can try out the alternatives, get more details by clicking an item, or ask a question that is instantly routed back to the advisor. That is demo 2. (This walk-through is scripted; a real run pulls live flights and hotels.)",
-    },
+    recap: [...planMeta.recap],
+    intro: { ...planMeta.intro },
+    endCard: { ...planMeta.endCard },
   },
   {
-    id: "client",
+    id: clientMeta.id,
     chapter: 2,
     next: "advisor",
-    title: "2 · The client's view",
-    blurb: "The proposal lands with the Millers. Watch them explore it in their own window, pick a hotel, watch the price follow every click, and send their answer back.",
+    title: clientMeta.title,
+    blurb: clientMeta.blurb,
     durationLabel: reelDurationLabel(dublinClient.recording, dublinClient.highlights),
     recording: dublinClient.recording,
     highlights: dublinClient.highlights,
-    recap: ["a living page, not a PDF", "the advisor's note on top", "their hotel pick reprices the trip", "a tour page one click deep", "their question, on the day itself", "one click back to the advisor"],
-    intro: { eyebrow: "▶ Demo 2 of 3", note: "This walk-through is scripted, like demo 1. A real Voygent folio is a live page your clients open, change, and annotate." },
-    endCard: {
-      eyebrow: "✓ Demo 2 · the clients answered",
-      title: "They shaped their own trip",
-      blurb: "The Millers picked their hotel, added a tour and the transfers, and asked one question. All of it went back to the advisor in one click. Demo 3 is what the advisor does with it: the reply, the booking, and the commission. (Scripted walk-through; the live folio is a real page.)",
-    },
+    recap: [...clientMeta.recap],
+    intro: { ...clientMeta.intro },
+    endCard: { ...clientMeta.endCard },
   },
   {
-    id: "advisor",
+    id: advisorMeta.id,
     chapter: 3,
-    title: "3 · Book the trip",
-    blurb: "The Millers' answer lands back with the advisor. Voygent folds it in, files the airline's messy confirmation email, and itemizes the commission.",
+    title: advisorMeta.title,
+    blurb: advisorMeta.blurb,
     durationLabel: reelDurationLabel(dublinRun.recording, dublinRun.highlights),
     recording: dublinRun.recording,
     highlights: dublinRun.highlights,
-    recap: ["the reply, routed to the trip", "their note becomes the plan", "a messy confirmation, pasted, filed", "$280 commission, itemized"],
-    intro: { eyebrow: "▶ Demo 3 of 3", note: "This walk-through is scripted, like demos 1 and 2. A real Voygent run files real confirmations against real trips." },
-    endCard: {
-      eyebrow: "✓ That's the whole loop",
-      title: "Plan it, share it, book it, get paid",
-      blurb: "One thread planned the trip, the clients shaped it in their own window, the booking filed itself from a pasted email, and the commission stayed itemized the whole way. The walk-through was scripted; the demo behind the button below is live.",
-    },
+    recap: [...advisorMeta.recap],
+    intro: { ...advisorMeta.intro },
+    endCard: { ...advisorMeta.endCard },
   },
   // DIY (traveller-only) reels — the free tier, no advisor anywhere. Not part of
   // the 3-chapter advisor arc; reached via ?reel=ireland / ?reel=cruise.

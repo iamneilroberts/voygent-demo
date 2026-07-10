@@ -255,3 +255,21 @@ export const dublinCollab = screenplay({ trip: "Dublin · plan", skin: "claude" 
   s.advisor.sendsToClient({ subject: "Your Dublin trip is ready to look over" });
   s.spotlight({ interactionKind: "handoff", nth: 1 }, { target: "handoff-notice", eyebrow: "Out to the travellers", title: "Sent for review", body: "The advisor adds a note and sends the folio. The travellers get it by email and can reply straight back into Voygent. Simulated here. What they see when they open it is demo 2." });
 });
+
+// Registry copy for this chapter. Lives here so the walk-through's words and its
+// content change in the same file; registry.ts only wires ids and ordering.
+export const meta = {
+  id: "plan",
+  title: "1 · Plan the trip",
+  blurb: "An advisor and Voygent build a week in Dublin: real searches, a hotel shortlist, the open day sold, and the advisor's commission in view.",
+  intro: {
+    eyebrow: "▶ Demo 1 of 3",
+    note: "A scripted walk-through of the workflow. Your own run pulls real live flights and hotels.",
+  },
+  endCard: {
+    eyebrow: "✓ Demo 1 · the plan is out",
+    title: "The trip is with the travellers",
+    blurb: "The travellers get a link to a live, detailed portfolio with the advisor's recommendations and transparent pricing. They can try out the alternatives, get more details by clicking an item, or ask a question that is instantly routed back to the advisor. That is demo 2. (This walk-through is scripted; a real run pulls live flights and hotels.)",
+  },
+  recap: ["six real fares, one pick", "a 3-hotel shortlist for the clients", "the week, day by day", "the open day becomes a $43 commission", "the advisor edits in place", "commission projected, itemized"],
+} as const;

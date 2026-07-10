@@ -172,3 +172,18 @@ export const dublinClient = screenplay({ trip: "Dublin · client", skin: "claude
   });
   s.client.folioView(null);
 });
+
+// Registry copy for this chapter. Lives here so the walk-through's words and its
+// content change in the same file; registry.ts only wires ids and ordering.
+export const meta = {
+  id: "client",
+  title: "2 · The client's view",
+  blurb: "The proposal lands with the Millers. Watch them explore it in their own window, pick a hotel, watch the price follow every click, and send their answer back.",
+  intro: { eyebrow: "▶ Demo 2 of 3", note: "This walk-through is scripted, like demo 1. A real Voygent folio is a live page your clients open, change, and annotate." },
+  endCard: {
+    eyebrow: "✓ Demo 2 · the clients answered",
+    title: "They shaped their own trip",
+    blurb: "The Millers picked their hotel, added a tour and the transfers, and asked one question. All of it went back to the advisor in one click. Demo 3 is what the advisor does with it: the reply, the booking, and the commission. (Scripted walk-through; the live folio is a real page.)",
+  },
+  recap: ["a living page, not a PDF", "the advisor's note on top", "their hotel pick reprices the trip", "a tour page one click deep", "their question, on the day itself", "one click back to the advisor"],
+} as const;
