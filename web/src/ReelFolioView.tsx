@@ -87,7 +87,7 @@ export function ReelFolioView({ view, mode, cta }: {
     <div className="cl-fv-scrim cl-scene-client" role="dialog" aria-modal="true" aria-label="The client's folio window">
       {/* N18: scene shift — the blurred inbox backdrop + label make it unmistakable that
           we've left the advisor's chat and are looking over the clients' shoulder. */}
-      <div className="cl-scene-label"><span aria-hidden="true">📥</span> The clients&#39; view — the Millers&#39; window</div>
+      <div className="cl-scene-label"><span aria-hidden="true">📥</span> {view.sceneLabel ?? "The clients' view — the Millers' window"}</div>
       <div className="cl-fv-window" onPointerDownCapture={interactive ? cancelAuto : undefined}>
         <div className="cl-fv-bar" aria-hidden="true"><span className="cl-fv-dots">● ● ●</span><span className="cl-fv-url">{view.url}</span></div>
         {view.advisorNote && (
@@ -123,7 +123,7 @@ export function ReelFolioView({ view, mode, cta }: {
           <header className="cl-fv-hero" data-reel-target="folio-hero">
             <span className={`cl-fv-status ${view.status}`} data-reel-target="folio-status">{view.status === "final" ? "✓ Final" : "Draft"}</span>
             <h2 className="cl-fv-title">{view.folio.title}</h2>
-            <p className="cl-fv-sub">Prepared for Mark &amp; Julie Miller · Oct 4–11</p>
+            <p className="cl-fv-sub">{view.audienceLine ?? "Prepared for Mark & Julie Miller · Oct 4–11"}</p>
           </header>
 
           {view.folio.flights.map((f) => (
@@ -170,7 +170,7 @@ export function ReelFolioView({ view, mode, cta }: {
                   {dayNotes.length > 0 && (
                     <div className="cl-fv-notes" data-reel-target="folio-note">
                       {dayNotes.map((nt, k) => (
-                        <p key={k} className={`cl-fv-note ${nt.author}`}><b>{nt.author === "client" ? "Julie" : "Your advisor"}</b> {nt.text}</p>
+                        <p key={k} className={`cl-fv-note ${nt.author}`}><b>{nt.authorLabel ?? (nt.author === "client" ? "Julie" : "Your advisor")}</b> {nt.text}</p>
                       ))}
                     </div>
                   )}
@@ -200,7 +200,7 @@ export function ReelFolioView({ view, mode, cta }: {
         </div>
 
         {view.advisorUpdating && <div className="cl-fv-updating" role="status"><span className="cl-fv-pulse" aria-hidden="true" />Advisor is updating…</div>}
-        <div className="cl-fv-total" data-reel-target="folio-total"><span>Trip total · two travellers</span><b key={total}>{usd(total)}</b></div>
+        <div className="cl-fv-total" data-reel-target="folio-total"><span>{view.totalLabel ?? "Trip total · two travellers"}</span><b key={total}>{usd(total)}</b></div>
         {/* QA4 ch2 closing beat: the scripted Send — button flips to sent + a
             confirmation line, so the "back to the advisor" moment is visible. */}
         {!interactive && view.feedbackSent != null && (
@@ -216,7 +216,7 @@ export function ReelFolioView({ view, mode, cta }: {
             as the client's page, not a menu of demo buttons. */}
         {cta?.sendFunnel && (
           <div className="cl-fv-cta">
-            <button type="button" className="cl-reel-btn cl-reel-btn-primary" onClick={() => setSent(true)}>Send to your advisor →</button>
+            <button type="button" className="cl-reel-btn cl-reel-btn-primary" onClick={() => setSent(true)}>{view.helperLine ?? "Send to your advisor →"}</button>
           </div>
         )}
       </div>

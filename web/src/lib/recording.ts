@@ -24,9 +24,16 @@ export interface ReelClientSession {
   addons: ReelAddon[];           // optional upgrades the client can toggle
   question: string | null;       // the client's typed note (shown before Send)
   progress: number;              // 0..1, "ready to book"
+  // Optional copy overrides for non-advisor-arc reels (e.g. a traveller-only DIY reel).
+  // Omitted → the exact current hardcoded string, so existing reels are unchanged.
+  sceneLabel?: string;   // the cutaway scene label (default "The clients' view — the Millers' window")
+  readyLine?: string;    // the "ready to book" status line (default "✓ Ready to book — send it back to your advisor")
+  noteLabel?: string;    // label above the client's typed note (default "A note for your advisor")
 }
 
-export interface ReelFolioNote { anchor: string; author: "client" | "advisor"; text: string }
+// authorLabel: optional display-name override for who left the note (default derives
+// "Julie" / "Your advisor" from `author`) — a DIY reel's own traveller isn't Julie.
+export interface ReelFolioNote { anchor: string; author: "client" | "advisor"; text: string; authorLabel?: string }
 
 // The full client folio window (ch3): a simulated browser window showing the folio
 // itself — production-faithful content (FolioData) plus the live-pricing fields the
@@ -58,6 +65,12 @@ export interface ReelFolioSession {
   // QA4 ch2: the client pressed Send — renders the button as sent + a confirmation
   // line ("your advisor sees this instantly"), the chapter's closing beat.
   feedbackSent?: boolean;
+  // Optional copy overrides for non-advisor-arc reels (e.g. a traveller-only DIY reel).
+  // Omitted → the exact current hardcoded string, so existing reels are unchanged.
+  audienceLine?: string; // the "Prepared for …" line (default "Prepared for Mark & Julie Miller · Oct 4–11")
+  sceneLabel?: string;   // the cutaway scene label (default "The clients' view — the Millers' window")
+  totalLabel?: string;   // the trip-total caption (default "Trip total · two travellers")
+  helperLine?: string;   // the interactive end-state "send back" CTA label (default "Send to your advisor →")
 }
 
 // A brief peek at the engineering view (reel): a small panel that slides in to show

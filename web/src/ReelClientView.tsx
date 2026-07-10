@@ -16,7 +16,7 @@ export function ReelClientView({ view }: { view: ReelClientSession }) {
   return (
     <div className="cl-cv-scrim cl-scene-client" role="dialog" aria-modal="false" aria-label="What the client sees">
       {/* N18: scene shift — blurred inbox backdrop + label say "we're in the clients' window now". */}
-      <div className="cl-scene-label"><span aria-hidden="true">📥</span> The clients&#39; view — the Millers&#39; window</div>
+      <div className="cl-scene-label"><span aria-hidden="true">📥</span> {view.sceneLabel ?? "The clients' view — the Millers' window"}</div>
       <div className="cl-cv-window" data-reel-target="client-view">
         <div className="cl-cv-chrome">
           <span className="cl-cv-dots" aria-hidden="true"><i /><i /><i /></span>
@@ -29,7 +29,7 @@ export function ReelClientView({ view }: { view: ReelClientSession }) {
             <span className="cl-cv-total" key={total}>{usd(total)}</span>
           </div>
           <div className={`cl-cv-progress ${ready ? "ready" : ""}`}>
-            <span className="cl-cv-progress-l">{ready ? "✓ Ready to book — send it back to your advisor" : "Pick your hotel to finish"}</span>
+            <span className="cl-cv-progress-l">{ready ? (view.readyLine ?? "✓ Ready to book — send it back to your advisor") : "Pick your hotel to finish"}</span>
           </div>
 
           <div className="cl-cv-line"><span>Flights</span><span>{usd(view.flightsPrice)}</span></div>
@@ -69,7 +69,7 @@ export function ReelClientView({ view }: { view: ReelClientSession }) {
 
           {view.question != null && (
             <div className="cl-cv-note">
-              <div className="cl-cv-note-l">A note for your advisor</div>
+              <div className="cl-cv-note-l">{view.noteLabel ?? "A note for your advisor"}</div>
               <div className="cl-cv-note-box">{view.question}</div>
             </div>
           )}

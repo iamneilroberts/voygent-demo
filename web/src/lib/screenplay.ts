@@ -32,11 +32,13 @@ class Builder {
   readonly agent = {
     says: (text: string) => this.event({ type: "text", delta: text }),
     tool: (tool: string, o?: { summary?: string }) => { this.event({ type: "tool", tool, phase: "start" }); this.event({ type: "tool", tool, phase: "done", summary: o?.summary }); },
-    board: (kind: "flight" | "hotel" | "includes" | "tour", boardId: string, candidates: BoardCandidate[]) => {
+    board: (kind: "flight" | "hotel" | "includes" | "tour" | "car" | "cruise", boardId: string, candidates: BoardCandidate[]) => {
       this.boards.set(boardId, new Set(candidates.map((c) => c.id)));
       this.event({ type: "board", kind, boardId, tripId: "t", candidates });
     },
     folio: (folio: FolioData) => { this.folio = folio; this.event({ type: "folio", folio }); },
+    // Honesty tag: whether this session's results are live supplier data or sample fixtures.
+    source: (live: boolean) => this.event({ type: "source", live }),
     // Brief engineering-view peek: open/update/close a small panel showing the real
     // tools called so far. Pass null to close. One beat per call (like client.view).
     engPanel: (snapshot: ReelEngPanel | null) => {

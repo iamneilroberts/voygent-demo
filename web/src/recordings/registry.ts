@@ -6,6 +6,8 @@ import dublinHl from "./dublin-oct.highlights.json";
 import { dublinCollab } from "./dublin-collab.screenplay";
 import { dublinRun } from "./dublin-run.screenplay";
 import { dublinClient } from "./dublin-client.screenplay";
+import { irelandDiy, meta as irelandMeta } from "./ireland-diy.screenplay";
+import { caribbeanCruise, meta as cruiseMeta } from "./caribbean-cruise.screenplay";
 
 export interface ReelEntry {
   id: string;
@@ -22,6 +24,10 @@ export interface ReelEntry {
   intro?: { eyebrow: string; note: string };
   chapter?: number;  // position in the story arc; absent → not a chapter (legacy reels)
   next?: string;     // id of the chapter to offer when this reel ends
+  // Whether the inline folio's "Send to client" affordance shows during this reel's
+  // playback. Default true (existing behavior); a traveller-only DIY reel with no
+  // client to send to can set this false.
+  showSend?: boolean;
 }
 
 // QA4 arc (2026-07-09): 1 plan (advisor + Voygent build it, projected commission) →
@@ -88,6 +94,33 @@ export const REELS: ReelEntry[] = [
       title: "Plan it, share it, book it, get paid",
       blurb: "One thread planned the trip, the clients shaped it in their own window, the booking filed itself from a pasted email, and the commission stayed itemized the whole way. The walk-through was scripted; the demo behind the button below is live.",
     },
+  },
+  // DIY (traveller-only) reels — the free tier, no advisor anywhere. Not part of
+  // the 3-chapter advisor arc; reached via ?reel=ireland / ?reel=cruise.
+  {
+    id: irelandMeta.id,
+    next: "cruise",
+    showSend: false,
+    title: irelandMeta.title,
+    blurb: irelandMeta.blurb,
+    durationLabel: irelandMeta.durationLabel,
+    recording: irelandDiy.recording,
+    highlights: irelandDiy.highlights,
+    recap: [...irelandMeta.recap],
+    intro: { ...irelandMeta.intro },
+    endCard: { ...irelandMeta.endCard },
+  },
+  {
+    id: cruiseMeta.id,
+    showSend: false,
+    title: cruiseMeta.title,
+    blurb: cruiseMeta.blurb,
+    durationLabel: cruiseMeta.durationLabel,
+    recording: caribbeanCruise.recording,
+    highlights: caribbeanCruise.highlights,
+    recap: [...cruiseMeta.recap],
+    intro: { ...cruiseMeta.intro },
+    endCard: { ...cruiseMeta.endCard },
   },
 ];
 
