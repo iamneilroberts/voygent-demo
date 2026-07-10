@@ -2,8 +2,10 @@
 import { SIGNUP_URL } from "./lib/reel-render";
 
 export function ReelIntro(
-  { title, blurb, durationLabel, onWatch, onPlanYourOwn, eyebrow, note, chapters, chaptersLabel, onChapter, more, moreLabel }:
+  { title, blurb, durationLabel, onWatch, onPlanYourOwn, eyebrow, note, chapters, chaptersLabel, onChapter, more, moreLabel, signupUrl }:
   { title: string; blurb: string; durationLabel: string; onWatch: () => void; onPlanYourOwn: () => void;
+    // Signup destination; DIY reels pass the traveller landing page. Absent -> root.
+    signupUrl?: string;
     // Per-reel overrides. Default = "real session" framing (honest for the real
     // dublin-oct recording); the scripted collab reel passes its own honest copy.
     eyebrow?: string; note?: string;
@@ -31,7 +33,7 @@ export function ReelIntro(
         <button type="button" className="cl-reel-btn cl-reel-btn-secondary" onClick={onPlanYourOwn}>
           Plan your own trip instead<span className="cl-reel-btn-meta">live · type anything</span>
         </button>
-        <a className="cl-reel-btn cl-reel-btn-signup cl-reel-signup" href={SIGNUP_URL} target="_blank" rel="noopener noreferrer">
+        <a className="cl-reel-btn cl-reel-btn-signup cl-reel-signup" href={signupUrl ?? SIGNUP_URL} target="_blank" rel="noopener noreferrer">
           Create a free account<span className="cl-reel-btn-meta">voygent.ai · takes about a minute</span>
         </a>
         {chapters && chapters.length > 1 && (

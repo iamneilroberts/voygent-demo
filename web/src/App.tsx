@@ -30,6 +30,7 @@ import { replayChat } from "./lib/recording";
 import { emptyReelViewState, applyInteraction, reconcileEdits, type ReelViewState } from "./lib/interaction";
 import { isPickTool, resolveBoardPickId } from "./lib/board-match";
 import { selectReel, CHAPTERS, REELS } from "./recordings/registry";
+import { signupUrlFor } from "./lib/reel-render";
 import { ReelBreadcrumb } from "./ReelBreadcrumb";
 import { ReelIntro } from "./ReelIntro";
 import { ReelCallout } from "./ReelCallout";
@@ -410,6 +411,8 @@ export function App() {
   function startReel() { resetReelState(); setReelPhase("playing"); }
   function planYourOwn() { goLive(false); }
   function tryYourself() { goLive(true); }
+  // DIY reels send signups to the traveller landing page; advisor surfaces to the root.
+  const reelSignupUrl = signupUrlFor(selectedReel.audience);
 
   // Clean reload with mutated URL params — re-latches the session / restarts the
   // reel player from a fresh state. Shared by gotoReel, enterLive, toggleDemo.
@@ -555,7 +558,7 @@ export function App() {
             <ReelIntro
               title={selectedReel.title} blurb={selectedReel.blurb} durationLabel={selectedReel.durationLabel}
               eyebrow={selectedReel.intro?.eyebrow} note={selectedReel.intro?.note}
-              onWatch={startReel} onPlanYourOwn={planYourOwn}
+              onWatch={startReel} onPlanYourOwn={planYourOwn} signupUrl={reelSignupUrl}
               {...(selectedReel.audience === "traveller"
                 ? {
                     chapters: travellerReels.map((r) => ({ id: r.id, title: r.title, durationLabel: r.durationLabel, current: r.id === selectedReel.id })),
@@ -587,7 +590,7 @@ export function App() {
             <ReelClientView view={reelView.clientView} />
           )}
           {skin === "claude" && mode === "auto" && reelPhase === "playing" && reelView.folioView?.open && (
-            <ReelFolioView view={reelView.folioView} mode="scripted" />
+            <ReelFolioView view={reelView.folioView} mode="scripted" signupUrl={reelSignupUrl} />
           )}
           {skin === "claude" && mode === "auto" && reelPhase === "playing" && reelView.engPanel?.open && (
             <ReelEngPanel view={reelView.engPanel} />
@@ -644,15 +647,15 @@ export function App() {
           {skin === "claude" && mode === "auto" && reelPhase === "ended" && (
             reelView.folioView?.open
               // Ch3 ends on the folio itself: same surface, now interactive, standard CTA row.
-              ? <ReelFolioView view={reelView.folioView} mode="interactive"
+              ? <ReelFolioView view={reelView.folioView} mode="interactive" signupUrl={reelSignupUrl}
                   cta={{ nextChapter, onTryYourself: tryYourself, onReplay: startReel }} />
               : reelView.clientView && folio
               // Reels with a priced client-view (ch1/ch2) end on the same folio surface,
               // interactive, built from the client session + the canonical chat folio.
-              ? <ReelFolioView view={folioSessionFromClient(reelView.clientView, folio)} mode="interactive"
+              ? <ReelFolioView view={folioSessionFromClient(reelView.clientView, folio)} mode="interactive" signupUrl={reelSignupUrl}
                   cta={{ nextChapter, onTryYourself: tryYourself, onReplay: startReel, sendFunnel: true }} />
               : <ReelEndCard
-                  onTryYourself={tryYourself} onReplay={startReel}
+                  onTryYourself={tryYourself} onReplay={startReel} signupUrl={reelSignupUrl}
                   recap={selectedReel.recap}
                   eyebrow={selectedReel.endCard?.eyebrow}
                   title={selectedReel.endCard?.title}

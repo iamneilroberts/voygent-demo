@@ -12,10 +12,12 @@ import { SIGNUP_URL } from "./lib/reel-render";
 // spec Decision 6). Visual contract:
 // docs/reference/2026-07-08-alaska-warm-folio-staging.png — client-facing surface, so
 // commission fields on the fixture are NEVER rendered here.
-export function ReelFolioView({ view, mode, cta }: {
+export function ReelFolioView({ view, mode, cta, signupUrl }: {
   view: ReelFolioSession;
   mode: "scripted" | "interactive";
   cta?: { nextChapter?: NextChapterCta; onTryYourself: () => void; onReplay: () => void; sendFunnel?: boolean };
+  // Signup destination for the ctaLine anchor; DIY reels pass the traveller landing page.
+  signupUrl?: string;
 }) {
   const interactive = mode === "interactive";
   // N13: when a next chapter exists, the ended surface auto-advances after a visible
@@ -212,7 +214,7 @@ export function ReelFolioView({ view, mode, cta }: {
           )}
 
           {view.ctaLine && (
-            <a className="cl-fv-cta" href={SIGNUP_URL} target="_blank" rel="noopener noreferrer">{view.ctaLine} →</a>
+            <a className="cl-fv-cta" href={signupUrl ?? SIGNUP_URL} target="_blank" rel="noopener noreferrer">{view.ctaLine} →</a>
           )}
           </>)}
         </div>

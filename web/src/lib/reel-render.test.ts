@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { actorClass, actorLabel, pickedActor, editForActivity, threadsForDay, actorInitial, sendButtonLabel } from "./reel-render";
+import { actorClass, actorLabel, pickedActor, editForActivity, threadsForDay, actorInitial, sendButtonLabel, signupUrlFor, SIGNUP_URL, TRAVELLER_SIGNUP_URL } from "./reel-render";
 import type { ReelEditMarker, ReelThread } from "./interaction";
 
 describe("actorClass / actorLabel", () => {
@@ -83,5 +83,13 @@ describe("sendButtonLabel", () => {
   it("flips from a call-to-action to a confirmation once sent", () => {
     expect(sendButtonLabel(false)).toBe("Send to client");
     expect(sendButtonLabel(true)).toBe("✓ Sent to client");
+  });
+});
+
+describe("signupUrlFor", () => {
+  it("routes traveller reels to the traveller landing page, everything else to the root", () => {
+    expect(signupUrlFor("traveller")).toBe(TRAVELLER_SIGNUP_URL);
+    expect(signupUrlFor("traveller")).toBe("https://voygent.ai/travelers");
+    expect(signupUrlFor(undefined)).toBe(SIGNUP_URL);
   });
 });

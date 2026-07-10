@@ -10,8 +10,10 @@ const DEFAULT_TITLE = "Now it's your turn";
 const DEFAULT_BLURB = "Everything you just watched was a real Voygent run. Nothing in the results was scripted.";
 
 export function ReelEndCard(
-  { onTryYourself, onReplay, recap, eyebrow, title, blurb, nextChapter }:
+  { onTryYourself, onReplay, recap, eyebrow, title, blurb, nextChapter, signupUrl }:
   { onTryYourself: () => void; onReplay: () => void;
+    // Signup destination; DIY reels pass the traveller landing page. Absent -> root.
+    signupUrl?: string;
     // Per-reel overrides; absent → the "real session" copy (honest for the real
     // dublin-oct recording). The scripted collab reel passes its own honest framing.
     recap?: string[]; eyebrow?: string; title?: string; blurb?: string;
@@ -35,7 +37,7 @@ export function ReelEndCard(
           Build your own trip →
           {!nextChapter && <span className="cl-reel-btn-meta">live · real flights and hotels · type anything</span>}
         </button>
-        <a className="cl-reel-btn cl-reel-btn-signup cl-reel-signup" href={SIGNUP_URL} target="_blank" rel="noopener noreferrer">
+        <a className="cl-reel-btn cl-reel-btn-signup cl-reel-signup" href={signupUrl ?? SIGNUP_URL} target="_blank" rel="noopener noreferrer">
           Create a free account<span className="cl-reel-btn-meta">voygent.ai · takes about a minute</span>
         </a>
         <button type="button" className="cl-reel-btn cl-reel-btn-tertiary" onClick={onReplay}>↺ Replay the demo</button>

@@ -1,8 +1,13 @@
 import type { Actor } from "./recording";
 import type { ReelEditMarker, ReelThread } from "./interaction";
 
-// Single source for the free-signup CTA link (intro card + end card).
+// Single source for the free-signup CTA links (intro card, end card, folio ctaLine).
+// Traveller-audience (DIY) reels land on the traveller page; everything else on the root.
 export const SIGNUP_URL = "https://voygent.ai";
+export const TRAVELLER_SIGNUP_URL = "https://voygent.ai/travelers";
+export function signupUrlFor(audience?: "traveller"): string {
+  return audience === "traveller" ? TRAVELLER_SIGNUP_URL : SIGNUP_URL;
+}
 
 // Scoped CSS class for an actor's color treatment (defined in skin-claude.css).
 export function actorClass(actor: Actor): string {
