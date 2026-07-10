@@ -389,7 +389,9 @@ export function ClaudeChatView(
       <header className="cl-header">
         <span className="cl-wordmark"><span className="cl-spark" aria-hidden="true">✳</span> Voygent</span>
         <span className="cl-header-note">travel-planning assistant</span>
-        <span className="cl-positioning">Live MCP orchestration · persisted trip state · model routing · cost/context telemetry</span>
+        {/* Hidden during the reel: the top-right nav cluster (transport + chapter
+            chips) occupies this corner and overlapped the tagline (QA 07-10). */}
+        {!reelMode && <span className="cl-positioning">Live MCP orchestration · persisted trip state · model routing · cost/context telemetry</span>}
       </header>
       <div className="cl-ribbon" role="note">A Voygent demo in a Claude-style chat surface — not affiliated with Anthropic.</div>
       {dataSource && (
