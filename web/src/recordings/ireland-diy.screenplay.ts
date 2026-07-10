@@ -231,7 +231,7 @@ export const meta = {
   endCard: {
     eyebrow: "✓ A week in Ireland, planned in one chat",
     title: "Build your own trip",
-    blurb: "Everything here is the free tier. A free account takes about a minute: sign up at voygent.ai, add the Voygent custom connector in claude.ai, and start planning. This walk-through is scripted, a real run pulls live results.",
+    blurb: "Everything here is the free tier. A free account takes about a minute, and adding the Voygent connector in claude.ai is one click. This walk-through is scripted, a real run pulls live results.",
   },
   recap: [
     "148 fares, sources named",

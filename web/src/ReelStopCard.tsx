@@ -16,7 +16,7 @@ export function ReelStopCard(
           <span className="cl-reel-btn-meta">live · real flights and hotels · type anything</span>
         </button>
         <button type="button" className="cl-reel-btn cl-reel-btn-secondary" onClick={onResume}>▶ Keep watching</button>
-        <button type="button" className="cl-reel-btn cl-reel-btn-secondary" onClick={onReplay}>↺ Replay from the start</button>
+        <button type="button" className="cl-reel-btn cl-reel-btn-tertiary" onClick={onReplay}>↺ Replay from the start</button>
       </div>
     </div>
   );

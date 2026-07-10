@@ -466,6 +466,7 @@
 }
 :root[data-skin="claude"] .cl-reel-btn-primary { background: var(--cl-accent); color: var(--cl-accent-ink); }
 :root[data-skin="claude"] .cl-reel-btn-secondary { background: var(--cl-surface); color: var(--cl-ink); border-color: var(--cl-line); margin-top: 9px; }
+:root[data-skin="claude"] .cl-reel-btn-tertiary { background: transparent; color: var(--cl-muted); border-color: transparent; margin-top: 9px; font-size: .8125rem; }
 :root[data-skin="claude"] .cl-reel-btn-meta { display: block; font: 500 .75rem/1 var(--cl-mono); opacity: .85; margin-top: 5px; }
 :root[data-skin="claude"] .cl-reel-signup { text-decoration: none; }
 
