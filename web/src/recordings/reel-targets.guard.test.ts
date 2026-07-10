@@ -41,7 +41,7 @@ const DYNAMIC_PATTERNS: RegExp[] = [
   /^tool-.+$/,
   /^comment-.+$/,
   /^folio-day-\d+$/,
-  /^board-(flight|hotel|includes|tour)$/,
+  /^board-(flight|hotel|includes|tour|car|cruise)$/,
   /^none$/, // explicit no-target: ReelCallout dims the screen and centers the card
 ];
 

@@ -43,8 +43,8 @@ export function BoardView(
   const hasReelSelection = (selectedCandidate?.candidateIds.length ?? 0) > 0;
   const locked = board.resolved || !!board.resolvedId || hasReelSelection;
   const interactive = !reelMode; // live driving = highlight, then confirm
-  const kindWord = board.kind === "flight" ? "flight" : board.kind === "hotel" ? "hotel" : board.kind === "tour" ? "tour" : "option";
-  const title = board.kind === "flight" ? "Select a flight" : board.kind === "includes" ? "Choose what to include" : board.kind === "tour" ? "Choose a tour" : "Choose a hotel";
+  const kindWord = board.kind === "flight" ? "flight" : board.kind === "hotel" ? "hotel" : board.kind === "tour" ? "tour" : board.kind === "car" ? "car" : board.kind === "cruise" ? "cruise" : "option";
+  const title = board.kind === "flight" ? "Select a flight" : board.kind === "includes" ? "Choose what to include" : board.kind === "tour" ? "Choose a tour" : board.kind === "car" ? "Rental cars" : board.kind === "cruise" ? "Cruises" : "Choose a hotel";
 
   function rowClick(c: BoardCandidate) {
     if (locked || busy) return;
@@ -90,6 +90,7 @@ export function BoardView(
                     {c.badge && <span className="cl-option-badge">{c.badge}</span>}
                   </span>
                   {c.meta && <span className="cl-option-meta">{c.meta}</span>}
+                  {c.source && <span className="cl-option-source">via {c.source}</span>}
                 </span>
                 <span className="cl-option-econ">
                   {c.price && <span className="cl-option-price">{c.price}</span>}
@@ -132,7 +133,7 @@ export function BoardView(
       {interactive && !locked && (
         <div className="cl-board-actions">
           <button type="button" className="cl-board-confirm" disabled={!highlighted || busy} onClick={confirm}>
-            {board.kind === "flight" ? "Confirm flight →" : board.kind === "hotel" ? "Choose this hotel →" : board.kind === "tour" ? "Add this tour →" : "Confirm →"}
+            {board.kind === "flight" ? "Confirm flight →" : board.kind === "hotel" ? "Choose this hotel →" : board.kind === "tour" ? "Add this tour →" : board.kind === "car" ? "Choose this car →" : board.kind === "cruise" ? "Choose this cruise →" : "Confirm →"}
           </button>
           {!highlighted && <span className="cl-board-hint">Tap a {kindWord} to see details, or just tell me what you prefer.</span>}
         </div>

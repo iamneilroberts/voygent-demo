@@ -89,13 +89,14 @@ export interface BoardCandidate {
   perPerson?: number;      // flight per-person price, USD
   legs?: FlightLeg[];      // flight itinerary detail — when present, the option expands to show it
   badge?: string;          // Voygent's editorial tag for this option, e.g. "Best value" / "Cheapest" / "Quickest"
+  source?: string;         // data-provider attribution, e.g. "Travelpayouts" / "wise-travel.com" — renders as a muted "via X" chip when present
 }
 
 export type ServerEvent =
   | { type: "text"; delta: string }
   | { type: "tool"; tool: string; phase: "start" | "done"; summary?: string; title?: string }
   | { type: "folio"; folio: FolioData }
-  | { type: "board"; kind: "flight" | "hotel" | "includes" | "tour"; boardId: string; tripId: string; candidates: BoardCandidate[] }
+  | { type: "board"; kind: "flight" | "hotel" | "includes" | "tour" | "car" | "cruise"; boardId: string; tripId: string; candidates: BoardCandidate[] }
   // Honesty signal: whether this session's flight/hotel results are LIVE supplier data
   // (true) or curated sample fixtures (false). Emitted once, when the first search
   // resolves. The UI shows a "live" / "sample results" tag so we never imply replayed

@@ -305,7 +305,7 @@ function Welcome({ presets, geoCity, onSend, busy, postReel }: { presets: Preset
 }
 
 export function ClaudeChatView(
-  { items, folio, onSend, onPick, busy, presets, geoCity, advisor, mobileView, onMobileView, onToggleDemo, demoLabel, engHasContent, postReel, reelView, reelMode, dataSource, onRequestAccess }:
+  { items, folio, onSend, onPick, busy, presets, geoCity, advisor, mobileView, onMobileView, onToggleDemo, demoLabel, engHasContent, postReel, reelView, reelMode, showSend, dataSource, onRequestAccess }:
   {
     items: TimelineItem[];
     folio: FolioData | null;
@@ -323,6 +323,10 @@ export function ClaudeChatView(
     postReel?: boolean;
     reelView: ReelViewState;
     reelMode?: boolean;   // reel playback (mode=auto) — shows the folio "Send to client" affordance
+    // Per-reel override for the folio "Send to client" affordance; absent → falls back
+    // to reelMode (existing behavior). A traveller-only reel with no client to send to
+    // can force this false even during reel playback.
+    showSend?: boolean;
     dataSource?: "live" | "sample" | null;  // honesty tag: live supplier data vs curated sample fixtures
     onRequestAccess?: () => void;  // live (non-reel) only: folio CTA → request a live-demo auth code
   },
@@ -413,7 +417,7 @@ export function ClaudeChatView(
             return busy && i === lastIdx ? <WorkingIndicator key={i} live={!reelMode} /> : null;
           })}
           {showTailWorking && <WorkingIndicator live={!reelMode} />}
-          {folio && <div className={`cl-folio-inline${reelMode ? " in-reel" : ""}`}><FolioArtifact folio={folio} advisor={advisor} edits={reelView.edits} threads={reelView.threads} showSend={reelMode} sent={!!reelView.handoff?.sent} onRequestAccess={onRequestAccess} /></div>}
+          {folio && <div className={`cl-folio-inline${reelMode ? " in-reel" : ""}`}><FolioArtifact folio={folio} advisor={advisor} edits={reelView.edits} threads={reelView.threads} showSend={showSend ?? reelMode} sent={!!reelView.handoff?.sent} onRequestAccess={onRequestAccess} /></div>}
           <div ref={endRef} />
         </div>
       </div>
@@ -424,7 +428,7 @@ export function ClaudeChatView(
             <button type="button" className="cl-sheet-close" onClick={() => onMobileView("chat")} aria-label="Back to chat">✕ chat</button>
           </div>
           <div className="cl-sheet-body">
-            {folio ? <FolioArtifact folio={folio} advisor={advisor} edits={reelView.edits} threads={reelView.threads} showSend={reelMode} sent={!!reelView.handoff?.sent} onRequestAccess={onRequestAccess} /> : <p className="cl-day-desc">Your trip folio will build here as Voygent works.</p>}
+            {folio ? <FolioArtifact folio={folio} advisor={advisor} edits={reelView.edits} threads={reelView.threads} showSend={showSend ?? reelMode} sent={!!reelView.handoff?.sent} onRequestAccess={onRequestAccess} /> : <p className="cl-day-desc">Your trip folio will build here as Voygent works.</p>}
           </div>
         </div>
       )}

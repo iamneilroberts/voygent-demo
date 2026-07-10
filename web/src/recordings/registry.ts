@@ -22,6 +22,10 @@ export interface ReelEntry {
   intro?: { eyebrow: string; note: string };
   chapter?: number;  // position in the story arc; absent → not a chapter (legacy reels)
   next?: string;     // id of the chapter to offer when this reel ends
+  // Whether the inline folio's "Send to client" affordance shows during this reel's
+  // playback. Default true (existing behavior); a traveller-only DIY reel with no
+  // client to send to can set this false.
+  showSend?: boolean;
 }
 
 // QA4 arc (2026-07-09): 1 plan (advisor + Voygent build it, projected commission) →
