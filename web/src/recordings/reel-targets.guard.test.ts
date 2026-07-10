@@ -5,6 +5,8 @@ import { fileURLToPath } from "node:url";
 import { dublinRun } from "./dublin-run.screenplay";
 import { dublinCollab } from "./dublin-collab.screenplay";
 import { dublinClient } from "./dublin-client.screenplay";
+import { irelandDiy } from "./ireland-diy.screenplay";
+import { caribbeanCruise } from "./caribbean-cruise.screenplay";
 import { resolveHighlightFrames } from "../lib/highlights";
 
 // Guard against a highlight spotlighting a `data-reel-target` that no claude-skin
@@ -58,7 +60,7 @@ describe("reel highlight targets exist in the claude-skin render path", () => {
     expect(staticTargets.has("client-view")).toBe(true);
   });
 
-  for (const [name, screenplay] of [["dublinRun", dublinRun], ["dublinCollab", dublinCollab], ["dublinClient", dublinClient]] as const) {
+  for (const [name, screenplay] of [["dublinRun", dublinRun], ["dublinCollab", dublinCollab], ["dublinClient", dublinClient], ["irelandDiy", irelandDiy], ["caribbeanCruise", caribbeanCruise]] as const) {
     it(`every highlight target in ${name} resolves to a real or dynamically-valid data-reel-target`, () => {
       const bad = screenplay.highlights
         .map((h) => h.target)
@@ -78,7 +80,7 @@ describe("reel highlight targets exist in the claude-skin render path", () => {
 describe("cutaway (folioview) spotlight targets avoid anchors the chat folio also emits", () => {
   const chatStatic = fileTargets("ClaudeChatView.tsx");
 
-  for (const [name, sp] of [["dublinRun", dublinRun], ["dublinCollab", dublinCollab]] as const) {
+  for (const [name, sp] of [["dublinRun", dublinRun], ["dublinCollab", dublinCollab], ["irelandDiy", irelandDiy], ["caribbeanCruise", caribbeanCruise]] as const) {
     it(`${name}: folioview-bound highlights collide with nothing the chat renders`, () => {
       const frames = sp.recording.frames;
       const maxDays = Math.max(0, ...frames.flatMap((f) =>
