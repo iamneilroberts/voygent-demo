@@ -246,7 +246,6 @@ export const meta = {
   id: "cruise",
   title: "A family cruise, planned in one chat",
   blurb: "A family of four plans a seven night Caribbean cruise from Miami by themselves, no travel advisor, just real searches with the sources named.",
-  durationLabel: "~3 min",
   intro: {
     eyebrow: "▶ DIY demo",
     note: "A scripted walk-through of the free tier. Your own run pulls live sailings, hotels and excursions.",

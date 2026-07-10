@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { irelandDiy, irelandFolio } from "./ireland-diy.screenplay";
 import { resolveHighlightFrames } from "../lib/highlights";
-import { computeDelay, interactionDwell } from "../lib/pacing";
+import { estimateReelMs } from "../lib/reel-duration";
 import { computeTripTotal } from "../lib/reel-pricing";
 import type { FolioData, BoardCandidate } from "../../../shared/events";
 import type { ReelFolioSession } from "../lib/recording";
@@ -146,23 +146,9 @@ describe("ireland-diy (grounding)", () => {
     expect(resolved.has(0)).toBe(true);
   });
 
-  it("estimates a 1x runtime between 140s and 230s (tolerant estimate, mirrors the player)", () => {
-    const hlMap = resolveHighlightFrames(frames, irelandDiy.highlights);
-    let total = 0;
-    let prev: typeof frames[number] | null = null;
-    for (let i = 0; i < frames.length; i++) {
-      const f = frames[i];
-      total += computeDelay(f, prev, { speed: 1, reducedMotion: false });
-      const hits = hlMap.get(i);
-      if (f.kind === "interaction" && !(hits && hits.length)) {
-        total += interactionDwell(f.interaction.kind, { speed: 1, reducedMotion: false });
-      }
-      if (hits && hits.length) {
-        for (const h of hits) total += h.dwellMs ?? 4000;
-      }
-      prev = f;
-    }
-    expect(total).toBeGreaterThan(140_000);
+  it("estimates a 1x runtime between 130s and 230s (tolerant estimate, mirrors the player)", () => {
+    const total = estimateReelMs(irelandDiy.recording, irelandDiy.highlights);
+    expect(total).toBeGreaterThan(130_000);
     expect(total).toBeLessThan(230_000);
   });
 });

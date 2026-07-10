@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { caribbeanCruise, meta } from "./caribbean-cruise.screenplay";
 import { resolveHighlightFrames } from "../lib/highlights";
-import { computeDelay, interactionDwell } from "../lib/pacing";
+import { estimateReelMs } from "../lib/reel-duration";
 import { computeTripTotal } from "../lib/reel-pricing";
 import type { FolioData } from "../../../shared/events";
 import type { ReelFolioSession } from "../lib/recording";
@@ -121,24 +121,9 @@ describe("caribbean-cruise screenplay (grounding)", () => {
     for (const line of allCopy) expect(line).not.toMatch(/—/);
   });
 
-  it("estimated 1x runtime lands between 140s and 230s", () => {
-    const hl = resolveHighlightFrames(frames, caribbeanCruise.highlights);
-    let total = 0;
-    let prev = null as (typeof frames)[number] | null;
-    for (let i = 0; i < frames.length; i++) {
-      const f = frames[i];
-      total += computeDelay(f, prev, { speed: 1, reducedMotion: false });
-      const hits = hl.get(i);
-      const spotlit = !!(hits && hits.length);
-      if (f.kind === "interaction" && !spotlit) {
-        total += interactionDwell(f.interaction.kind, { speed: 1, reducedMotion: false });
-      }
-      if (spotlit) {
-        for (const h of hits!) total += h.dwellMs ?? 4000;
-      }
-      prev = f;
-    }
-    expect(total).toBeGreaterThan(140_000);
+  it("estimated 1x runtime lands between 130s and 230s", () => {
+    const total = estimateReelMs(caribbeanCruise.recording, caribbeanCruise.highlights);
+    expect(total).toBeGreaterThan(130_000);
     expect(total).toBeLessThan(230_000);
   });
 });

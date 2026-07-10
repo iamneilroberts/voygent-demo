@@ -8,6 +8,7 @@ import { dublinRun } from "./dublin-run.screenplay";
 import { dublinClient } from "./dublin-client.screenplay";
 import { irelandDiy, meta as irelandMeta } from "./ireland-diy.screenplay";
 import { caribbeanCruise, meta as cruiseMeta } from "./caribbean-cruise.screenplay";
+import { reelDurationLabel } from "../lib/reel-duration";
 
 export interface ReelEntry {
   id: string;
@@ -38,7 +39,7 @@ export const REELS: ReelEntry[] = [
     id: "dublin-oct",
     title: "Five days in Dublin",
     blurb: "Watch Voygent build a real Dublin trip from live flights and hotels.",
-    durationLabel: "~2 min",
+    durationLabel: reelDurationLabel(dublin as Recording, (dublinHl as HighlightTrack).highlights),
     recording: dublin as Recording,
     highlights: (dublinHl as HighlightTrack).highlights,
   },
@@ -48,7 +49,7 @@ export const REELS: ReelEntry[] = [
     next: "client",
     title: "1 · Plan the trip",
     blurb: "An advisor and Voygent build a week in Dublin: real searches, a hotel shortlist, the open day sold, and the advisor's commission in view.",
-    durationLabel: "~4 min",
+    durationLabel: reelDurationLabel(dublinCollab.recording, dublinCollab.highlights),
     recording: dublinCollab.recording,
     highlights: dublinCollab.highlights,
     recap: ["six real fares, one pick", "a 3-hotel shortlist for the clients", "the week, day by day", "the open day becomes a $43 commission", "the advisor edits in place", "commission projected, itemized"],
@@ -68,7 +69,7 @@ export const REELS: ReelEntry[] = [
     next: "advisor",
     title: "2 · The client's view",
     blurb: "The proposal lands with the Millers. Watch them explore it in their own window, pick a hotel, watch the price follow every click, and send their answer back.",
-    durationLabel: "~3 min",
+    durationLabel: reelDurationLabel(dublinClient.recording, dublinClient.highlights),
     recording: dublinClient.recording,
     highlights: dublinClient.highlights,
     recap: ["a living page, not a PDF", "the advisor's note on top", "their hotel pick reprices the trip", "a tour page one click deep", "their question, on the day itself", "one click back to the advisor"],
@@ -84,7 +85,7 @@ export const REELS: ReelEntry[] = [
     chapter: 3,
     title: "3 · Book the trip",
     blurb: "The Millers' answer lands back with the advisor. Voygent folds it in, files the airline's messy confirmation email, and itemizes the commission.",
-    durationLabel: "~2 min",
+    durationLabel: reelDurationLabel(dublinRun.recording, dublinRun.highlights),
     recording: dublinRun.recording,
     highlights: dublinRun.highlights,
     recap: ["the reply, routed to the trip", "their note becomes the plan", "a messy confirmation, pasted, filed", "$280 commission, itemized"],
@@ -103,7 +104,7 @@ export const REELS: ReelEntry[] = [
     showSend: false,
     title: irelandMeta.title,
     blurb: irelandMeta.blurb,
-    durationLabel: irelandMeta.durationLabel,
+    durationLabel: reelDurationLabel(irelandDiy.recording, irelandDiy.highlights),
     recording: irelandDiy.recording,
     highlights: irelandDiy.highlights,
     recap: [...irelandMeta.recap],
@@ -115,7 +116,7 @@ export const REELS: ReelEntry[] = [
     showSend: false,
     title: cruiseMeta.title,
     blurb: cruiseMeta.blurb,
-    durationLabel: cruiseMeta.durationLabel,
+    durationLabel: reelDurationLabel(caribbeanCruise.recording, caribbeanCruise.highlights),
     recording: caribbeanCruise.recording,
     highlights: caribbeanCruise.highlights,
     recap: [...cruiseMeta.recap],
