@@ -34,12 +34,12 @@ const cruises: BoardCandidate[] = [
   },
   {
     id: "cruise:celebration", title: "Carnival Celebration · Carnival Cruise Line", price: "$2,980 total",
-    meta: "Eastern Caribbean · San Juan, St Thomas, Amber Cove + 2 sea days · interior stateroom",
+    meta: "Eastern Caribbean · San Juan, St Thomas, Amber Cove + 2 sea days · interior stateroom · kids club 2 to 17",
     summary: "Carnival Celebration, interior stateroom, $2,980 total", source: "Widgety", badge: "Best teen spaces",
   },
   {
     id: "cruise:seascape", title: "MSC Seascape · MSC Cruises", price: "$2,410 total",
-    meta: "Western Caribbean · Cozumel, Costa Maya, Roatan + 2 sea days · interior stateroom",
+    meta: "Western Caribbean · Cozumel, Costa Maya, Roatan + 2 sea days · interior stateroom · kids club 0 to 17",
     summary: "MSC Seascape, interior stateroom, $2,410 total", source: "Widgety", badge: "Cheapest",
   },
 ];
