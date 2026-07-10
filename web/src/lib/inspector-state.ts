@@ -8,6 +8,10 @@
 export type EngState = "idle" | "peek" | "open";
 
 export function engState(toolCount: number, expanded: boolean): EngState {
-  if (toolCount === 0) return "idle";   // nothing to show yet → quiet rail, even if expanded
-  return expanded ? "open" : "peek";
+  // A viewer's explicit expand always wins — the idle rail is clickable (QA 07-10:
+  // the rail was dead for the whole reel and pre-first-message live, so "Engineering"
+  // could never be opened when there was no telemetry yet). With no tools the open
+  // panel still carries the static engineering stories (DIG DEEPER links).
+  if (expanded) return "open";
+  return toolCount === 0 ? "idle" : "peek";
 }

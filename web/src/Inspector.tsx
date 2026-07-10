@@ -241,7 +241,10 @@ export function Inspector(
     if (state === "idle") {
       return (
         <aside className="inspector term crt collapsed" role="complementary" aria-label="Engineering inspector">
-          <div className="ins-rail" aria-hidden="true"><span className="ins-rail-label">Engineering</span></div>
+          <button className="ins-rail" onClick={onToggleCollapse} aria-label="Expand engineering inspector">
+            <span className="ins-rail-caret" aria-hidden="true">⤢</span>
+            <span className="ins-rail-label">Engineering</span>
+          </button>
         </aside>
       );
     }
