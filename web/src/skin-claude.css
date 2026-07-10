@@ -529,6 +529,7 @@
   font: 600 9px/1 var(--cl-mono); letter-spacing: .09em; text-transform: uppercase;
   color: var(--cl-muted); margin-top: 2px;
 }
+:root[data-skin="claude"] .cl-reel-honesty { font-size: .6875rem; color: var(--cl-muted); white-space: nowrap; }
 :root[data-skin="claude"] .cl-reel-controls {
   display: inline-flex; align-items: center; gap: 8px;
   background: var(--cl-surface); border: 1px solid var(--cl-line); border-radius: 10px; padding: 4px 8px;

@@ -622,6 +622,9 @@ export function App() {
                   />
                 </>
               )}
+              {selectedReel.honestyChip && (
+                <span className="cl-reel-honesty" role="note">{selectedReel.honestyChip}</span>
+              )}
             </div>
           )}
           {skin === "claude" && mode === "auto" && reelPhase === "playing" && stopCta && (

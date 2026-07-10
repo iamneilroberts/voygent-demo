@@ -33,6 +33,10 @@ export interface ReelEntry {
   // Per-actor label overrides for inline attribution during this reel
   // (e.g. { client: "You" } in the DIY reels). Absent -> Advisor/Client/Voygent.
   actorLabels?: ActorLabels;
+  // Small persistent chip in the playback rail, e.g. "Scripted walk-through ·
+  // your own run pulls live results". Absent -> no chip (dublin-oct is a real
+  // recording and needs none; the advisor chapters adopt it in a later pass).
+  honestyChip?: string;
 }
 
 // QA4 arc (2026-07-09): 1 plan (advisor + Voygent build it, projected commission) →
@@ -107,6 +111,7 @@ export const REELS: ReelEntry[] = [
     next: "cruise",
     showSend: false,
     actorLabels: { client: "You" },
+    honestyChip: "Scripted walk-through · your own run pulls live results",
     title: irelandMeta.title,
     blurb: irelandMeta.blurb,
     durationLabel: reelDurationLabel(irelandDiy.recording, irelandDiy.highlights),
@@ -120,6 +125,7 @@ export const REELS: ReelEntry[] = [
     id: cruiseMeta.id,
     showSend: false,
     actorLabels: { client: "You" },
+    honestyChip: "Scripted walk-through · your own run pulls live results",
     title: cruiseMeta.title,
     blurb: cruiseMeta.blurb,
     durationLabel: reelDurationLabel(caribbeanCruise.recording, caribbeanCruise.highlights),
