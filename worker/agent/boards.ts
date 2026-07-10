@@ -231,3 +231,66 @@ export function createBoardBuilder(): BoardBuilder {
     return { type: "board", kind, boardId: crypto.randomUUID(), tripId, candidates };
   };
 }
+
+// --- Ref-and-fetch hydration (voygent-lite's `board` MCP-app tool) ---------------
+//
+// The backend's `board` tool is a claude.ai MCP-app widget: the model-visible result
+// is a one-line summary plus a tiny {"__voygentBoardRef":{tripId,kind}} line, and the
+// widget hydrates the full projection via the app-only `board_data` tool. This demo
+// has no MCP-app host, so when the model calls `board` (its description steers it
+// there after every search) nothing would render. Hydrate the ref server-side into
+// the demo's own inline `board` event instead.
+
+/** Extract the {tripId, kind} ref from a `board` tool result, if present. */
+export function boardRefFrom(resultText: string): { tripId: string; kind: string } | null {
+  const at = resultText.indexOf("__voygentBoardRef");
+  if (at < 0) return null;
+  const line = resultText.slice(resultText.lastIndexOf("\n", at) + 1);
+  try {
+    const ref = (JSON.parse(line.trim()) as Record<string, any>).__voygentBoardRef;
+    return ref && typeof ref.tripId === "string" && typeof ref.kind === "string" ? ref : null;
+  } catch { return null; }
+}
+
+// board_data option → demo card. The projection is already advisor-view curated
+// (commission included); reference-only rows (bookable:false) can't be picked in
+// the demo's board, so they're dropped rather than rendered unpickable.
+function boardDataCandidate(o: Record<string, any>): BoardCandidate | null {
+  if (typeof o.id !== "string" || !o.id || typeof o.label !== "string" || !o.label) return null;
+  if (o.bookable === false) return null;
+  const price = typeof o.priceLabel === "string" && o.priceLabel ? o.priceLabel : usd(o.lo);
+  const meta = typeof o.meta?.a === "string" && o.meta.a ? o.meta.a : undefined;
+  const out: BoardCandidate = {
+    id: o.id, title: o.label, price, meta,
+    summary: [o.label, price].filter(Boolean).join(", "),
+  };
+  if (typeof o.ribbon === "string" && o.ribbon) out.badge = o.ribbon;
+  if (typeof o.img === "string" && o.img) out.image = o.img;
+  if (typeof o.perPerson === "number" && Number.isFinite(o.perPerson)) out.perPerson = o.perPerson;
+  if (typeof o.commission?.amount === "number") out.commission = o.commission.amount;
+  if (typeof o.commission?.rate === "number") out.commissionPct = o.commission.rate;
+  const legs = legsFrom(o.legs) ?? segmentsToLegs(o.segments);
+  if (legs) out.legs = legs;
+  return out;
+}
+
+/** Build a demo `board` event from a board_data result ({"__voygentBoardData": ...}). */
+export function boardFromData(dataText: string, tripId: string): ServerEvent | null {
+  let parsed: unknown;
+  try { parsed = JSON.parse(dataText); } catch { return null; }
+  const data = (parsed as Record<string, any>)?.__voygentBoardData;
+  if (!data || typeof data !== "object") return null;
+  // The demo's inline board renders flight/hotel/tour; car/cruise/customize have no
+  // demo surface (skipping is the pre-existing behavior for those, just now explicit).
+  const kind = data.kind === "flight" || data.kind === "hotel" || data.kind === "tour" ? data.kind : null;
+  if (!kind) return null;
+  // Hotel boards may arrive grouped per stay; the demo board is flat, so flatten.
+  const rawList: unknown[] = Array.isArray(data.options) && data.options.length
+    ? data.options
+    : Array.isArray(data.stays) ? data.stays.flatMap((s: Record<string, any>) => Array.isArray(s?.options) ? s.options : []) : [];
+  const candidates = rawList
+    .map((o) => (o && typeof o === "object" ? boardDataCandidate(o as Record<string, any>) : null))
+    .filter((c): c is BoardCandidate => c !== null);
+  if (candidates.length === 0) return null;
+  return { type: "board", kind, boardId: crypto.randomUUID(), tripId, candidates };
+}

@@ -285,3 +285,77 @@ describe("hotel_search_and_rank (cpmaxx live) board mapping", () => {
     expect(build("hotel_search_and_rank", wrongShape, "t")).toBeNull();
   });
 });
+
+// --- Ref-and-fetch hydration (backend `board` MCP-app tool) ---
+
+import { boardRefFrom, boardFromData } from "./boards";
+
+// The exact two-line shape voygent-lite's `board` tool returns (summary + ref),
+// as joined by the MCP client's "\n" content join.
+const BOARD_TOOL_RESULT =
+  'flight board: 5 of 35 options for "Seattle, WA". The traveler picks in the board above; their choice saves to the trip.\n' +
+  '{"__voygentBoardRef":{"tripId":"demo-abc","kind":"flight"}}';
+
+describe("boardRefFrom", () => {
+  it("extracts the tripId/kind ref from a board tool result", () => {
+    expect(boardRefFrom(BOARD_TOOL_RESULT)).toEqual({ tripId: "demo-abc", kind: "flight" });
+  });
+  it("returns null when no ref marker is present", () => {
+    expect(boardRefFrom('{"status":"ok","flights":[]}')).toBeNull();
+    expect(boardRefFrom("plain text result")).toBeNull();
+  });
+  it("returns null on a malformed ref line", () => {
+    expect(boardRefFrom("summary\n{broken __voygentBoardRef json")).toBeNull();
+  });
+});
+
+describe("boardFromData", () => {
+  const data = (over: Record<string, unknown> = {}) => JSON.stringify({
+    __voygentBoardData: {
+      kind: "flight", tripId: "demo-abc", title: "Seattle, WA", currency: "USD",
+      options: [
+        { id: "kiwi:f1", label: "MOB → SEA · American", lo: 830, hi: null, priceLabel: "$830", ribbon: "Best value", meta: { a: "1 stop · 7h 10m" }, perPerson: 415 },
+        { id: "ref:bench", label: "Google Flights reference", lo: 800, hi: null, bookable: false },
+      ],
+      selectedId: null, shown: 2, total: 35, controls: [], note: null,
+      ...over,
+    },
+  });
+
+  it("maps board_data options to demo candidates, dropping unbookable reference rows", () => {
+    const ev = boardFromData(data(), "demo-abc");
+    if (ev?.type !== "board") throw new Error("expected board event");
+    expect(ev.kind).toBe("flight");
+    expect(ev.tripId).toBe("demo-abc");
+    expect(ev.candidates).toHaveLength(1);
+    const c = ev.candidates[0];
+    expect(c).toMatchObject({
+      id: "kiwi:f1", title: "MOB → SEA · American", price: "$830",
+      meta: "1 stop · 7h 10m", badge: "Best value", perPerson: 415,
+      summary: "MOB → SEA · American, $830",
+    });
+  });
+
+  it("flattens per-stay hotel groups when options[] is empty", () => {
+    const ev = boardFromData(data({
+      kind: "hotel", options: [],
+      stays: [
+        { stayRef: "s1", label: "Seattle", sub: null, options: [{ id: "cp:h1", label: "Hotel Theodore", lo: 214, hi: null, priceLabel: "$214/night", commission: { amount: 120, rate: 10 } }], total: 1, shown: 1, selectedId: null, chosenId: null },
+        { stayRef: "s2", label: "Tacoma", sub: null, options: [{ id: "cp:h2", label: "Hotel Murano", lo: 180, hi: null }], total: 1, shown: 1, selectedId: null, chosenId: null },
+      ],
+    }), "demo-abc");
+    if (ev?.type !== "board") throw new Error("expected board event");
+    expect(ev.kind).toBe("hotel");
+    expect(ev.candidates.map((c) => c.id)).toEqual(["cp:h1", "cp:h2"]);
+    expect(ev.candidates[0].commission).toBe(120);
+    expect(ev.candidates[0].commissionPct).toBe(10);
+  });
+
+  it("returns null for kinds the demo board cannot render, and for empty/invalid payloads", () => {
+    expect(boardFromData(data({ kind: "cruise" }), "demo-abc")).toBeNull();
+    expect(boardFromData(data({ kind: "customize" }), "demo-abc")).toBeNull();
+    expect(boardFromData(data({ options: [] }), "demo-abc")).toBeNull();
+    expect(boardFromData("not json", "demo-abc")).toBeNull();
+    expect(boardFromData('{"no":"marker"}', "demo-abc")).toBeNull();
+  });
+});

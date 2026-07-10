@@ -1,7 +1,7 @@
 import { SseMultiplexer } from "./agent/sse";
 import { runAgentLoop } from "./agent/loop";
 import { INITIAL_PHASE, advancePhase, phaseDirective, shouldInjectPhaseDirectiveAfterBatch, isBeforeSummary, type TripPhase, type PhaseCtx } from "./agent/phases";
-import { createBoardBuilder, type BoardBuilder } from "./agent/boards";
+import { createBoardBuilder, boardRefFrom, boardFromData, type BoardBuilder } from "./agent/boards";
 import { tripToFolio } from "./agent/folio-sync";
 import { McpClient } from "./mcp/client";
 import { FixtureReplay, type ReplayHelpers } from "./mcp/replay";
@@ -118,8 +118,8 @@ const BOARDS_WORKFLOW_OVERRIDE =
   "WHEN PRESENTING OPTIONS (this overrides the auto-pick steps above): after flight_search/flight_list " +
   "(and hotel_search/hotel_list) return candidates, STOP and let the traveler choose. Do NOT stage or " +
   "promote a flight or hotel until the traveler tells you which option they picked. Present the options " +
-  "in one short, friendly sentence — the option cards render beside your message, so don't enumerate them " +
-  "in text — and end your turn. When the traveler replies with a chosen option id, stage THAT exact id " +
+  "in one short, friendly sentence — the option cards render in the chat right below your message, so don't " +
+  "enumerate them in text; refer to them as 'the options below', never as a panel or separate page — and end your turn. When the traveler replies with a chosen option id, stage THAT exact id " +
   "with patch_trip and call the matching promote tool. For hotels the traveler may pick one or more. " +
   "Never auto-select.";
 
@@ -147,8 +147,9 @@ const FAITHFUL_ADDENDUM =
   "for that route and offer to try different dates or another destination.";
 
 const FAITHFUL_BOARDS_NOTE =
-  "PRESENTATION (demo): the flight and hotel option cards render in-chat automatically from your search results — " +
-  "present the choice in one short sentence and let the traveler pick; do not enumerate the options in text. " +
+  "PRESENTATION (demo): the flight and hotel option cards render in-chat automatically from your search results, " +
+  "directly below your message — present the choice in one short sentence and let the traveler pick; do not " +
+  "enumerate the options in text, and refer to them as 'the options below', never as a panel or separate page. " +
   "Do NOT call list_render: it builds a hosted page on an advisor subdomain this demo does not use, so the traveler " +
   "would see nothing. Populate the in-chat cards by running flight_search then flight_list { tripId, action:'list' } " +
   "for flights, and hotel_search_and_rank (or hotel_search) for hotels; then stop and let the traveler pick before staging.\n" +
@@ -737,7 +738,18 @@ export class SessionDO {
             return phaseDirective(this.tripPhase, buildPhaseCtx());
           } : undefined,
           buildBoard: this.boardsMode
-            ? (name, resultText) => this.boardBuilder(name, resultText, this.tripId)
+            ? async (name, resultText) => {
+                // Slim replay/list payloads map directly; the backend `board` MCP-app
+                // tool returns only a ref — hydrate it via the app-only board_data tool
+                // (without this, live-mode "the cards are in the panel" renders nothing).
+                const direct = this.boardBuilder(name, resultText, this.tripId);
+                if (direct) return direct;
+                const ref = boardRefFrom(resultText);
+                if (!ref) return null;
+                try {
+                  return boardFromData(await mcp.callTool("board_data", { tripId: ref.tripId, kind: ref.kind }), ref.tripId);
+                } catch { return null; } // board hydration is best-effort; never abort the turn
+              }
             : undefined,
           onFolio: async () => {
             const raw = await mcp.callTool("read_trip", { tripId: this.tripId });

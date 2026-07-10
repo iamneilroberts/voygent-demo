@@ -50,7 +50,8 @@ export interface AgentLoopArgs {
   nextModel?: () => string;
   // Boards mode (claude skin): map a list-tool result to an inline chooser
   // `board` event, or null. Absent → no board events (default path unchanged).
-  buildBoard?: (toolName: string, resultText: string) => ServerEvent | null;
+  // May be async (the `board` MCP-app ref needs a board_data fetch to hydrate).
+  buildBoard?: (toolName: string, resultText: string) => ServerEvent | null | Promise<ServerEvent | null>;
   // Deterministic workflow nudge: called once per tool batch with the batch's
   // tool names; a returned string is appended as a text block AFTER the
   // tool_result blocks (harness-injected reminder, like a host system note).
@@ -138,7 +139,7 @@ export async function runAgentLoop(args: AgentLoopArgs): Promise<void> {
       const latencyMs = Date.now() - t0;
       emit({ type: "tool", tool: t.name, phase: "done", summary: visitorToolSummary(content, ok, !!args.friendlyToolErrors) });
       if (ok && args.buildBoard) {
-        const board = args.buildBoard(t.name, content);
+        const board = await args.buildBoard(t.name, content);
         if (board) emit(board);
       }
       emit({
