@@ -5,6 +5,7 @@ import type { Actor } from "./lib/recording";
 import { commissionLabel, fmtUsd } from "./lib/advisor";
 import { safeHttpUrl } from "./lib/url";
 import { actorClass, actorLabel, pickedActor } from "./lib/reel-render";
+import type { ActorLabels } from "./lib/reel-render";
 
 // The expandable routing detail behind a flight option: each leg's route, times,
 // flight number and aircraft, with the layover called out between legs.
@@ -32,8 +33,8 @@ function FlightLegs({ legs }: { legs: FlightLeg[] }) {
 // immediate-pick path; reel picks are driven by `selectedCandidate`. Once
 // resolved the board locks: the pick stays highlighted, siblings dim.
 export function BoardView(
-  { board, busy, advisor, onPick, selectedCandidate, reelMode }:
-  { board: BoardItem; busy: boolean; advisor: boolean; onPick: (board: BoardItem, c: BoardCandidate) => void; selectedCandidate?: { candidateIds: string[]; actor: Actor }; reelMode?: boolean },
+  { board, busy, advisor, onPick, selectedCandidate, reelMode, actorLabels }:
+  { board: BoardItem; busy: boolean; advisor: boolean; onPick: (board: BoardItem, c: BoardCandidate) => void; selectedCandidate?: { candidateIds: string[]; actor: Actor }; reelMode?: boolean; actorLabels?: ActorLabels },
 ) {
   // Per-candidate expand state for the routing detail. Undefined = follow the default
   // (the highlighted/picked option auto-expands so the routing is visible); a click overrides.
@@ -105,7 +106,7 @@ export function BoardView(
                   )}
                 </span>
                 <span className="cl-option-mark" aria-hidden={reelActor || liveHi ? undefined : "true"}>
-                  {picked ? (reelActor ? `✓ ${actorLabel(reelActor)} chose this` : "✓") : (liveHi ? "●" : "")}
+                  {picked ? (reelActor ? `✓ ${actorLabel(reelActor, actorLabels)} chose this` : "✓") : (liveHi ? "●" : "")}
                 </span>
               </button>
               {(hasLegs || detail) && (

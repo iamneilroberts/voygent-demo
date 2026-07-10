@@ -9,6 +9,7 @@ import { dublinClient } from "./dublin-client.screenplay";
 import { irelandDiy, meta as irelandMeta } from "./ireland-diy.screenplay";
 import { caribbeanCruise, meta as cruiseMeta } from "./caribbean-cruise.screenplay";
 import { reelDurationLabel } from "../lib/reel-duration";
+import type { ActorLabels } from "../lib/reel-render";
 
 export interface ReelEntry {
   id: string;
@@ -29,6 +30,9 @@ export interface ReelEntry {
   // playback. Default true (existing behavior); a traveller-only DIY reel with no
   // client to send to can set this false.
   showSend?: boolean;
+  // Per-actor label overrides for inline attribution during this reel
+  // (e.g. { client: "You" } in the DIY reels). Absent -> Advisor/Client/Voygent.
+  actorLabels?: ActorLabels;
 }
 
 // QA4 arc (2026-07-09): 1 plan (advisor + Voygent build it, projected commission) →
@@ -102,6 +106,7 @@ export const REELS: ReelEntry[] = [
     id: irelandMeta.id,
     next: "cruise",
     showSend: false,
+    actorLabels: { client: "You" },
     title: irelandMeta.title,
     blurb: irelandMeta.blurb,
     durationLabel: reelDurationLabel(irelandDiy.recording, irelandDiy.highlights),
@@ -114,6 +119,7 @@ export const REELS: ReelEntry[] = [
   {
     id: cruiseMeta.id,
     showSend: false,
+    actorLabels: { client: "You" },
     title: cruiseMeta.title,
     blurb: cruiseMeta.blurb,
     durationLabel: reelDurationLabel(caribbeanCruise.recording, caribbeanCruise.highlights),

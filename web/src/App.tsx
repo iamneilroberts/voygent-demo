@@ -540,6 +540,7 @@ export function App() {
               reelView={reelView}
               reelMode={mode === "auto"}
               showSend={selectedReel.showSend === false ? false : undefined}
+              actorLabels={selectedReel.actorLabels}
               dataSource={dataSource}
               onRequestAccess={mode === "auto" ? undefined : () => setShowProForm(true)}
             />

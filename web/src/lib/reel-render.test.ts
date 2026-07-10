@@ -68,6 +68,17 @@ describe("actorInitial", () => {
   });
 });
 
+it("actorLabel: overrides win, defaults hold", () => {
+  expect(actorLabel("client")).toBe("Client");
+  expect(actorLabel("client", { client: "You" })).toBe("You");
+  expect(actorLabel("agent", { client: "You" })).toBe("Voygent");
+});
+
+it("actorInitial follows the overridden label", () => {
+  expect(actorInitial("client", { client: "You" })).toBe("Y");
+  expect(actorInitial("client")).toBe("C");
+});
+
 describe("sendButtonLabel", () => {
   it("flips from a call-to-action to a confirmation once sent", () => {
     expect(sendButtonLabel(false)).toBe("Send to client");

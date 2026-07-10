@@ -10,6 +10,7 @@ import { safeHttpUrl } from "./lib/url";
 import { type MobileView, toggleMobileView } from "./lib/mobile-view";
 import { markProgrammaticScroll, consumeProgrammaticScroll } from "./lib/scroll-intent";
 import { editForActivity, actorClass, actorLabel, threadsForDay, actorInitial, sendButtonLabel } from "./lib/reel-render";
+import type { ActorLabels } from "./lib/reel-render";
 import type { ReelViewState, ReelEditMarker, ReelThread } from "./lib/interaction";
 
 // claude.ai-lookalike left pane. Deliberately close to claude.ai's layout
@@ -24,7 +25,7 @@ import type { ReelViewState, ReelEditMarker, ReelThread } from "./lib/interactio
 // down so the folio stays clean (the reel beat holds the dwell while it's open). A
 // manual click takes over and cancels the auto-collapse. Timers are abort-safe
 // (cleared on unmount / reel reset, which empties reelView.threads → count 0).
-function CommentThread({ thread, dayTitle }: { thread: ReelThread; dayTitle: string }) {
+function CommentThread({ thread, dayTitle, actorLabels }: { thread: ReelThread; dayTitle: string; actorLabels?: ActorLabels }) {
   const [expanded, setExpanded] = useState(false);
   const [pulse, setPulse] = useState(false);
   const manual = useRef(false);
@@ -59,9 +60,9 @@ function CommentThread({ thread, dayTitle }: { thread: ReelThread; dayTitle: str
         <div className="cl-thread" role="group" aria-label={`Comments on ${dayTitle}`}>
           {thread.comments.map((c, i) => (
             <div key={i} className={`cl-cmt ${actorClass(c.actor)}`}>
-              <span className="cl-cmt-av" aria-hidden="true">{actorInitial(c.actor)}</span>
+              <span className="cl-cmt-av" aria-hidden="true">{actorInitial(c.actor, actorLabels)}</span>
               <span className="cl-cmt-body">
-                <span className="cl-cmt-name">{actorLabel(c.actor)}</span>
+                <span className="cl-cmt-name">{actorLabel(c.actor, actorLabels)}</span>
                 <span className="cl-cmt-text">{c.text}</span>
               </span>
             </div>
@@ -95,7 +96,7 @@ function WorkingIndicator({ live }: { live: boolean }) {
   );
 }
 
-function FolioArtifact({ folio, advisor, edits, threads, showSend, sent, onRequestAccess }: { folio: FolioData; advisor: boolean; edits: ReelEditMarker[]; threads: ReelThread[]; showSend?: boolean; sent?: boolean; onRequestAccess?: () => void }) {
+function FolioArtifact({ folio, advisor, edits, threads, showSend, sent, onRequestAccess, actorLabels }: { folio: FolioData; advisor: boolean; edits: ReelEditMarker[]; threads: ReelThread[]; showSend?: boolean; sent?: boolean; onRequestAccess?: () => void; actorLabels?: ActorLabels }) {
   // N12: an authored breakdown supersedes the hotels-derived total — the header pill
   // then shows earned commission across ALL components, and the itemized section below
   // carries the per-component rows (the section owns the trip-commission anchor then).
@@ -199,7 +200,7 @@ function FolioArtifact({ folio, advisor, edits, threads, showSend, sent, onReque
                             <span className="cl-sr-only">Changed from </span>
                             <span className="cl-edit-was">{edit.was}</span>
                             <span className="cl-edit-arrow" aria-hidden="true"> → </span>
-                            <span className="cl-edit-tag">{actorLabel(edit.actor)} edited</span>
+                            <span className="cl-edit-tag">{actorLabel(edit.actor, actorLabels)} edited</span>
                           </span>
                         )}
                         {au ? <a href={au} target="_blank" rel="noopener noreferrer">{name}</a> : name}
@@ -223,7 +224,7 @@ function FolioArtifact({ folio, advisor, edits, threads, showSend, sent, onReque
                 </div>
               )}
               {threadsForDay(threads, i).map((t) => (
-                <CommentThread key={t.threadId} thread={t} dayTitle={d.title} />
+                <CommentThread key={t.threadId} thread={t} dayTitle={d.title} actorLabels={actorLabels} />
               ))}
             </div>
           ))}
@@ -305,7 +306,7 @@ function Welcome({ presets, geoCity, onSend, busy, postReel }: { presets: Preset
 }
 
 export function ClaudeChatView(
-  { items, folio, onSend, onPick, busy, presets, geoCity, advisor, mobileView, onMobileView, onToggleDemo, demoLabel, engHasContent, postReel, reelView, reelMode, showSend, dataSource, onRequestAccess }:
+  { items, folio, onSend, onPick, busy, presets, geoCity, advisor, mobileView, onMobileView, onToggleDemo, demoLabel, engHasContent, postReel, reelView, reelMode, showSend, actorLabels, dataSource, onRequestAccess }:
   {
     items: TimelineItem[];
     folio: FolioData | null;
@@ -327,6 +328,9 @@ export function ClaudeChatView(
     // to reelMode (existing behavior). A traveller-only reel with no client to send to
     // can force this false even during reel playback.
     showSend?: boolean;
+    // Per-actor label overrides for inline attribution during this reel (e.g. { client: "You" }
+    // in the DIY reels). Absent → default Advisor/Client/Voygent labels.
+    actorLabels?: ActorLabels;
     dataSource?: "live" | "sample" | null;  // honesty tag: live supplier data vs curated sample fixtures
     onRequestAccess?: () => void;  // live (non-reel) only: folio CTA → request a live-demo auth code
   },
@@ -418,13 +422,13 @@ export function ClaudeChatView(
           {firstRun && <Welcome presets={presets} geoCity={geoCity} onSend={onSend} busy={busy} postReel={postReel} />}
           {items.map((it, i) => {
             if (it.role === "toolchip") return <ClaudeToolChip key={i} item={it} reel={!!reelMode} />;
-            if (it.role === "board") return <BoardView key={it.boardId} board={it} busy={busy} advisor={advisor} onPick={onPick} selectedCandidate={reelView.selected[it.boardId]} reelMode={reelMode} />;
+            if (it.role === "board") return <BoardView key={it.boardId} board={it} busy={busy} advisor={advisor} onPick={onPick} selectedCandidate={reelView.selected[it.boardId]} reelMode={reelMode} actorLabels={actorLabels} />;
             if (it.role === "user") return <div key={i} className="cl-msg-user">{it.text}</div>;
             if (it.text) return <div key={i} className="cl-prose"><Prose text={it.text} /></div>;
             return busy && i === lastIdx ? <WorkingIndicator key={i} live={!reelMode} /> : null;
           })}
           {showTailWorking && <WorkingIndicator live={!reelMode} />}
-          {folio && <div className={`cl-folio-inline${reelMode ? " in-reel" : ""}`}><FolioArtifact folio={folio} advisor={advisor} edits={reelView.edits} threads={reelView.threads} showSend={showSend ?? reelMode} sent={!!reelView.handoff?.sent} onRequestAccess={onRequestAccess} /></div>}
+          {folio && <div className={`cl-folio-inline${reelMode ? " in-reel" : ""}`}><FolioArtifact folio={folio} advisor={advisor} edits={reelView.edits} threads={reelView.threads} showSend={showSend ?? reelMode} sent={!!reelView.handoff?.sent} onRequestAccess={onRequestAccess} actorLabels={actorLabels} /></div>}
           <div ref={endRef} />
         </div>
       </div>
@@ -435,7 +439,7 @@ export function ClaudeChatView(
             <button type="button" className="cl-sheet-close" onClick={() => onMobileView("chat")} aria-label="Back to chat">✕ chat</button>
           </div>
           <div className="cl-sheet-body">
-            {folio ? <FolioArtifact folio={folio} advisor={advisor} edits={reelView.edits} threads={reelView.threads} showSend={showSend ?? reelMode} sent={!!reelView.handoff?.sent} onRequestAccess={onRequestAccess} /> : <p className="cl-day-desc">Your trip folio will build here as Voygent works.</p>}
+            {folio ? <FolioArtifact folio={folio} advisor={advisor} edits={reelView.edits} threads={reelView.threads} showSend={showSend ?? reelMode} sent={!!reelView.handoff?.sent} onRequestAccess={onRequestAccess} actorLabels={actorLabels} /> : <p className="cl-day-desc">Your trip folio will build here as Voygent works.</p>}
           </div>
         </div>
       )}
