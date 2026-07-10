@@ -150,7 +150,7 @@ export const irelandDiy = screenplay({ trip: "Ireland · DIY", skin: "claude" },
   s.spotlight({ eventType: "board", where: { boardId: "b-flight" } }, {
     target: "board-flight", eyebrow: "Every result names its source",
     title: "One board, two suppliers",
-    body: "The free tier searches real fare sources and shows you which one found each price, not a single guess dressed up as an answer.",
+    body: "The free tier searches real fare sources and labels each price with the supplier that found it.",
     dwellMs: 4500,
   });
   s.client.picks("b-flight", "flight:aerlingus-ns", "The nonstop Aer Lingus", withFlight);
@@ -162,9 +162,9 @@ export const irelandDiy = screenplay({ trip: "Ireland · DIY", skin: "claude" },
   s.client.says("Yes, Tuesday to Tuesday works.");
   s.agent.folio(withNewDates);
   s.spotlight({ eventType: "tool", where: { tool: "search_flexible_flights", phase: "done" } }, {
-    target: "tool-search_flexible_flights", eyebrow: "It looks before you ask",
-    title: "The cheaper window, offered unasked",
-    body: "Nobody asked Voygent to check other dates. It ran the flexible search on its own and found $228 for two, sitting two days later.",
+    target: "tool-search_flexible_flights", eyebrow: "Flexible dates, checked automatically",
+    title: "Two days later is $228 cheaper",
+    body: "Nobody asked Voygent to check other dates. It ran a flexible-date search on its own: leaving two days later saves $228 for the two travellers.",
     dwellMs: 4500,
   });
 
@@ -202,8 +202,8 @@ export const irelandDiy = screenplay({ trip: "Ireland · DIY", skin: "claude" },
   s.agent.board("includes", "b-incl", tipCandidates);
   s.spotlight({ eventType: "board", where: { boardId: "b-incl" } }, {
     target: "board-includes", eyebrow: "Free extras, built by Voygent",
-    title: "Nobody sold you these",
-    body: "A walking tour, free museum time, a lakeshore afternoon and the practical notes for the week. No commission on any of it, because nobody here is selling anything.",
+    title: "Free additions, no commission",
+    body: "A walking tour, free museum time, a lakeshore afternoon and the practical notes for the week. All of it free, none of it commissioned.",
     dwellMs: 4500,
   });
   s.client.picksMany("b-incl", TIPS_KEPT, "Keep all four", withFreeExtras);
@@ -214,8 +214,8 @@ export const irelandDiy = screenplay({ trip: "Ireland · DIY", skin: "claude" },
   s.client.folioView(finaleWithInsurance);
   s.spotlight({ interactionKind: "folioview", nth: 2 }, {
     target: "folio-total", eyebrow: "One folio, live total",
-    title: "The price answers as you go",
-    body: "Toggle travel insurance on and the total moves right there, the same way it will for the car, the hotels and the tours. This is the free tier. Your own run pulls live flights, hotels, cars and tours.",
+    title: "The total updates as you change the trip",
+    body: "Toggle travel insurance and the total updates immediately. The car, hotels and tours reprice the same way. Everything in this demo is the free tier, and your own run uses live results.",
     dwellMs: 5200,
   });
   s.client.folioView(null);

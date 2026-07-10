@@ -171,7 +171,7 @@ export const caribbeanCruise = screenplay({ trip: "Caribbean cruise", skin: "cla
   s.agent.board("cruise", "b-cruise", cruises);
   s.spotlight({ eventType: "board", kind: "cruise", nth: 1 }, {
     target: "board-cruise", eyebrow: "Real sailings, sources named",
-    title: "Every price, sourced",
+    title: "Every price shows its source",
     body: "31 sailings pulled from Widgety, narrowed to three that fit a family of four the last week of March. The kids club age range sits right on the card, so Sam and Maya both fit before you click anything.",
     dwellMs: 7000,
   });
@@ -197,9 +197,9 @@ export const caribbeanCruise = screenplay({ trip: "Caribbean cruise", skin: "cla
   s.client.picksMany("b-excursions", EXCURSION_PICKS, "The snorkel beach in Cozumel for Sam, the falls climb in Falmouth for Maya.", withExcursions);
   s.agent.says("Good pairing. That leaves George Town open, and that is fine. Seven Mile Beach is a free public morning there, and every port has a no cost option if you would rather save the money, a walk through downtown Cozumel, or the crafts market in Falmouth.");
   s.spotlight({ interactionKind: "pick", nth: 2 }, {
-    target: "board-tour", eyebrow: "Not every port needs a receipt",
-    title: "Free mornings, mapped in",
-    body: "Two excursions booked, one for each kid. George Town stays free on purpose, Seven Mile Beach costs nothing, and Voygent points out a free option at every stop, not only the paid ones.",
+    target: "board-tour", eyebrow: "Free options at every port",
+    title: "Two paid excursions, the rest free",
+    body: "Two excursions booked, one for each kid. George Town stays free on purpose, Seven Mile Beach costs nothing. Voygent shows a free option at every stop, not only the paid ones.",
     dwellMs: 7000,
   });
 
@@ -210,9 +210,9 @@ export const caribbeanCruise = screenplay({ trip: "Caribbean cruise", skin: "cla
   s.agent.board("hotel", "b-hotel-mia", hotels);
   s.client.picks("b-hotel-mia", "hotel:holidayinn", "The Holiday Inn, we can walk to the terminal with the kids and the bags.", withHotel);
   s.spotlight({ interactionKind: "pick", nth: 3 }, {
-    target: "board-hotel", eyebrow: "The advice that is not a sales pitch",
-    title: "The honest tip, sleep here first",
-    body: "Voygent is not selling this stay, it is protecting the sailing. A short walk to the terminal beats a gamble on Turnpike traffic on embarkation morning.",
+    target: "board-hotel", eyebrow: "Advice, not a sales pitch",
+    title: "Stay near the port the night before",
+    body: "Voygent recommends this hotel to protect the sailing, not to earn anything on it. A short walk to the terminal beats a gamble on Turnpike traffic on embarkation morning.",
     dwellMs: 7000,
   });
 
@@ -223,8 +223,8 @@ export const caribbeanCruise = screenplay({ trip: "Caribbean cruise", skin: "cla
   s.client.picksMany("b-incl", INCLUDE_KEEP, "Keep all five, we will want every one of these.", withIncludes);
   s.spotlight({ interactionKind: "pick", nth: 4 }, {
     target: "board-includes", eyebrow: "Free extras, built by Voygent",
-    title: "Free extras, built by Voygent",
-    body: "None of this cost anything and none of it was typed by hand. The muster drill note, the passport reminder for the kids, the motion sickness plan B, all ready written, just chosen.",
+    title: "Ready-made notes for this family",
+    body: "None of this cost anything and none of it was typed by hand. The muster drill note, the kids' passport reminder, the motion sickness plan B: Voygent wrote them and the family kept the ones they wanted.",
     dwellMs: 7000,
   });
 
@@ -238,7 +238,7 @@ export const caribbeanCruise = screenplay({ trip: "Caribbean cruise", skin: "cla
   s.spotlight({ interactionKind: "folioview", nth: 5 }, {
     target: "folio-total", eyebrow: "One number, no surprises",
     title: "The whole trip, one honest total",
-    body: "Cruise fare with the connecting cabin saving, one night at the port hotel, both excursions. Add the wifi package and watch the total answer right away.",
+    body: "Cruise fare with the connecting cabin saving, one night at the port hotel, both excursions. Add the wifi package and the total updates right away.",
     dwellMs: 7000,
   });
   // 8d: the wifi total-pop callout above already holds 7000ms so the total reads;
