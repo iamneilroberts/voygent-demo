@@ -2,13 +2,14 @@
 import { SIGNUP_URL } from "./lib/reel-render";
 
 export function ReelIntro(
-  { title, blurb, durationLabel, onWatch, onPlanYourOwn, eyebrow, note, chapters, onChapter, more, moreLabel }:
+  { title, blurb, durationLabel, onWatch, onPlanYourOwn, eyebrow, note, chapters, chaptersLabel, onChapter, more, moreLabel }:
   { title: string; blurb: string; durationLabel: string; onWatch: () => void; onPlanYourOwn: () => void;
     // Per-reel overrides. Default = "real session" framing (honest for the real
     // dublin-oct recording); the scripted collab reel passes its own honest copy.
     eyebrow?: string; note?: string;
     // The story arc, so visitors can see there is more than one chapter.
     chapters?: { id: string; title: string; durationLabel: string; current: boolean }[];
+    chaptersLabel?: string;
     onChapter?: (id: string) => void;
     // A second, smaller list of reels for a different audience (e.g. the DIY
     // traveller reels, listed under the advisor arc's chapters). Absent -> no list.
@@ -34,17 +35,17 @@ export function ReelIntro(
           Create a free account<span className="cl-reel-btn-meta">voygent.ai · takes about a minute</span>
         </a>
         {chapters && chapters.length > 1 && (
-          <div className="cl-reel-chapters" role="list" aria-label="All chapters">
+          <div className="cl-reel-chapters" role="list" aria-label={chaptersLabel ?? "All chapters"}>
             {chapters.map((c) => c.current
               ? <span key={c.id} role="listitem" className="cl-reel-chapter on" aria-current="true">{c.title}<i>watching</i></span>
               : <button key={c.id} role="listitem" type="button" className="cl-reel-chapter" onClick={() => onChapter?.(c.id)}>{c.title}<i>{c.durationLabel}</i></button>)}
           </div>
         )}
         {more && more.length > 0 && (
-          <div className="cl-reel-chapters cl-reel-more" role="list" aria-label="Demos for travellers">
+          <div className="cl-reel-chapters cl-reel-more" role="group" aria-label={moreLabel ?? "Planning it yourself?"}>
             <span className="cl-reel-more-label">{moreLabel ?? "Planning it yourself?"}</span>
             {more.map((m) => (
-              <button key={m.id} role="listitem" type="button" className="cl-reel-chapter" onClick={() => onChapter?.(m.id)}>
+              <button key={m.id} type="button" className="cl-reel-chapter" onClick={() => onChapter?.(m.id)}>
                 {m.title}<i>{m.durationLabel}</i>
               </button>
             ))}

@@ -559,6 +559,7 @@ export function App() {
               {...(selectedReel.audience === "traveller"
                 ? {
                     chapters: travellerReels.map((r) => ({ id: r.id, title: r.title, durationLabel: r.durationLabel, current: r.id === selectedReel.id })),
+                    chaptersLabel: "Demos for travellers",
                     more: [{ id: "plan", title: "Watch the advisor demos", durationLabel: "3 parts" }],
                     moreLabel: "Working with an advisor?",
                   }
