@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { streamChat, UnauthorizedError } from "./sse-client";
 import { Gate } from "./Gate";
 import { OnboardingForm } from "./OnboardingForm";
@@ -6,7 +6,7 @@ import { ProAccessForm } from "./ProAccessForm";
 import { readCodeFromHash, authenticate, sessionInfo } from "./lib/gate";
 import { effectiveMode, gateOnGoLive, showPublicDisclaimer, type Tier } from "./lib/access";
 import { ChatView, type ChatMessage, type Preset } from "./ChatView";
-import { ClaudeChatView } from "./ClaudeChatView";
+import { ClaudeChatView, FolioArtifact } from "./ClaudeChatView";
 import { FolioPanel } from "./FolioPanel";
 import type { ServerEvent, FolioData, BoardCandidate, StatsResponse } from "../../shared/events";
 import { toolChipTitle } from "../../shared/tool-chip-title";
@@ -197,6 +197,30 @@ export function App() {
   }
   // Reel interaction view-state; consumed by ClaudeChatView render.
   const [reelView, setReelView] = useState<ReelViewState>(emptyReelViewState);
+  // Reel folio pop (behavior B): during a reel the folio is not a tall always-on
+  // strip. It surfaces as a bottom sheet only when it just changed (a transient pop
+  // that retreats) or while a callout is aimed at an inline-folio element (held open
+  // and rendered instantly, so the spotlight lands on the real element).
+  const [folioChanged, setFolioChanged] = useState(false);
+  const folioSig = useMemo(
+    () => (mode === "auto" ? JSON.stringify([folio, reelView.edits, reelView.selected, reelView.handoff]) : ""),
+    [folio, reelView.edits, reelView.selected, reelView.handoff, mode],
+  );
+  const folioSigSeen = useRef(false);
+  useEffect(() => {
+    if (mode !== "auto") { setFolioChanged(false); folioSigSeen.current = false; return; }
+    if (!folioSigSeen.current) { folioSigSeen.current = true; return; }  // skip the first (mount) signature
+    setFolioChanged(true);
+    const t = setTimeout(() => setFolioChanged(false), 2800);
+    return () => clearTimeout(t);
+  }, [folioSig, mode]);
+  // A callout aimed at an inline-folio element (not the full folio window) must reveal
+  // the folio sheet, instantly, so ReelCallout's layout effect measures the real target.
+  const folioCalloutTarget =
+    !!activeHighlight &&
+    !reelView.folioView &&
+    (activeHighlight.target.startsWith("folio-") || activeHighlight.target === "trip-commission" || activeHighlight.target.startsWith("comment-"));
+  const folioReveal = folioCalloutTarget || folioChanged;
   // Honesty tag: whether this live session's flight/hotel results are real ("live") or
   // curated sample fixtures ("sample"). Set from the worker's `source` event.
   const [dataSource, setDataSource] = useState<"live" | "sample" | null>(null);
@@ -624,6 +648,15 @@ export function App() {
                   })}
               onChapter={gotoReel}
             />
+          )}
+          {skin === "claude" && mode === "auto" && reelPhase === "playing" && folio && (
+            <div className={`cl-folio-sheet${folioReveal ? " up" : ""}${folioCalloutTarget ? " instant" : ""}`} aria-hidden={!folioReveal}>
+              <FolioArtifact
+                folio={folio} advisor={true} edits={reelView.edits} threads={reelView.threads}
+                showSend={selectedReel.showSend === false ? false : true}
+                sent={!!reelView.handoff?.sent} actorLabels={selectedReel.actorLabels}
+              />
+            </div>
           )}
           {skin === "claude" && mode === "auto" && reelPhase === "playing" && activeHighlight && (
             <ReelCallout

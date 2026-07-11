@@ -96,7 +96,7 @@ function WorkingIndicator({ live }: { live: boolean }) {
   );
 }
 
-function FolioArtifact({ folio, advisor, edits, threads, showSend, sent, onRequestAccess, actorLabels }: { folio: FolioData; advisor: boolean; edits: ReelEditMarker[]; threads: ReelThread[]; showSend?: boolean; sent?: boolean; onRequestAccess?: () => void; actorLabels?: ActorLabels }) {
+export function FolioArtifact({ folio, advisor, edits, threads, showSend, sent, onRequestAccess, actorLabels }: { folio: FolioData; advisor: boolean; edits: ReelEditMarker[]; threads: ReelThread[]; showSend?: boolean; sent?: boolean; onRequestAccess?: () => void; actorLabels?: ActorLabels }) {
   // N12: an authored breakdown supersedes the hotels-derived total — the header pill
   // then shows earned commission across ALL components, and the itemized section below
   // carries the per-component rows (the section owns the trip-commission anchor then).
@@ -434,7 +434,10 @@ export function ClaudeChatView(
             return busy && i === lastIdx ? <WorkingIndicator key={i} live={!reelMode} /> : null;
           })}
           {showTailWorking && <WorkingIndicator live={!reelMode} />}
-          {folio && <div className={`cl-folio-inline${reelMode ? " in-reel" : ""}`}><FolioArtifact folio={folio} advisor={advisor} edits={reelView.edits} threads={reelView.threads} showSend={showSend ?? reelMode} sent={!!reelView.handoff?.sent} onRequestAccess={onRequestAccess} actorLabels={actorLabels} /></div>}
+          {/* Non-reel (live) keeps the folio inline in the chat. During a reel the folio
+              is shown as a pop-up sheet (rendered in App) that appears on changes and
+              while a callout targets it, so it isn't a tall always-on strip. */}
+          {folio && !reelMode && <div className="cl-folio-inline"><FolioArtifact folio={folio} advisor={advisor} edits={reelView.edits} threads={reelView.threads} showSend={showSend ?? reelMode} sent={!!reelView.handoff?.sent} onRequestAccess={onRequestAccess} actorLabels={actorLabels} /></div>}
           <div ref={endRef} />
         </div>
       </div>

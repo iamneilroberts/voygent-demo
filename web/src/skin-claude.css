@@ -244,6 +244,26 @@
   border: 1px solid #e0d8c7; border-top: 3px solid #3d5245; border-radius: 12px; padding: 10px 13px;
   box-shadow: 0 1px 3px rgba(31, 30, 28, .05);
 }
+
+/* Reel folio pop (behavior B): the folio is not an always-on strip during a reel.
+   It slides up from the bottom as a sheet when it changes (transient) or while a
+   callout targets it, then retreats. z-30 keeps it below the callout overlay (65)
+   so a spotlight dims around it correctly. The artifact carries its own card chrome. */
+:root[data-skin="claude"] .cl-folio-sheet {
+  position: absolute; left: 12px; right: 12px; bottom: 12px; z-index: 30;
+  max-height: 60%; overflow-y: auto; border-radius: 12px;
+  box-shadow: 0 16px 44px rgba(31, 30, 28, .26);
+  transform: translateY(125%); opacity: 0; pointer-events: none;
+  transition: transform .34s cubic-bezier(.2, .7, .3, 1), opacity .28s ease;
+}
+:root[data-skin="claude"] .cl-folio-sheet.up { transform: none; opacity: 1; pointer-events: auto; }
+/* callout reveals show with no animation so ReelCallout measures the target in place */
+:root[data-skin="claude"] .cl-folio-sheet.instant { transition: none; }
+@media (prefers-reduced-motion: reduce) { :root[data-skin="claude"] .cl-folio-sheet { transition: none; } }
+/* desktop: a floating card at bottom-right of the chat pane rather than full width */
+@media (min-width: 761px) {
+  :root[data-skin="claude"] .cl-folio-sheet { left: auto; width: 340px; right: 20px; max-height: 66%; }
+}
 :root[data-skin="claude"] .cl-artifact-head { display: flex; flex-direction: column; gap: 4px; }
 :root[data-skin="claude"] .cl-artifact-titlerow { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
 :root[data-skin="claude"] .cl-artifact-kicker { font-size: .625rem; letter-spacing: .1em; text-transform: uppercase; color: #3d5245; font-weight: 700; }
