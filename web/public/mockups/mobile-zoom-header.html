@@ -125,8 +125,11 @@
   }
   .frame[data-mode="proposed"] .transport::-webkit-scrollbar { display: none; }
   .frame[data-mode="proposed"] .transport .ctl { width: 1.85em; height: 1.85em; border-radius: 8px; }
-  .frame[data-mode="proposed"] .transport .track { flex: 1 1 3em; min-width: 2.4em; }
+  .frame[data-mode="proposed"] .transport .track { flex: 1 1 1.6em; min-width: 1.4em; }
   .frame[data-mode="proposed"] .transport .speed button { padding: .5em .5em; }
+  /* the frame-number toggle is a QA affordance — hide it on the phone so the
+     speed controls (1x / 2x / Read) never get pushed off the edge */
+  .frame[data-mode="proposed"] .transport > .ctl:last-child { display: none; }
 
   /* ── CURRENT: replicates the live bug. Ribbon + pill stack as two lines,
         transport is pinned with a fixed 104px offset and the scroll reserves
