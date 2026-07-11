@@ -131,6 +131,14 @@
      speed controls (1x / 2x / Read) never get pushed off the edge */
   .frame[data-mode="proposed"] .transport > .ctl:last-child { display: none; }
 
+  /* Once text is large enough that the full row would overflow, drop the two
+     non-essential controls — the progress scrubber and Restart — so
+     Pause / Stop / 1x / 2x / Read always stay on one row, no scroll, no clip.
+     (In the real demo this is an em-based media query; here a text-size
+     threshold stands in for it.) */
+  .frame[data-mode="proposed"].cramped .transport .track { display: none; }
+  .frame[data-mode="proposed"].cramped .transport > .ctl:nth-child(3) { display: none; }
+
   /* ── CURRENT: replicates the live bug. Ribbon + pill stack as two lines,
         transport is pinned with a fixed 104px offset and the scroll reserves
         a fixed 104px band; nothing reflows, so past the 104px assumption it
@@ -163,8 +171,9 @@
     </div>
   </div>
   <p class="hint">Tip: start around <code>170%</code> to match a strongly zoomed phone,
-    then toggle Current vs Proposed. In Proposed the control row shrinks; if it still
-    can't fit it scrolls sideways rather than stacking.</p>
+    then toggle Current vs Proposed. In Proposed, once text is large the row drops the
+    scrubber and Restart so <b>Pause · Stop · 1× · 2× · Read</b> always stay on one
+    row without clipping.</p>
 
   <div class="frame" id="frame" data-mode="proposed" style="--ts:1.3">
     <div class="surface">
@@ -219,6 +228,8 @@
     function setSize(v) {
       frame.style.setProperty('--ts', (v / 100).toString());
       tsv.textContent = v + '%';
+      // past this point the full row can't fit a phone — drop scrubber + restart
+      frame.classList.toggle('cramped', Number(v) >= 125);
     }
     bCur.addEventListener('click', function () { setMode('current'); });
     bProp.addEventListener('click', function () { setMode('proposed'); });
