@@ -1,5 +1,5 @@
 import type { ServerEvent, BoardCandidate, FolioData } from "../../../shared/events";
-import type { Recording, Frame, Actor, ReelClientSession, ReelEngPanel, ReelFolioSession, ReelEmailView } from "./recording";
+import type { Recording, Frame, Actor, ReelClientSession, ReelEngPanel, ReelFolioSession, ReelEmailView, ReelPocketGuide } from "./recording";
 import type { Highlight, HighlightMatch } from "./highlights";
 
 interface Meta { trip: string; skin: "claude" }
@@ -88,6 +88,10 @@ class Builder {
       // airline sent it, shown before the advisor pastes it into the chat.
       email: (snapshot: ReelEmailView | null) => {
         this.add({ delayMs: 0, kind: "interaction", actor, interaction: { kind: "emailview", view: snapshot }, beatId: this.beat() });
+      },
+      // DIY finale: open/close the Pocket Guide window (the saved-to-phone offline guide).
+      pocketGuide: (snapshot: ReelPocketGuide | null, opts?: { holdMs?: number }) => {
+        this.add({ delayMs: 0, kind: "interaction", actor, interaction: { kind: "pocketguide", view: snapshot }, beatId: this.beat(), ...(opts?.holdMs != null ? { holdMs: opts.holdMs } : {}) });
       },
     };
   }

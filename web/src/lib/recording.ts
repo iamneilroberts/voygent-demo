@@ -101,6 +101,19 @@ export interface ReelEngPanel {
 // sceneLabel names whose inbox we're looking at (defaults to "Inbox").
 export interface ReelEmailView { from: string; subject: string; body: string; sceneLabel?: string }
 
+// The Pocket Guide: the whole trip as a self-contained page the traveller saves to
+// their phone and opens offline (voygent-lite preview_folio format:"pocket_guide").
+// Shown as a phone-framed window at the end of the DIY reels. Tickets carry the real
+// confirmation the guide holds; days is the at-a-glance itinerary strip.
+export interface ReelPocketGuideTicket { label: string; conf: string; note?: string }
+export interface ReelPocketGuide {
+  tripName: string;
+  subtitle?: string;
+  tickets: ReelPocketGuideTicket[];
+  days?: string[];
+  sceneLabel?: string;
+}
+
 // Reel-only interaction payloads. NEVER a ServerEvent — the worker/live app never sees these.
 export type ReelInteraction =
   | { kind: "pick"; boardId: string; candidateIds: string[]; echo: string }
@@ -112,7 +125,8 @@ export type ReelInteraction =
   | { kind: "clientview"; view: ReelClientSession | null }
   | { kind: "folioview"; view: ReelFolioSession | null }
   | { kind: "engpanel"; view: ReelEngPanel | null }
-  | { kind: "emailview"; view: ReelEmailView | null };
+  | { kind: "emailview"; view: ReelEmailView | null }
+  | { kind: "pocketguide"; view: ReelPocketGuide | null };
 
 export type Frame =
   | { delayMs: number; kind: "user"; text: string; actor?: Actor; beatId?: string }

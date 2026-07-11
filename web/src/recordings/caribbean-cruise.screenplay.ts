@@ -1,6 +1,6 @@
 import { screenplay } from "../lib/screenplay";
 import type { BoardCandidate, FolioData, FolioDay, FolioInclude } from "../../../shared/events";
-import type { ReelFolioSession, ReelHotelOption, ReelAddon, ReelComponent } from "../lib/recording";
+import type { ReelFolioSession, ReelHotelOption, ReelAddon, ReelComponent, ReelPocketGuide } from "../lib/recording";
 
 // "A family cruise, planned in one chat" (DIY reel, 2026-07-10). Traveller-only: a
 // family of four plans a 7-night Caribbean cruise themselves, no advisor anywhere.
@@ -154,6 +154,19 @@ const fvDay3: ReelFolioSession = { ...fvBase, focus: "folio-day-3", expandedDay:
 const fvExtras: ReelFolioSession = { ...fvBase, focus: "folio-addons" };
 const fvWifiOn: ReelFolioSession = { ...fvExtras, addons: fvExtras.addons.map((a) => (a.id === "addon-wifi" ? { ...a, on: true } : a)), ctaLine: "Plan yours free at voygent.ai" };
 
+// The Pocket Guide shown at the finale — the cruise saved to the family's phone.
+const cruiseGuide: ReelPocketGuide = {
+  tripName: "A family cruise",
+  subtitle: "7 nights · Western Caribbean · family of four",
+  tickets: [
+    { label: "Chankanaab beach and snorkel", conf: "VIA-5520C", note: "Cozumel · Day 3 · kids half price" },
+    { label: "Dunn's River Falls", conf: "GYG-71844", note: "Falmouth · Day 5 · small group" },
+    { label: "Two connecting interior cabins", conf: "RCL-8842K", note: "kids club, ages 0 to 17" },
+    { label: "Port hotel, Miami", conf: "BK-33019", note: "the night before you sail" },
+  ],
+  days: ["Embark in Miami", "Sea day", "Cozumel", "George Town", "Falmouth", "Sea day", "Sea day", "Home"],
+};
+
 export const caribbeanCruise = screenplay({ trip: "Caribbean cruise", skin: "claude" }, (s) => {
   // Beat 1 — the brief, straight from the family. No advisor anywhere in this reel.
   s.client.says("Two adults, a 14 year old and a 5 year old, out of Orlando. We want a 7 night Caribbean cruise from Miami, the last week of March, spring break. The kids need real kids programs, not just a pool.");
@@ -246,19 +259,22 @@ export const caribbeanCruise = screenplay({ trip: "Caribbean cruise", skin: "cla
   // enough to register the close, not the folioview kind's full 4200ms floor.
   s.client.folioView(null, { holdMs: 2800 });
 
-  // Beat 7.5 — the Pocket Guide: the whole cruise on your phone, offline. Real feature,
-  // preview_folio format:"pocket_guide" (voygent-lite). Offline matters at sea and in port.
-  s.agent.says("Before you go, I've put the whole week into a Pocket Guide: the day-by-day, your port hotel and cabin details, both excursion tickets and confirmation numbers, and the family notes. Save it to your phone and it opens with no signal, which is the point at sea and in port where data gets slow or expensive.");
-  s.agent.tool("preview_folio", { summary: "Pocket Guide, a self-contained trip page you save to your phone" });
-  s.spotlight({ eventType: "tool", where: { tool: "preview_folio", phase: "done" } }, {
-    target: "tool-preview_folio", eyebrow: "Take the whole trip with you",
-    title: "A Pocket Guide that works offline",
-    body: "Save it to your phone's home screen and the whole cruise comes with you: day by day, cabin and hotel details, excursion tickets and confirmation numbers, and the family notes. It opens with no signal, so it works at sea and in port.",
-    dwellMs: 5000,
-  });
-
   // Beat 8 — the wrap.
   s.agent.says("This walkthrough was scripted, sources named the whole way. Sign up free and Voygent pulls live sailings, live hotels and live excursions for your own dates, no advisor required.");
+
+  // Beat 9 — the Pocket Guide: the whole cruise on the family's phone, offline. Real
+  // feature, preview_folio format:"pocket_guide" (voygent-lite). The tool chip starts a
+  // fresh message after the wrap, then the Pocket Guide window opens and the callout
+  // points at it. Offline matters at sea and in port.
+  s.agent.tool("preview_folio", { summary: "Pocket Guide, a self-contained page you save to your phone" });
+  s.agent.says("And one thing to take with you: a Pocket Guide for the whole cruise. Save it to your phone and it opens with no signal, which is the point at sea and in port.");
+  s.client.pocketGuide(cruiseGuide);
+  s.spotlight({ interactionKind: "pocketguide", nth: 1 }, {
+    target: "pocket-guide", eyebrow: "Take the whole trip with you",
+    title: "A Pocket Guide that works offline",
+    body: "Save it to your phone's home screen and the whole cruise comes with you: the day-by-day, your cabin and port hotel, and the excursion tickets and confirmation numbers. It opens with no signal, so it works at sea and in port.",
+    dwellMs: 5500,
+  });
 });
 
 export const meta = {

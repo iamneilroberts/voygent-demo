@@ -21,8 +21,8 @@ describe("ireland-diy (grounding)", () => {
   const kinds = interactions.map((i) => i.kind);
   const folioViews = interactions.flatMap((i) => (i.kind === "folioview" && i.view) ? [i.view as ReelFolioSession] : []);
 
-  it("uses only picks and the folio cutaway — no edit, comment, handoff, engpanel or clientview", () => {
-    expect(new Set(kinds)).toEqual(new Set(["pick", "folioview"]));
+  it("uses only picks, the folio cutaway and the pocket guide — no edit, comment, handoff, engpanel or clientview", () => {
+    expect(new Set(kinds)).toEqual(new Set(["pick", "folioview", "pocketguide"]));
     expect(kinds.filter((k) => k === "handoff")).toHaveLength(0);
   });
 

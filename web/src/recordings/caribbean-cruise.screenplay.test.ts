@@ -22,7 +22,7 @@ describe("caribbean-cruise screenplay (grounding)", () => {
   const allUserTexts = frames.flatMap((f) => (f.kind === "user") ? [f.text] : []);
 
   it("is traveller-only: picks and the finale cutaway, nothing else", () => {
-    expect(new Set(kinds)).toEqual(new Set(["pick", "folioview"]));
+    expect(new Set(kinds)).toEqual(new Set(["pick", "folioview", "pocketguide"]));
     expect(kinds.includes("handoff")).toBe(false);
   });
 

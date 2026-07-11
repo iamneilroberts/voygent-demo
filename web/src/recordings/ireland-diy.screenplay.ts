@@ -1,6 +1,6 @@
 import { screenplay } from "../lib/screenplay";
 import type { BoardCandidate, FolioData, FolioDay, FolioInclude, FolioBooking } from "../../../shared/events";
-import type { ReelFolioSession, ReelAddon, ReelHotelOption } from "../lib/recording";
+import type { ReelFolioSession, ReelAddon, ReelHotelOption, ReelPocketGuide } from "../lib/recording";
 
 // "A week in Ireland, planned in one chat" — the DIY reel. Two travellers, no advisor
 // anywhere: every human turn is s.client. Voygent searches real sources, names them on
@@ -86,7 +86,19 @@ const daysWithFreeExtras: FolioDay[] = daysBase.map((d, i) => {
   return d;
 });
 
-const carBooking: FolioBooking = { label: "Compact automatic · Dublin Airport", conf: "TP-88214", detail: "7 days, picked up when you leave Dublin", status: "confirmed" };
+const carBooking: FolioBooking = { label: "Compact automatic · Dublin Airport", conf: "TP-88214", detail: "7 days at $44/day, $308 · picked up when you leave Dublin", status: "confirmed" };
+
+// The Pocket Guide shown at the finale — the trip saved to the traveller's phone.
+const irelandGuide: ReelPocketGuide = {
+  tripName: "A week in Ireland",
+  subtitle: "Sep 22-29 · two travellers",
+  tickets: [
+    { label: "Guinness Storehouse", conf: "VIA-4471X", note: "Day 3 · timed entry" },
+    { label: "Gap of Dunloe boat and walk", conf: "GYG-88102", note: "Day 5 · small group" },
+    { label: "Compact automatic · Dublin Airport", conf: "TP-88214", note: "7 days · pick-up on arrival" },
+  ],
+  days: ["Arrive in Dublin", "Dublin on foot", "Guinness Storehouse", "Dublin to Killarney", "Gap of Dunloe", "Killarney and the lakes", "Fly home"],
+};
 const wrenHotel = { name: "Wren Urban Nest", price: "$417", area: "Dublin, Docklands", nights: 3, perNight: "$139" };
 const arbutusHotel = { name: "Arbutus Hotel", price: "$476", area: "Killarney, High Street", nights: 4, perNight: "$119" };
 
@@ -215,21 +227,23 @@ export const irelandDiy = screenplay({ trip: "Ireland · DIY", skin: "claude" },
   s.spotlight({ interactionKind: "folioview", nth: 2 }, {
     target: "folio-total", eyebrow: "One folio, live total",
     title: "The total updates as you change the trip",
-    body: "Toggle travel insurance and the total updates immediately. The car, hotels and tours reprice the same way. Everything in this demo is the free tier, and your own run uses live results.",
+    body: "One page holds the whole trip, with a single total at the bottom. Change anything and it updates right away: turning on travel insurance just moved it, and swapping a hotel or a tour would too. This demo is the free tier, and your own run uses live results.",
     dwellMs: 5200,
   });
   s.client.folioView(null);
 
   // Act 9 — the Pocket Guide: the whole trip on your phone, offline. Real feature,
-  // preview_folio format:"pocket_guide" (voygent-lite): a self-contained page you save
-  // to your home screen and it works with no signal.
-  s.agent.says("One more thing before you go. I've packed the whole week into a Pocket Guide: every day, your hotel and car details, the tour tickets and confirmation numbers, and the practical notes. Save it to your phone and it opens even with no signal, so it's there in the taxi line or out on the Ring of Kerry.");
-  s.agent.tool("preview_folio", { summary: "Pocket Guide, a self-contained trip page you save to your phone" });
-  s.spotlight({ eventType: "tool", where: { tool: "preview_folio", phase: "done" } }, {
-    target: "tool-preview_folio", eyebrow: "Take the whole trip with you",
+  // preview_folio format:"pocket_guide" (voygent-lite). The tool chip comes first so
+  // the line below starts a fresh message instead of running on from the folio line
+  // above, then the Pocket Guide window itself opens and the callout points at it.
+  s.agent.tool("preview_folio", { summary: "Pocket Guide, a self-contained page you save to your phone" });
+  s.agent.says("One more thing before you go: I've packed the whole week into a Pocket Guide. Save it to your phone and it opens even with no signal.");
+  s.client.pocketGuide(irelandGuide);
+  s.spotlight({ interactionKind: "pocketguide", nth: 1 }, {
+    target: "pocket-guide", eyebrow: "Take the whole trip with you",
     title: "A Pocket Guide that works offline",
-    body: "Save it to your phone's home screen and the whole trip comes with you: day by day, hotel and car details, tour tickets and confirmation numbers. It opens with no signal, so it works where the bars don't.",
-    dwellMs: 5000,
+    body: "Save it to your phone's home screen and the whole trip comes with you: the day-by-day, your hotel and car details, and the tour tickets and confirmation numbers. It opens with no signal, so it works where the bars don't.",
+    dwellMs: 5500,
   });
 });
 

@@ -22,7 +22,7 @@ const REDUCED = 90;
 // between consecutive snapshots); the closing snapshot (open:false) shares the floor.
 // engpanel's open beat is held by its callout; the only un-spotlit engpanel beat is the
 // close (panel already gone), so keep that short — a long floor there is just dead air.
-const INTERACTION_DWELL: Record<ReelInteraction["kind"], number> = { pick: 3500, edit: 3200, comment: 4200, handoff: 5200, clientview: 4200, folioview: 4200, engpanel: 600, emailview: 5200 };
+const INTERACTION_DWELL: Record<ReelInteraction["kind"], number> = { pick: 3500, edit: 3200, comment: 4200, handoff: 5200, clientview: 4200, folioview: 4200, engpanel: 600, emailview: 5200, pocketguide: 4200 };
 const INTERACTION_PREBEAT = 320;       // small delay BEFORE an interaction frame appears
 const INTERACTION_REDUCED_DWELL = 1500; // reduced-motion still needs reading time
 

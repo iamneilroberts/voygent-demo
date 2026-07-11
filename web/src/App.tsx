@@ -39,6 +39,7 @@ import { ReelClientView } from "./ReelClientView";
 import { ReelFolioView } from "./ReelFolioView";
 import { ReelEngPanel } from "./ReelEngPanel";
 import { ReelEmailView } from "./ReelEmailView";
+import { ReelPocketGuide } from "./ReelPocketGuide";
 import { ReelEndCard } from "./ReelEndCard";
 import { ReelStopCard } from "./ReelStopCard";
 import { folioSessionFromClient } from "./lib/folio-session";
@@ -693,6 +694,9 @@ export function App() {
           )}
           {skin === "claude" && mode === "auto" && reelPhase === "playing" && reelView.emailView && (
             <ReelEmailView view={reelView.emailView} />
+          )}
+          {skin === "claude" && mode === "auto" && reelPhase === "playing" && reelView.pocketGuide && (
+            <ReelPocketGuide view={reelView.pocketGuide} />
           )}
           {skin === "claude" && mode === "auto" && reelPhase === "playing" && stopCta && (
             <ReelStopCard onTrial={tryYourself} onResume={resumeDemo} onReplay={() => { setStopCta(false); startReel(); }} />

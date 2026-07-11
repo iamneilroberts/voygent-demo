@@ -1,4 +1,4 @@
-import type { Actor, ReelInteraction, ReelClientSession, ReelEngPanel, ReelFolioSession, ReelEmailView } from "./recording";
+import type { Actor, ReelInteraction, ReelClientSession, ReelEngPanel, ReelFolioSession, ReelEmailView, ReelPocketGuide } from "./recording";
 
 export interface ReelEditMarker { path: string; was: string; now: string; tag: string; actor: Actor; reconciled: boolean }
 export interface ReelComment { actor: Actor; text: string }
@@ -19,10 +19,11 @@ export interface ReelViewState {
   folioView: ReelFolioSession | null;     // ch3: the client's full folio window
   engPanel: ReelEngPanel | null;          // brief engineering-view peek
   emailView: ReelEmailView | null;        // ch3: the raw airline email, as an email window
+  pocketGuide: ReelPocketGuide | null;    // DIY finale: the saved-to-phone offline guide
 }
 
 export function emptyReelViewState(): ReelViewState {
-  return { selected: {}, edits: [], threads: [], handoff: null, clientView: null, folioView: null, engPanel: null, emailView: null };
+  return { selected: {}, edits: [], threads: [], handoff: null, clientView: null, folioView: null, engPanel: null, emailView: null, pocketGuide: null };
 }
 
 export function applyInteraction(state: ReelViewState, i: ReelInteraction, actor: Actor): ReelViewState {
@@ -48,6 +49,8 @@ export function applyInteraction(state: ReelViewState, i: ReelInteraction, actor
       return { ...state, engPanel: i.view };
     case "emailview":
       return { ...state, emailView: i.view };
+    case "pocketguide":
+      return { ...state, pocketGuide: i.view };
   }
 }
 
