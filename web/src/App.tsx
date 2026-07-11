@@ -520,8 +520,11 @@ export function App() {
     <div className="cl-reel-nav" data-reel-target="reel-controls">
       {/* Mobile-only: one short honesty note that replaces the header ribbon + the
           scripted-chip, keeping the phone header compact (desktop hides this span
-          and keeps the full ribbon). */}
-      <span className="cl-reel-note-mobile" role="note">A Voygent demo, not affiliated with Anthropic. Scripted walk-through; your own run pulls live results.</span>
+          and keeps the full ribbon). Reel-aware: the "not affiliated" disclaimer is
+          global; the scripted-walk-through line is appended ONLY when this reel has
+          an honestyChip (the real-recording dublin-oct reel has none, so it must not
+          claim scripted). */}
+      <span className="cl-reel-note-mobile" role="note">A Voygent demo, not affiliated with Anthropic.{selectedReel.honestyChip ? ` ${selectedReel.honestyChip}` : ""}</span>
       {reelPhase === "playing" && (
         <div className="cl-reel-controls" role="group" aria-label="Playback controls">
           <button type="button" className="cl-reel-ctl" aria-pressed={paused} aria-label={paused ? "Play" : "Pause"} onClick={togglePause}>{paused ? "▶" : "❚❚"}</button>
