@@ -131,10 +131,10 @@ describe("ireland-diy (grounding)", () => {
   });
 
   it("resolves all callouts, in ascending frame order", () => {
-    expect(irelandDiy.highlights.length).toBe(5);
+    expect(irelandDiy.highlights.length).toBe(6);
     const resolved = resolveHighlightFrames(frames, irelandDiy.highlights);
     const total = [...resolved.values()].reduce((n, hs) => n + hs.length, 0);
-    expect(total).toBe(5);
+    expect(total).toBe(6);
     const idxs = [...resolved.keys()];
     expect(idxs).toEqual([...idxs].sort((a, b) => a - b));
   });

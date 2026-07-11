@@ -219,6 +219,18 @@ export const irelandDiy = screenplay({ trip: "Ireland · DIY", skin: "claude" },
     dwellMs: 5200,
   });
   s.client.folioView(null);
+
+  // Act 9 — the Pocket Guide: the whole trip on your phone, offline. Real feature,
+  // preview_folio format:"pocket_guide" (voygent-lite): a self-contained page you save
+  // to your home screen and it works with no signal.
+  s.agent.says("One more thing before you go. I've packed the whole week into a Pocket Guide: every day, your hotel and car details, the tour tickets and confirmation numbers, and the practical notes. Save it to your phone and it opens even with no signal, so it's there in the taxi line or out on the Ring of Kerry.");
+  s.agent.tool("preview_folio", { summary: "Pocket Guide, a self-contained trip page you save to your phone" });
+  s.spotlight({ eventType: "tool", where: { tool: "preview_folio", phase: "done" } }, {
+    target: "tool-preview_folio", eyebrow: "Take the whole trip with you",
+    title: "A Pocket Guide that works offline",
+    body: "Save it to your phone's home screen and the whole trip comes with you: day by day, hotel and car details, tour tickets and confirmation numbers. It opens with no signal, so it works where the bars don't.",
+    dwellMs: 5000,
+  });
 });
 
 export const meta = {
