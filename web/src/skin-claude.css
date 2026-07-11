@@ -564,11 +564,17 @@
    to the essentials (Pause / Stop / 1x / 2x / Read) so it stays one row. */
 @media (max-width: 760px) {
   :root[data-skin="claude"] .cl-reel-nav {
-    position: sticky; top: 0; z-index: 66;
+    position: sticky; top: 0; z-index: 40;   /* BELOW the callout overlay (65) so a
+       callout is never hidden behind the nav; the callout's dim is pointer-events:none
+       so the transport underneath stays tappable */
     flex-direction: column; align-items: stretch; gap: 6px;
     margin: 0; padding: 8px 14px 10px;
     background: var(--cl-bg); border-bottom: 1px solid var(--cl-line);
   }
+  /* During playback keep the header short: collapse the chapter list (it returns
+     when the reel ends and you're choosing the next demo). */
+  :root[data-skin="claude"] .cl-reel-nav:has(.cl-reel-controls) .cl-reel-nav-label,
+  :root[data-skin="claude"] .cl-reel-nav:has(.cl-reel-controls) .cl-reel-crumb { display: none; }
   /* replace the two stacked disclaimers with the single combined note */
   :root[data-skin="claude"] .cl-pane:has(.cl-reel-nav) .cl-ribbon { display: none; }
   :root[data-skin="claude"] .cl-reel-note-mobile {
