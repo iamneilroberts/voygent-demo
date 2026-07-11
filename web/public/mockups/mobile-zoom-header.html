@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Demo header — zoom fix mockup</title>
+<style>
+  :root {
+    --cl-bg:#faf9f5; --cl-surface:#fff; --cl-user-bubble:#f0eee6;
+    --cl-ink:#1f1e1c; --cl-ink-2:#3d3d3a; --cl-muted:#6b6a64; --cl-line:#e8e6dd;
+    --cl-accent:#c96442; --cl-accent-ink:#fff; --cl-tool-bg:#f5f4ee;
+    --cl-sans: ui-sans-serif,-apple-system,"Segoe UI",system-ui,sans-serif;
+    --cl-serif: Georgia,"Iowan Old Style","Times New Roman",serif;
+    --cl-mono:  ui-monospace,"SF Mono",Menlo,monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: #ece9e2;
+    font-family: var(--cl-sans);
+    color: var(--cl-ink);
+    -webkit-text-size-adjust: 100%;
+    padding: 12px 12px 40px;
+  }
+
+  /* ── test rig (not part of the demo UI) ───────────────────────── */
+  .rig { max-width: 460px; margin: 0 auto 14px; }
+  .rig h1 { font: 600 17px/1.3 var(--cl-sans); margin: 4px 0 6px; }
+  .rig p  { font: 14px/1.45 var(--cl-sans); color: #55524b; margin: 0 0 12px; }
+  .rig .row { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; margin-bottom: 12px; }
+  .seg { display: inline-flex; border: 1px solid #cdc8bd; border-radius: 999px; overflow: hidden; background: #fff; }
+  .seg button {
+    appearance: none; border: 0; background: transparent; cursor: pointer;
+    font: 600 13px/1 var(--cl-sans); color: #55524b; padding: 9px 14px;
+  }
+  .seg button[aria-pressed="true"] { background: var(--cl-accent); color: #fff; }
+  .slider { display: flex; align-items: center; gap: 9px; font: 13px/1 var(--cl-sans); color: #55524b; }
+  .slider input { width: 150px; }
+  .slider b { font-variant-numeric: tabular-nums; color: var(--cl-ink); min-width: 3.2em; }
+  .hint { font: 12.5px/1.4 var(--cl-sans); color: #7a766c; max-width: 460px; margin: 0 auto 14px; }
+  .hint code { font-family: var(--cl-mono); background: #fff; padding: 1px 5px; border-radius: 4px; border: 1px solid #ded9cd; }
+
+  /* ── the phone-sized demo surface ─────────────────────────────── */
+  .frame {
+    max-width: 460px; margin: 0 auto;
+    height: 78vh; min-height: 520px;
+    background: var(--cl-bg);
+    border: 1px solid #d9d4c8; border-radius: 22px; overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,.14);
+    display: flex; flex-direction: column;
+    /* text-size knob: everything inside sizes in em off this */
+    font-size: calc(16px * var(--ts, 1));
+  }
+
+  .surface { display: flex; flex-direction: column; height: 100%; min-height: 0; }
+
+  /* header cluster — wordmark, ribbon, honesty chip, transport */
+  .head-wordmark { display: flex; align-items: baseline; gap: .5em; padding: .55em .85em .35em; }
+  .head-wordmark .mark { color: var(--cl-accent); }
+  .head-wordmark .name { font: 600 1em/1 var(--cl-sans); }
+  .head-wordmark .note { font: .8em/1 var(--cl-sans); color: var(--cl-muted); }
+  .ribbon { font: .78em/1.35 var(--cl-sans); color: var(--cl-muted); padding: 0 1em .3em; }
+  .chip {
+    display: inline-block; margin: 0 .85em .4em; padding: .3em .7em;
+    background: var(--cl-tool-bg); border: 1px solid var(--cl-line); border-radius: 999px;
+    font: .72em/1.2 var(--cl-sans); color: var(--cl-ink-2);
+  }
+  .transport {
+    display: flex; align-items: center; gap: .45em;
+    padding: .5em .7em; background: var(--cl-surface); border: 1px solid var(--cl-line);
+    border-radius: 14px; margin: 0 .6em;
+  }
+  .transport .ctl {
+    appearance: none; border: 1px solid var(--cl-line); background: #fff; border-radius: 9px;
+    width: 2.1em; height: 2.1em; display: grid; place-items: center; cursor: pointer;
+    font: 1em/1 var(--cl-sans); color: var(--cl-ink-2); flex: 0 0 auto;
+  }
+  .transport .track { flex: 1 1 6em; min-width: 4em; height: .5em; border-radius: 999px; background: var(--cl-line); position: relative; }
+  .transport .track i { position: absolute; left: 0; top: 0; bottom: 0; width: 22%; background: var(--cl-accent); border-radius: 999px; }
+  .transport .speed { display: inline-flex; gap: .25em; flex: 0 0 auto; }
+  .transport .speed button {
+    appearance: none; border: 1px solid var(--cl-line); background: #fff; border-radius: 8px;
+    font: 600 .82em/1 var(--cl-sans); color: var(--cl-ink-2); padding: .55em .6em; cursor: pointer;
+  }
+  .transport .speed button.on { background: var(--cl-accent); color: #fff; border-color: var(--cl-accent); }
+
+  /* chat scroll area */
+  .scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 1em .85em 1.4em; }
+  .bubble-user {
+    margin: 1.1em 0 1.4em auto; max-width: 88%;
+    background: var(--cl-user-bubble); border-radius: 16px; padding: .8em 1em;
+    font: 1em/1.5 var(--cl-sans); color: var(--cl-ink);
+  }
+  .beat-dot { width: .5em; height: .5em; border-radius: 50%; background: var(--cl-accent); margin: 1.4em 0 1.4em .4em; }
+  .intro {
+    border: 1.5px solid var(--cl-accent); border-radius: 16px; background: var(--cl-surface);
+    padding: 1.1em 1.1em 1.2em;
+  }
+  .intro .kicker { font: 700 .72em/1 var(--cl-sans); letter-spacing: .12em; color: var(--cl-accent); text-transform: uppercase; }
+  .intro h2 { font: 700 1.35em/1.2 var(--cl-serif); margin: .5em 0 .5em; color: var(--cl-ink); }
+  .intro p { font: 1em/1.55 var(--cl-sans); color: var(--cl-ink-2); margin: 0; }
+  .intro .cont { display: block; text-align: right; margin-top: 1em; color: var(--cl-accent); font: 600 1em/1 var(--cl-sans); }
+
+  /* ── PROPOSED (default): header is one sticky flow stack, auto height,
+        transport wraps. Nothing uses a fixed px offset, so any text size
+        just pushes the chat down instead of overlapping it. ─────────── */
+  .frame[data-mode="proposed"] .headstack {
+    position: sticky; top: 0; z-index: 5;
+    background: var(--cl-bg); border-bottom: 1px solid var(--cl-line);
+    padding-bottom: .5em;
+  }
+  .frame[data-mode="proposed"] .transport { flex-wrap: wrap; }
+
+  /* ── CURRENT: replicates the live bug. Transport is pinned with a fixed
+        104px offset and the scroll reserves a fixed 104px band; the caption
+        text is nowrap-ish and does not reflow, so when text grows past the
+        104px assumption everything collides. ─────────────────────────── */
+  .frame[data-mode="current"] .surface { position: relative; }
+  .frame[data-mode="current"] .headstack {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 5;
+  }
+  .frame[data-mode="current"] .transport { flex-wrap: nowrap; margin-top: .4em; }
+  .frame[data-mode="current"] .transport .speed button { padding: .55em .5em; }
+  .frame[data-mode="current"] .scroll { padding-top: 104px; }   /* the magic number that breaks */
+</style>
+</head>
+<body>
+  <div class="rig">
+    <h1>Demo header — mobile zoom fix</h1>
+    <p>Flip between the live layout and the proposed fix, then drag the text size up
+      the way your phone is set. Current overlaps as text grows; Proposed keeps the
+      header and controls tidy and just pushes the chat down.</p>
+    <div class="row">
+      <div class="seg" role="group" aria-label="Layout">
+        <button id="mCurrent" aria-pressed="false">Current layout</button>
+        <button id="mProposed" aria-pressed="true">Proposed fix</button>
+      </div>
+      <label class="slider">Text size
+        <input id="ts" type="range" min="100" max="240" step="5" value="130" />
+        <b id="tsv">130%</b>
+      </label>
+    </div>
+  </div>
+  <p class="hint">Tip: start around <code>170%</code> to match a strongly zoomed phone,
+    then toggle Current vs Proposed.</p>
+
+  <div class="frame" id="frame" data-mode="proposed" style="--ts:1.3">
+    <div class="surface">
+      <div class="headstack">
+        <div class="head-wordmark">
+          <span class="mark" aria-hidden="true">✳</span>
+          <span class="name">Voygent</span>
+          <span class="note">travel-planning assistant</span>
+        </div>
+        <div class="ribbon">A Voygent demo in a Claude-style chat surface. Not affiliated with Anthropic.</div>
+        <span class="chip">Scripted walk-through · your own run pulls live results</span>
+        <div class="transport" role="group" aria-label="Playback controls">
+          <button class="ctl" title="Pause">❚❚</button>
+          <button class="ctl" title="Stop">■</button>
+          <button class="ctl" title="Restart">↺</button>
+          <div class="track"><i></i></div>
+          <div class="speed">
+            <button>1×</button>
+            <button>2×</button>
+            <button class="on">Read</button>
+          </div>
+          <button class="ctl" title="Frame number">#</button>
+        </div>
+      </div>
+
+      <div class="scroll">
+        <div class="bubble-user">Two of us, a week in Ireland late September. We fly out of Boston. Dublin, plus somewhere greener. We want a rental car and we don't want to overpay.</div>
+        <div class="beat-dot" aria-hidden="true"></div>
+        <div class="intro">
+          <div class="kicker">DIY Demo</div>
+          <h2>A week in Ireland, planned in one chat</h2>
+          <p>Two travellers, no advisor anywhere. Every search below is real, and every result names where it came from. In Read mode this stops at every note like this one. Pick 1× or 2× up here to let it run on its own.</p>
+          <span class="cont">Continue ▸</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var frame = document.getElementById('frame');
+    var ts = document.getElementById('ts');
+    var tsv = document.getElementById('tsv');
+    var bCur = document.getElementById('mCurrent');
+    var bProp = document.getElementById('mProposed');
+
+    function setMode(mode) {
+      frame.setAttribute('data-mode', mode);
+      bCur.setAttribute('aria-pressed', String(mode === 'current'));
+      bProp.setAttribute('aria-pressed', String(mode === 'proposed'));
+    }
+    function setSize(v) {
+      frame.style.setProperty('--ts', (v / 100).toString());
+      tsv.textContent = v + '%';
+    }
+    bCur.addEventListener('click', function () { setMode('current'); });
+    bProp.addEventListener('click', function () { setMode('proposed'); });
+    ts.addEventListener('input', function () { setSize(this.value); });
+    setSize(ts.value);
+  </script>
+</body>
+</html>
