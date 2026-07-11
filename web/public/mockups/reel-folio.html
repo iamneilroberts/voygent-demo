@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Reel folio — pop vs thin-bar mockup</title>
+<style>
+  :root {
+    --cl-bg:#faf9f5; --cl-surface:#fff; --cl-user-bubble:#f0eee6;
+    --cl-ink:#1f1e1c; --cl-ink-2:#3d3d3a; --cl-muted:#6b6a64; --cl-line:#e8e6dd;
+    --cl-accent:#c96442; --cl-accent-ink:#fff; --cl-tool-bg:#f5f4ee;
+    --cl-sans: ui-sans-serif,-apple-system,"Segoe UI",system-ui,sans-serif;
+    --cl-serif: Georgia,"Iowan Old Style","Times New Roman",serif;
+    --cl-mono:  ui-monospace,"SF Mono",Menlo,monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background:#ece9e2; font-family:var(--cl-sans); color:var(--cl-ink); -webkit-text-size-adjust:100%; padding:12px 12px 40px; }
+
+  /* ── test rig ─────────────────────────────────────────────── */
+  .rig { max-width: 460px; margin: 0 auto 14px; }
+  .rig h1 { font: 600 17px/1.3 var(--cl-sans); margin: 4px 0 6px; }
+  .rig p  { font: 14px/1.45 var(--cl-sans); color:#55524b; margin: 0 0 12px; }
+  .rig .row { display:flex; flex-wrap:wrap; gap:10px 12px; align-items:center; margin-bottom:12px; }
+  .seg { display:inline-flex; border:1px solid #cdc8bd; border-radius:999px; overflow:hidden; background:#fff; }
+  .seg button { appearance:none; border:0; background:transparent; cursor:pointer; font:600 13px/1.2 var(--cl-sans); color:#55524b; padding:9px 13px; }
+  .seg button[aria-pressed="true"] { background:var(--cl-accent); color:#fff; }
+  .act { appearance:none; border:1px solid #cdc8bd; background:#fff; border-radius:9px; cursor:pointer; font:600 13px/1 var(--cl-sans); color:#3d3d3a; padding:10px 13px; }
+  .act.primary { background:#3d5245; color:#f4efe4; border-color:#3d5245; }
+  .act:disabled { opacity:.45; cursor:default; }
+  .slider { display:flex; align-items:center; gap:9px; font:13px/1 var(--cl-sans); color:#55524b; }
+  .slider input { width:130px; }
+  .slider b { font-variant-numeric:tabular-nums; color:var(--cl-ink); min-width:3.2em; }
+
+  /* ── phone-sized surface ──────────────────────────────────── */
+  .frame { position:relative; max-width:460px; margin:0 auto; height:80vh; min-height:560px;
+    background:var(--cl-bg); border:1px solid #d9d4c8; border-radius:22px; overflow:hidden;
+    box-shadow:0 10px 30px rgba(0,0,0,.14); display:flex; flex-direction:column;
+    font-size: calc(16px * var(--ts,1)); }
+  .surface { display:flex; flex-direction:column; height:100%; min-height:0; }
+
+  .headstack { background:var(--cl-bg); border-bottom:1px solid var(--cl-line); padding-bottom:.5em; }
+  .hw { display:flex; align-items:baseline; gap:.5em; padding:.55em .85em .3em; }
+  .hw .mark { color:var(--cl-accent); } .hw .name { font:600 1em/1 var(--cl-sans); } .hw .note { font:.8em/1 var(--cl-sans); color:var(--cl-muted); }
+  .disc { font:.76em/1.4 var(--cl-sans); color:var(--cl-muted); padding:0 1em .4em; }
+  .transport { display:flex; align-items:center; gap:.4em; padding:.45em .6em; background:var(--cl-surface); border:1px solid var(--cl-line); border-radius:12px; margin:0 .6em; }
+  .transport .ctl { border:1px solid var(--cl-line); background:#fff; border-radius:8px; width:1.85em; height:1.85em; display:grid; place-items:center; font:1em/1 var(--cl-sans); color:var(--cl-ink-2); }
+  .transport .sp { display:inline-flex; gap:.25em; margin-left:auto; }
+  .transport .sp button { border:1px solid var(--cl-line); background:#fff; border-radius:8px; font:600 .8em/1 var(--cl-sans); color:var(--cl-ink-2); padding:.5em .55em; }
+  .transport .sp button.on { background:var(--cl-accent); color:#fff; border-color:var(--cl-accent); }
+
+  .scroll { flex:1 1 auto; min-height:0; overflow-y:auto; padding:1em .85em 1.4em; }
+  .msg-a { font:1em/1.5 var(--cl-serif); color:var(--cl-ink); margin:.2em 0 1em; }
+  .msg-u { margin:0 0 1.1em auto; max-width:86%; background:var(--cl-user-bubble); border-radius:16px; padding:.75em .95em; font:1em/1.5 var(--cl-sans); }
+  .chip { display:flex; align-items:center; gap:.5em; background:var(--cl-tool-bg); border:1px solid var(--cl-line); border-radius:10px; padding:.6em .8em; font:.85em/1.2 var(--cl-mono); color:var(--cl-ink-2); margin:.2em 0 1em; }
+  .chip .ok { color:#2f8f50; }
+
+  /* ── folio: full card (shared by both modes when shown) ───── */
+  .folio { border:1.5px solid var(--cl-line); border-radius:14px; background:var(--cl-surface); overflow:hidden; }
+  .folio-h { display:flex; align-items:center; gap:.5em; padding:.7em .9em; background:#3d5245; color:#f4efe4; font:600 .95em/1.2 var(--cl-sans); }
+  .folio-h .st { margin-left:auto; font:.72em/1 var(--cl-sans); border:1px solid rgba(244,239,228,.5); border-radius:99px; padding:.15em .6em; }
+  .folio-row { display:flex; justify-content:space-between; gap:.8em; padding:.6em .9em; border-bottom:1px solid var(--cl-line); font:.92em/1.35 var(--cl-sans); color:var(--cl-ink-2); }
+  .folio-row b { color:var(--cl-ink); white-space:nowrap; }
+  .folio-row.new { animation: rowin .5s ease; background:#fbf3ec; box-shadow: inset 3px 0 0 var(--cl-accent); }
+  @keyframes rowin { from { background:#f6ddcf; } to { background:#fbf3ec; } }
+  .folio-total { display:flex; justify-content:space-between; padding:.7em .9em; font:600 1em/1.2 var(--cl-sans); }
+  .folio-total b { color:var(--cl-accent); }
+
+  /* ── mode A: thin summary bar in flow ─────────────────────── */
+  .folio-slot { margin:.3em 0 1em; }
+  .folio-thin { display:flex; align-items:center; gap:.5em; width:100%; text-align:left;
+    background:var(--cl-surface); border:1px solid var(--cl-line); border-radius:999px; padding:.55em .9em;
+    font:.9em/1.2 var(--cl-sans); color:var(--cl-ink-2); cursor:pointer; }
+  .folio-thin .chev { margin-left:auto; color:var(--cl-muted); }
+  .folio-empty { font:.85em/1.4 var(--cl-sans); color:var(--cl-muted); padding:.2em .2em; }
+  .folio-wrap { overflow:hidden; transition: max-height .32s ease, opacity .28s ease; }
+  .folio-wrap.collapsed { max-height:0; opacity:0; }
+  .folio-wrap.open { max-height:640px; opacity:1; }
+
+  /* ── mode B: bottom sheet that pops and retreats ──────────── */
+  .folio-sheet { position:absolute; left:10px; right:10px; bottom:10px; z-index:8;
+    transform: translateY(130%); opacity:0; transition: transform .34s cubic-bezier(.2,.7,.3,1), opacity .28s ease;
+    box-shadow:0 18px 48px #00000033; }
+  .folio-sheet.up { transform: translateY(0); opacity:1; }
+  .sheet-cap { font:600 .78em/1.2 var(--cl-sans); color:var(--cl-accent); padding:.5em .3em .1em; }
+
+  /* callout pin note */
+  .cobar { display:flex; align-items:center; gap:.6em; background:var(--cl-surface); border:2px solid var(--cl-accent); border-radius:12px; padding:.6em .8em; margin-top:.5em; box-shadow:0 10px 28px #00000022; }
+  .cobar .txt { font:.82em/1.35 var(--cl-sans); color:var(--cl-ink-2); }
+  .cobar .txt b { display:block; color:var(--cl-ink); font-size:1.02em; }
+  .cobar .go { margin-left:auto; border:0; background:none; color:var(--cl-accent); font:600 .82em/1 var(--cl-mono); cursor:pointer; white-space:nowrap; }
+</style>
+</head>
+<body>
+  <div class="rig">
+    <h1>Reel folio — pop vs thin-bar</h1>
+    <p>Pick a behavior, then tap "Add next item" a few times to watch the folio appear
+      and retreat. "Callout on folio" shows the case where a reel note points at the
+      folio, so it must stay open until you continue.</p>
+    <div class="row">
+      <div class="seg" role="group" aria-label="Behavior">
+        <button id="mA" aria-pressed="true">A · Thin summary</button>
+        <button id="mB" aria-pressed="false">B · Hidden, pop-in</button>
+      </div>
+    </div>
+    <div class="row">
+      <button class="act primary" id="add">+ Add next item</button>
+      <button class="act" id="callout">Callout on folio</button>
+      <button class="act" id="reset">Reset</button>
+      <label class="slider">Text
+        <input id="ts" type="range" min="100" max="220" step="5" value="130" /><b id="tsv">130%</b>
+      </label>
+    </div>
+  </div>
+
+  <div class="frame" id="frame" style="--ts:1.3">
+    <div class="surface">
+      <div class="headstack">
+        <div class="hw"><span class="mark">✳</span><span class="name">Voygent</span><span class="note">travel assistant</span></div>
+        <div class="disc">A Voygent demo, not affiliated with Anthropic. Scripted walk-through; your own run pulls live results.</div>
+        <div class="transport">
+          <button class="ctl">❚❚</button><button class="ctl">■</button>
+          <div class="sp"><button>1×</button><button>2×</button><button class="on">Read</button></div>
+        </div>
+      </div>
+
+      <div class="scroll" id="scroll">
+        <div class="msg-a">Happy to. Who's travelling, and roughly when?</div>
+        <div class="msg-u">Two of us, a week in Ireland late September. Dublin plus somewhere greener, and a rental car.</div>
+        <div class="chip"><span class="ok">✓</span> search_flights · Done</div>
+        <div class="msg-a">Found real fares and a couple of rooms. Building your folio as we go.</div>
+
+        <!-- mode A folio lives here, in the chat flow -->
+        <div class="folio-slot" id="folioSlot"></div>
+
+        <div class="msg-a" id="tail">Tap "Add next item" to add flights, a hotel, then a tour.</div>
+      </div>
+
+      <!-- mode B folio pops from the bottom -->
+      <div class="folio-sheet" id="sheet">
+        <div class="sheet-cap" id="sheetCap">Added</div>
+        <div id="sheetBody"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var SEQ = [
+      { label: "Flights · Boston to Dublin", price: 980 },
+      { label: "Hotel · The Wilder, Dublin", price: 1240 },
+      { label: "Day tour · Cliffs of Moher", price: 190 }
+    ];
+    var frame = document.getElementById('frame');
+    var slot = document.getElementById('folioSlot');
+    var sheet = document.getElementById('sheet');
+    var sheetBody = document.getElementById('sheetBody');
+    var sheetCap = document.getElementById('sheetCap');
+    var addBtn = document.getElementById('add');
+
+    var mode = 'A';
+    var items = [];        // added items
+    var expanded = false;  // mode A expanded now?
+    var pinned = false;    // held open by a callout?
+    var lastNew = -1;      // index of the just-added row (for highlight)
+    var hideTimer = null;
+
+    function total() { return items.reduce(function (s, i) { return s + i.price; }, 0); }
+    function usd(n) { return '$' + n.toLocaleString('en-US'); }
+
+    function folioCardHTML() {
+      var rows = items.map(function (it, i) {
+        return '<div class="folio-row' + (i === lastNew ? ' new' : '') + '"><span>' + it.label + '</span><b>' + usd(it.price) + '</b></div>';
+      }).join('');
+      return '<div class="folio">'
+        + '<div class="folio-h">Ireland · 6 days<span class="st">draft</span></div>'
+        + rows
+        + '<div class="folio-total"><span>Trip total</span><b>' + usd(total()) + '</b></div>'
+        + '</div>';
+    }
+
+    function calloutBarHTML() {
+      return '<div class="cobar"><div class="txt"><b>The folio makes the upsell</b>'
+        + 'Every add updates the price in place, so the client sees value, not a hard sell.</div>'
+        + '<button class="go" id="coGo">Continue ▸</button></div>';
+    }
+
+    function renderA() {
+      sheet.classList.remove('up');
+      if (items.length === 0) { slot.innerHTML = '<div class="folio-empty">Folio builds here as items are added.</div>'; return; }
+      var open = expanded || pinned;
+      slot.innerHTML =
+        '<button class="folio-thin" id="thinBar">🧾 Trip folio · ' + usd(total()) + ' · 6 days <span class="chev">' + (open ? '▴' : '▾') + '</span></button>'
+        + '<div class="folio-wrap ' + (open ? 'open' : 'collapsed') + '" id="fwrap">' + folioCardHTML() + (pinned ? calloutBarHTML() : '') + '</div>';
+      document.getElementById('thinBar').onclick = function () { pinned = false; expanded = !open; clearTimeout(hideTimer); renderA(); };
+      if (pinned) document.getElementById('coGo').onclick = endCallout;
+    }
+
+    function renderB() {
+      slot.innerHTML = '';   // nothing in the flow
+      if (items.length === 0 && !pinned) { sheet.classList.remove('up'); return; }
+      sheetCap.textContent = pinned ? 'The reel points here' : (lastNew >= 0 ? 'Added to the trip' : 'Trip folio');
+      sheetBody.innerHTML = folioCardHTML() + (pinned ? calloutBarHTML() : '');
+      sheet.classList.add('up');
+      if (pinned) document.getElementById('coGo').onclick = endCallout;
+    }
+
+    function render() { (mode === 'A' ? renderA : renderB)(); }
+
+    function showThenHide() {
+      clearTimeout(hideTimer);
+      expanded = true;         // A: expand
+      render();                // B: sheet up
+      if (pinned) return;      // a callout holds it open
+      hideTimer = setTimeout(function () {
+        expanded = false; lastNew = -1;
+        if (mode === 'B') sheet.classList.remove('up');
+        render();
+      }, 2600);
+    }
+
+    function addItem() {
+      if (items.length >= SEQ.length) return;
+      items.push(SEQ[items.length]);
+      lastNew = items.length - 1;
+      addBtn.disabled = items.length >= SEQ.length;
+      showThenHide();
+    }
+
+    function startCallout() {
+      if (items.length === 0) { items.push(SEQ[0]); lastNew = 0; addBtn.disabled = false; }
+      pinned = true; expanded = true; clearTimeout(hideTimer);
+      render();
+    }
+    function endCallout() { pinned = false; expanded = false; lastNew = -1; if (mode === 'B') sheet.classList.remove('up'); render(); }
+
+    function setMode(m) {
+      mode = m;
+      document.getElementById('mA').setAttribute('aria-pressed', String(m === 'A'));
+      document.getElementById('mB').setAttribute('aria-pressed', String(m === 'B'));
+      clearTimeout(hideTimer); expanded = false; pinned = false;
+      sheet.classList.remove('up');
+      render();
+    }
+    function reset() { items = []; lastNew = -1; expanded = false; pinned = false; addBtn.disabled = false; clearTimeout(hideTimer); sheet.classList.remove('up'); render(); }
+
+    document.getElementById('mA').onclick = function () { setMode('A'); };
+    document.getElementById('mB').onclick = function () { setMode('B'); };
+    addBtn.onclick = addItem;
+    document.getElementById('callout').onclick = startCallout;
+    document.getElementById('reset').onclick = reset;
+    var ts = document.getElementById('ts'), tsv = document.getElementById('tsv');
+    ts.oninput = function () { frame.style.setProperty('--ts', (this.value / 100).toString()); tsv.textContent = this.value + '%'; };
+
+    render();
+  </script>
+</body>
+</html>
