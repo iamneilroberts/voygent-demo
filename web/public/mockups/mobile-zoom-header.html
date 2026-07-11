@@ -54,17 +54,21 @@
 
   .surface { display: flex; flex-direction: column; height: 100%; min-height: 0; }
 
-  /* header cluster — wordmark, ribbon, honesty chip, transport */
+  /* header cluster — wordmark, notes, transport */
   .head-wordmark { display: flex; align-items: baseline; gap: .5em; padding: .55em .85em .35em; }
   .head-wordmark .mark { color: var(--cl-accent); }
   .head-wordmark .name { font: 600 1em/1 var(--cl-sans); }
   .head-wordmark .note { font: .8em/1 var(--cl-sans); color: var(--cl-muted); }
+
   .ribbon { font: .78em/1.35 var(--cl-sans); color: var(--cl-muted); padding: 0 1em .3em; }
   .chip {
     display: inline-block; margin: 0 .85em .4em; padding: .3em .7em;
     background: var(--cl-tool-bg); border: 1px solid var(--cl-line); border-radius: 999px;
     font: .72em/1.2 var(--cl-sans); color: var(--cl-ink-2);
   }
+  /* the collapsed single note that replaces ribbon + chip on the phone */
+  .note-compact { font: .76em/1.4 var(--cl-sans); color: var(--cl-muted); padding: 0 1em .45em; }
+
   .transport {
     display: flex; align-items: center; gap: .45em;
     padding: .5em .7em; background: var(--cl-surface); border: 1px solid var(--cl-line);
@@ -101,20 +105,34 @@
   .intro p { font: 1em/1.55 var(--cl-sans); color: var(--cl-ink-2); margin: 0; }
   .intro .cont { display: block; text-align: right; margin-top: 1em; color: var(--cl-accent); font: 600 1em/1 var(--cl-sans); }
 
-  /* ── PROPOSED (default): header is one sticky flow stack, auto height,
-        transport wraps. Nothing uses a fixed px offset, so any text size
-        just pushes the chat down instead of overlapping it. ─────────── */
+  /* ── PROPOSED (default): header is one sticky flow stack, auto height.
+        One collapsed honesty note replaces the ribbon + pill. The transport
+        is a single compact row that shrinks to fit and scrolls sideways only
+        as a last resort — it never wraps to a second line and never overlaps
+        the chat, at any text size. ──────────────────────────────────────── */
   .frame[data-mode="proposed"] .headstack {
     position: sticky; top: 0; z-index: 5;
     background: var(--cl-bg); border-bottom: 1px solid var(--cl-line);
     padding-bottom: .5em;
   }
-  .frame[data-mode="proposed"] .transport { flex-wrap: wrap; }
+  .frame[data-mode="proposed"] .ribbon,
+  .frame[data-mode="proposed"] .chip { display: none; }
+  .frame[data-mode="proposed"] .note-compact { display: block; }
 
-  /* ── CURRENT: replicates the live bug. Transport is pinned with a fixed
-        104px offset and the scroll reserves a fixed 104px band; the caption
-        text is nowrap-ish and does not reflow, so when text grows past the
-        104px assumption everything collides. ─────────────────────────── */
+  .frame[data-mode="proposed"] .transport {
+    flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden;
+    -webkit-overflow-scrolling: touch; scrollbar-width: none;
+  }
+  .frame[data-mode="proposed"] .transport::-webkit-scrollbar { display: none; }
+  .frame[data-mode="proposed"] .transport .ctl { width: 1.85em; height: 1.85em; border-radius: 8px; }
+  .frame[data-mode="proposed"] .transport .track { flex: 1 1 3em; min-width: 2.4em; }
+  .frame[data-mode="proposed"] .transport .speed button { padding: .5em .5em; }
+
+  /* ── CURRENT: replicates the live bug. Ribbon + pill stack as two lines,
+        transport is pinned with a fixed 104px offset and the scroll reserves
+        a fixed 104px band; nothing reflows, so past the 104px assumption it
+        all collides. ────────────────────────────────────────────────────── */
+  .frame[data-mode="current"] .note-compact { display: none; }
   .frame[data-mode="current"] .surface { position: relative; }
   .frame[data-mode="current"] .headstack {
     position: absolute; top: 0; left: 0; right: 0; z-index: 5;
@@ -128,8 +146,8 @@
   <div class="rig">
     <h1>Demo header — mobile zoom fix</h1>
     <p>Flip between the live layout and the proposed fix, then drag the text size up
-      the way your phone is set. Current overlaps as text grows; Proposed keeps the
-      header and controls tidy and just pushes the chat down.</p>
+      the way your phone is set. Current overlaps as text grows. Proposed keeps one
+      short note and one compact control row, and just pushes the chat down.</p>
     <div class="row">
       <div class="seg" role="group" aria-label="Layout">
         <button id="mCurrent" aria-pressed="false">Current layout</button>
@@ -142,7 +160,8 @@
     </div>
   </div>
   <p class="hint">Tip: start around <code>170%</code> to match a strongly zoomed phone,
-    then toggle Current vs Proposed.</p>
+    then toggle Current vs Proposed. In Proposed the control row shrinks; if it still
+    can't fit it scrolls sideways rather than stacking.</p>
 
   <div class="frame" id="frame" data-mode="proposed" style="--ts:1.3">
     <div class="surface">
@@ -154,6 +173,7 @@
         </div>
         <div class="ribbon">A Voygent demo in a Claude-style chat surface. Not affiliated with Anthropic.</div>
         <span class="chip">Scripted walk-through · your own run pulls live results</span>
+        <div class="note-compact">A Voygent demo, not affiliated with Anthropic. Scripted walk-through; your own run pulls live results.</div>
         <div class="transport" role="group" aria-label="Playback controls">
           <button class="ctl" title="Pause">❚❚</button>
           <button class="ctl" title="Stop">■</button>
