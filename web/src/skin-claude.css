@@ -599,7 +599,11 @@
   :root[data-skin="claude"] .cl-pane:has(.cl-reel-nav) .cl-ribbon { display: none; }
   :root[data-skin="claude"] .cl-reel-note-mobile {
     display: block; font: .78rem/1.4 var(--cl-sans); color: var(--cl-muted);
+    overflow: hidden; max-height: 8em; opacity: 1;
+    transition: max-height .4s ease, opacity .3s ease;
   }
+  /* after the opening seconds the disclaimer collapses to reclaim the space */
+  :root[data-skin="claude"] .cl-reel-note-mobile.collapsed { max-height: 0; opacity: 0; }
   :root[data-skin="claude"] .cl-reel-honesty { display: none; }
   /* compact single control row: drop the scrubber, Restart and frame-# so the
      speed controls never get pushed off the edge */

@@ -221,6 +221,11 @@ export function App() {
     !reelView.folioView &&
     (activeHighlight.target.startsWith("folio-") || activeHighlight.target === "trip-commission" || activeHighlight.target.startsWith("comment-"));
   const folioReveal = folioCalloutTarget || folioChanged;
+  // Mobile disclaimer note: on a phone the "not affiliated / scripted" note replaces
+  // the header ribbon. Show it at the start of the reel, then collapse it to reclaim
+  // the vertical space (the viewer has already seen it). Desktop keeps the ribbon.
+  const [reelDisclaimer, setReelDisclaimer] = useState(true);
+  const disclaimerTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Honesty tag: whether this live session's flight/hotel results are real ("live") or
   // curated sample fixtures ("sample"). Set from the worker's `source` event.
   const [dataSource, setDataSource] = useState<"live" | "sample" | null>(null);
@@ -432,7 +437,13 @@ export function App() {
     });
   }
 
-  function startReel() { resetReelState(); setReelPhase("playing"); }
+  function startReel() {
+    resetReelState();
+    setReelPhase("playing");
+    setReelDisclaimer(true);
+    if (disclaimerTimer.current) clearTimeout(disclaimerTimer.current);
+    disclaimerTimer.current = setTimeout(() => setReelDisclaimer(false), 7000);
+  }
   function planYourOwn() { goLive(false); }
   function tryYourself() { goLive(true); }
   // DIY reels send signups to the traveller landing page; advisor surfaces to the root.
@@ -548,7 +559,7 @@ export function App() {
           global; the scripted-walk-through line is appended ONLY when this reel has
           an honestyChip (the real-recording dublin-oct reel has none, so it must not
           claim scripted). */}
-      <span className="cl-reel-note-mobile" role="note">A Voygent demo, not affiliated with Anthropic.{selectedReel.honestyChip ? ` ${selectedReel.honestyChip}` : ""}</span>
+      <span className={`cl-reel-note-mobile${reelDisclaimer ? "" : " collapsed"}`} role="note">A Voygent demo, not affiliated with Anthropic.{selectedReel.honestyChip ? ` ${selectedReel.honestyChip}` : ""}</span>
       {reelPhase === "playing" && (
         <div className="cl-reel-controls" role="group" aria-label="Playback controls">
           <button type="button" className="cl-reel-ctl" aria-pressed={paused} aria-label={paused ? "Play" : "Pause"} onClick={togglePause}>{paused ? "▶" : "❚❚"}</button>
