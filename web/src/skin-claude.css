@@ -553,6 +553,38 @@
 :root[data-skin="claude"] .cl-reel-speed { display: inline-flex; gap: 2px; }
 :root[data-skin="claude"] .cl-reel-speed button { background: none; border: none; padding: 4px 8px; border-radius: 6px; font: 600 .6875rem/1 var(--cl-mono); color: var(--cl-muted); cursor: pointer; }
 :root[data-skin="claude"] .cl-reel-speed button[aria-pressed="true"] { background: var(--cl-accent); color: var(--cl-accent-ink); }
+/* the combined one-line honesty note is mobile-only (desktop keeps the header
+   ribbon + the scripted chip) */
+:root[data-skin="claude"] .cl-reel-note-mobile { display: none; }
+
+/* ── Mobile reel header (max-width:760px) ─────────────────────────────────────
+   The transport/nav flows in the header stack instead of floating over it, so it
+   reserves its own height and can never overlap the header under large text zoom.
+   One short note replaces the ribbon + scripted chip, and the control row drops
+   to the essentials (Pause / Stop / 1x / 2x / Read) so it stays one row. */
+@media (max-width: 760px) {
+  :root[data-skin="claude"] .cl-reel-nav {
+    position: sticky; top: 0; z-index: 66;
+    flex-direction: column; align-items: stretch; gap: 6px;
+    margin: 0; padding: 8px 14px 10px;
+    background: var(--cl-bg); border-bottom: 1px solid var(--cl-line);
+  }
+  /* replace the two stacked disclaimers with the single combined note */
+  :root[data-skin="claude"] .cl-pane:has(.cl-reel-nav) .cl-ribbon { display: none; }
+  :root[data-skin="claude"] .cl-reel-note-mobile {
+    display: block; font: .78rem/1.4 var(--cl-sans); color: var(--cl-muted);
+  }
+  :root[data-skin="claude"] .cl-reel-honesty { display: none; }
+  /* compact single control row: drop the scrubber, Restart and frame-# so the
+     speed controls never get pushed off the edge */
+  :root[data-skin="claude"] .cl-reel-controls {
+    align-self: flex-start; flex-wrap: nowrap; gap: 6px; max-width: 100%;
+  }
+  :root[data-skin="claude"] .cl-reel-track,
+  :root[data-skin="claude"] .cl-reel-restart,
+  :root[data-skin="claude"] .cl-reel-frametoggle,
+  :root[data-skin="claude"] .cl-reel-frameno { display: none; }
+}
 
 /* Post-reel greeting banner (kept separate from the legal disambiguation ribbon) */
 :root[data-skin="claude"] .cl-reel-greet {

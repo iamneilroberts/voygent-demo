@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Prose } from "./prose";
 import type { Preset } from "./ChatView";
 import type { FolioData, BoardCandidate } from "../../shared/events";
@@ -306,7 +306,7 @@ function Welcome({ presets, geoCity, onSend, busy, postReel }: { presets: Preset
 }
 
 export function ClaudeChatView(
-  { items, folio, onSend, onPick, busy, presets, geoCity, advisor, mobileView, onMobileView, onToggleDemo, demoLabel, engHasContent, postReel, reelView, reelMode, showSend, actorLabels, dataSource, onRequestAccess }:
+  { items, folio, onSend, onPick, busy, presets, geoCity, advisor, mobileView, onMobileView, onToggleDemo, demoLabel, engHasContent, postReel, reelView, reelMode, showSend, actorLabels, dataSource, onRequestAccess, reelNav }:
   {
     items: TimelineItem[];
     folio: FolioData | null;
@@ -333,6 +333,11 @@ export function ClaudeChatView(
     actorLabels?: ActorLabels;
     dataSource?: "live" | "sample" | null;  // honesty tag: live supplier data vs curated sample fixtures
     onRequestAccess?: () => void;  // live (non-reel) only: folio CTA → request a live-demo auth code
+    // Reel transport/nav cluster, built in App (keeps the playback handlers there).
+    // Rendered here in the header flow so on mobile it reserves its own height and
+    // can never overlap the header/ribbon under large text zoom. Desktop CSS keeps
+    // it absolute (top-right), so the desktop layout is unchanged.
+    reelNav?: ReactNode;
   },
 ) {
   const [input, setInput] = useState("");
@@ -414,6 +419,7 @@ export function ClaudeChatView(
             : <><span className="cl-source-dot" aria-hidden="true" /> Sample results — this featured trip uses curated data. Try an off-menu destination for a live run.</>}
         </div>
       )}
+      {reelNav}
       <div className="cl-scroll" ref={scrollRef} onScroll={onScroll}>
         <div className="cl-col">
           {firstRun && postReel && (

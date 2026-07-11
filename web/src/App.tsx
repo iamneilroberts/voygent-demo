@@ -513,6 +513,54 @@ export function App() {
     />;
   }
 
+  // Reel transport + chapter nav + honesty note. Rendered inside ClaudeChatView's
+  // header flow (via the reelNav prop) so on mobile it reserves its own height and
+  // never overlaps the header under text zoom; desktop CSS keeps it absolute.
+  const reelNav = skin === "claude" && mode === "auto" && (reelPhase === "playing" || reelPhase === "ended") ? (
+    <div className="cl-reel-nav" data-reel-target="reel-controls">
+      {/* Mobile-only: one short honesty note that replaces the header ribbon + the
+          scripted-chip, keeping the phone header compact (desktop hides this span
+          and keeps the full ribbon). */}
+      <span className="cl-reel-note-mobile" role="note">A Voygent demo, not affiliated with Anthropic. Scripted walk-through; your own run pulls live results.</span>
+      {reelPhase === "playing" && (
+        <div className="cl-reel-controls" role="group" aria-label="Playback controls">
+          <button type="button" className="cl-reel-ctl" aria-pressed={paused} aria-label={paused ? "Play" : "Pause"} onClick={togglePause}>{paused ? "▶" : "❚❚"}</button>
+          <button type="button" className="cl-reel-ctl" aria-label="Stop the demo" title="Stop the demo" onClick={stopDemo}>■</button>
+          <button type="button" className="cl-reel-ctl cl-reel-restart" aria-label="Restart" onClick={startReel}>↺</button>
+          <div className="cl-reel-track">
+            <i style={{ width: `${reelSeekPct}%` }} />
+            <input
+              type="range" className="cl-reel-seek" min={0} max={100} step={1}
+              value={reelSeekPct} aria-label="Seek through the reel"
+              onPointerDown={() => { scrubbingRef.current = true; }}
+              onChange={(e) => { const v = Number(e.currentTarget.value); scrubValRef.current = v; setScrubPct(v); if (!scrubbingRef.current) commitSeek(v); }}
+              onPointerUp={() => { if (scrubbingRef.current) { scrubbingRef.current = false; commitSeek(scrubValRef.current); } }}
+            />
+          </div>
+          <div className="cl-reel-speed">
+            <button type="button" aria-pressed={speed === 1 && !readMode} onClick={() => pickSpeed("1")}>1×</button>
+            <button type="button" aria-pressed={speed === 2 && !readMode} onClick={() => pickSpeed("2")}>2×</button>
+            <button type="button" aria-pressed={readMode} title="Play at 1× and hold every callout until you click Continue" onClick={() => pickSpeed("read")}>Read</button>
+          </div>
+          <button type="button" className="cl-reel-ctl cl-reel-frametoggle" aria-pressed={showFrameNum} aria-label="Toggle frame number" title="Frame number" onClick={toggleFrameNum}>#</button>
+          {showFrameNum && <span className="cl-reel-frameno" aria-live="off">{reelProg.done}/{reelProg.total}</span>}
+        </div>
+      )}
+      {selectedReel.chapter != null && (
+        <>
+          <span className="cl-reel-nav-label">3 short demos</span>
+          <ReelBreadcrumb
+            chapters={CHAPTERS.map((c) => ({ id: c.id, title: c.title, chapter: c.chapter! }))}
+            currentId={selectedReel.id} onChapter={gotoReel}
+          />
+        </>
+      )}
+      {selectedReel.honestyChip && (
+        <span className="cl-reel-honesty" role="note">{selectedReel.honestyChip}</span>
+      )}
+    </div>
+  ) : null;
+
   return (
     <div className="app">
       {showPublicDisclaimer(tier, mode) && (
@@ -547,6 +595,7 @@ export function App() {
               actorLabels={selectedReel.actorLabels}
               dataSource={dataSource}
               onRequestAccess={mode === "auto" ? undefined : () => setShowProForm(true)}
+              reelNav={reelNav}
             />
           ) : (
             <>
@@ -597,49 +646,6 @@ export function App() {
           )}
           {skin === "claude" && mode === "auto" && reelPhase === "playing" && reelView.emailView && (
             <ReelEmailView view={reelView.emailView} />
-          )}
-          {/* QA4: one navigation cluster — transport + chapter list live together in the
-              top-right and stay in the same spot across chapters (playing AND ended),
-              so the viewer always knows where they are and where the next demo is. */}
-          {skin === "claude" && mode === "auto" && (reelPhase === "playing" || reelPhase === "ended") && (
-            <div className="cl-reel-nav" data-reel-target="reel-controls">
-              {reelPhase === "playing" && (
-                <div className="cl-reel-controls" role="group" aria-label="Playback controls">
-                  <button type="button" className="cl-reel-ctl" aria-pressed={paused} aria-label={paused ? "Play" : "Pause"} onClick={togglePause}>{paused ? "▶" : "❚❚"}</button>
-                  <button type="button" className="cl-reel-ctl" aria-label="Stop the demo" title="Stop the demo" onClick={stopDemo}>■</button>
-                  <button type="button" className="cl-reel-ctl" aria-label="Restart" onClick={startReel}>↺</button>
-                  <div className="cl-reel-track">
-                    <i style={{ width: `${reelSeekPct}%` }} />
-                    <input
-                      type="range" className="cl-reel-seek" min={0} max={100} step={1}
-                      value={reelSeekPct} aria-label="Seek through the reel"
-                      onPointerDown={() => { scrubbingRef.current = true; }}
-                      onChange={(e) => { const v = Number(e.currentTarget.value); scrubValRef.current = v; setScrubPct(v); if (!scrubbingRef.current) commitSeek(v); }}
-                      onPointerUp={() => { if (scrubbingRef.current) { scrubbingRef.current = false; commitSeek(scrubValRef.current); } }}
-                    />
-                  </div>
-                  <div className="cl-reel-speed">
-                    <button type="button" aria-pressed={speed === 1 && !readMode} onClick={() => pickSpeed("1")}>1×</button>
-                    <button type="button" aria-pressed={speed === 2 && !readMode} onClick={() => pickSpeed("2")}>2×</button>
-                    <button type="button" aria-pressed={readMode} title="Play at 1× and hold every callout until you click Continue" onClick={() => pickSpeed("read")}>Read</button>
-                  </div>
-                  <button type="button" className="cl-reel-ctl" aria-pressed={showFrameNum} aria-label="Toggle frame number" title="Frame number" onClick={toggleFrameNum}>#</button>
-                  {showFrameNum && <span className="cl-reel-frameno" aria-live="off">{reelProg.done}/{reelProg.total}</span>}
-                </div>
-              )}
-              {selectedReel.chapter != null && (
-                <>
-                  <span className="cl-reel-nav-label">3 short demos</span>
-                  <ReelBreadcrumb
-                    chapters={CHAPTERS.map((c) => ({ id: c.id, title: c.title, chapter: c.chapter! }))}
-                    currentId={selectedReel.id} onChapter={gotoReel}
-                  />
-                </>
-              )}
-              {selectedReel.honestyChip && (
-                <span className="cl-reel-honesty" role="note">{selectedReel.honestyChip}</span>
-              )}
-            </div>
           )}
           {skin === "claude" && mode === "auto" && reelPhase === "playing" && stopCta && (
             <ReelStopCard onTrial={tryYourself} onResume={resumeDemo} onReplay={() => { setStopCta(false); startReel(); }} />
