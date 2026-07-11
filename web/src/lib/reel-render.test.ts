@@ -89,7 +89,8 @@ describe("sendButtonLabel", () => {
 describe("signupUrlFor", () => {
   it("routes traveller reels to the traveller landing page, everything else to the root", () => {
     expect(signupUrlFor("traveller")).toBe(TRAVELLER_SIGNUP_URL);
-    expect(signupUrlFor("traveller")).toBe("https://voygent.ai/travelers");
+    expect(signupUrlFor("traveller")).toBe("https://voygent.ai/travelers#get");
     expect(signupUrlFor(undefined)).toBe(SIGNUP_URL);
+    expect(signupUrlFor(undefined)).toBe("https://voygent.ai/#get");
   });
 });

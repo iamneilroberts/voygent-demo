@@ -3,8 +3,10 @@ import type { ReelEditMarker, ReelThread } from "./interaction";
 
 // Single source for the free-signup CTA links (intro card, end card, folio ctaLine).
 // Traveller-audience (DIY) reels land on the traveller page; everything else on the root.
-export const SIGNUP_URL = "https://voygent.ai";
-export const TRAVELLER_SIGNUP_URL = "https://voygent.ai/travelers";
+// The #get anchor drops the viewer straight onto the signup field (the landing pages'
+// "Get early access" / "Get started free" section), not the top-of-page hero.
+export const SIGNUP_URL = "https://voygent.ai/#get";
+export const TRAVELLER_SIGNUP_URL = "https://voygent.ai/travelers#get";
 export function signupUrlFor(audience?: "traveller"): string {
   return audience === "traveller" ? TRAVELLER_SIGNUP_URL : SIGNUP_URL;
 }
