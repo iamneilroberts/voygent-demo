@@ -246,6 +246,17 @@ export const caribbeanCruise = screenplay({ trip: "Caribbean cruise", skin: "cla
   // enough to register the close, not the folioview kind's full 4200ms floor.
   s.client.folioView(null, { holdMs: 2800 });
 
+  // Beat 7.5 — the Pocket Guide: the whole cruise on your phone, offline. Real feature,
+  // preview_folio format:"pocket_guide" (voygent-lite). Offline matters at sea and in port.
+  s.agent.says("Before you go, I've put the whole week into a Pocket Guide: the day-by-day, your port hotel and cabin details, both excursion tickets and confirmation numbers, and the family notes. Save it to your phone and it opens with no signal, which is the point at sea and in port where data gets slow or expensive.");
+  s.agent.tool("preview_folio", { summary: "Pocket Guide, a self-contained trip page you save to your phone" });
+  s.spotlight({ eventType: "tool", where: { tool: "preview_folio", phase: "done" } }, {
+    target: "tool-preview_folio", eyebrow: "Take the whole trip with you",
+    title: "A Pocket Guide that works offline",
+    body: "Save it to your phone's home screen and the whole cruise comes with you: day by day, cabin and hotel details, excursion tickets and confirmation numbers, and the family notes. It opens with no signal, so it works at sea and in port.",
+    dwellMs: 5000,
+  });
+
   // Beat 8 — the wrap.
   s.agent.says("This walkthrough was scripted, sources named the whole way. Sign up free and Voygent pulls live sailings, live hotels and live excursions for your own dates, no advisor required.");
 });

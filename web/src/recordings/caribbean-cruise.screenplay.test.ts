@@ -99,10 +99,10 @@ describe("caribbean-cruise screenplay (grounding)", () => {
   });
 
   it("resolves all callouts, in ascending frame order", () => {
-    expect(caribbeanCruise.highlights.length).toBe(7);
+    expect(caribbeanCruise.highlights.length).toBe(8);
     const resolved = resolveHighlightFrames(frames, caribbeanCruise.highlights);
     const total = [...resolved.values()].reduce((n, hs) => n + hs.length, 0);
-    expect(total).toBe(7);
+    expect(total).toBe(8);
     const idxs = [...resolved.keys()];
     expect(idxs).toEqual([...idxs].sort((a, b) => a - b));
   });
