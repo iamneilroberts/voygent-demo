@@ -15,6 +15,7 @@ import { handleOnboard } from "./access/onboard";
 import { handleProRequest } from "./access/pro-request-handler";
 import { handleShowcase, handleShowcaseComment } from "./showcase/routes";
 import { SHOWCASE_PATH, SHOWCASE_COMMENTS_PATH } from "./showcase/config";
+import { injectBeacon } from "./analytics/beacon";
 
 interface Env {
   SESSION: DurableObjectNamespace;
@@ -108,7 +109,7 @@ export default {
         const ov = await getOverride(db, slug);
         const html = renderInfo(slug, mergeOverride(def, ov), { withEditor: true, edited: !!ov });
         // no-store so a just-saved edit shows immediately (was public max-age=300).
-        return new Response(html, { headers: { ...cors(), "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } });
+        return new Response(injectBeacon(html), { headers: { ...cors(), "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } });
       }
       // Unknown info slug → send them to the demo rather than a bare "ok".
       return Response.redirect(new URL("/", url).toString(), 302);
@@ -122,7 +123,7 @@ export default {
       const ov = def ? await getOverride(db, "blog-home") : null;
       const hero = def ? mergeOverride(def, ov) : null;
       const html = renderBlog(hero, collectPosts(PAGES), { withEditor: true, edited: !!ov });
-      return new Response(html, { headers: { ...cors(), "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } });
+      return new Response(injectBeacon(html), { headers: { ...cors(), "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } });
     }
     if (url.pathname === "/presets" && req.method === "GET") {
       // Featured trips for the first-run chips + IP-geo greeting (no permission prompt).

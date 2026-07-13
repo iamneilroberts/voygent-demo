@@ -3,6 +3,7 @@ import { SECTIONS, KNOWN_SECTION_IDS, SHOWCASE_PATH } from "./config";
 import { parseBuildLog, type RawEntry } from "./buildlog";
 import changelogRaw from "./changelog.json";
 import { renderShowcasePage } from "./render";
+import { injectBeacon } from "../analytics/beacon";
 import {
   validateComment,
   hashIp,
@@ -74,7 +75,7 @@ export async function handleShowcase(req: Request, env: ShowcaseEnv, db: Db): Pr
 
   const buildlog = parseBuildLog(changelogRaw as RawEntry[]);
   const html = renderShowcasePage({ sections: SECTIONS, buildlog, comments, showComments });
-  return htmlResponse(html, 200);
+  return htmlResponse(injectBeacon(html), 200);
 }
 
 /**
