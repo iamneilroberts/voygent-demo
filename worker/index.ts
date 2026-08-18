@@ -3,6 +3,7 @@ import { buildPresets } from "./presets";
 import { getPageData, mergeOverride, renderInfo, isKnownSlug, PAGES } from "./info/pages";
 import { getOverride, putOverride, deleteOverride } from "./info/overrides";
 import { collectPosts, renderBlog } from "./blog/render";
+import { SHIP_LOG_HTML } from "./ship-log";
 import { enabledModels, DEFAULT_SMART_MAP } from "../shared/models";
 import { STATS_AGG_SQL, shapeStats, type StatsAggRow } from "./stats";
 import { deepseekEnabled } from "./llm/index";
@@ -124,6 +125,11 @@ export default {
       const hero = def ? mergeOverride(def, ov) : null;
       const html = renderBlog(hero, collectPosts(PAGES), { withEditor: true, edited: !!ov });
       return new Response(injectBeacon(html), { headers: { ...cors(), "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } });
+    }
+    if (url.pathname === "/ship-log" && req.method === "GET") {
+      // Static build-in-public shipping-cadence board. Regenerated from the private
+      // voygent-lite git history by scripts/gen-ship-log.mjs (writes worker/ship-log.ts).
+      return new Response(SHIP_LOG_HTML, { headers: { ...cors(), "content-type": "text/html; charset=utf-8", "cache-control": "public, max-age=3600" } });
     }
     if (url.pathname === "/presets" && req.method === "GET") {
       // Featured trips for the first-run chips + IP-geo greeting (no permission prompt).
